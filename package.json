@@ -1,0 +1,45 @@
+{
+  "name": "database-builder",
+  "version": "0.0.1",
+  "description": "Framework to assist in database manipulation (DDL and CRUD)",
+  "main": "./main.js",
+  "types": "./main.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "moment": "2.20.1",
+    "lambda-expression": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "2.6.2"
+  },
+  "keywords": [
+    "orm",
+    "database",
+    "builder",
+    "database-builder",
+    "sqlite",
+    "sql",
+    "sql-builder",
+    "crud",
+    "insert",
+    "update",
+    "delete",
+    "select",
+    "ddl",
+    "create-table",
+    "drop-table",
+    "alter-table"
+  ],
+  "author": "Fernando Leal",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fernandocode/database-builder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fernandocode/database-builder/issues"
+  },
+  "homepage": "https://github.com/fernandocode/database-builder#readme"
+}
