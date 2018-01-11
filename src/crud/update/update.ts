@@ -1,9 +1,9 @@
-import { WhereBuilder } from './where-builder';
-import { CrudBase } from "./crud-base";
-import { UpdateBuilder } from "./update-builder";
-import { MetadataTable } from "./metadata-table";
-import { UpdateColumnsBuilder } from "./columns-builder";
-import { Database } from './definitions/database-definition';
+import { WhereBuilder } from './../where-builder';
+import { Database } from './../../definitions/database-definition';
+import { MetadataTable } from './../../metadata-table';
+import { UpdateBuilder } from './update-builder';
+import { CrudBase } from './../crud-base';
+import { UpdateColumnsBuilder } from '../columns-builder';
 
 export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>>{
 

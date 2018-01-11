@@ -1,6 +1,6 @@
 // import { Injectable } from '@angular/core';
 import { DatetimeUtils } from "./datetime-utils";
-import { ValueTypeToParse, ValueType, FieldType, ColumnType } from "./utils";
+import { ValueTypeToParse, ValueType, FieldType, ColumnType } from "./core/utils";
 import * as moment from 'moment';
 
 // @Injectable()

@@ -1,4 +1,4 @@
-import { DdlBaseBuilder } from "./ddl-base-builder";
+import { DdlBaseBuilder } from "../ddl-base-builder";
 
 export class DropBuilder<T> extends DdlBaseBuilder<T>{
 

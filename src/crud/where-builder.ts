@@ -1,6 +1,6 @@
-import { DatabaseHelper } from './database-helper';
+import { DatabaseHelper } from './../database-helper';
 import { Expression, ExpressionUtils } from 'lambda-expression';
-import { ValueType, IQueryCompilable, ValueTypeToParse } from "./utils";
+import { ValueType, IQueryCompilable, ValueTypeToParse } from "./../core/utils";
 
 // TODO: add LambdaExpression support in WhereBuilder
 export class WhereBuilder<T> {

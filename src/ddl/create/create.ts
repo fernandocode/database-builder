@@ -1,7 +1,7 @@
-import { Database } from './definitions/database-definition';
-import { MetadataTable } from './metadata-table';
+import { MetadataTable } from './../../metadata-table';
+import { Database } from './../../definitions/database-definition';
 import { CreateBuilder } from "./create-builder";
-import { DdlBase } from "./ddl-base";
+import { DdlBase } from "../ddl-base";
 
 export class Create<T> extends DdlBase<T, CreateBuilder<T>>{
 

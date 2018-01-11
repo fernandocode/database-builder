@@ -1,4 +1,4 @@
-import { FieldType } from './utils';
+import { FieldType } from './core/utils';
 
 export class MapperColumn {
 

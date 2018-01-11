@@ -1,6 +1,6 @@
 import { WhereCompiled, WhereBuilder } from './where-builder';
-import { ColumnsCompiled, CrudCompiled, QueryCompiled } from "./utils";
-import { ColumnsValuesBuilder } from "./columns-values-builder";
+import { ColumnsCompiled, CrudCompiled, QueryCompiled } from "./../core/utils";
+import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
 
 let NEXT_VALUE_ALIAS: number = 0;
 

@@ -1,7 +1,7 @@
+import { Database } from './../../definitions/database-definition';
+import { MetadataTable } from './../../metadata-table';
 import { QueryBuilder } from "./query-builder";
-import { MetadataTable } from "./metadata-table";
 import { QueryReadableBuilderBase } from './query-readable-builder-base';
-import { Database } from "./definitions/database-definition";
 
 export class QueryReadableBuilder<T> extends QueryReadableBuilderBase{
 

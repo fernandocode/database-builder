@@ -1,11 +1,11 @@
-import { Database } from './definitions/database-definition';
-import { MapperTable } from './mapper-table';
+import { MapperTable } from './../../mapper-table';
+import { ProjectionBuilder } from './../projection-builder';
+import { WhereBuilder } from './../where-builder';
+import { Database } from './../../definitions/database-definition';
+import { MetadataTable } from './../../metadata-table';
 import { QueryReadableBuilder } from './query-readable-builder';
 import { QueryBuilder, JoinQueryBuilder, JoinType } from './query-builder';
-import { WhereBuilder } from "./where-builder";
-import { ProjectionBuilder } from "./projection-builder";
-import { MetadataTable } from "./metadata-table";
-import { ValueType, ResultExecuteSql, IQueryCompilable, OrderBy, QueryCompiled } from "./utils";
+import { ValueType, ResultExecuteSql, IQueryCompilable, OrderBy, QueryCompiled } from "./../../core/utils";
 import { Expression } from "lambda-expression";
 
 export class Query<T> implements IQueryCompilable {

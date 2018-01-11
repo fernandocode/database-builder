@@ -1,6 +1,6 @@
-import { MapperTable } from './mapper-table';
-import { DatabaseHelper } from './database-helper';
-import { ResultExecuteSql } from './utils';
+import { MapperTable } from './../../mapper-table';
+import { DatabaseHelper } from './../../database-helper';
+import { ResultExecuteSql } from './../../core/utils';
 
 export class QueryReadableBuilderBase{
     private _databaseHelper: DatabaseHelper;

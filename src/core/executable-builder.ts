@@ -1,4 +1,4 @@
-import { Database, DatabaseObject, DatabaseTransaction } from './definitions/database-definition';
+import { Database, DatabaseObject, DatabaseTransaction } from './../definitions/database-definition';
 import { ResultExecuteSql, QueryCompiled } from "./utils";
 
 export class ExecutableBuilder {

@@ -1,4 +1,4 @@
-import { MetadataTable } from './metadata-table';
+import { MetadataTable } from './../metadata-table';
 import { ColumnsCompiled, ValueTypeToParse, Column, FieldType } from "./utils";
 import { Expression } from "lambda-expression";
 import { ColumnsBaseBuilder } from "./columns-base-builder";

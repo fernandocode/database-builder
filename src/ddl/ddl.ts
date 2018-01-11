@@ -1,8 +1,8 @@
-import { Database } from './definitions/database-definition';
-import { IGetMapper } from './definitions/interface-get-mapper';
-import { Drop } from './drop';
-import { Create } from './create';
-import { MetadataTable } from "./metadata-table";
+import { Drop } from './drop/drop';
+import { Create } from './create/create';
+import { MetadataTable } from './../metadata-table';
+import { Database } from './../definitions/database-definition';
+import { IGetMapper } from '../definitions/interface-get-mapper';
 
 export class Ddl {
 

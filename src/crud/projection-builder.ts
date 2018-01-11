@@ -1,4 +1,4 @@
-import { QueryCompiled, ValueType } from './utils';
+import { QueryCompiled, ValueType } from './../core/utils';
 import { Expression, ExpressionUtils } from "lambda-expression";
 
 export class ProjectionBuilder<T> {

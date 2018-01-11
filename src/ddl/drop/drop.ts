@@ -1,5 +1,5 @@
-import { Database } from './definitions/database-definition';
-import { DdlBase } from "./ddl-base";
+import { Database } from './../../definitions/database-definition';
+import { DdlBase } from './../ddl-base';
 import { DropBuilder } from "./drop-builder";
 
 export class Drop<T> extends DdlBase<T, DropBuilder<T>>{

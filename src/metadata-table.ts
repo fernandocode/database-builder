@@ -1,5 +1,5 @@
 import { Expression, ExpressionUtils } from 'lambda-expression';
-import { FieldType, ValueTypeToParse } from './utils';
+import { FieldType, ValueTypeToParse } from './core/utils';
 import { MapperTable } from './mapper-table';
 import { DatabaseHelper } from './database-helper';
 import { MapperColumn } from './mapper-column';

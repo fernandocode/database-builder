@@ -1,5 +1,5 @@
-import { ColumnsValuesBuilder } from "./columns-values-builder";
-import { Column } from "./utils";
+import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
+import { Column } from "./../core/utils";
 
 export class UpdateColumnsBuilder<T> extends ColumnsValuesBuilder<T, UpdateColumnsBuilder<T>>{
 

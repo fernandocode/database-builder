@@ -1,6 +1,7 @@
-import { DdlColumnsBuilder } from './columns-base-builder';
-import { MetadataTable } from "./metadata-table";
-import { DdlBaseBuilder } from "./ddl-base-builder";
+import { DdlColumnsBuilder } from './../ddl-columns-builder';
+import { MetadataTable } from './../../metadata-table';
+import { DdlBaseBuilder } from "../ddl-base-builder";
+
 
 export class CreateBuilder<T> extends DdlBaseBuilder<T>{
 

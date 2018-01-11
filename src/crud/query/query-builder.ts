@@ -1,10 +1,11 @@
+import { ExecutableBuilder } from './../../core/executable-builder';
+import { ProjectionBuilder } from './../projection-builder';
 import { SqlAndParams } from './query-builder';
-import { WhereBuilder, WhereCompiled } from "./where-builder";
-import { ProjectionBuilder, ProjectionCompiled } from "./projection-builder";
-import { ResultExecuteSql, QueryCompiled, IQueryCompilable, OrderBy, ValueType } from "./utils";
-import { ExecutableBuilder } from "./executable-builder";
+import { ResultExecuteSql, QueryCompiled, IQueryCompilable, OrderBy, ValueType } from "./../../core/utils";
 import { Expression, ExpressionUtils } from "lambda-expression";
-import { Database } from './definitions/database-definition';
+import { Database } from './../../definitions/database-definition';
+import { WhereCompiled, WhereBuilder } from '../where-builder';
+import { ProjectionCompiled } from '../projection-builder';
 
 let NEXT_VALUE_ALIAS: number = 0;
 

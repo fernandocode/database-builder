@@ -1,7 +1,7 @@
-import { DeleteColumnsBuilder } from './columns-builder';
-import { WhereBuilder } from './where-builder';
-import { CrudBaseBuilder } from "./crud-base-builder";
-import { CrudCompiled } from "./utils";
+import { WhereBuilder } from './../where-builder';
+import { CrudCompiled } from "./../../core/utils";
+import { DeleteColumnsBuilder } from "../columns-builder";
+import { CrudBaseBuilder } from "../crud-base-builder";
 
 export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>>{
 

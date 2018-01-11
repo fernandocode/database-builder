@@ -1,9 +1,8 @@
-import { Database } from './definitions/database-definition';
-import { DeleteColumnsBuilder } from './columns-builder';
-
-import { CrudBase } from "./crud-base";
+import { WhereBuilder } from './../where-builder';
+import { Database } from './../../definitions/database-definition';
+import { CrudBase } from './../crud-base';
 import { DeleteBuilder } from "./delete-builder";
-import { WhereBuilder } from "./where-builder";
+import { DeleteColumnsBuilder } from '../columns-builder';
 
 export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilder<T>>{
 

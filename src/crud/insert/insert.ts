@@ -1,8 +1,8 @@
-import { InsertColumnsBuilder } from './columns-builder';
-import { CrudBase } from "./crud-base";
-import { MetadataTable } from "./metadata-table";
+import { Database } from './../../definitions/database-definition';
+import { MetadataTable } from './../../metadata-table';
+import { InsertColumnsBuilder } from './../columns-builder';
+import { CrudBase } from './../crud-base';
 import { InsertBuilder } from "./insert-builder";
-import { Database } from './definitions/database-definition';
 
 export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilder<T>>{
 

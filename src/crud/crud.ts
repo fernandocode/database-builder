@@ -1,10 +1,10 @@
-import { IGetMapper } from './definitions/interface-get-mapper';
-import { Query } from './query';
-import { MetadataTable } from "./metadata-table";
-import { Delete } from "./delete";
-import { Update } from "./update";
-import { Insert } from "./insert";
-import { Database } from './definitions/database-definition';
+import { Query } from './query/query';
+import { Insert } from './insert/insert';
+import { Update } from './update/update';
+import { MetadataTable } from './../metadata-table';
+import { Delete } from './delete/delete';
+import { Database } from './../definitions/database-definition';
+import { IGetMapper } from '../definitions/interface-get-mapper';
 
 export class Crud {
 

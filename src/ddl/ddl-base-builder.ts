@@ -1,5 +1,5 @@
-import { ColumnsBaseCompiled } from "./utils";
-import { DdlColumnsBuilder } from "./columns-base-builder";
+import { DdlColumnsBuilder } from './ddl-columns-builder';
+import { ColumnsBaseCompiled } from './../core/utils';
 
 export abstract class DdlBaseBuilder<T>{
 

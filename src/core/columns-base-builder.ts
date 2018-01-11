@@ -1,8 +1,8 @@
-import { MetadataTable } from './metadata-table';
-import { DatabaseHelper } from "./database-helper";
-import { ValueTypeToParse, Column, FieldType, ColumnsCompiled } from "./utils";
+import { MetadataTable } from './../metadata-table';
+import { DatabaseHelper } from './../database-helper';
 import { Expression, ExpressionUtils } from "lambda-expression";
-import { MapperTable } from './mapper-table';
+import { FieldType, ColumnsCompiled, ValueTypeToParse, Column } from './utils';
+import { MapperTable } from '../mapper-table';
 
 export abstract class ColumnsBaseBuilder<TThis extends ColumnsBaseBuilder<TThis, T, TColumn>, T, TColumn extends Column>{
 
@@ -70,19 +70,4 @@ export abstract class ColumnsBaseBuilder<TThis extends ColumnsBaseBuilder<TThis,
     protected abstract getInstance(): TThis;
 
     protected abstract setColumnValue(column: string, value: ValueTypeToParse, fieldType: FieldType): TThis;
-}
-
-export class DdlColumnsBuilder<T> extends ColumnsBaseBuilder<DdlColumnsBuilder<T>, T, Column>{
-
-    protected setColumnValue(column: string, value: ValueTypeToParse, fieldType: FieldType): DdlColumnsBuilder<T> {
-        return this.setColumn(column, fieldType);
-    }
-
-    protected getInstance(): DdlColumnsBuilder<T> {
-        return this;
-    }
-
-    protected columnFormat(column: Column): string {
-        return `${column.name} ${this.databaseHelper.parseToColumnType(column.type)}`;
-    }
 }

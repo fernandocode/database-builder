@@ -1,9 +1,14 @@
-import { Database } from './definitions/database-definition';
-import { ExecutableBuilder } from "./executable-builder";
-import { ResultExecuteSql } from "./utils";
-import { DdlBaseBuilder } from "./ddl-base-builder";
+import { ExecutableBuilder } from './../core/executable-builder';
+import { Database } from './../definitions/database-definition';
+import { CrudBaseBuilder } from "./crud-base-builder";
+import { ResultExecuteSql, ValueType } from "./../core/utils";
+import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
 
-export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>>{
+export class CrudBase<
+    T,
+    TBuilder extends CrudBaseBuilder<T, TColumnsBuilder>,
+    TColumnsBuilder extends ColumnsValuesBuilder<T, TColumnsBuilder>
+    >{
 
     protected readonly _executableBuilder: ExecutableBuilder;
 
@@ -16,10 +21,10 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>>{
     }
 
     public execute(database: Database = void 0): Promise<ResultExecuteSql> {
-        return this._executableBuilder.execute({ query: this.compile(), params: [] }, this.getDatabase(database));
+        return this._executableBuilder.execute(this.compile(), this.getDatabase(database));
     }
 
-    public compile(): string {
+    public compile(): { query: string, params: ValueType[] } {
         return this._builder.compile();
     }
 
