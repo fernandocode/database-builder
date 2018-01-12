@@ -1,9 +1,9 @@
 {
   "name": "database-builder",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Framework to assist in database manipulation (DDL and CRUD)",
-  "main": "./main.js",
-  "types": "./main.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
