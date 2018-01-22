@@ -1,18 +1,22 @@
-import { DdlColumnsBuilder } from './ddl-columns-builder';
-import { ColumnsBaseCompiled } from './../core/utils';
+import { DdlColumnsBuilder } from "./ddl-columns-builder";
+import { ColumnsBaseCompiled } from "./../core/columns-base-compiled";
 
-export abstract class DdlBaseBuilder<T>{
+export abstract class DdlBaseBuilder<T> {
 
     protected _tablename: string;
 
-    private _columnsCompiled: ColumnsBaseCompiled = <ColumnsBaseCompiled>{
-        columns: []
-    };
+    private _columnsCompiled: ColumnsBaseCompiled = {
+        columns: [],
+    } as ColumnsBaseCompiled;
 
     constructor(
-        protected readonly _typeT: new () => T
+        protected readonly _typeT: new () => T,
     ) {
         this._tablename = _typeT.name;
+    }
+
+    public compile(): string {
+        return this.buildBase();
     }
 
     protected getColumnsCompiled(): ColumnsBaseCompiled {
@@ -32,17 +36,13 @@ export abstract class DdlBaseBuilder<T>{
         return instanceReturn;
     }
 
+    protected abstract buildBase(): string;
+
+    protected abstract setDefaultColumns(): void;
+
     private compileColumns(compiled: ColumnsBaseCompiled) {
         if (compiled.columns.length) {
             this._columnsCompiled.columns = this._columnsCompiled.columns.concat(compiled.columns);
         }
     }
-
-    public compile(): string {
-        return this.buildBase();
-    }
-
-    protected abstract buildBase(): string;
-
-    protected abstract setDefaultColumns(): void;
 }

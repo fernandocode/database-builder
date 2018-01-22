@@ -1,12 +1,12 @@
-import { MapperColumn } from './mapper-column';
+import { MapperColumn } from "./mapper-column";
 
-export class MapperTable{
+export class MapperTable {
 
     public columns: MapperColumn[] = [];
 
     constructor(
-        public tableName: string = void 0
-    ){
+        public tableName: string = void 0,
+    ) {
 
     }
 

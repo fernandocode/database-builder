@@ -1,11 +1,11 @@
-import * as moment from 'moment';
+import * as moment from "moment";
 
 export class DatetimeUtils {
 
     public static datetimeToDatabase(date: moment.Moment): number {
-        if(!date.unix){
-            console.warn("Date format incorrect");
-            console.warn(date);
+        if (!date.unix) {
+            throw new Error("Date format incorrect");
+            // console.warn("Date format incorrect");
         }
         return date.unix();
     }
@@ -15,7 +15,7 @@ export class DatetimeUtils {
     }
 
     public static datetimeToDate(date: any): moment.Moment {
-        return moment.utc(moment.utc(date).toISOString(), 'YYYY-MM-DD');
+        return moment.utc(moment.utc(date).toISOString(), "YYYY-MM-DD");
     }
 
     public static databaseToDatetime(unix: number) {

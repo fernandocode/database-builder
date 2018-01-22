@@ -1,0 +1,7 @@
+##Compile TS:
+> tsc
+
+##TSLint:
+> tslint -c tslint.json --project "./src" [--fix]
+> tslint -c tslint.json "src/**/*.ts" [--fix]
+- // tslint:disable-next-line

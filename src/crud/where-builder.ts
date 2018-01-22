@@ -1,6 +1,9 @@
-import { DatabaseHelper } from './../database-helper';
-import { Expression, ExpressionUtils } from 'lambda-expression';
-import { ValueType, IQueryCompilable, ValueTypeToParse } from "./../core/utils";
+import { DatabaseHelper } from "./../database-helper";
+import { Expression, ExpressionUtils } from "lambda-expression";
+import { ExpressionOrColumn, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { QueryCompilable } from "../core/query-compilable";
+import { WhereCompiled } from "./where-compiled";
+import { Condition } from "./enums/condition";
 
 // TODO: add LambdaExpression support in WhereBuilder
 export class WhereBuilder<T> {
@@ -14,14 +17,12 @@ export class WhereBuilder<T> {
     private _pendingCondition: Condition = void 0;
     private _pendingAndOr: string = WhereBuilder.AND;
 
-    private readonly _expressionUtils: ExpressionUtils;
     private readonly _databaseHelper: DatabaseHelper;
 
     constructor(
         private _typeT: new () => T,
-        private _alias: string
+        private _alias: string,
     ) {
-        this._expressionUtils = new ExpressionUtils();
         this._databaseHelper = new DatabaseHelper();
     }
 
@@ -40,23 +41,31 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public scope(scopeCallback: (scope: WhereBuilder<T>) => void): WhereBuilder<T> {
-        let instanceScope: WhereBuilder<T> = new WhereBuilder(this._typeT, this._alias);
+    public scope(
+        scopeCallback: (scope: WhereBuilder<T>) => void,
+    ): WhereBuilder<T> {
+        const instanceScope: WhereBuilder<T> = new WhereBuilder(this._typeT, this._alias);
         scopeCallback(instanceScope);
         this.compileScope(instanceScope.compile());
         return this;
     }
 
-    public equalColumn(expression: Expression<T>, column: string): WhereBuilder<T> {
+    public equalColumn(
+        expression: ExpressionOrColumn<T>,
+        column: string,
+    ): WhereBuilder<T> {
         this.buildWhere(
             Condition.Equal,
-            this.addAlias(this._expressionUtils.getColumnByExpression(expression)),
-            column
+            this.addAlias(Utils.getColumn(expression)),
+            column,
         );
         return this;
     }
 
-    public equalValue(expression: Expression<T>, value: ValueTypeToParse): WhereBuilder<T> {
+    public equalValue(
+        expression: ExpressionOrColumn<T>,
+        value: ValueTypeToParse,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.Equal,
             expression,
@@ -64,7 +73,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public equal(expression1: Expression<T>, expression2: Expression<T>): WhereBuilder<T> {
+    public equal(
+        expression1: ExpressionOrColumn<T>,
+        expression2: ExpressionOrColumn<T>,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpression(
             Condition.Equal,
             expression1,
@@ -72,16 +84,21 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public isNull(expression1: Expression<T>): WhereBuilder<T> {
+    public isNull(
+        expression1: ExpressionOrColumn<T>,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpression(
             Condition.IsNull,
             expression1,
-            void 0
+            void 0,
         );
         return this;
     }
 
-    public greatValue(expression: Expression<T>, value: ValueTypeToParse): WhereBuilder<T> {
+    public greatValue(
+        expression: ExpressionOrColumn<T>,
+        value: ValueTypeToParse,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.Great,
             expression,
@@ -89,7 +106,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public great(expression1: Expression<T>, expression2: Expression<T>): WhereBuilder<T> {
+    public great(
+        expression1: ExpressionOrColumn<T>,
+        expression2: ExpressionOrColumn<T>,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpression(
             Condition.Great,
             expression1,
@@ -97,7 +117,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public greatAndEqualValue(expression: Expression<T>, value: ValueTypeToParse): WhereBuilder<T> {
+    public greatAndEqualValue(
+        expression: ExpressionOrColumn<T>,
+        value: ValueTypeToParse,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.GreatAndEqual,
             expression,
@@ -105,7 +128,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public greatAndEqual(expression1: Expression<T>, expression2: Expression<T>): WhereBuilder<T> {
+    public greatAndEqual(
+        expression1: ExpressionOrColumn<T>,
+        expression2: ExpressionOrColumn<T>,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpression(
             Condition.GreatAndEqual,
             expression1,
@@ -113,7 +139,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public lessValue(expression: Expression<T>, value: ValueTypeToParse): WhereBuilder<T> {
+    public lessValue(
+        expression: ExpressionOrColumn<T>,
+        value: ValueTypeToParse,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.Less,
             expression,
@@ -121,7 +150,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public less(expression1: Expression<T>, expression2: Expression<T>): WhereBuilder<T> {
+    public less(
+        expression1: ExpressionOrColumn<T>,
+        expression2: ExpressionOrColumn<T>,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpression(
             Condition.Less,
             expression1,
@@ -129,7 +161,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public lessAndEqualValue(expression: Expression<T>, value: ValueTypeToParse): WhereBuilder<T> {
+    public lessAndEqualValue(
+        expression: ExpressionOrColumn<T>,
+        value: ValueTypeToParse,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.LessAndEqual,
             expression,
@@ -137,7 +172,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public lessAndEqual(expression1: Expression<T>, expression2: Expression<T>): WhereBuilder<T> {
+    public lessAndEqual(
+        expression1: ExpressionOrColumn<T>,
+        expression2: ExpressionOrColumn<T>,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpression(
             Condition.LessAndEqual,
             expression1,
@@ -145,7 +183,11 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public betweenValue(expression: Expression<T>, value1: ValueTypeToParse, value2: ValueTypeToParse): WhereBuilder<T> {
+    public betweenValue(
+        expression: ExpressionOrColumn<T>,
+        value1: ValueTypeToParse,
+        value2: ValueTypeToParse,
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.Between,
             expression,
@@ -153,7 +195,10 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public inValues(expression: Expression<T>, values: ValueTypeToParse[]): WhereBuilder<T> {
+    public inValues(
+        expression: ExpressionOrColumn<T>,
+        values: ValueTypeToParse[],
+    ): WhereBuilder<T> {
         this.buildWhereWithExpressionWithParameter(
             Condition.In,
             expression,
@@ -161,11 +206,14 @@ export class WhereBuilder<T> {
         return this;
     }
 
-    public inSelect(expression: Expression<T>, query: IQueryCompilable): WhereBuilder<T> {
-        let compiled = query.compile();
+    public inSelect(
+        expression: ExpressionOrColumn<T>,
+        query: QueryCompilable,
+    ): WhereBuilder<T> {
+        const compiled = query.compile();
         this.buildWhere(
             Condition.In,
-            this.addAlias(this._expressionUtils.getColumnByExpression(expression)),
+            this.addAlias(Utils.getColumn(expression)),
             compiled.query);
         this.addParam(compiled.params);
         return this;
@@ -173,12 +221,14 @@ export class WhereBuilder<T> {
 
     public compile(): WhereCompiled {
         return {
+            params: this._params,
             where: this._where,
-            params: this._params
-        }
+        };
     }
 
-    private addParam(param: ValueTypeToParse | ValueTypeToParse[]) {
+    private addParam(
+        param: ValueTypeToParse | ValueTypeToParse[],
+    ) {
         if (Array.isArray(param)) {
             param.forEach((value) => {
                 this.addValueParam(value);
@@ -188,58 +238,86 @@ export class WhereBuilder<T> {
         }
     }
 
-    private addValueParam(param: ValueTypeToParse) {
+    private addValueParam(
+        param: ValueTypeToParse,
+    ) {
         this._params.push(
-            this._databaseHelper.parseToValueType(param)
+            this._databaseHelper.parseToValueType(param),
         );
     }
 
-    private buildWhereWithExpressionWithParameter<T>(condition: Condition, expression: Expression<T>, param: ValueTypeToParse | ValueTypeToParse[]) {
-        this.buildWhereWithParameter(condition, this._expressionUtils.getColumnByExpression(expression), param);
+    private buildWhereWithExpressionWithParameter(
+        condition: Condition,
+        expression: ExpressionOrColumn<T>,
+        param: ValueTypeToParse | ValueTypeToParse[],
+        ) {
+        this.buildWhereWithParameter(condition, Utils.getColumn(expression), param);
     }
 
-    private buildWhereWithParameter(condition: Condition, column: string, param: ValueTypeToParse | ValueTypeToParse[]) {
+    private buildWhereWithParameter(
+        condition: Condition,
+        column: string,
+        param: ValueTypeToParse | ValueTypeToParse[],
+    ) {
         let column2: string | string[] = "?";
         if (Array.isArray(param)) {
             column2 = [];
             param.forEach(() => {
-                (<string[]>column2).push("?");
+                (column2 as string[]).push("?");
             });
         }
         this.buildWhere(condition, this.addAlias(column), column2);
         this.addParam(param);
     }
 
-    private addAlias(column: string): string {
-        if (this._alias) {
+    private addAlias(
+        column: string,
+    ): string {
+        if (this._alias && Utils.isNameColumn(column)) {
             return `${this._alias}.${column}`;
         }
         return column;
     }
 
-    private buildWhereWithExpression(condition: Condition, expression1: Expression<T>, expression2: Expression<T>) {
+    private buildWhereWithExpression(
+        condition: Condition,
+        expression1: ExpressionOrColumn<T>,
+        expression2: ExpressionOrColumn<T>,
+    ) {
         this.buildWhere(condition,
-            this._expressionUtils.getColumnByExpression(expression1),
-            expression2 ? this._expressionUtils.getColumnByExpression(expression2) : void 0
+            Utils.getColumn(expression1),
+            expression2 ? Utils.getColumn(expression2) : void 0,
         );
     }
 
-    private buildWhere(condition: Condition, column1: string, column2: string | string[]) {
+    private buildWhere(
+        condition: Condition,
+        column1: string,
+        column2: string | string[],
+        ) {
         this.checkWhere();
         this._where += this.createWhere(condition, column1, column2);
     }
 
-    private createWhere(condition: Condition, column1: string, column2: string | string[]) {
-        let pendingCondition = this._pendingCondition;
+    private createWhere(
+        condition: Condition,
+        column1: string,
+        column2: string | string[],
+        ) {
+        const pendingCondition = this._pendingCondition;
         this._pendingCondition = void 0;
-        let appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
+        const appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
         if (appendCondition.appended) {
-            return this.buildCondition(<Condition>appendCondition.condition, column1, column2);
+            return this.buildCondition(appendCondition.condition as Condition, column1, column2);
         }
-        return `${pendingCondition}(${this.buildCondition(<Condition>appendCondition.condition, column1, column2)})`;
+        return `${pendingCondition}(${this.buildCondition(appendCondition.condition as Condition, column1, column2)})`;
     }
 
-    private buildCondition(condition: Condition, column1: string, column2: string | string[]) {
+    private buildCondition(
+        condition: Condition,
+        column1: string,
+        column2: string | string[],
+        ) {
         // new scope
         if (!condition) {
             return `(${column1})`;
@@ -247,10 +325,10 @@ export class WhereBuilder<T> {
         switch (condition) {
             case Condition.Between:
                 // ${column} BETWEEN ? AND ?
-                if (column2.length == 2) {
+                if (column2.length === 2) {
                     return `${column1} ${condition} ${column2[0]} ${WhereBuilder.AND} ${column2[0]}`;
                 }
-                throw `Length (${column2.length}) parameter to '${condition}' condition incorrect!`;
+                throw new Error(`Length (${column2.length}) parameter to '${condition}' condition incorrect!`);
             case Condition.In:
             case this.buildConditionNotIn():
                 // ${column} IN (?, ?, ...)
@@ -272,82 +350,68 @@ export class WhereBuilder<T> {
         return `${Condition.Not} ${Condition.In}`;
     }
 
-    private checkAppendPendingCondition(condition: Condition, pendingCondition: Condition)
-        : { condition: string, appended: boolean } {
+    private checkAppendPendingCondition(
+        condition: Condition,
+        pendingCondition: Condition,
+    ): { condition: string, appended: boolean } {
         if (!pendingCondition) {
             return {
-                condition: condition,
-                appended: true
-            }
-        }
-        else if (pendingCondition == Condition.Not) {
+                appended: true,
+                condition,
+            };
+        } else if (pendingCondition === Condition.Not) {
             switch (condition) {
                 case Condition.Equal:
                     return {
+                        appended: true,
                         condition: "<>",
-                        appended: true
-                    }
+                    };
                 case Condition.Great:
                     return {
+                        appended: true,
                         condition: Condition.LessAndEqual,
-                        appended: true
-                    }
+                    };
                 case Condition.GreatAndEqual:
                     return {
+                        appended: true,
                         condition: Condition.Less,
-                        appended: true
-                    }
+                    };
                 case Condition.IsNull:
                     return {
+                        appended: true,
                         condition: "IS NOT NULL",
-                        appended: true
-                    }
+                    };
                 case Condition.Less:
                     return {
+                        appended: true,
                         condition: Condition.GreatAndEqual,
-                        appended: true
-                    }
+                    };
                 case Condition.LessAndEqual:
                     return {
+                        appended: true,
                         condition: Condition.Great,
-                        appended: true
-                    }
+                    };
                 case Condition.In:
                     return {
+                        appended: true,
                         condition: this.buildConditionNotIn(),
-                        appended: true
-                    }
+                    };
                 case Condition.Not:
-                    throw "Not condition unavaliable to 'Not' pre condition";
+                    throw new Error("Not condition unavaliable to 'Not' pre condition");
                 case Condition.Between:
                 default:
                     return {
-                        condition: condition,
-                        appended: false
-                    }
+                        appended: false,
+                        condition,
+                    };
             }
         }
-        throw `Pre condition ${condition} not supported`;
+        throw new Error(`Pre condition ${condition} not supported`);
     }
 
-    private compileScope(compiled: WhereCompiled) {
-        this.buildWhereWithParameter(void 0, compiled.where, compiled.params)
+    private compileScope(
+        compiled: WhereCompiled,
+    ) {
+        this.buildWhereWithParameter(void 0, compiled.where, compiled.params);
     }
-}
-
-export interface WhereCompiled {
-    where: string;
-    params: ValueType[];
-}
-
-export enum Condition {
-    Not = "NOT",
-    IsNull = "IS NULL",
-    Equal = "=",
-    Great = ">",
-    Less = "<",
-    GreatAndEqual = ">=",
-    LessAndEqual = "<=",
-    Between = "BETWEEN",
-    In = "IN"
 }

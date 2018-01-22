@@ -1,3 +1,3 @@
 
-export { IGetMapper } from "./interface-get-mapper";
+export { GetMapper } from "./interface-get-mapper";
 export * from "./database-definition";

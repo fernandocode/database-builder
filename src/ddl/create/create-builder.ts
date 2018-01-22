@@ -1,9 +1,8 @@
-import { DdlColumnsBuilder } from './../ddl-columns-builder';
-import { MetadataTable } from './../../metadata-table';
+import { DdlColumnsBuilder } from "./../ddl-columns-builder";
+import { MetadataTable } from "./../../metadata-table";
 import { DdlBaseBuilder } from "../ddl-base-builder";
 
-
-export class CreateBuilder<T> extends DdlBaseBuilder<T>{
+export class CreateBuilder<T> extends DdlBaseBuilder<T> {
 
     constructor(typeT: new () => T, private _metadata: MetadataTable<T>) {
         super(typeT);
@@ -21,6 +20,6 @@ export class CreateBuilder<T> extends DdlBaseBuilder<T>{
     }
 
     protected setDefaultColumns(): void {
-        this.columns(columns => columns.allColumns());
+        this.columns((columns) => columns.allColumns());
     }
 }

@@ -1,21 +1,22 @@
-import { ExecutableBuilder } from './../core/executable-builder';
-import { Database } from './../definitions/database-definition';
+import { ExecutableBuilder } from "./../core/executable-builder";
+import { Database } from "./../definitions/database-definition";
 import { CrudBaseBuilder } from "./crud-base-builder";
-import { ResultExecuteSql, ValueType } from "./../core/utils";
+import { ValueType } from "./../core/utils";
 import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
+import { ResultExecuteSql } from "../core/result-execute-sql";
 
 export class CrudBase<
     T,
     TBuilder extends CrudBaseBuilder<T, TColumnsBuilder>,
     TColumnsBuilder extends ColumnsValuesBuilder<T, TColumnsBuilder>
-    >{
+    > {
 
     protected readonly _executableBuilder: ExecutableBuilder;
 
     constructor(
         protected readonly _builder: TBuilder,
         private readonly _database: Database = void 0,
-        enableLog: boolean = true
+        enableLog: boolean = true,
     ) {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
@@ -29,9 +30,9 @@ export class CrudBase<
     }
 
     private getDatabase(database: Database): Database {
-        let result = (database ? database : this._database);
+        const result = (database ? database : this._database);
         if (!result) {
-            throw "Database not specified in query.";
+            throw new Error("Database not specified in query.");
         }
         return result;
     }

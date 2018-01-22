@@ -1,16 +1,16 @@
-import { ExecutableBuilder } from './../core/executable-builder';
-import { Database } from './../definitions/database-definition';
+import { ExecutableBuilder } from "./../core/executable-builder";
+import { Database } from "./../definitions/database-definition";
 import { DdlBaseBuilder } from "./ddl-base-builder";
-import { ResultExecuteSql } from '../core/utils';
+import { ResultExecuteSql } from "../core/result-execute-sql";
 
-export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>>{
+export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
 
     protected readonly _executableBuilder: ExecutableBuilder;
 
     constructor(
         protected readonly _builder: TBuilder,
         private readonly _database: Database = void 0,
-        enableLog: boolean = true
+        enableLog: boolean = true,
     ) {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
@@ -24,9 +24,9 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>>{
     }
 
     private getDatabase(database: Database): Database {
-        let result = (database ? database : this._database);
+        const result = (database ? database : this._database);
         if (!result) {
-            throw "Database not specified in query.";
+            throw new Error("Database not specified in query.");
         }
         return result;
     }

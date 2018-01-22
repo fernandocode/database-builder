@@ -1,31 +1,32 @@
-import { Expression, ExpressionUtils } from 'lambda-expression';
-import { FieldType, ValueTypeToParse } from './core/utils';
-import { MapperTable } from './mapper-table';
-import { DatabaseHelper } from './database-helper';
-import { MapperColumn } from './mapper-column';
+import { Expression, ExpressionUtils } from "lambda-expression";
+import { ValueTypeToParse } from "./core/utils";
+import { MapperTable } from "./mapper-table";
+import { DatabaseHelper } from "./database-helper";
+import { MapperColumn } from "./mapper-column";
+import { FieldType } from "./core/enums/field-type";
 
 export class MetadataTable<T> {
-
-    private _expressionUtils: ExpressionUtils = new ExpressionUtils();
 
     public instance: any;
 
     public mapperTable: MapperTable;
 
+    private _expressionUtils: ExpressionUtils = new ExpressionUtils();
+
     constructor(
         public newable: new () => T,
         private _databaseHelper: DatabaseHelper,
         public readOnly: boolean = false,
-        public keyColumn: string = "key"
+        public keyColumn: string = "key",
     ) {
         this.instance = new newable();
         this.mapperTable = new MapperTable(newable.name);
     }
 
     public mapper(expression: Expression<T>): MetadataTable<T> {
-        let column = this._expressionUtils.getColumnByExpression(expression, "_");
-        let field = this._expressionUtils.getColumnByExpression(expression, ".");
-        this.setColumn(column, this.getTypeByValue(this._databaseHelper.getValue(this.instance, field)))
+        const column = this._expressionUtils.getColumnByExpression(expression, "_");
+        const field = this._expressionUtils.getColumnByExpression(expression, ".");
+        this.setColumn(column, this.getTypeByValue(this._databaseHelper.getValue(this.instance, field)));
         return this;
     }
 
@@ -38,22 +39,26 @@ export class MetadataTable<T> {
         return this;
     }
 
+    protected getTypeByValue(value: ValueTypeToParse): FieldType {
+        return this._databaseHelper.getType(value);
+    }
+
     private autoMapperColumns(
         references: boolean = true,
         referencesId: boolean = true,
         referencesIdRecursive: boolean = true,
-        referencesIdColumn: string = "id"
+        referencesIdColumn: string = "id",
     ): void {
-        for (var key in this.instance) {
-            if (key != 'constructor' && typeof this.instance[key] != 'function') {
-                let type = this._databaseHelper.getType(this.instance[key]);
-                if (((type != FieldType.OBJECT)
+        for (const key in this.instance) {
+            if (key !== "constructor" && typeof this.instance[key] !== "function") {
+                const type = this._databaseHelper.getType(this.instance[key]);
+                if (((type !== FieldType.OBJECT)
                     || references)
-                    && key != this.keyColumn) {
+                    && key !== this.keyColumn) {
                     this.setColumn(key, this.getTypeByValue(this.instance[key]));
                 }
             }
-        };
+        }
         if (referencesId) {
             this.autoColumnsModelReferencesRecursive(this.instance, "", referencesIdRecursive, referencesIdColumn);
         }
@@ -62,15 +67,15 @@ export class MetadataTable<T> {
     private autoColumnsModelReferencesRecursive(
         instanceMapper: any,
         ascendingRefName: string,
-        recursive: boolean, referencesIdColumn: string
+        recursive: boolean, referencesIdColumn: string,
     ) {
-        for (var key in instanceMapper) {
-            if (key != 'constructor' && typeof instanceMapper[key] != 'function') {
+        for (const key in instanceMapper) {
+            if (key !== "constructor" && typeof instanceMapper[key] !== "function") {
                 if (
                     (instanceMapper[key] instanceof Object && instanceMapper[key].hasOwnProperty(referencesIdColumn))) {
                     this.setColumn(
                         `${ascendingRefName}${key}_${referencesIdColumn}`,
-                        this.getTypeByValue(instanceMapper[key][referencesIdColumn])
+                        this.getTypeByValue(instanceMapper[key][referencesIdColumn]),
                     );
                 }
                 if (recursive && instanceMapper[key] instanceof Object) {
@@ -79,11 +84,7 @@ export class MetadataTable<T> {
                         recursive, referencesIdColumn);
                 }
             }
-        };
-    }
-
-    protected getTypeByValue(value: ValueTypeToParse): FieldType {
-        return this._databaseHelper.getType(value);
+        }
     }
 
     private setColumn(

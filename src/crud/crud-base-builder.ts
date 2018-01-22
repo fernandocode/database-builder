@@ -1,10 +1,13 @@
-import { WhereCompiled, WhereBuilder } from './where-builder';
-import { ColumnsCompiled, CrudCompiled, QueryCompiled } from "./../core/utils";
+import { WhereBuilder } from "./where-builder";
 import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
+import { ColumnsCompiled } from "../core/columns-compiled";
+import { QueryCompiled } from "../core/query-compiled";
+import { CrudCompiled } from "../core/crud-compiled";
+import { WhereCompiled } from "./where-compiled";
 
 let NEXT_VALUE_ALIAS: number = 0;
 
-export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBuilder<T, TColumnsBuilder>>{
+export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBuilder<T, TColumnsBuilder>> {
 
     protected _tablename: string;
 
@@ -14,7 +17,7 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
     constructor(
         protected readonly _typeT: new () => T,
         protected readonly _alias: string = void 0,
-        protected readonly _modelToSave: T = void 0
+        protected readonly _modelToSave: T = void 0,
     ) {
         this._tablename = _typeT.name;
         if (!this._alias) {
@@ -23,23 +26,18 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
     }
 
     public hasAlias(alias: string): boolean {
-        if (this._alias == alias)
+        if (this._alias === alias) {
             return true;
+        }
         return false;
     }
 
-    private defaultAlias(typeT: new () => T) {
-        if (typeT.name.length > 3) {
-            return typeT.name.substring(0, 3);
-        }
-        return typeT.name;
-    }
-
-    private createUniqueAlias(aliasProposed: string): string {
-        if (this.hasAlias(aliasProposed)) {
-            return this.createUniqueAlias(`${aliasProposed}${NEXT_VALUE_ALIAS++}`);
-        }
-        return aliasProposed;
+    public compile(): QueryCompiled {
+        const compiledBase = this.buildBase();
+        return {
+            params: compiledBase.params.concat(this._whereCompiled.params),
+            query: `${compiledBase.sql}${this._whereCompiled.where}`,
+        };
     }
 
     protected getColumnsCompiled(): ColumnsCompiled {
@@ -59,22 +57,19 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
         return instanceReturn;
     }
 
-    private compileColumns(compiled: ColumnsCompiled) {
-        if (compiled.columns.length) {
-            this._columnsCompiled.columns = this._columnsCompiled.columns.concat(compiled.columns);
-            this._columnsCompiled.params = this._columnsCompiled.params.concat(compiled.params);
-        }
-    }
-
     protected whereBase<TBuilder extends CrudBaseBuilder<T, TColumnsBuilder>>(
         whereCallback: (where: WhereBuilder<T>) => void,
         instanceReturn: TBuilder, withAlias: boolean = true)
         : TBuilder {
-        let instanceWhere: WhereBuilder<T> = new WhereBuilder(this._typeT, withAlias ? this._alias : void 0);
+        const instanceWhere: WhereBuilder<T> = new WhereBuilder(this._typeT, withAlias ? this._alias : void 0);
         whereCallback(instanceWhere);
         this.compileWhere(instanceWhere.compile());
         return instanceReturn;
     }
+
+    protected abstract buildBase(): CrudCompiled;
+
+    protected abstract setDefaultColumns(): void;
 
     private compileWhere(compiled: WhereCompiled) {
         if (compiled.where.length) {
@@ -83,15 +78,24 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
         }
     }
 
-    public compile(): QueryCompiled {
-        let compiledBase = this.buildBase();
-        return {
-            query: `${compiledBase.sql}${this._whereCompiled.where}`,
-            params: compiledBase.params.concat(this._whereCompiled.params)
+    private defaultAlias(typeT: new () => T) {
+        if (typeT.name.length > 3) {
+            return typeT.name.substring(0, 3);
         }
+        return typeT.name;
     }
 
-    protected abstract buildBase(): CrudCompiled;
+    private createUniqueAlias(aliasProposed: string): string {
+        if (this.hasAlias(aliasProposed)) {
+            return this.createUniqueAlias(`${aliasProposed}${NEXT_VALUE_ALIAS++}`);
+        }
+        return aliasProposed;
+    }
 
-    protected abstract setDefaultColumns(): void;
+    private compileColumns(compiled: ColumnsCompiled) {
+        if (compiled.columns.length) {
+            this._columnsCompiled.columns = this._columnsCompiled.columns.concat(compiled.columns);
+            this._columnsCompiled.params = this._columnsCompiled.params.concat(compiled.params);
+        }
+    }
 }

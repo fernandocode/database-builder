@@ -1,11 +1,11 @@
-import { WhereBuilder } from './../where-builder';
-import { Database } from './../../definitions/database-definition';
-import { MetadataTable } from './../../metadata-table';
-import { UpdateBuilder } from './update-builder';
-import { CrudBase } from './../crud-base';
-import { UpdateColumnsBuilder } from '../columns-builder';
+import { WhereBuilder } from "./../where-builder";
+import { Database } from "./../../definitions/database-definition";
+import { MetadataTable } from "./../../metadata-table";
+import { UpdateBuilder } from "./update-builder";
+import { CrudBase } from "./../crud-base";
+import { UpdateColumnsBuilder } from "../columns-builder";
 
-export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>>{
+export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
@@ -13,7 +13,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
         metadata: MetadataTable<T>,
         alias: string = void 0,
         database: Database = void 0,
-        enableLog: boolean = true
+        enableLog: boolean = true,
     ) {
         super(new UpdateBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
     }

@@ -1,32 +1,32 @@
-import { Database, DatabaseObject, DatabaseTransaction } from './../definitions/database-definition';
-import { ResultExecuteSql, QueryCompiled } from "./utils";
+import { Database, DatabaseObject, DatabaseTransaction } from "./../definitions/database-definition";
+import { QueryCompiled } from "./query-compiled";
+import { ResultExecuteSql } from "./result-execute-sql";
 
 export class ExecutableBuilder {
 
-    constructor(public enableLog: boolean = true){
+    constructor(public enableLog: boolean = true) {
 
     }
 
     public execute(
         compiled: QueryCompiled,
-        database: Database
+        database: Database,
     ): Promise<ResultExecuteSql> {
         this.log(compiled);
         return this.executeSql(database, compiled);
     }
 
     private executeSql(
-        database: Database, compiled: QueryCompiled
+        database: Database, compiled: QueryCompiled,
     ): Promise<ResultExecuteSql> {
-        if ((<DatabaseObject>database).addTransaction) {
-        // if (database instanceof SQLiteObject) {
-            return (<DatabaseObject>database).executeSql(
+        if ((database as DatabaseObject).addTransaction) {
+            return (database as DatabaseObject).executeSql(
                 compiled.query,
-                compiled.params
+                compiled.params,
             );
         }
         return new Promise<any>((resolve, reject) => {
-            (<DatabaseTransaction>database).executeSql(
+            (database as DatabaseTransaction).executeSql(
                 compiled.query,
                 compiled.params,
                 (tx: DatabaseTransaction, result: ResultExecuteSql) => {
@@ -34,13 +34,15 @@ export class ExecutableBuilder {
                 },
                 (tx: DatabaseTransaction, error: any) => {
                     reject(error);
-                }
+                },
             );
         });
     }
 
     private log(log: any) {
-        if (this.enableLog)
+        if (this.enableLog) {
+            // tslint:disable-next-line
             console.log(log);
+        }
     }
 }

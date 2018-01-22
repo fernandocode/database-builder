@@ -1,9 +1,9 @@
-import { WhereBuilder } from './../where-builder';
-import { CrudCompiled } from "./../../core/utils";
+import { WhereBuilder } from "./../where-builder";
 import { DeleteColumnsBuilder } from "../columns-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
+import { CrudCompiled } from "../../core/crud-compiled";
 
-export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>>{
+export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>> {
 
     constructor(typeT: new () => T, alias: string = void 0) {
         super(typeT, alias);
@@ -15,8 +15,8 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
 
     protected buildBase(): CrudCompiled {
         return {
+            params: [],
             sql: `DELETE FROM ${this._tablename}`,
-            params: []
         };
     }
 

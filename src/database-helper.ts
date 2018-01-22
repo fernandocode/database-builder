@@ -1,33 +1,35 @@
 // import { Injectable } from '@angular/core';
 import { DatetimeUtils } from "./datetime-utils";
-import { ValueTypeToParse, ValueType, FieldType, ColumnType } from "./core/utils";
-import * as moment from 'moment';
+import { ValueType, ValueTypeToParse } from "./core/utils";
+import * as moment from "moment";
+import { FieldType } from "./core/enums/field-type";
+import { ColumnType } from "./core/enums/column-type";
 
 // @Injectable()
 export class DatabaseHelper {
 
     public getType(value: ValueTypeToParse): FieldType {
-        let valueFormatted = this.preFormatValue(value);
-        let tipo = typeof valueFormatted;
+        const valueFormatted = this.preFormatValue(value);
+        const tipo = typeof valueFormatted;
         switch (tipo) {
-            case 'string':
+            case "string":
                 return FieldType.STRING;
-            case 'number':
+            case "number":
                 return FieldType.NUMBER;
-            case 'boolean':
+            case "boolean":
                 return FieldType.BOOLEAN;
-            case 'object':
+            case "object":
                 // tratar date como inteiro
-                if (valueFormatted.constructor.name == 'Date'
-                    || valueFormatted.constructor.name == 'Moment') {
+                if (valueFormatted.constructor.name === "Date"
+                    || valueFormatted.constructor.name === "Moment") {
                     return FieldType.DATE;
                 }
                 // serializar todos os objetos
                 return FieldType.OBJECT;
-            case 'function':
+            case "function":
                 return FieldType.FUNCTION;
             default:
-                throw `type: '${tipo}', value: '${valueFormatted}' não configurado!`;
+                throw new Error(`type: '${tipo}', value: '${valueFormatted}' não configurado!`);
         }
     }
 
@@ -42,18 +44,18 @@ export class DatabaseHelper {
             case FieldType.BOOLEAN:
                 return ColumnType.BOOLEAN;
             default:
-                throw `type '${type}' não configurado!`;
+                throw new Error(`type '${type}' não configurado!`);
         }
     }
 
     public parseToValueType(value: ValueTypeToParse, type: FieldType = this.getType(value)): ValueType {
-        let valueFormatted = this.preFormatValue(value);
+        const valueFormatted = this.preFormatValue(value);
         return this.valueToDatabase(valueFormatted, type);
     }
 
     public preFormatValue(value: ValueTypeToParse): ValueTypeToParse {
-        let regexISODatetime = /(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})[+-](\d{2})\:(\d{2})/gm;
-        if (typeof value == "string" && regexISODatetime.test(value)) {
+        const regexISODatetime = /(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})[+-](\d{2})\:(\d{2})/gm;
+        if (typeof value === "string" && regexISODatetime.test(value)) {
             return DatetimeUtils.dateToDatabase(value);
         }
         return value;
@@ -66,30 +68,30 @@ export class DatabaseHelper {
             case FieldType.DATE:
                 return DatetimeUtils.databaseToDatetime(columnValue);
             case FieldType.BOOLEAN:
-                return typeof columnValue == "string" ? columnValue === "true" : columnValue;
+                return typeof columnValue === "string" ? columnValue === "true" : columnValue;
             default:
                 return columnValue;
         }
     }
 
     public valueToDatabase(value: ValueTypeToParse, fieldType: FieldType): ValueType {
-        let type = value != void 0 ? this.getType(value) : fieldType;
+        const type = value !== void 0 ? this.getType(value) : fieldType;
         switch (type) {
             case FieldType.OBJECT:
                 return JSON.stringify(value);
             case FieldType.DATE:
-                return DatetimeUtils.datetimeToDatabase(<moment.Moment>value);
+                return DatetimeUtils.datetimeToDatabase(value as moment.Moment);
             default:
-                return <ValueType>value;
+                return value as ValueType;
         }
-    }    
+    }
 
     public getValue(instance: any, fieldReference: string): ValueTypeToParse {
-        return this.getValueByProperties(instance, fieldReference.split('.'));
+        return this.getValueByProperties(instance, fieldReference.split("."));
     }
 
     public getValueByProperties(instance: any, properties: string[]): ValueTypeToParse {
-        let shiftField = properties.shift();
+        const shiftField = properties.shift();
         if (shiftField) {
             if (instance.hasOwnProperty(shiftField)) {
                 return this.getValueByProperties(instance[shiftField], properties);

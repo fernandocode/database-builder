@@ -1,6 +1,6 @@
 import { DdlBaseBuilder } from "../ddl-base-builder";
 
-export class DropBuilder<T> extends DdlBaseBuilder<T>{
+export class DropBuilder<T> extends DdlBaseBuilder<T> {
 
     constructor(typeT: new () => T) {
         super(typeT);

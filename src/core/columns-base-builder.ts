@@ -1,21 +1,24 @@
-import { MetadataTable } from './../metadata-table';
-import { DatabaseHelper } from './../database-helper';
+import { MetadataTable } from "./../metadata-table";
+import { DatabaseHelper } from "./../database-helper";
 import { Expression, ExpressionUtils } from "lambda-expression";
-import { FieldType, ColumnsCompiled, ValueTypeToParse, Column } from './utils';
-import { MapperTable } from '../mapper-table';
+import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
+import { MapperTable } from "../mapper-table";
+import { Column } from "./column";
+import { FieldType } from "./enums/field-type";
+import { ColumnsCompiled } from "./columns-compiled";
 
-export abstract class ColumnsBaseBuilder<TThis extends ColumnsBaseBuilder<TThis, T, TColumn>, T, TColumn extends Column>{
+export abstract class ColumnsBaseBuilder<
+    TThis extends ColumnsBaseBuilder<TThis, T, TColumn>,
+    T,
+    TColumn extends Column
+    > {
 
     protected columns: TColumn[] = [];
-    protected readonly expressionUtils: ExpressionUtils;
-    protected readonly databaseHelper: DatabaseHelper;
 
     constructor(
         protected readonly metadata: MetadataTable<T>,
-        protected readonly modelToSave: T = metadata.instance
+        protected readonly modelToSave: T = metadata.instance,
     ) {
-        this.expressionUtils = new ExpressionUtils();
-        this.databaseHelper = new DatabaseHelper();
     }
 
     public allColumns() {
@@ -25,44 +28,32 @@ export abstract class ColumnsBaseBuilder<TThis extends ColumnsBaseBuilder<TThis,
     }
 
     public setColumn(column: string, type: FieldType): TThis {
-        this.columns.push(<TColumn>{
+        this.columns.push({
             name: column,
-            type: type
-        });
+            type,
+        } as TColumn);
         return this.getInstance();
     }
 
-    public set(expression: Expression<T>): TThis {
+    public set(expression: ExpressionOrColumn<T>): TThis {
         return this.setColumn(
-            this.expressionUtils.getColumnByExpression(expression),
-            this.getTypeByExpression(expression)
+            Utils.getColumn(expression),
+            Utils.getType(this.metadata.instance, expression),
         );
     }
 
     public compile(): ColumnsCompiled {
-        let result: ColumnsCompiled = {
+        const result: ColumnsCompiled = {
             columns: [],
-            params: []
+            params: [],
         };
-        this.columns.forEach(column => {
-            result.columns.push(this.columnFormat(column));
-        });
-        return result;
-    }
-
-    private setAllColumns(mapper: MapperTable, modelWithValue: T): void {
-        for (let key in mapper.columns) {
-            let column = mapper.columns[key];
-            this.setColumnValue(column.column, this.databaseHelper.getValue(modelWithValue, column.fieldReference), column.fieldType);
+        for (const key in this.columns) {
+            if (this.columns.hasOwnProperty(key)) {
+                const column = this.columns[key];
+                result.columns.push(this.columnFormat(column));
+            }
         }
-    }
-
-    protected getTypeByValue(value: ValueTypeToParse): FieldType {
-        return this.databaseHelper.getType(value);
-    }
-
-    protected getTypeByExpression(expression: Expression<T>): FieldType {
-        return this.getTypeByValue(this.expressionUtils.getValueByExpression(this.metadata.instance, expression));
+        return result;
     }
 
     protected abstract columnFormat(column: TColumn): string;
@@ -70,4 +61,15 @@ export abstract class ColumnsBaseBuilder<TThis extends ColumnsBaseBuilder<TThis,
     protected abstract getInstance(): TThis;
 
     protected abstract setColumnValue(column: string, value: ValueTypeToParse, fieldType: FieldType): TThis;
+
+    private setAllColumns(mapper: MapperTable, modelWithValue: T): void {
+        for (const key in mapper.columns) {
+            if (mapper.columns.hasOwnProperty(key)) {
+                const column = mapper.columns[key];
+                this.setColumnValue(column.column,
+                    Utils.getValue(modelWithValue, column.fieldReference),
+                    column.fieldType);
+            }
+        }
+    }
 }

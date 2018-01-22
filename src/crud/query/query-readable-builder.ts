@@ -1,13 +1,13 @@
-import { Database } from './../../definitions/database-definition';
-import { MetadataTable } from './../../metadata-table';
+import { Database } from "./../../definitions/database-definition";
+import { MetadataTable } from "./../../metadata-table";
 import { QueryBuilder } from "./query-builder";
-import { QueryReadableBuilderBase } from './query-readable-builder-base';
+import { QueryReadableBuilderBase } from "./query-readable-builder-base";
 
-export class QueryReadableBuilder<T> extends QueryReadableBuilderBase{
+export class QueryReadableBuilder<T> extends QueryReadableBuilderBase {
 
     constructor(
         typeT: new () => T,
-        enableLog: boolean = true
+        enableLog: boolean = true,
     ) {
         super(enableLog);
     }
@@ -15,11 +15,11 @@ export class QueryReadableBuilder<T> extends QueryReadableBuilderBase{
     public executeAndRead(
         queryBuilder: QueryBuilder<T>,
         metadata: MetadataTable<T>,
-        database: Database
+        database: Database,
     ): Promise<T[]> {
         return new Promise((resolve, reject) => {
             queryBuilder.execute(database)
-                .then(cursor => {
+                .then((cursor) => {
                     this.log(cursor);
                     try {
                         resolve(this.read(cursor, metadata.newable, metadata.mapperTable));

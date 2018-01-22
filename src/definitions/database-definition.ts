@@ -1,12 +1,18 @@
+import { ResultExecuteSql } from "./../core/result-execute-sql";
 
 export type Database = DatabaseTransaction | DatabaseObject;
 
 export interface DatabaseTransaction {
     start: () => void;
-    executeSql: (sql: any, values: any, success: Function, error: Function) => void;
-    addStatement: (sql: any, values: any, success: Function, error: Function) => void;
-    handleStatementSuccess: (handler: Function, response: any) => void;
-    handleStatementFailure: (handler: Function, response: any) => void;
+    executeSql: (
+        sql: any,
+        values: any,
+        success: (tx: DatabaseTransaction, result: ResultExecuteSql) => void,
+        error: (tx: DatabaseTransaction, error: any) => void,
+    ) => void;
+    addStatement: (sql: any, values: any, success: () => void, error: () => void) => void;
+    handleStatementSuccess: (handler: () => void, response: any) => void;
+    handleStatementFailure: (handler: () => void, response: any) => void;
     run: () => void;
     abort: (txFailure: any) => void;
     finish: () => void;
@@ -21,7 +27,7 @@ export interface DatabaseObject {
      */
     transaction(fn: any): Promise<any>;
     /**
-     * @param fn {Function}
+     * @param fn {() => void}
      * @returns {Promise<any>}
      */
     readTransaction(fn: (tx: DatabaseTransaction) => void): Promise<any>;

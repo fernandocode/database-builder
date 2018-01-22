@@ -1,4 +1,4 @@
-import { FieldType } from './core/utils';
+import { FieldType } from "./core/enums/field-type";
 
 export class MapperColumn {
 
