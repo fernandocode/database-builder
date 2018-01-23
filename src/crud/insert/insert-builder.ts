@@ -1,5 +1,5 @@
+import { InsertColumnsBuilder } from './insert-columns-builder';
 import { MetadataTable } from "./../../metadata-table";
-import { InsertColumnsBuilder } from "./../columns-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { CrudCompiled } from "../../core/crud-compiled";
 
