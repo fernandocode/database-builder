@@ -5,3 +5,4 @@ export * from "./update";
 export * from "./crud";
 export * from "./where-builder";
 export * from "./enums";
+export * from "./projection-compiled";
