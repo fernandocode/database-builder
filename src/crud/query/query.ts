@@ -6,11 +6,11 @@ import { WhereBuilder } from "./../where-builder";
 import { Database } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
 import { QueryReadableBuilder } from "./query-readable-builder";
-import { QueryBuilder } from "./query-builder";
+import { QueryBuilder, JoinQueryBuilder } from "./query-builder";
 import { ExpressionOrColumn, ValueType } from "./../../core/utils";
 import { QueryCompilable } from "./../../core/query-compilable";
 import { OrderBy } from "../../core/enums/order-by";
-import { JoinQueryBuilder } from "./join-query-builder";
+// import { JoinQueryBuilder } from "./join-query-builder";
 import { JoinType } from "../enums/join-type";
 
 export class Query<T> implements QueryCompilable {
@@ -64,8 +64,17 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
+    /**
+     * @deprecated Use `select`
+     * @param projectionCallback 
+     */
     public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): Query<T> {
         this._queryBuilder.projection(projectionCallback);
+        return this;
+    }
+
+    public select(selectCallback: (select: ProjectionBuilder<T>) => void): Query<T> {
+        this._queryBuilder.projection(selectCallback);
         return this;
     }
 

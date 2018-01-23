@@ -8,5 +8,5 @@ export enum Projection {
     Distinct = "DISTINCT",
     Round = "ROUND",
     Coalesce = "COALESCE",
-    BetweenParenthesis = " ",
+    BetweenParenthesis = "",
 }

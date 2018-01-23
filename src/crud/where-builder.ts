@@ -50,6 +50,11 @@ export class WhereBuilder<T> {
         return this;
     }
 
+    /**
+     * @deprecated Use `equal`
+     * @param expression 
+     * @param column 
+     */
     public equalColumn(
         expression: ExpressionOrColumn<T>,
         column: string,
@@ -285,8 +290,8 @@ export class WhereBuilder<T> {
         expression2: ExpressionOrColumn<T>,
     ) {
         this.buildWhere(condition,
-            Utils.getColumn(expression1),
-            expression2 ? Utils.getColumn(expression2) : void 0,
+            this.addAlias(Utils.getColumn(expression1)),
+            expression2 ? this.addAlias(Utils.getColumn(expression2)) : void 0,
         );
     }
 

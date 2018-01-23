@@ -1,11 +1,12 @@
 {
   "name": "database-builder",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Framework to assist in database manipulation (DDL and CRUD)",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": " tsc & mocha src/**/*.spec.js",
+    "test-debug": "mocha -r ts-node/register src/**/*.spec.ts --debug-brk"
   },
   "dependencies": {
     "moment": "2.20.1",

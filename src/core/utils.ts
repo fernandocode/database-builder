@@ -6,6 +6,7 @@ import * as moment from "moment";
 import { ExpressionOrColumnEnum } from "./enums/expression-or-column-enum";
 import { FieldType } from "./enums/field-type";
 import { ColumnType } from "./enums/column-type";
+import { ProjectionCompiled } from "../crud/projection-compiled";
 
 export type ValueType = number | string | boolean;
 export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
@@ -13,6 +14,8 @@ export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 export type ExpressionOrColumn<T> = Expression<T> | string;
 
 export type ProjectionOrValue<T> = ProjectionBuilder<T> | ValueTypeToParse;
+
+export type ProjectionCompiledOrValue = ProjectionCompiled | ValueTypeToParse;
 
 export class Utils {
 
@@ -53,6 +56,10 @@ export class Utils {
 
     public static isProjectionBuilder<T>(projectionCandidate: any): boolean {
         return projectionCandidate instanceof ProjectionBuilder;
+    }
+
+    public static isProjectionCompiled<T>(projectionCandidate: any): boolean {
+        return projectionCandidate instanceof ProjectionCompiled;
     }
 
     public static isValueType<T>(value: ValueType): boolean {

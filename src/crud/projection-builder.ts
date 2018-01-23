@@ -1,6 +1,6 @@
 import { QueryCompiled } from "./../core/query-compiled";
 import { WhereBuilder } from "./where-builder";
-import { ExpressionOrColumn, ProjectionOrValue, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { ExpressionOrColumn, ProjectionOrValue, Utils, ValueType, ValueTypeToParse, ProjectionCompiledOrValue } from "./../core/utils";
 import { Expression, ExpressionUtils } from "lambda-expression";
 import { BuilderCompiled } from "../core/builder-compiled";
 import { WhereCompiled } from "./where-compiled";
@@ -15,6 +15,7 @@ export class ProjectionBuilder<T> {
     constructor(
         private _typeT: new () => T,
         private _aliasTable: string,
+        private _addAliasTableToAlias: boolean = false
     ) {
     }
 
@@ -44,21 +45,54 @@ export class ProjectionBuilder<T> {
      */
     public group(
         alias: string,
-        ...projections: ProjectionCompiled[],
+        ...projections: ProjectionCompiledOrValue[],
     ): ProjectionBuilder<T> {
-        const projectionCompiled = new ProjectionCompiled();
+        const projectionsCompiled = new ProjectionCompiled();
         projections.forEach((projection) => {
-            projectionCompiled.projection += `${projection.projection} `;
-            projectionCompiled.params = projectionCompiled.params.concat(projection.params);
+
+            if (Utils.isProjectionCompiled(projection)) {
+                const projectionCompiled = projection as ProjectionCompiled;
+                projectionsCompiled.projection += `${projectionCompiled.projection} `;
+                projectionsCompiled.params = projectionsCompiled.params.concat(projectionCompiled.params);
+                // this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
+                // this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);
+            } else {
+                projectionsCompiled.projection += `${projection} `;
+                // this._whenBuilder.builder += ` ${type} ${Utils.getValueType(projection)}`;
+            }
+
+            // projectionsCompiled.projection += `${projection.projection} `;
+            // projectionsCompiled.params = projectionsCompiled.params.concat(projection.params);
         });
-        projectionCompiled.projection = projectionCompiled.projection.trim();
+        projectionsCompiled.projection = projectionsCompiled.projection.trim();
 
         this.buildProjection(Projection.BetweenParenthesis,
-            projectionCompiled.projection, alias, projectionCompiled.params);
+            projectionsCompiled.projection, alias, projectionsCompiled.params);
 
         return this;
     }
+    // public group(
+    //     alias: string,
+    //     ...projections: ProjectionCompiled[],
+    // ): ProjectionBuilder<T> {
+    //     const projectionCompiled = new ProjectionCompiled();
+    //     projections.forEach((projection) => {
+    //         projectionCompiled.projection += `${projection.projection} `;
+    //         projectionCompiled.params = projectionCompiled.params.concat(projection.params);
+    //     });
+    //     projectionCompiled.projection = projectionCompiled.projection.trim();
 
+    //     this.buildProjection(Projection.BetweenParenthesis,
+    //         projectionCompiled.projection, alias, projectionCompiled.params);
+
+    //     return this;
+    // }
+
+    /**
+     * @deprecated Use `add`
+     * @param column 
+     * @param alias 
+     */
     public column(
         column: string,
         alias: string = void 0,
@@ -67,6 +101,18 @@ export class ProjectionBuilder<T> {
             column,
             alias,
         );
+        return this;
+    }
+
+    public columns(
+        ...expressions: ExpressionOrColumn<T>[]
+    ): ProjectionBuilder<T> {
+        for (const key in expressions) {
+            if (expressions.hasOwnProperty(key)) {
+                const expression = expressions[key];
+                this.add(expression);
+            }
+        }
         return this;
     }
 
@@ -195,7 +241,7 @@ export class ProjectionBuilder<T> {
     public coalesce(
         expression: ExpressionOrColumn<T>,
         alias: string = void 0,
-        ): ProjectionBuilder<T> {
+    ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Coalesce,
             expression,
             alias,
@@ -226,7 +272,7 @@ export class ProjectionBuilder<T> {
     public subQuery(
         subQuery: QueryCompiled,
         alias: string = "",
-        ): ProjectionBuilder<T> {
+    ): ProjectionBuilder<T> {
         this.buildProjection(void 0,
             `(${subQuery.query})`,
             alias,
@@ -262,9 +308,9 @@ export class ProjectionBuilder<T> {
     private buildProjection(
         projection: Projection,
         column: string,
-        alias: string = column,
+        alias: string = this.defaultAliasAs(column),
         args: any[] = [],
-        ) {
+    ) {
         const projectionBuild = this.createProjection(projection, this.addAliasTable(column), alias, args);
         this.applyProjection(projectionBuild);
     }
@@ -300,13 +346,19 @@ export class ProjectionBuilder<T> {
         return args.length ? ", " + args.join("") : "";
     }
 
+    private defaultAliasAs(column: string): string {
+        return this._addAliasTableToAlias
+            ? `${this._aliasTable}_${column}`
+            : column;
+    }
+
     private createProjection(
         projection: Projection,
         column: string,
-        alias: string = column,
+        alias: string = this.defaultAliasAs(column),
         args: any[],
     ): ProjectionCompiled {
-        if (projection) {
+        if (projection != void 0) {
             return this.buildColumn(this.builderProjection(projection, column, args), alias);
         }
         return this.buildColumn(column, alias);
@@ -314,7 +366,7 @@ export class ProjectionBuilder<T> {
 
     private buildColumn(
         column: string,
-        alias: string = column,
+        alias: string = this.defaultAliasAs(column),
     ): ProjectionCompiled {
         if (alias === ProjectionBuilder.WILDCARD) {
             return new ProjectionCompiled(column, []);

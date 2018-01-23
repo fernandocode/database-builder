@@ -8,7 +8,7 @@ import { WhereBuilder } from "../where-builder";
 import { QueryCompilable } from "../../core/query-compilable";
 import { OrderBy } from "../../core/enums/order-by";
 import { WhereCompiled } from "../where-compiled";
-import { JoinQueryBuilder } from "./join-query-builder";
+// import { JoinQueryBuilder } from "./join-query-builder";
 import { JoinType } from "../enums/join-type";
 import { SqlAndParams } from "../sql-and-params";
 import { ProjectionCompiled } from "../projection-compiled";
@@ -44,7 +44,7 @@ export class QueryBuilder<T> implements QueryCompilable {
     private _tablename: string;
     private readonly _alias: string;
 
-    constructor(private _typeT: new () => T, alias: string = void 0, enableLog: boolean = true) {
+    constructor(protected _typeT: new () => T, alias: string = void 0, enableLog: boolean = true) {
         this._tablename = _typeT.name;
         if (!alias) {
             alias = this.createUniqueAlias(this.defaultAlias(_typeT));
@@ -109,9 +109,21 @@ export class QueryBuilder<T> implements QueryCompilable {
         return this;
     }
 
+    /**
+     * @deprecated Use `select`
+     * @param projectionCallback 
+     */
     public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): QueryBuilder<T> {
-        const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this.alias);
-        projectionCallback(instanceProjection);
+        return this.select(projectionCallback);
+        // const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this.alias);
+        // projectionCallback(instanceProjection);
+        // this.compileProjection(instanceProjection.compile());
+        // return this;
+    }
+
+    public select(selectCallback: (select: ProjectionBuilder<T>) => void): QueryBuilder<T> {
+        const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
+        selectCallback(instanceProjection);
         this.compileProjection(instanceProjection.compile());
         return this;
     }
@@ -171,6 +183,10 @@ export class QueryBuilder<T> implements QueryCompilable {
             params: sqlBase.params.concat(this._joinParams.concat(this._whereCompiled.params)),
             query: `${sqlBase.sql}${buildWhere()}${buildGroupBy()}${buildOrderBy()}${this._limit}`,
         });
+    }
+
+    protected createProjectionBuilder(): ProjectionBuilder<T>{
+        return new ProjectionBuilder(this._typeT, this.alias)
     }
 
     private createUniqueAlias(aliasProposed: string): string {
@@ -270,5 +286,45 @@ export class QueryBuilder<T> implements QueryCompilable {
             return typeT.name.substring(0, 3);
         }
         return typeT.name;
+    }
+}
+
+export class JoinQueryBuilder<T> extends QueryBuilder<T> {
+    
+    private readonly _onWhere: WhereBuilder<T>;
+    public get onWhere(): WhereBuilder<T> {
+        return this._onWhere;
+    }
+
+    constructor(
+        typeT: new () => T,
+        onWhereCallback: (where: WhereBuilder<T>) => void,
+        public type: JoinType = JoinType.LEFT,
+        alias: string = void 0,
+        enableLog: boolean = true,
+    ) {
+        super(typeT, alias, enableLog);
+
+        this._onWhere = new WhereBuilder(typeT, this.alias);
+        onWhereCallback(this._onWhere);
+    }
+
+    public join<TJoin>(
+        typeTJoin: new () => TJoin,
+        onWhereCallback: (where: WhereBuilder<TJoin>) => void,
+        joinCallback: (joinQuery: JoinQueryBuilder<TJoin>) => void,
+    ): QueryBuilder<T> {
+        throw new Error("Not allowed to add a join inside another join. Please add the joins only in the root query.");
+    }
+
+    public limit(
+        limit: number,
+    ): QueryBuilder<T> {
+        throw new Error("Not allowed to specify limit in join query.");
+    }
+
+    // Para adicionar alias da tabela no apelido da projeção padrão
+    protected createProjectionBuilder(): ProjectionBuilder<T>{
+        return new ProjectionBuilder(this._typeT, this.alias, true)
     }
 }
