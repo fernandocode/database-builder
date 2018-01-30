@@ -1,16 +1,18 @@
 {
   "name": "database-builder",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Framework to assist in database manipulation (DDL and CRUD)",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "scripts": {
-    "test": " tsc & mocha src/**/*.spec.js",
+    "test": "tsc & mocha src/**/*.spec.js",
+    "test-grep": "tsc & mocha src/**/*.spec.js --grep",
+    "test-single": "tsc & mocha src/**/*.spec.js --grep Mapper --debug-brk",
     "test-debug": "mocha -r ts-node/register src/**/*.spec.ts --debug-brk"
   },
   "dependencies": {
     "moment": "2.20.1",
-    "lambda-expression": "0.1.1"
+    "lambda-expression": "0.1.2"
   },
   "devDependencies": {
     "@types/chai": "^4.1.1",

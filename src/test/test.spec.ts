@@ -1,3 +1,7 @@
+import { Regiao } from './models/regiao';
+import { SubRegiao } from './models/sub-regiao';
+import { Uf } from './models/uf';
+import { Classificacao } from './models/classificacao';
 import { ProjectionCompiled } from './../crud/projection-compiled';
 import { Projection } from './../crud/enums/projection';
 import { Query } from './../crud/query/query';
@@ -5,6 +9,8 @@ import { Cliente } from './models/cliente';
 import { expect, assert } from "chai";
 import { Cidade } from './models/cidade';
 import { Operator } from '../crud/enums/operator';
+import { Crud, Insert } from '../index';
+import { MappersTable } from './mappers-table';
 
 describe("Query method", () => {
 
@@ -136,5 +142,42 @@ describe("Query method", () => {
     });
 
     // TODO: query from query
+
+
+});
+
+describe("Mapper", () => {
+    let clienteToSave = <Cliente>{
+        id: 1,
+        razaoSocial: "Razão",
+        apelido: "Apelido",
+        cidade: <Cidade>{
+            id: 2,
+            nome: "Cidade",
+            uf: <Uf>{
+                id: "SC",
+                nome: "Santa Catarina"
+            },
+            subRegiao: <SubRegiao>{
+                id: 4,
+                nome: "Sub Região",
+                regiao: <Regiao>{
+                    id: 5,
+                    nome: "Região"
+                }
+            },
+        },
+        classificacao: <Classificacao>{
+            id: 3,
+            descricao: "Top"
+        },
+        desativo: false
+    };
+
+    it("Test mapper insert", () => {
+        const result = new Insert(Cliente, clienteToSave, new MappersTable().clienteMapper).compile();
+        expect(result.params.toString()).to.equal([1, 'Razão', 'Apelido', false, 2, 3].toString());
+        expect(result.query).to.equal("INSERT INTO Cliente (id, razaoSocial, apelido, desativo, cidade_id, classificacao_id) VALUES (?, ?, ?, ?, ?, ?)");
+    });
 
 });

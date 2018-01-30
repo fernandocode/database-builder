@@ -1,3 +1,4 @@
+import { Utils } from './../../core/utils';
 import { InsertColumnsBuilder } from './insert-columns-builder';
 import { MetadataTable } from "./../../metadata-table";
 import { CrudBaseBuilder } from "../crud-base-builder";
@@ -27,9 +28,11 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
 
         return {
             params: this.getColumnsCompiled().params,
-            sql: `INSERT INTO ${this._tablename}
-            (${this.getColumnsCompiled().columns.join(", ")})
-            VALUES (${parameterValues.join(", ")})`,
+            sql: Utils.normalizeSqlString(
+                `INSERT INTO ${this._tablename}
+                    (${this.getColumnsCompiled().columns.join(", ")})
+                    VALUES (${parameterValues.join(", ")})`
+            ),
         };
     }
 

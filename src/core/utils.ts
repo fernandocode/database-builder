@@ -116,6 +116,10 @@ export class Utils {
         return isNameColumn.test(column);
     }
 
+    public static normalizeSqlString(inputSql: string): string{
+        return inputSql.replace(/\s+/g, ' ').trim();
+    }
+
     private static getExpressionUtils(): ExpressionUtils {
         return this._expressionUtils = this._expressionUtils ? this._expressionUtils : new ExpressionUtils();
     }
