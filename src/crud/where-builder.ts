@@ -404,7 +404,7 @@ export class WhereBuilder<T> {
             case[Condition.Not, Condition.Between].toString():
                 // ${column} BETWEEN ? AND ?
                 if (column2.length === 2) {
-                    return `${column1} ${this.builderConditions(conditions)} ${column2[0]} ${WhereBuilder.AND} ${column2[0]}`;
+                    return `${column1} ${this.builderConditions(conditions)} ${column2[0]} ${WhereBuilder.AND} ${column2[1]}`;
                 }
                 throw new Error(`Length (${column2.length}) parameter to '${conditions}' condition incorrect!`);
             case[Condition.In].toString():
