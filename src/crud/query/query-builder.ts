@@ -12,6 +12,7 @@ import { WhereCompiled } from "../where-compiled";
 import { JoinType } from "../enums/join-type";
 import { SqlAndParams } from "../sql-and-params";
 import { ProjectionCompiled } from "../projection-compiled";
+import { LambdaExpression } from "lambda-expression";
 
 let NEXT_VALUE_ALIAS: number = 0;
 
@@ -105,6 +106,13 @@ export class QueryBuilder<T> implements QueryCompilable {
     public where(whereCallback: (where: WhereBuilder<T>) => void): QueryBuilder<T> {
         const instanceWhere: WhereBuilder<T> = this.createWhere();
         whereCallback(instanceWhere);
+        this.compileWhere(instanceWhere.compile());
+        return this;
+    }
+
+    public whereExp(expression: LambdaExpression<T>): QueryBuilder<T> {
+        const instanceWhere: WhereBuilder<T> = this.createWhere();
+        instanceWhere.expression(expression);
         this.compileWhere(instanceWhere.compile());
         return this;
     }

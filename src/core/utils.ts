@@ -1,12 +1,15 @@
+import { ValueTypeToParse } from './utils';
+import { LambdaMetadata } from './lambda-metadata';
 import { WhereBuilder } from "./../crud/where-builder";
 import { DatabaseHelper } from "./../database-helper";
 import { ProjectionBuilder } from "./../crud/projection-builder";
-import { Expression, ExpressionUtils } from "lambda-expression";
+import { Expression, ExpressionUtils, LambdaExpression, LambdaColumnMetadata } from "lambda-expression";
 import * as moment from "moment";
 import { ExpressionOrColumnEnum } from "./enums/expression-or-column-enum";
 import { FieldType } from "./enums/field-type";
 import { ColumnType } from "./enums/column-type";
 import { ProjectionCompiled } from "../crud/projection-compiled";
+import { Condition } from "../crud/enums/condition";
 
 export type ValueType = number | string | boolean;
 export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
@@ -40,6 +43,26 @@ export class Utils {
 
     public static isBoolean(value: any): boolean {
         return this.is(value, "boolean");
+    }
+
+    public static isOnlyNumber(value: any): boolean {
+        return /^[0-9]*$/.test(value)
+    }
+
+    public static isStartWithNumber(value: any): boolean {
+        return /^[0-9]/.test(value)
+    }
+
+    public static isValueNumber(value: any): boolean {
+        return this.isNumber(value) || this.isOnlyNumber(value);
+    }
+
+    public static isValueBoolean(value: any): boolean {
+        return this.isBoolean(value) || this.isReservedBoolean(value);
+    }
+
+    public static isReservedBoolean(value: any): boolean {
+        return value === "true" || value === "false";
     }
 
     public static isFunction(value: any): boolean {
@@ -111,13 +134,105 @@ export class Utils {
         return this.getDatabaseHelper().parseToColumnType(type);
     }
 
-    public static isNameColumn(column: string): boolean {
-        const isNameColumn = /^[a-zA-Z0-9_\*]*$/;
-        return isNameColumn.test(column);
+    private static isColumnReservedNameOrNotAllowed(columnName: string): boolean {
+        return this.isStartWithNumber(columnName) || this.isReservedBoolean(columnName)
     }
 
-    public static normalizeSqlString(inputSql: string): string{
+    public static isNameColumn(column: string): boolean {
+        const isNameColumn = /^[a-zA-Z0-9_\*]*$/;
+        return isNameColumn.test(column) && !this.isColumnReservedNameOrNotAllowed(column);
+    }
+
+    public static isValue(value: any): boolean {
+        return !this.isNameColumn(value) &&
+            (
+                this.isValueNumber(value) || this.isString(value) || this.isValueBoolean(value)
+                // this.isValueType(value)
+                || this.isDate(value)
+                || this.isMoment(value)
+                // || this.isObject(value)
+            );
+    }
+
+    public static normalizeSqlString(inputSql: string): string {
         return inputSql.replace(/\s+/g, ' ').trim();
+    }
+
+    public static getLambdaMetadata<T>(expression: LambdaExpression<T>): LambdaMetadata {
+        let columnMetadata = this.getLambdaColumnMetadata(expression);
+        return <LambdaMetadata>{
+            left: columnMetadata.columnLeft,
+            condition: this.conditionSql(columnMetadata),
+            right: columnMetadata.columnRight,
+        }
+    }
+
+    public static clearParam(param: ValueTypeToParse): ValueTypeToParse {
+        if (Utils.isString(param)) {
+            if(Utils.isOnlyNumber(param)){
+                return +param;
+            }
+            if(Utils.isReservedBoolean(param)){
+                return param === 'true'; 
+            }
+            // remove possiveis " ou ' (aspas duplas ou simples) no inicio ou fim de uma string de valor de parametro
+            return (<string>param).replace(/(^["']|["']$)/mg, "");
+        }
+        return param;
+    }
+
+    private static getLambdaColumnMetadata<T>(expression: LambdaExpression<T>): LambdaColumnMetadata {
+        return this.getExpressionUtils().getColumnByLambdaExpression(expression);
+    }
+
+    private static conditionSql(metadata: LambdaColumnMetadata): Condition[] {
+        switch (metadata.operator) {
+            case '==':
+            case '===':
+                if (this.isEquivalentNullExpression(metadata.columnRight)) {
+                    return [Condition.IsNull]
+                }
+                return [Condition.Equal];
+            case '>':
+                return [Condition.Great];
+            case '>=':
+                return [Condition.GreatAndEqual];
+            case '<':
+                return [Condition.Less];
+            case '<=':
+                return [Condition.LessAndEqual];
+            case '!':
+                return [Condition.Not];
+            case '!=':
+            case '!==':
+                if (this.isEquivalentNullExpression(metadata.columnRight)) {
+                    return [Condition.Not, Condition.IsNull]
+                }
+                return [Condition.Not, Condition.Equal];
+            case 'XX':
+                // TODO: not implemented
+                return [Condition.Between];
+            case 'XXX':
+                // TODO: not implemented
+                return [Condition.In];
+            // case '':
+            // return Condition.
+            default:
+                throw `Not found condition (${metadata.operator})`
+        }
+    }
+
+    private static isEquivalentNullExpression(value: string): boolean {
+        switch (value) {
+            case 'null':
+            case 'void 0':
+            case 'void':
+            case 'undefined':
+            case 'nil':
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static getExpressionUtils(): ExpressionUtils {

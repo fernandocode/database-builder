@@ -1,5 +1,6 @@
+import { LambdaMetadata } from './../core/lambda-metadata';
 import { DatabaseHelper } from "./../database-helper";
-import { Expression, ExpressionUtils } from "lambda-expression";
+import { Expression, ExpressionUtils, LambdaExpression } from "lambda-expression";
 import { ExpressionOrColumn, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
@@ -14,7 +15,8 @@ export class WhereBuilder<T> {
     private _where: string = "";
     private readonly _params: ValueType[] = [];
 
-    private _pendingCondition: Condition = void 0;
+    private _pendingConditions: Condition[] = [];
+    // private _pendingCondition: Condition = void 0;
     private _pendingAndOr: string = WhereBuilder.AND;
 
     private readonly _databaseHelper: DatabaseHelper;
@@ -27,7 +29,8 @@ export class WhereBuilder<T> {
     }
 
     public not(): WhereBuilder<T> {
-        this._pendingCondition = Condition.Not;
+        this._pendingConditions.push(Condition.Not);
+        // this._pendingCondition = Condition.Not;
         return this;
     }
 
@@ -60,7 +63,7 @@ export class WhereBuilder<T> {
         column: string,
     ): WhereBuilder<T> {
         this.buildWhere(
-            Condition.Equal,
+            [Condition.Equal],
             this.addAlias(Utils.getColumn(expression)),
             column,
         );
@@ -217,7 +220,7 @@ export class WhereBuilder<T> {
     ): WhereBuilder<T> {
         const compiled = query.compile();
         this.buildWhere(
-            Condition.In,
+            [Condition.In],
             this.addAlias(Utils.getColumn(expression)),
             compiled.query);
         this.addParam(compiled.params);
@@ -229,6 +232,24 @@ export class WhereBuilder<T> {
             params: this._params,
             where: this._where,
         };
+    }
+
+    public expression(expression: LambdaExpression<T>): WhereBuilder<T> {
+        let metadata = Utils.getLambdaMetadata(expression);
+        this.buildWhereMetadata(metadata);
+        return this;
+    }
+
+    private buildWhereMetadata(metadata: LambdaMetadata) {
+        if (Utils.isValue(metadata.left)) {
+            this.addParam(metadata.left);
+            metadata.left = "?";
+        }
+        if (Utils.isValue(metadata.right)) {
+            this.addParam(metadata.right);
+            metadata.right = "?";
+        }
+        this.buildWhere(metadata.condition, this.addAlias(metadata.left), this.addAlias(metadata.right));
     }
 
     private addParam(
@@ -247,7 +268,8 @@ export class WhereBuilder<T> {
         param: ValueTypeToParse,
     ) {
         this._params.push(
-            this._databaseHelper.parseToValueType(param),
+            this._databaseHelper.parseToValueType(Utils.clearParam(param)),
+            // this._databaseHelper.parseToValueType(param),
         );
     }
 
@@ -255,7 +277,7 @@ export class WhereBuilder<T> {
         condition: Condition,
         expression: ExpressionOrColumn<T>,
         param: ValueTypeToParse | ValueTypeToParse[],
-        ) {
+    ) {
         this.buildWhereWithParameter(condition, Utils.getColumn(expression), param);
     }
 
@@ -271,7 +293,7 @@ export class WhereBuilder<T> {
                 (column2 as string[]).push("?");
             });
         }
-        this.buildWhere(condition, this.addAlias(column), column2);
+        this.buildWhere([condition], this.addAlias(column), column2);
         this.addParam(param);
     }
 
@@ -289,61 +311,128 @@ export class WhereBuilder<T> {
         expression1: ExpressionOrColumn<T>,
         expression2: ExpressionOrColumn<T>,
     ) {
-        this.buildWhere(condition,
+        this.buildWhere([condition],
             this.addAlias(Utils.getColumn(expression1)),
             expression2 ? this.addAlias(Utils.getColumn(expression2)) : void 0,
         );
     }
 
     private buildWhere(
-        condition: Condition,
+        conditions: Condition[],
         column1: string,
         column2: string | string[],
-        ) {
+    ) {
         this.checkWhere();
-        this._where += this.createWhere(condition, column1, column2);
+        this._where += this.createWhere(conditions, column1, column2);
     }
+    // private buildWhere(
+    //     condition: Condition,
+    //     column1: string,
+    //     column2: string | string[],
+    // ) {
+    //     this.checkWhere();
+    //     this._where += this.createWhere(condition, column1, column2);
+    // }
 
     private createWhere(
-        condition: Condition,
+        conditions: Condition[],
         column1: string,
         column2: string | string[],
-        ) {
-        const pendingCondition = this._pendingCondition;
-        this._pendingCondition = void 0;
-        const appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
-        if (appendCondition.appended) {
-            return this.buildCondition(appendCondition.condition as Condition, column1, column2);
-        }
-        return `${pendingCondition}(${this.buildCondition(appendCondition.condition as Condition, column1, column2)})`;
+    ) {
+        return this.buildConditions(conditions, column1, column2)
+        // const pendingCondition = this._pendingCondition;
+        // this._pendingCondition = void 0;
+        // const appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
+        // if (appendCondition.appended) {
+        //     return this.buildCondition(appendCondition.condition as Condition, column1, column2);
+        // }
+        // return `${pendingCondition}(${this.buildCondition(appendCondition.condition as Condition, column1, column2)})`;
     }
+    // private createWhere(
+    //     condition: Condition,
+    //     column1: string,
+    //     column2: string | string[],
+    // ) {
+    //     const pendingCondition = this._pendingCondition;
+    //     this._pendingCondition = void 0;
+    //     const appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
+    //     if (appendCondition.appended) {
+    //         return this.buildCondition(appendCondition.condition as Condition, column1, column2);
+    //     }
+    //     return `${pendingCondition}(${this.buildCondition(appendCondition.condition as Condition, column1, column2)})`;
+    // }
 
-    private buildCondition(
-        condition: Condition,
+    // private buildCondition(
+    //     condition: Condition,
+    //     column1: string,
+    //     column2: string | string[],
+    // ) {
+    //     // new scope
+    //     if (!condition) {
+    //         return `(${column1})`;
+    //     }
+    //     switch (condition) {
+    //         case Condition.Between:
+    //             // ${column} BETWEEN ? AND ?
+    //             if (column2.length === 2) {
+    //                 return `${column1} ${condition} ${column2[0]} ${WhereBuilder.AND} ${column2[0]}`;
+    //             }
+    //             throw new Error(`Length (${column2.length}) parameter to '${condition}' condition incorrect!`);
+    //         case Condition.In:
+    //         case this.buildConditionNotIn():
+    //             // ${column} IN (?, ?, ...)
+    //             return `${column1} ${condition} (${column2})`.trim();
+    //         default:
+    //             if (column2) {
+    //                 return `${column1} ${condition} ${column2}`.trim();
+    //             }
+    //             return `${column1} ${condition}`.trim();
+    //     }
+    // }
+
+    private buildConditions(
+        conditions: Condition[],
         column1: string,
         column2: string | string[],
-        ) {
+    ): string {
         // new scope
-        if (!condition) {
+        if (!conditions) {
             return `(${column1})`;
         }
-        switch (condition) {
-            case Condition.Between:
+        switch (conditions.toString()) {
+            case[Condition.Between].toString():
+            case[Condition.Not, Condition.Between].toString():
                 // ${column} BETWEEN ? AND ?
                 if (column2.length === 2) {
-                    return `${column1} ${condition} ${column2[0]} ${WhereBuilder.AND} ${column2[0]}`;
+                    return `${column1} ${this.builderConditions(conditions)} ${column2[0]} ${WhereBuilder.AND} ${column2[0]}`;
                 }
-                throw new Error(`Length (${column2.length}) parameter to '${condition}' condition incorrect!`);
-            case Condition.In:
-            case this.buildConditionNotIn():
+                throw new Error(`Length (${column2.length}) parameter to '${conditions}' condition incorrect!`);
+            case[Condition.In].toString():
+            case[Condition.Not, Condition.In].toString():
                 // ${column} IN (?, ?, ...)
-                return `${column1} ${condition} (${column2})`.trim();
+                return `${column1} ${this.builderConditions(conditions)} (${column2})`.trim();
+            case[Condition.Not, Condition.IsNull].toString():
+                return `${column1} IS NOT NULL`.trim();
+            case[Condition.Not, Condition.Equal].toString():
+                return `${column1} <> ${column2}`.trim();
+            case[Condition.Not, Condition.Great].toString():
+                return this.buildConditions([Condition.LessAndEqual], column1, column2);
+            case[Condition.Not, Condition.GreatAndEqual].toString():
+                return this.buildConditions([Condition.Less], column1, column2);
+            case[Condition.Not, Condition.Less].toString():
+                return this.buildConditions([Condition.GreatAndEqual], column1, column2);
+            case[Condition.Not, Condition.LessAndEqual].toString():
+                return this.buildConditions([Condition.Great], column1, column2);
             default:
                 if (column2) {
-                    return `${column1} ${condition} ${column2}`.trim();
+                    return `${column1} ${this.builderConditions(conditions)} ${column2}`.trim();
                 }
-                return `${column1} ${condition}`.trim();
+                return `${column1} ${this.builderConditions(conditions)}`.trim();
         }
+    }
+
+    private builderConditions(conditions: Condition[]): string {
+        return conditions.join(" ");
     }
 
     private checkWhere() {
@@ -351,68 +440,68 @@ export class WhereBuilder<T> {
         this._pendingAndOr = WhereBuilder.AND;
     }
 
-    private buildConditionNotIn() {
-        return `${Condition.Not} ${Condition.In}`;
-    }
+    // private buildConditionNotIn() {
+    //     return `${Condition.Not} ${Condition.In}`;
+    // }
 
-    private checkAppendPendingCondition(
-        condition: Condition,
-        pendingCondition: Condition,
-    ): { condition: string, appended: boolean } {
-        if (!pendingCondition) {
-            return {
-                appended: true,
-                condition,
-            };
-        } else if (pendingCondition === Condition.Not) {
-            switch (condition) {
-                case Condition.Equal:
-                    return {
-                        appended: true,
-                        condition: "<>",
-                    };
-                case Condition.Great:
-                    return {
-                        appended: true,
-                        condition: Condition.LessAndEqual,
-                    };
-                case Condition.GreatAndEqual:
-                    return {
-                        appended: true,
-                        condition: Condition.Less,
-                    };
-                case Condition.IsNull:
-                    return {
-                        appended: true,
-                        condition: "IS NOT NULL",
-                    };
-                case Condition.Less:
-                    return {
-                        appended: true,
-                        condition: Condition.GreatAndEqual,
-                    };
-                case Condition.LessAndEqual:
-                    return {
-                        appended: true,
-                        condition: Condition.Great,
-                    };
-                case Condition.In:
-                    return {
-                        appended: true,
-                        condition: this.buildConditionNotIn(),
-                    };
-                case Condition.Not:
-                    throw new Error("Not condition unavaliable to 'Not' pre condition");
-                case Condition.Between:
-                default:
-                    return {
-                        appended: false,
-                        condition,
-                    };
-            }
-        }
-        throw new Error(`Pre condition ${condition} not supported`);
-    }
+    // private checkAppendPendingCondition(
+    //     condition: Condition,
+    //     pendingCondition: Condition,
+    // ): { condition: string, appended: boolean } {
+    //     if (!pendingCondition) {
+    //         return {
+    //             appended: true,
+    //             condition,
+    //         };
+    //     } else if (pendingCondition === Condition.Not) {
+    //         switch (condition) {
+    //             case Condition.Equal:
+    //                 return {
+    //                     appended: true,
+    //                     condition: "<>",
+    //                 };
+    //             case Condition.Great:
+    //                 return {
+    //                     appended: true,
+    //                     condition: Condition.LessAndEqual,
+    //                 };
+    //             case Condition.GreatAndEqual:
+    //                 return {
+    //                     appended: true,
+    //                     condition: Condition.Less,
+    //                 };
+    //             case Condition.IsNull:
+    //                 return {
+    //                     appended: true,
+    //                     condition: "IS NOT NULL",
+    //                 };
+    //             case Condition.Less:
+    //                 return {
+    //                     appended: true,
+    //                     condition: Condition.GreatAndEqual,
+    //                 };
+    //             case Condition.LessAndEqual:
+    //                 return {
+    //                     appended: true,
+    //                     condition: Condition.Great,
+    //                 };
+    //             case Condition.In:
+    //                 return {
+    //                     appended: true,
+    //                     condition: this.buildConditionNotIn(),
+    //                 };
+    //             case Condition.Not:
+    //                 throw new Error("Not condition unavaliable to 'Not' pre condition");
+    //             case Condition.Between:
+    //             default:
+    //                 return {
+    //                     appended: false,
+    //                     condition,
+    //                 };
+    //         }
+    //     }
+    //     throw new Error(`Pre condition ${condition} not supported`);
+    // }
 
     private compileScope(
         compiled: WhereCompiled,

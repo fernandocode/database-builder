@@ -12,6 +12,7 @@ import { QueryCompilable } from "./../../core/query-compilable";
 import { OrderBy } from "../../core/enums/order-by";
 // import { JoinQueryBuilder } from "./join-query-builder";
 import { JoinType } from "../enums/join-type";
+import { LambdaExpression } from "lambda-expression";
 
 export class Query<T> implements QueryCompilable {
 
@@ -61,6 +62,11 @@ export class Query<T> implements QueryCompilable {
 
     public where(where: (whereCallback: WhereBuilder<T>) => void): Query<T> {
         this._queryBuilder.where(where);
+        return this;
+    }
+
+    public whereExp(expression: LambdaExpression<T>): Query<T> {
+        this._queryBuilder.whereExp(expression);
         return this;
     }
 
