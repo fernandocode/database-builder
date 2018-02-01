@@ -71,7 +71,7 @@ describe("Query method", () => {
                 select.add(x => x.desativo, 'inativo')
             })
             .where(where => {
-                where.equalValue(x => x.razaoSocial, "ABC");
+                where.not().equalValue(x => x.razaoSocial, "ABC");
                 where.greatAndEqualValue(x => x.id, 10);
             })
             .join(
@@ -91,7 +91,7 @@ describe("Query method", () => {
         expect(result.params.length).to.equal(2);
         expect(result.params[0]).to.equal("ABC");
         expect(result.params[1]).to.equal(10);
-        expect(result.query).to.equal(`SELECT cli.cidade_id AS cidade_id, cli.apelido AS apelido, cli.razaoSocial AS razaoSocial, cli.id AS id, cli.desativo AS inativo, cid.nome AS cidade_nome, cid.id AS cid_id FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.id = cli.cidade_id) WHERE cli.razaoSocial = ? AND cli.id >= ?`);
+        expect(result.query).to.equal(`SELECT cli.cidade_id AS cidade_id, cli.apelido AS apelido, cli.razaoSocial AS razaoSocial, cli.id AS id, cli.desativo AS inativo, cid.nome AS cidade_nome, cid.id AS cid_id FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.id = cli.cidade_id) WHERE cli.razaoSocial <> ? AND cli.id >= ?`);
     });
 
     it("test select with projection case", () => {

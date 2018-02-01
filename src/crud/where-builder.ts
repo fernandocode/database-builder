@@ -339,7 +339,9 @@ export class WhereBuilder<T> {
         column1: string,
         column2: string | string[],
     ) {
-        return this.buildConditions(conditions, column1, column2)
+        let conditionsArray = this._pendingConditions.concat(conditions);
+        this._pendingConditions = [];
+        return this.buildConditions(conditionsArray, column1, column2)
         // const pendingCondition = this._pendingCondition;
         // this._pendingCondition = void 0;
         // const appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
