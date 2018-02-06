@@ -24,7 +24,7 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
     public where(
         whereCallback: (where: WhereBuilder<T>) => void,
     ): UpdateBuilder<T> {
-        return super.whereBase(whereCallback, this);
+        return super.whereBase(whereCallback, this, false);
     }
 
     protected buildBase(): CrudCompiled {
