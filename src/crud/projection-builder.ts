@@ -1,3 +1,4 @@
+import { MapperTable } from './../mapper-table';
 import { QueryCompiled } from "./../core/query-compiled";
 import { WhereBuilder } from "./where-builder";
 import { ExpressionOrColumn, ProjectionOrValue, Utils, ValueType, ValueTypeToParse, ProjectionCompiledOrValue } from "./../core/utils";
@@ -7,6 +8,7 @@ import { WhereCompiled } from "./where-compiled";
 import { ProjectionCompiled } from "./projection-compiled";
 import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";
+import { MetadataTable } from '../metadata-table';
 
 export class ProjectionBuilder<T> {
     private static readonly WILDCARD = "*";
@@ -21,6 +23,19 @@ export class ProjectionBuilder<T> {
 
     public all() {
         this.buildProjection(void 0, ProjectionBuilder.WILDCARD);
+    }
+
+    public allByMap(metadade: MetadataTable<T>) {
+        this.selectAllColumns(metadade.mapperTable)
+    }
+    
+    private selectAllColumns(mapper: MapperTable): void {
+        for (const key in mapper.columns) {
+            if (mapper.columns.hasOwnProperty(key)) {
+                const column = mapper.columns[key];
+                this.add(column.column);
+            }
+        }
     }
 
     public create(): ProjectionBuilder<T> {
@@ -347,6 +362,8 @@ export class ProjectionBuilder<T> {
     }
 
     private defaultAliasAs(column: string): string {
+        if (column == ProjectionBuilder.WILDCARD)
+            return "";
         return this._addAliasTableToAlias
             ? `${this._aliasTable}_${column}`
             : column;
@@ -368,9 +385,10 @@ export class ProjectionBuilder<T> {
         column: string,
         alias: string = this.defaultAliasAs(column),
     ): ProjectionCompiled {
-        if (alias === ProjectionBuilder.WILDCARD) {
-            return new ProjectionCompiled(column, []);
-        }
+        // defaultAliasAs check WILDCARD
+        // if (alias === ProjectionBuilder.WILDCARD) {
+        //     return new ProjectionCompiled(column, []);
+        // }
         if (alias && alias.length) {
             return new ProjectionCompiled(`${column} AS ${alias}`, []);
         }

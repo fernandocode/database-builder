@@ -12,6 +12,8 @@ import { Operator } from '../crud/enums/operator';
 import { Crud, Insert } from '../index';
 import { MappersTable } from './mappers-table';
 
+const mappersTable = new MappersTable();
+
 describe("Query method", () => {
 
     it("test simple select", () => {
@@ -68,7 +70,7 @@ describe("Query method", () => {
                     x => x.razaoSocial,
                     x => x.id
                 );
-                select.add(x => x.desativo, 'inativo')
+                select.add(x => x.desativo, 'inativo');
             })
             .where(where => {
                 where.not().equalValue(x => x.razaoSocial, "ABC");
@@ -81,7 +83,7 @@ describe("Query method", () => {
             join => {
                 join.select(select => {
                     select.add(x => x.nome, "cidade_nome");
-                    select.add(x => x.id)
+                    select.add(x => x.id) // cid_id
                 })
             }
             )
@@ -126,8 +128,7 @@ describe("Query method", () => {
                 onWhere.equal(x => x.id, query.ref(x => x.cidade.id)),
             join => {
                 join.select(select => {
-                    select.add(x => x.nome, "cidade_nome");
-                    select.add(x => x.id)
+                    select.all();
                 })
             }
             )
@@ -138,7 +139,30 @@ describe("Query method", () => {
         expect(result.params[0]).to.equal(1);
         expect(result.params[1]).to.equal("ABC");
         expect(result.params[2]).to.equal(10);
-        expect(result.query).to.equal(`SELECT cli.desativo AS inativo, CASE WHEN SUM(cli.classificacao_id) > ? THEN (SUM(cli.classificacao_id) * 2) ELSE 0 END AS classificacaoTest, cid.nome AS cidade_nome, cid.id AS cid_id FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.id = cli.cidade_id) WHERE cli.razaoSocial = ? AND cli.id >= ?`);
+        expect(result.query).to.equal(`SELECT cli.desativo AS inativo, CASE WHEN SUM(cli.classificacao_id) > ? THEN (SUM(cli.classificacao_id) * 2) ELSE 0 END AS classificacaoTest, cid.* FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.id = cli.cidade_id) WHERE cli.razaoSocial = ? AND cli.id >= ?`);
+    });
+
+
+
+    it("test select all by mapper", () => {
+        let query = new Query(Cliente);
+        query
+            .select(select => {
+                select.allByMap(mappersTable.getMapper(Cliente))
+            })
+            .join(Cidade,
+            onWhere =>
+                onWhere.equal(x => x.id, query.ref(x => x.cidade.id)),
+            join => {
+                join.select(select => {
+                    select.allByMap(mappersTable.getMapper(Cidade));
+                })
+            });
+
+        const result = query.compile();
+
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal(`SELECT cli.id AS id, cli.razaoSocial AS razaoSocial, cli.apelido AS apelido, cli.desativo AS desativo, cli.cidade_id AS cidade_id, cli.classificacao_id AS classificacao_id, cid.id AS cid_id, cid.nome AS cid_nome, cid.uf_id AS cid_uf_id, cid.subRegiao_id AS cid_subRegiao_id FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.id = cli.cidade_id)`);
     });
 
     // TODO: query from query
@@ -175,7 +199,7 @@ describe("Mapper", () => {
     };
 
     it("Test mapper insert", () => {
-        const result = new Insert(Cliente, clienteToSave, new MappersTable().clienteMapper).compile();
+        const result = new Insert(Cliente, clienteToSave, mappersTable.clienteMapper).compile();
         expect(result.params.toString()).to.equal([1, 'Razão', 'Apelido', false, 2, 3].toString());
         expect(result.query).to.equal("INSERT INTO Cliente (id, razaoSocial, apelido, desativo, cidade_id, classificacao_id) VALUES (?, ?, ?, ?, ?, ?)");
     });
