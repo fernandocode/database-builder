@@ -1,12 +1,12 @@
+import { QueryReadableBuilder } from "./query-readable-builder";
 import { QueryCompiled } from "./../../core/query-compiled";
-import { ResultExecuteSql } from "./../../core/result-execute-sql";
 import { MapperTable } from "./../../mapper-table";
 import { ProjectionBuilder } from "./../projection-builder";
 import { WhereBuilder } from "./../where-builder";
 import { Database } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
-import { QueryReadableBuilder } from "./query-readable-builder";
-import { QueryBuilder, JoinQueryBuilder } from "./query-builder";
+import { ResultExecuteSql } from "./../../core/result-execute-sql";
+import { JoinQueryBuilder, QueryBuilder } from "./query-builder";
 import { ExpressionOrColumn, ValueType } from "./../../core/utils";
 import { QueryCompilable } from "./../../core/query-compilable";
 import { OrderBy } from "../../core/enums/order-by";
@@ -72,7 +72,7 @@ export class Query<T> implements QueryCompilable {
 
     /**
      * @deprecated Use `select`
-     * @param projectionCallback 
+     * @param projectionCallback
      */
     public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): Query<T> {
         this._queryBuilder.projection(projectionCallback);

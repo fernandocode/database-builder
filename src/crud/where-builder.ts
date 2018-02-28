@@ -1,10 +1,10 @@
-import { LambdaMetadata } from './../core/lambda-metadata';
 import { DatabaseHelper } from "./../database-helper";
 import { Expression, ExpressionUtils, LambdaExpression } from "lambda-expression";
 import { ExpressionOrColumn, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
+import { LambdaMetadata } from "../core/lambda-metadata";
 
 // TODO: add LambdaExpression support in WhereBuilder
 export class WhereBuilder<T> {
@@ -55,8 +55,8 @@ export class WhereBuilder<T> {
 
     /**
      * @deprecated Use `equal`
-     * @param expression 
-     * @param column 
+     * @param expression
+     * @param column
      */
     public equalColumn(
         expression: ExpressionOrColumn<T>,
@@ -235,7 +235,7 @@ export class WhereBuilder<T> {
     }
 
     public expression(expression: LambdaExpression<T>): WhereBuilder<T> {
-        let metadata = Utils.getLambdaMetadata(expression);
+        const metadata = Utils.getLambdaMetadata(expression);
         this.buildWhereMetadata(metadata);
         return this;
     }
@@ -339,9 +339,9 @@ export class WhereBuilder<T> {
         column1: string,
         column2: string | string[],
     ) {
-        let conditionsArray = this._pendingConditions.concat(conditions);
+        const conditionsArray = this._pendingConditions.concat(conditions);
         this._pendingConditions = [];
-        return this.buildConditions(conditionsArray, column1, column2)
+        return this.buildConditions(conditionsArray, column1, column2);
         // const pendingCondition = this._pendingCondition;
         // this._pendingCondition = void 0;
         // const appendCondition = this.checkAppendPendingCondition(condition, pendingCondition);
@@ -398,7 +398,7 @@ export class WhereBuilder<T> {
         column2: string | string[],
     ): string {
         // new scope
-        if (!conditions) {
+        if (!conditions || (conditions.length === 1 && conditions[0] === void 0)) {
             return `(${column1})`;
         }
         switch (conditions.toString()) {

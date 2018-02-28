@@ -28,7 +28,11 @@
             "public-before-private",
             "static-before-instance",
             "variables-before-functions"
-        ]
+        ],
+        "arrow-parens": false,
+        "trailing-comma": false,
+        "max-line-length": false,
+        "object-literal-sort-keys": false
     },
     "linterOptions": {
         "exclude": [
