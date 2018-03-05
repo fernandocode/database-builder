@@ -1,3 +1,4 @@
+import { HavingBuilder } from "./../having-builder";
 import { QueryReadableBuilder } from "./query-readable-builder";
 import { QueryCompiled } from "./../../core/query-compiled";
 import { MapperTable } from "./../../mapper-table";
@@ -6,13 +7,17 @@ import { WhereBuilder } from "./../where-builder";
 import { Database } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
 import { ResultExecuteSql } from "./../../core/result-execute-sql";
-import { JoinQueryBuilder, QueryBuilder } from "./query-builder";
+import { QueryBuilder } from "./query-builder";
 import { ExpressionOrColumn, ValueType } from "./../../core/utils";
 import { QueryCompilable } from "./../../core/query-compilable";
 import { OrderBy } from "../../core/enums/order-by";
 // import { JoinQueryBuilder } from "./join-query-builder";
 import { JoinType } from "../enums/join-type";
 import { LambdaExpression } from "lambda-expression";
+import { JoinQueryBuilder } from "./join-query-builder";
+import { DatabaseBuilderError } from "../../core/errors";
+import { ProjectionsHelper } from "../../core/projections-helper";
+import { ColumnRef } from "../../core/column-ref";
 
 export class Query<T> implements QueryCompilable {
 
@@ -38,8 +43,12 @@ export class Query<T> implements QueryCompilable {
         return this._queryBuilder.alias;
     }
 
-    public ref(expression: ExpressionOrColumn<T>): string {
-        return this._queryBuilder.ref(expression);
+    // public ref(expression: ExpressionOrColumn<T>): string {
+    //     return this._queryBuilder.ref(expression);
+    // }
+
+    public ref2(expression: ExpressionOrColumn<T>): ColumnRef {
+        return this._queryBuilder.ref2(expression);
     }
 
     public from(query: QueryCompiled): Query<T> {
@@ -47,11 +56,13 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public join<TJoin>(typeTJoin: new () => TJoin,
-                       onWhere: (where: WhereBuilder<TJoin>) => void,
-                       join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
-                       type: JoinType = JoinType.LEFT,
-                       alias: string = void 0): Query<T> {
+    public join<TJoin>(
+        typeTJoin: new () => TJoin,
+        onWhere: (where: WhereBuilder<TJoin>) => void,
+        join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
+        type: JoinType = JoinType.LEFT,
+        alias: string = void 0
+    ): Query<T> {
         this._queryBuilder.join(typeTJoin, onWhere, join, type, alias);
         return this;
     }
@@ -80,12 +91,12 @@ export class Query<T> implements QueryCompilable {
     }
 
     public select(selectCallback: (select: ProjectionBuilder<T>) => void): Query<T> {
-        this._queryBuilder.projection(selectCallback);
+        this._queryBuilder.select(selectCallback);
         return this;
     }
 
-    public limit(limit: number): Query<T> {
-        this._queryBuilder.limit(limit);
+    public limit(limit: number, offset?: number): Query<T> {
+        this._queryBuilder.limit(limit, offset);
         return this;
     }
 
@@ -104,8 +115,11 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public groupBy(expression: ExpressionOrColumn<T>): Query<T> {
-        this._queryBuilder.groupBy(expression);
+    public groupBy(
+        expression: ExpressionOrColumn<T>,
+        havingCallback?: (having: HavingBuilder<T>, projection: ProjectionsHelper<T>) => void
+    ): Query<T> {
+        this._queryBuilder.groupBy(expression, havingCallback);
         return this;
     }
 
@@ -199,7 +213,7 @@ export class Query<T> implements QueryCompilable {
     private getDatabase(database: Database): Database {
         const result = (database ? database : this._database);
         if (!result) {
-            throw new Error("Database not specified in query. Call 'executeAndRead'.");
+            throw new DatabaseBuilderError("Database not specified in query. Call 'executeAndRead'.");
         }
         return result;
     }
@@ -207,7 +221,7 @@ export class Query<T> implements QueryCompilable {
     private getMetadata(metadata: MetadataTable<T>): MetadataTable<T> {
         const result = (metadata ? metadata : this._metadata);
         if (!result) {
-            throw new Error("MetadataTable not specified in query. Call 'executeAndRead'.");
+            throw new DatabaseBuilderError("MetadataTable not specified in query. Call 'executeAndRead'.");
         }
         return result;
     }

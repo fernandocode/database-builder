@@ -1,4 +1,4 @@
-import { UpdateColumnsBuilder } from './update-columns-builder';
+import { UpdateColumnsBuilder } from "./update-columns-builder";
 import { WhereBuilder } from "./../where-builder";
 import { Database } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";

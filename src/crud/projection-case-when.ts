@@ -1,3 +1,4 @@
+import { ProjectionsHelper } from "./../core/projections-helper";
 import { ProjectionOrValue, Utils, ValueType, ValueTypeToParse } from "../core/utils";
 import { CaseWhen } from "./enums/case-when";
 import { BuilderCompiled } from "../core/builder-compiled";
@@ -38,7 +39,11 @@ export class ProjectionCaseWhen<T> {
     }
 
     private projection(type: CaseWhen, projection: ProjectionOrValue<T>): ProjectionCaseWhen<T> {
-        if (Utils.isProjectionBuilder(projection)) {
+        if (Utils.isProjectionsHelper(projection)) {
+            const projectionCompiled = (projection as ProjectionsHelper<T>)._compiled();
+            this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
+            this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);
+        } else if (Utils.isProjectionBuilder(projection)) {
             const projectionCompiled = (projection as ProjectionBuilder<T>).compile();
             this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
             this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);

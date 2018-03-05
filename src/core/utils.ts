@@ -1,3 +1,5 @@
+import { Projection } from "./../crud/enums/projection";
+import { ExpressionOrValueEnum } from "./enums/expression-or-value-enum";
 import * as moment from "moment";
 import { ValueTypeToParse } from "./utils";
 import { WhereBuilder } from "./../crud/where-builder";
@@ -10,15 +12,23 @@ import { FieldType } from "./enums/field-type";
 import { ColumnType } from "./enums/column-type";
 import { ProjectionCompiled } from "../crud/projection-compiled";
 import { Condition } from "../crud/enums/condition";
+import { DatabaseBuilderError } from "./errors";
+import { ExpressionOrColumnOrProjectionEnum } from "./enums/expression-or-column-or-projection-enum";
+import { ProjectionsHelper } from "./projections-helper";
+import { ColumnParams } from "./column-params";
+import { ColumnRef } from "./column-ref";
+import { PlanRef } from "./plan-ref";
 
 export type ValueType = number | string | boolean;
 export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 
 export type ExpressionOrColumn<T> = Expression<T> | string;
 
-export type ProjectionOrValue<T> = ProjectionBuilder<T> | ValueTypeToParse;
+export type ExpressionOrValue<T> = Expression<T> | ValueTypeToParse | ColumnRef | ProjectionsHelper<T>;
 
-export type ProjectionCompiledOrValue = ProjectionCompiled | ValueTypeToParse;
+export type TypeProjection<T> = ProjectionsHelper<T> | ColumnRef | PlanRef;
+
+export type ProjectionOrValue<T> = ProjectionBuilder<T> | ProjectionsHelper<T> | ValueTypeToParse;
 
 export class Utils {
 
@@ -77,15 +87,19 @@ export class Utils {
         return moment.isMoment(value);
     }
 
-    public static isProjectionBuilder<T>(projectionCandidate: any): boolean {
+    public static isProjectionBuilder(projectionCandidate: any): boolean {
         return projectionCandidate instanceof ProjectionBuilder;
     }
 
-    public static isProjectionCompiled<T>(projectionCandidate: any): boolean {
+    public static isProjectionCompiled(projectionCandidate: any): boolean {
         return projectionCandidate instanceof ProjectionCompiled;
     }
 
-    public static isValueType<T>(value: ValueType): boolean {
+    public static isProjectionsHelper(projectionCandidate: any): boolean {
+        return projectionCandidate instanceof ProjectionsHelper;
+    }
+
+    public static isValueType(value: ValueType): boolean {
         return this.isNumber(value) || this.isString(value) || this.isBoolean(value);
     }
 
@@ -97,14 +111,82 @@ export class Utils {
         return whereCandidate instanceof WhereBuilder;
     }
 
-    public static expressionOrColumn<T>(value: ExpressionOrColumn<T>): ExpressionOrColumnEnum {
-        return this.isString(value) ? ExpressionOrColumnEnum.Column : ExpressionOrColumnEnum.Expression;
+    public static isColumnRef<T>(instance: any): boolean {
+        return instance instanceof ColumnRef;
+    }
+
+    public static isPlanRef<T>(instance: any): boolean {
+        return instance instanceof PlanRef;
+    }
+
+    public static expressionOrColumn<T>(
+        value: ExpressionOrColumn<T>
+    ): ExpressionOrColumnEnum {
+        return this.isString(value)
+            ? ExpressionOrColumnEnum.Column
+            : ExpressionOrColumnEnum.Expression;
+    }
+
+    public static expressionOrValue<T>(
+        value: ExpressionOrValue<T>
+    ): ExpressionOrValueEnum {
+        return this.isProjectionsHelper(value)
+            ? ExpressionOrValueEnum.Projection
+            : this.isColumnRef(value)
+                ? ExpressionOrValueEnum.Ref
+                : this.isValue(value)
+                    ? ExpressionOrValueEnum.Value
+                    : ExpressionOrValueEnum.Expression;
     }
 
     public static getColumn<T>(expression: ExpressionOrColumn<T>): string {
-        return this.expressionOrColumn(expression) === ExpressionOrColumnEnum.Expression
-            ? this.getExpressionUtils().getColumnByExpression(expression as Expression<T>)
-            : expression as string;
+        const type = this.expressionOrColumn(expression);
+        switch (type) {
+            case (ExpressionOrColumnEnum.Expression):
+                return this.getExpressionUtils().getColumnByExpression(expression as Expression<T>);
+            case (ExpressionOrColumnEnum.Column):
+                return expression as string;
+        }
+    }
+
+    public static getColumnValue<T>(expression: ExpressionOrValue<T>): ColumnParams {
+        const type = this.expressionOrValue(expression);
+        switch (type) {
+            case (ExpressionOrValueEnum.Expression):
+                return {
+                    column: this.getExpressionUtils().getColumnByExpression(expression as Expression<T>),
+                    params: []
+                };
+            case (ExpressionOrValueEnum.Ref):
+                return {
+                    column: (expression as ColumnRef).result(),
+                    params: []
+                };
+            case (ExpressionOrValueEnum.Value):
+                return {
+                    column: "?",
+                    params: [expression]
+                };
+            case (ExpressionOrValueEnum.Projection):
+                const compiled = this.resolveProjection(expression as ProjectionsHelper<T>);
+                return {
+                    column: compiled.projection,
+                    params: compiled.params
+                };
+        }
+    }
+
+    public static resolveProjection<T>(expression: TypeProjection<T>): ProjectionCompiled {
+        if (this.isProjectionsHelper(expression)) {
+            return (expression as ProjectionsHelper<T>)._compiled();
+        }
+        if (this.isColumnRef(expression)) {
+            return new ProjectionCompiled((expression as ColumnRef).result());
+        }
+        if (this.isPlanRef(expression)) {
+            return new ProjectionCompiled((expression as PlanRef).result());
+        }
+        return new ProjectionCompiled(expression + "");
     }
 
     public static getValue<T>(instance: any, expression: ExpressionOrColumn<T>): string {
@@ -143,10 +225,8 @@ export class Utils {
         return !this.isNameColumn(value) &&
             (
                 this.isValueNumber(value) || this.isString(value) || this.isValueBoolean(value)
-                // this.isValueType(value)
                 || this.isDate(value)
                 || this.isMoment(value)
-                // || this.isObject(value)
             );
     }
 
@@ -218,7 +298,7 @@ export class Utils {
             // case '':
             // return Condition.
             default:
-                throw new Error(`Not found condition (${metadata.operator})`);
+                throw new DatabaseBuilderError(`Not found condition (${metadata.operator})`);
         }
     }
 

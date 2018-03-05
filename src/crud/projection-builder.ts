@@ -1,126 +1,89 @@
-import { MapperTable } from './../mapper-table';
-import { QueryCompiled } from "./../core/query-compiled";
-import { WhereBuilder } from "./where-builder";
-import { ExpressionOrColumn, ProjectionOrValue, Utils, ValueType, ValueTypeToParse, ProjectionCompiledOrValue } from "./../core/utils";
 import { Expression, ExpressionUtils } from "lambda-expression";
+import { PlanRef } from "./../core/plan-ref";
+import { ProjectionsUtils } from "./../core/projections-utils";
 import { BuilderCompiled } from "../core/builder-compiled";
+import { MapperTable } from "./../mapper-table";
+import { WhereBuilder } from "./where-builder";
+import { ExpressionOrColumn, ProjectionOrValue, TypeProjection, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { ColumnRef } from "./../core/column-ref";
+import { QueryCompiled } from "./../core/query-compiled";
 import { WhereCompiled } from "./where-compiled";
 import { ProjectionCompiled } from "./projection-compiled";
 import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";
-import { MetadataTable } from '../metadata-table';
+import { MetadataTable } from "../metadata-table";
+import { ProjectionsHelper } from "../core/projections-helper";
 
 export class ProjectionBuilder<T> {
-    private static readonly WILDCARD = "*";
     private _projection: ProjectionCompiled = new ProjectionCompiled();
+
+    private readonly _projectionsUtils: ProjectionsUtils<T>;
 
     constructor(
         private _typeT: new () => T,
         private _aliasTable: string,
         private _addAliasTableToAlias: boolean = false
     ) {
+        this._projectionsUtils = new ProjectionsUtils(
+            _typeT, _aliasTable, _addAliasTableToAlias,
+            (projection: ProjectionCompiled) => this.applyProjection(projection)
+        );
     }
 
     public all() {
-        this.buildProjection(void 0, ProjectionBuilder.WILDCARD);
+        this.apply(ProjectionsUtils.WILDCARD);
     }
 
     public allByMap(metadade: MetadataTable<T>) {
-        this.selectAllColumns(metadade.mapperTable)
-    }
-    
-    private selectAllColumns(mapper: MapperTable): void {
-        for (const key in mapper.columns) {
-            if (mapper.columns.hasOwnProperty(key)) {
-                const column = mapper.columns[key];
-                this.add(column.column);
-            }
-        }
+        this.selectAllColumns(metadade.mapperTable);
     }
 
-    public create(): ProjectionBuilder<T> {
-        return new ProjectionBuilder(this._typeT, this._aliasTable);
+    public proj(): ProjectionsHelper<T> {
+        return new ProjectionsHelper(this._typeT, this._aliasTable, false);
     }
 
-    /**
-     * Group projection support
-     * Usage:
-     * @example
-     *  projection.group(
-     *      "sumColumn1AddColumn2",
-     *      projection.projection(Projection.Sum, projection.getColumn(x => x.column1)),
-     *      new ProjectionCompiled(Operator.Add),
-     *      projection.projection(void 0, projection.getColumn(x => x.column2)),
-     *  );
-     * // result: (SUM(column1) + column2) AS sumColumn1AddColumn2
-     * @param {string} alias
-     * @param {...Array<ProjectionCompiled>} projections
-     * @returns {ProjectionBuilder<T>}
-     * @memberof ProjectionBuilder
-     */
+    public col(column: string): ColumnRef {
+        return new ColumnRef(column, this._aliasTable);
+    }
+
+    public plan(value: any): PlanRef {
+        return new PlanRef(value);
+    }
+
+    // use `.proj()`
+    // public create(): ProjectionBuilder<T> {
+    //     return new ProjectionBuilder(this._typeT, this._aliasTable);
+    // }
+
     public group(
         alias: string,
-        ...projections: ProjectionCompiledOrValue[],
+        ...projections: Array<TypeProjection<T>>,
     ): ProjectionBuilder<T> {
-        const projectionsCompiled = new ProjectionCompiled();
-        projections.forEach((projection) => {
-
-            if (Utils.isProjectionCompiled(projection)) {
-                const projectionCompiled = projection as ProjectionCompiled;
-                projectionsCompiled.projection += `${projectionCompiled.projection} `;
-                projectionsCompiled.params = projectionsCompiled.params.concat(projectionCompiled.params);
-                // this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
-                // this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);
-            } else {
-                projectionsCompiled.projection += `${projection} `;
-                // this._whenBuilder.builder += ` ${type} ${Utils.getValueType(projection)}`;
-            }
-
-            // projectionsCompiled.projection += `${projection.projection} `;
-            // projectionsCompiled.params = projectionsCompiled.params.concat(projection.params);
-        });
-        projectionsCompiled.projection = projectionsCompiled.projection.trim();
-
-        this.buildProjection(Projection.BetweenParenthesis,
-            projectionsCompiled.projection, alias, projectionsCompiled.params);
-
+        const groupCompiled = this.proj().group(alias, ...projections)._compiled();
+        this.apply(
+            groupCompiled.projection,
+            [],
+            "",
+            groupCompiled.params
+        );
         return this;
     }
-    // public group(
-    //     alias: string,
-    //     ...projections: ProjectionCompiled[],
-    // ): ProjectionBuilder<T> {
-    //     const projectionCompiled = new ProjectionCompiled();
-    //     projections.forEach((projection) => {
-    //         projectionCompiled.projection += `${projection.projection} `;
-    //         projectionCompiled.params = projectionCompiled.params.concat(projection.params);
-    //     });
-    //     projectionCompiled.projection = projectionCompiled.projection.trim();
-
-    //     this.buildProjection(Projection.BetweenParenthesis,
-    //         projectionCompiled.projection, alias, projectionCompiled.params);
-
-    //     return this;
-    // }
 
     /**
      * @deprecated Use `add`
-     * @param column 
-     * @param alias 
+     * @param column
+     * @param alias
      */
     public column(
         column: string,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
-        this.buildProjection(void 0,
-            column,
-            alias,
-        );
+        this.apply(column, void 0, alias);
         return this;
     }
 
     public columns(
-        ...expressions: ExpressionOrColumn<T>[]
+        ...expressions: Array<ExpressionOrColumn<T>>
     ): ProjectionBuilder<T> {
         for (const key in expressions) {
             if (expressions.hasOwnProperty(key)) {
@@ -143,7 +106,7 @@ export class ProjectionBuilder<T> {
     }
 
     public sum(
-        expression: ExpressionOrColumn<T> | string,
+        expression?: ExpressionOrColumn<T> | string,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Sum,
@@ -154,7 +117,7 @@ export class ProjectionBuilder<T> {
     }
 
     public max(
-        expression: ExpressionOrColumn<T>,
+        expression?: ExpressionOrColumn<T>,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Max,
@@ -165,7 +128,7 @@ export class ProjectionBuilder<T> {
     }
 
     public min(
-        expression: ExpressionOrColumn<T>,
+        expression?: ExpressionOrColumn<T>,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Min,
@@ -176,7 +139,7 @@ export class ProjectionBuilder<T> {
     }
 
     public avg(
-        expression: ExpressionOrColumn<T>,
+        expression?: ExpressionOrColumn<T>,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Avg,
@@ -186,20 +149,36 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
+    /**
+     * @deprecated use `.avg().round(expression)`
+     *
+     * @param {ExpressionOrColumn<T>} expression
+     * @param {string} [alias]
+     * @returns {ProjectionBuilder<T>}
+     * @memberof ProjectionBuilder
+     */
     public avgRound(
         expression: ExpressionOrColumn<T>,
-        alias: string = Utils.getColumn(expression),
+        alias?: string,
     ): ProjectionBuilder<T> {
-        this.buildProjection(Projection.Round,
-            `${Projection.Avg}(${this.addAliasTable(Utils.getColumn(expression))})`,
+        this.apply(expression, [Projection.Round, Projection.Avg], alias);
+        return this;
+    }
+
+    public round(
+        expression?: ExpressionOrColumn<T>,
+        alias?: string,
+    ): ProjectionBuilder<T> {
+        this.buildProjectionWithExpression(Projection.Round,
+            expression,
             alias,
         );
         return this;
     }
 
     public count(
-        expression: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        expression?: ExpressionOrColumn<T>,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Count,
             expression,
@@ -208,19 +187,24 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
+    /**
+     * @deprecated use `.count().distinct(expression)`
+     *
+     * @param {ExpressionOrColumn<T>} expression
+     * @param {string} [alias]
+     * @returns {ProjectionBuilder<T>}
+     * @memberof ProjectionBuilder
+     */
     public countDistinct(
         expression: ExpressionOrColumn<T>,
-        alias: string = "",
+        alias?: string,
     ): ProjectionBuilder<T> {
-        this.buildProjection(Projection.Count,
-            `${Projection.Distinct} ${this.addAliasTable(Utils.getColumn(expression))}`,
-            alias,
-        );
+        this.apply(expression, [Projection.Count, Projection.Distinct], alias);
         return this;
     }
 
     public cast(
-        expression: ExpressionOrColumn<T>,
+        expression?: ExpressionOrColumn<T>,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Cast,
@@ -231,7 +215,7 @@ export class ProjectionBuilder<T> {
     }
 
     public distinct(
-        expression: ExpressionOrColumn<T>,
+        expression?: ExpressionOrColumn<T>,
         alias: string = void 0,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Distinct,
@@ -264,6 +248,16 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
+    /**
+     * @deprecated use `.proj()`
+     *
+     * @param {Projection} projection
+     * @param {ExpressionOrColumn<T>} expression
+     * @param {string} [alias=""]
+     * @param {any[]} [args=[]]
+     * @returns
+     * @memberof ProjectionBuilder
+     */
     public projection(
         projection: Projection,
         expression: ExpressionOrColumn<T>,
@@ -288,16 +282,22 @@ export class ProjectionBuilder<T> {
         subQuery: QueryCompiled,
         alias: string = "",
     ): ProjectionBuilder<T> {
-        this.buildProjection(void 0,
-            `(${subQuery.query})`,
-            alias,
-        );
+        this.apply(subQuery.query, [Projection.BetweenParenthesis], alias);
         this._projection.params = this._projection.params.concat(subQuery.params);
         return this;
     }
 
     public compile(): ProjectionCompiled {
         return this._projection;
+    }
+
+    private selectAllColumns(mapper: MapperTable): void {
+        for (const key in mapper.columns) {
+            if (mapper.columns.hasOwnProperty(key)) {
+                const column = mapper.columns[key];
+                this.add(column.column);
+            }
+        }
     }
 
     private checkProjection() {
@@ -317,21 +317,19 @@ export class ProjectionBuilder<T> {
         expression: ExpressionOrColumn<T> | string,
         alias: string = void 0,
         args: any[] = []) {
-        this.buildProjection(projection, Utils.getColumn(expression), alias, args);
+        this.apply(expression, projection ? [projection] : void 0, alias, args);
     }
 
-    private buildProjection(
-        projection: Projection,
-        column: string,
-        alias: string = this.defaultAliasAs(column),
-        args: any[] = [],
-    ) {
-        const projectionBuild = this.createProjection(projection, this.addAliasTable(column), alias, args);
-        this.applyProjection(projectionBuild);
+    private apply(
+        expression?: ExpressionOrColumn<T>,
+        projections: Projection[] = [],
+        alias?: string,
+        args?: any[]) {
+        this._projectionsUtils.apply(expression, projections, alias, args);
     }
 
     private applyProjection(
-        projection: ProjectionCompiled,
+        projection: ProjectionCompiled
     ) {
         this.checkProjection();
         this._projection.projection += projection.projection;
@@ -362,8 +360,9 @@ export class ProjectionBuilder<T> {
     }
 
     private defaultAliasAs(column: string): string {
-        if (column == ProjectionBuilder.WILDCARD)
+        if (column === ProjectionsUtils.WILDCARD) {
             return "";
+        }
         return this._addAliasTableToAlias
             ? `${this._aliasTable}_${column}`
             : column;
@@ -375,7 +374,7 @@ export class ProjectionBuilder<T> {
         alias: string = this.defaultAliasAs(column),
         args: any[],
     ): ProjectionCompiled {
-        if (projection != void 0) {
+        if (projection !== void 0) {
             return this.buildColumn(this.builderProjection(projection, column, args), alias);
         }
         return this.buildColumn(column, alias);
@@ -385,10 +384,6 @@ export class ProjectionBuilder<T> {
         column: string,
         alias: string = this.defaultAliasAs(column),
     ): ProjectionCompiled {
-        // defaultAliasAs check WILDCARD
-        // if (alias === ProjectionBuilder.WILDCARD) {
-        //     return new ProjectionCompiled(column, []);
-        // }
         if (alias && alias.length) {
             return new ProjectionCompiled(`${column} AS ${alias}`, []);
         }

@@ -4,6 +4,7 @@ import { CrudBaseBuilder } from "./crud-base-builder";
 import { ValueType } from "./../core/utils";
 import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
 import { ResultExecuteSql } from "../core/result-execute-sql";
+import { DatabaseBuilderError } from "../core/errors";
 
 export class CrudBase<
     T,
@@ -32,7 +33,7 @@ export class CrudBase<
     private getDatabase(database: Database): Database {
         const result = (database ? database : this._database);
         if (!result) {
-            throw new Error("Database not specified in query.");
+            throw new DatabaseBuilderError("Database not specified in query.");
         }
         return result;
     }

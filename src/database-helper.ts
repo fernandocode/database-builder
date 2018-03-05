@@ -4,6 +4,7 @@ import { ValueType, ValueTypeToParse } from "./core/utils";
 import * as moment from "moment";
 import { FieldType } from "./core/enums/field-type";
 import { ColumnType } from "./core/enums/column-type";
+import { DatabaseBuilderError } from "./core/errors";
 
 // @Injectable()
 export class DatabaseHelper {
@@ -29,7 +30,7 @@ export class DatabaseHelper {
             case "function":
                 return FieldType.FUNCTION;
             default:
-                throw new Error(`type: '${tipo}', value: '${valueFormatted}' não configurado!`);
+                throw new DatabaseBuilderError(`type: '${tipo}', value: '${valueFormatted}' não configurado!`);
         }
     }
 
@@ -44,7 +45,7 @@ export class DatabaseHelper {
             case FieldType.BOOLEAN:
                 return ColumnType.BOOLEAN;
             default:
-                throw new Error(`type '${type}' não configurado!`);
+                throw new DatabaseBuilderError(`type '${type}' não configurado!`);
         }
     }
 

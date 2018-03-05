@@ -1,13 +1,15 @@
-import { Cliente } from './models/cliente';
-import { Query } from './../crud/query/query';
+import { Cliente } from "./models/cliente";
+import { Query } from "./../crud/query/query";
 
-import { expect, assert } from "chai";
+import { assert, expect } from "chai";
 
 describe("Lambda Expression", () => {
 
     it("simple lambda", () => {
         const result = new Query(Cliente)
             .where(where => {
+                // For test double equals
+                // tslint:disable-next-line:triple-equals
                 where.expression(x => x.apelido == "Test");
                 where.equalValue(x => x.razaoSocial, "R");
             })
@@ -20,7 +22,7 @@ describe("Lambda Expression", () => {
 
     it("simple lambda with whereExp", () => {
         const result = new Query(Cliente)
-            .whereExp(x => x.apelido == "Test")
+            .whereExp(x => x.apelido === "Test")
             .whereExp(x => x.id > 10)
             .compile();
         expect(result.params.length).to.equal(2);
@@ -33,9 +35,9 @@ describe("Lambda Expression", () => {
         const result = new Query(Cliente)
             .where(where => {
                 where
-                    .expression(x => x.apelido == "Test")
+                    .expression(x => x.apelido === "Test")
                     .expression(x => x.id > 2)
-                    .expression(x => x.desativo != false)
+                    .expression(x => x.desativo !== false)
                     ;
             })
             .compile();

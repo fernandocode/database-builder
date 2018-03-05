@@ -1,38 +1,64 @@
-// import { QueryBuilder } from './query-builder';
-// import { WhereBuilder } from "../where-builder";
-// import { JoinType } from "../enums/join-type";
+import { ProjectionBuilder } from "./../projection-builder";
+import { QueryBuilder } from ".";
+import { JoinType, ProjectionCompiled, WhereBuilder } from "..";
+import { QueryBuilderBase } from "./query-builder-base";
+import { DatabaseBuilderError } from "../../core/errors";
+import { JoinQueryBuilderContract } from "./join-query-builder-contract";
+import { WhereCompiled } from "../where-compiled";
 
-// export class JoinQueryBuilder<T> extends QueryBuilder<T> {
+export class JoinQueryBuilder<T>
+    extends QueryBuilderBase<T, JoinQueryBuilder<T>>
+    implements JoinQueryBuilderContract<T, JoinQueryBuilder<T>> {
 
-//     private readonly _onWhere: WhereBuilder<T>;
-//     public get onWhere(): WhereBuilder<T> {
-//         return this._onWhere;
-//     }
+    private readonly _on: WhereBuilder<T>;
 
-//     constructor(
-//         typeT: new () => T,
-//         onWhereCallback: (where: WhereBuilder<T>) => void,
-//         public type: JoinType = JoinType.LEFT,
-//         alias: string = void 0,
-//         enableLog: boolean = true,
-//     ) {
-//         super(typeT, alias, enableLog);
+    protected _getInstance(): JoinQueryBuilder<T> {
+        return this;
+    }
 
-//         this._onWhere = new WhereBuilder(typeT, this.alias);
-//         onWhereCallback(this._onWhere);
-//     }
+    public _getOn(): WhereCompiled {
+        return this._on.compile();
+    }
 
-//     public join<TJoin>(
-//         typeTJoin: new () => TJoin,
-//         onWhereCallback: (where: WhereBuilder<TJoin>) => void,
-//         joinCallback: (joinQuery: JoinQueryBuilder<TJoin>) => void,
-//     ): QueryBuilder<T> {
-//         throw new Error("Not allowed to add a join inside another join. Please add the joins only in the root query.");
-//     }
+    public _getTypeJoin(): string {
+        return this._typeJoin;
+    }
 
-//     public limit(
-//         limit: number,
-//     ): QueryBuilder<T> {
-//         throw new Error("Not allowed to specify limit in join query.");
-//     }
-// }
+    public _getWhere(): WhereCompiled {
+        return this._whereCompiled;
+    }
+
+    public _getSelect(): ProjectionCompiled {
+        return this._projectionCompiled;
+    }
+
+    public _getGroupBy(): string {
+        return this._groupBy;
+    }
+
+    public _getHaving(): WhereCompiled {
+        return this._having;
+    }
+
+    public _getOrderBy(): string {
+        return this._orderBy;
+    }
+
+    constructor(
+        typeT: new () => T,
+        onWhereCallback: (where: WhereBuilder<T>) => void,
+        private _typeJoin: JoinType = JoinType.LEFT,
+        alias: string = void 0,
+        enableLog: boolean = true,
+    ) {
+        super(typeT, alias, enableLog);
+
+        this._on = new WhereBuilder(typeT, this.alias);
+        onWhereCallback(this._on);
+    }
+
+    // Para adicionar alias da tabela no apelido da projeção padrão
+    protected createProjectionBuilder(): ProjectionBuilder<T> {
+        return new ProjectionBuilder(this._typeT, this.alias, true);
+    }
+}

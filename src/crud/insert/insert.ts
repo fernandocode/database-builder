@@ -1,4 +1,4 @@
-import { InsertColumnsBuilder } from './insert-columns-builder';
+import { InsertColumnsBuilder } from "./insert-columns-builder";
 import { Database } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
 import { CrudBase } from "./../crud-base";

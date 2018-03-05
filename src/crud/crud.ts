@@ -5,6 +5,7 @@ import { MetadataTable } from "./../metadata-table";
 import { Delete } from "./delete/delete";
 import { Database } from "./../definitions/database-definition";
 import { GetMapper } from "../definitions/interface-get-mapper";
+import { DatabaseBuilderError } from "../core/errors";
 
 export class Crud {
 
@@ -43,7 +44,7 @@ export class Crud {
 
     private getDatabase() {
         if (!this._database) {
-            throw new Error("Transaction ou Database not specified in query.");
+            throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
         }
         return this._database;
     }

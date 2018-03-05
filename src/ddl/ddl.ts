@@ -3,6 +3,7 @@ import { Create } from "./create/create";
 import { MetadataTable } from "./../metadata-table";
 import { Database } from "./../definitions/database-definition";
 import { GetMapper } from "../definitions/interface-get-mapper";
+import { DatabaseBuilderError } from "../core/errors";
 
 export class Ddl {
 
@@ -29,7 +30,7 @@ export class Ddl {
 
     private getDatabase() {
         if (!this._database) {
-            throw new Error("Transaction ou Database not specified in query.");
+            throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
         }
         return this._database;
     }

@@ -1,7 +1,8 @@
-export class BaseKey implements IBaseKey{
-    key: number = 0;
+export class BaseKey implements IBaseKey {
+    public key: number = 0;
 }
 
-export interface IBaseKey{
+// tslint:disable-next-line:interface-name
+export interface IBaseKey {
     key: number;
 }

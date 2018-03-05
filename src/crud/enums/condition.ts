@@ -8,4 +8,5 @@ export enum Condition {
     LessAndEqual = "<=",
     Between = "BETWEEN",
     In = "IN",
+    Like = "LIKE",
 }

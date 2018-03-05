@@ -2,6 +2,7 @@ import { ExecutableBuilder } from "./../core/executable-builder";
 import { Database } from "./../definitions/database-definition";
 import { DdlBaseBuilder } from "./ddl-base-builder";
 import { ResultExecuteSql } from "../core/result-execute-sql";
+import { DatabaseBuilderError } from "../core/errors";
 
 export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
 
@@ -26,7 +27,7 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
     private getDatabase(database: Database): Database {
         const result = (database ? database : this._database);
         if (!result) {
-            throw new Error("Database not specified in query.");
+            throw new DatabaseBuilderError("Database not specified in query.");
         }
         return result;
     }

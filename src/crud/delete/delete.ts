@@ -1,4 +1,4 @@
-import { DeleteColumnsBuilder } from './delete-columns-builder';
+import { DeleteColumnsBuilder } from "./delete-columns-builder";
 import { WhereBuilder } from "./../where-builder";
 import { Database } from "./../../definitions/database-definition";
 import { CrudBase } from "./../crud-base";

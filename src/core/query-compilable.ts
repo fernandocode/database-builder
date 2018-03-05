@@ -1,5 +1,6 @@
 import { ValueType } from "./utils";
+import { QueryCompiled } from ".";
 
 export interface QueryCompilable {
-    compile(): { query: string, params: ValueType[] };
+    compile(): QueryCompiled;
 }

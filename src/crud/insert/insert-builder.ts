@@ -1,5 +1,5 @@
-import { Utils } from './../../core/utils';
-import { InsertColumnsBuilder } from './insert-columns-builder';
+import { Utils } from "./../../core/utils";
+import { InsertColumnsBuilder } from "./insert-columns-builder";
 import { MetadataTable } from "./../../metadata-table";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { CrudCompiled } from "../../core/crud-compiled";

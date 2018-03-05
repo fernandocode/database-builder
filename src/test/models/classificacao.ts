@@ -1,10 +1,10 @@
-import { BaseModel } from './base-model';
+import { BaseModel } from "./base-model";
 
 export class Classificacao extends BaseModel<number> {
-    
-    constructor(){
+
+    public descricao: string = "";
+
+    constructor() {
         super(-1);
     }
-    
-    public descricao: string = "";
 }

@@ -1,4 +1,4 @@
-import { UpdateColumnsBuilder } from './update-columns-builder';
+import { UpdateColumnsBuilder } from "./update-columns-builder";
 import { WhereBuilder } from "./../where-builder";
 import { MetadataTable } from "./../../metadata-table";
 import { CrudCompiled } from "./../../core/crud-compiled";
