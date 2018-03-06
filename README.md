@@ -14,14 +14,14 @@ This will install the current stable version of `database-builder` in your `node
 
 ### Step 2: Usage Typescript
 
-[In StackBlitz](https://stackblitz.com/edit/typescript-cfzt6q)
+[*Demo*](https://stackblitz.com/edit/typescript-cfzt6q)
 
 ```ts
 import { Query } from 'database-builder';
 import { TestClazz, TestClazzRef } from './models';
 
 let querySimple = new Query(TestClazz);
-print(querySimple.compile());
+console.log(querySimple.compile());
 /**
  * {
  *  params: [],
@@ -34,7 +34,7 @@ queryWhere.where(where => {
   where.contains(x => x.description, "abc");
   where.greatValue(x => x.id, 1);
 });
-print(queryWhere.compile());
+console.log(queryWhere.compile());
 /**
  * {
  *  params: ["%abc%", 1],
@@ -49,7 +49,7 @@ queryProjections.projection(projection => {
   projection.max(x => x.referenceTest.id);
   projection.count(x => x.id, "countId");
 });
-print(queryProjections.compile());
+console.log(queryProjections.compile());
 /**
  * {
  *  params: [],
@@ -59,7 +59,7 @@ print(queryProjections.compile());
 
 const queryOrderBy = new Query(TestClazz);
 queryOrderBy.orderBy(x => x.id);
-print(queryOrderBy.compile());
+console.log(queryOrderBy.compile());
 /**
  * {
  *  params: [],
@@ -71,7 +71,7 @@ const queryGroupBy = new Query(TestClazz);
 queryGroupBy.groupBy(x => x.id, (having, projection) => {
     having.greatValue(projection.count(x => x.id), 10);
   });
-print(queryGroupBy.compile());
+console.log(queryGroupBy.compile());
 /**
  * {
  *  params: [10],
@@ -80,8 +80,8 @@ print(queryGroupBy.compile());
  */
 
 const queryLimitOffset = new Query(TestClazz);
-queryLimitOffset.limit(10/*, 5*/);
-print(queryLimitOffset.compile());
+queryLimitOffset.limit(10, 5);
+console.log(queryLimitOffset.compile());
 /**
  * {
  *  params: [10, 5],
@@ -109,6 +109,8 @@ export class TestClazzRef{
 
 ### Usage Angular 2+
 
+[*Demo*](https://stackblitz.com/edit/angular-vxnvua)
+
 ```ts
 import { Component } from '@angular/core';
 import { Query } from 'database-builder';
@@ -134,3 +136,7 @@ export class AppComponent {
     }
 }
 ```
+
+### Usage Ionic 2+
+
+[*Demo*](https://stackblitz.com/edit/ionic-6sdjng)
