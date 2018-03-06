@@ -3,6 +3,8 @@
 # database-builder
 Framework to assist in database manipulation (DDL and CRUD)
 
+[look at the test for more details of use (`./src/test/`)](https://github.com/fernandocode/database-builder/tree/master/src/test)
+
 # Getting Started
 
 ### Step 1: Install npm module
@@ -124,13 +126,14 @@ export class AppComponent {
     
     ngOnInit(){
         let query = new Query(TestClazz);
+        query.where(where => where.between(x => x.id, 1, 20));
         const result = query.compile();
         console.log(result);
         /**
          * result:
          * {
-         *  params: [],
-         *  query: "SELECT tes.* FROM TestClazz AS tes"
+         *  params: [1,20],
+         *  query: "SELECT tes.* FROM TestClazz AS tes WHERE tes.id BETWEEN ? AND ?"
          * }
          */
     }
