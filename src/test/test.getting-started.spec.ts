@@ -3,7 +3,7 @@ import { TestClazz } from "./models/test-clazz";
 import { assert, expect } from "chai";
 import { OrderBy } from "../core/enums/order-by";
 
-describe("Query Getting Started", () => {
+describe("Getting Started", () => {
 
     it("query", () => {
         const query = new Query(TestClazz);
@@ -15,7 +15,7 @@ describe("Query Getting Started", () => {
     it("where", () => {
         const query = new Query(TestClazz);
         query.where(where => {
-            where.containsValue(x => x.description, "abc");
+            where.contains(x => x.description, "abc");
             where.greatValue(x => x.id, 1);
         });
         const result = query.compile();
@@ -27,11 +27,11 @@ describe("Query Getting Started", () => {
 
     it("select (projections)", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
-            select.add(x => x.description);
-            select.sum(x => x.id);
-            select.max(x => x.referenceTest.id);
-            select.count(x => x.id, "countId");
+        query.projection(projection => {
+            projection.add(x => x.description);
+            projection.sum(x => x.id);
+            projection.max(x => x.referenceTest.id);
+            projection.count(x => x.id, "countId");
         });
         const result = query.compile();
         expect(result.params.length).to.equal(0);
@@ -65,16 +65,6 @@ describe("Query Getting Started", () => {
         expect(result.params[0]).to.equal(10);
         expect(result.params[1]).to.equal(5);
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes LIMIT ? OFFSET ?");
-    });
-
-    it("query", () => {
-        const query = new Query(TestClazz);
-        // query.groupBy2(x => x.referenceTest.id, having => {
-        //     // having.
-        // });
-        const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
 });

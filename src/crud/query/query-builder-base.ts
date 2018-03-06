@@ -17,6 +17,7 @@ import { HavingBuilder } from "../having-builder";
 import { ProjectionsHelper } from "../../core/projections-helper";
 import { BuilderCompiled } from "../../core/builder-compiled";
 import { ColumnRef } from "../../core/column-ref";
+import { QueryCompilable } from "../../core/query-compilable";
 
 let NEXT_VALUE_ALIAS: number = 0;
 
@@ -85,7 +86,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     //     return this.addAlias(Utils.getColumn(expression));
     // }
 
-    public ref2(expression: ExpressionOrColumn<T>): ColumnRef {
+    public ref(expression: ExpressionOrColumn<T>): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
             this.alias
@@ -108,9 +109,20 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return false;
     }
 
-    public from(query: QueryCompiled): TQuery {
-        this._tablename = `(${query.query})`;
-        this._fromParams = query.params;
+    public from(query: QueryCompiled | QueryCompilable): TQuery {
+        if ((query as QueryCompilable).compile) {
+            return this.from((query as QueryCompilable).compile());
+        }
+        this._tablename = `(${(query as QueryCompiled).query})`;
+        this._fromParams = (query as QueryCompiled).params;
+        return this._getInstance();
+    }
+
+    public union(query: QueryCompiled | QueryCompilable): TQuery {
+        if ((query as QueryCompilable).compile) {
+            return this.union((query as QueryCompilable).compile());
+        }
+        this._unionsQuery.push(query as QueryCompiled);
         return this._getInstance();
     }
 
@@ -139,19 +151,20 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return this._getInstance();
     }
 
-    /**
-     * @deprecated Use `select`
-     * @param projectionCallback
-     */
     public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): TQuery {
-        return this.select(projectionCallback);
-    }
-
-    public select(selectCallback: (select: ProjectionBuilder<T>) => void): TQuery {
         const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
-        selectCallback(instanceProjection);
+        projectionCallback(instanceProjection);
         this.compileProjection(instanceProjection.compile());
         return this._getInstance();
+        // return this.select(projectionCallback);
+    }
+
+    public select(...expressions: Array<ExpressionOrColumn<T>>): TQuery {
+        return this.projection(projection => projection.columns(...expressions));
+        // const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
+        // instanceProjection.columns(...expressions);
+        // this.compileProjection(instanceProjection.compile());
+        // return this._getInstance();
     }
 
     public orderBy(expression: ExpressionOrColumn<T>, order: OrderBy = OrderBy.ASC): TQuery {
@@ -177,11 +190,6 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
             havingCallback(whereHaving, new ProjectionsHelper(this._typeT, this._alias, false));
             this.compileHaving(whereHaving.compile());
         }
-        return this._getInstance();
-    }
-
-    public union(query: QueryCompiled): TQuery {
-        this._unionsQuery.push(query);
         return this._getInstance();
     }
 

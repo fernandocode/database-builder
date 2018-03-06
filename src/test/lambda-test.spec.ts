@@ -6,14 +6,14 @@ import { assert, expect } from "chai";
 describe("Lambda Expression", () => {
 
     it("simple lambda", () => {
-        const result = new Query(Cliente)
+        const query = new Query(Cliente)
             .where(where => {
                 // For test double equals
                 // tslint:disable-next-line:triple-equals
                 where.expression(x => x.apelido == "Test");
                 where.equalValue(x => x.razaoSocial, "R");
-            })
-            .compile();
+            });
+        const result = query.compile();
         expect(result.params.length).to.equal(2);
         expect(result.params[0]).to.equal("Test");
         expect(result.params[1]).to.equal("R");

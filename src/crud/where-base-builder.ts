@@ -1,6 +1,6 @@
 import { DatabaseHelper } from "./../database-helper";
 import { LambdaExpression } from "lambda-expression";
-import { ExpressionOrColumn, ExpressionOrValue, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { Utils, ValueType, ValueTypeToParse } from "./../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
@@ -8,6 +8,7 @@ import { LambdaMetadata } from "../core/lambda-metadata";
 import { DatabaseBuilderError } from "../core/errors";
 import { WhereBaseBuilderContract } from "./where-base-builder-contract";
 import { ColumnParams } from "../core/column-params";
+import { ColumnRef } from "../core/column-ref";
 
 export abstract class WhereBaseBuilder<
     T,
@@ -33,15 +34,8 @@ export abstract class WhereBaseBuilder<
         this._databaseHelper = new DatabaseHelper();
     }
 
-    public eq(
-        expression1: TExpression,
-        expression2: TExpression
-    ): TWhere {
-        this.buildWhereWithExpressionOrValue(
-            [Condition.Equal],
-            expression1,
-            expression2);
-        return this._getInstance();
+    public ref(column: string, alias: string = this._alias): ColumnRef {
+        return new ColumnRef(column, alias);
     }
 
     public not(): TWhere {
@@ -85,6 +79,9 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `equal`
+     */
     public equalValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -109,6 +106,9 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `like`
+     */
     public likeValue(
         expression: TExpression,
         value: string,
@@ -132,21 +132,21 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
-    public containsValue(
+    public contains(
         expression: TExpression,
         value: string
     ): TWhere {
         return this.likeValue(expression, `%${value}%`);
     }
 
-    public startsWithValue(
+    public startsWith(
         expression: TExpression,
         value: string,
     ): TWhere {
         return this.likeValue(expression, `${value}%`);
     }
 
-    public endsWithValue(
+    public endsWith(
         expression: TExpression,
         value: string,
     ): TWhere {
@@ -164,6 +164,9 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `great`
+     */
     public greatValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -188,6 +191,9 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `greatAndEqual`
+     */
     public greatAndEqualValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -212,6 +218,9 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `less`
+     */
     public lessValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -236,6 +245,9 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `lessAndEqual`
+     */
     public lessAndEqualValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -260,7 +272,18 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `between`
+     */
     public betweenValue(
+        expression: TExpression,
+        value1: ValueTypeToParse,
+        value2: ValueTypeToParse,
+    ): TWhere {
+        return this.between(expression, value1, value2);
+    }
+
+    public between(
         expression: TExpression,
         value1: ValueTypeToParse,
         value2: ValueTypeToParse,
@@ -272,28 +295,44 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `in`
+     */
     public inValues(
         expression: TExpression,
         values: ValueTypeToParse[],
     ): TWhere {
-        this.buildWhereColumn(
-            [Condition.In],
-            this.getColumnParams(expression),
-            values);
+        return this.in(expression, values);
+    }
+
+    public in(
+        expression: TExpression,
+        valuesOrQuery: ValueTypeToParse[] | QueryCompilable,
+    ): TWhere {
+        if (Utils.isArray(valuesOrQuery)) {
+            this.buildWhereColumn(
+                [Condition.In],
+                this.getColumnParams(expression),
+                valuesOrQuery as ValueTypeToParse[]);
+        } else {
+            const compiled = (valuesOrQuery as QueryCompilable).compile();
+            this.buildWhereColumn(
+                [Condition.In],
+                this.getColumnParams(expression),
+                compiled.query);
+            this.addParam(compiled.params);
+        }
         return this._getInstance();
     }
 
+    /**
+     * @deprecated use `in`
+     */
     public inSelect(
         expression: TExpression,
         query: QueryCompilable,
     ): TWhere {
-        const compiled = query.compile();
-        this.buildWhereColumn(
-            [Condition.In],
-            this.getColumnParams(expression),
-            compiled.query);
-        this.addParam(compiled.params);
-        return this._getInstance();
+        return this.in(expression, query);
     }
 
     public compile(): WhereCompiled {
@@ -398,7 +437,7 @@ export abstract class WhereBaseBuilder<
                 params: []
             } as ColumnParams;
             param.forEach((value) => {
-                result.column += "?";
+                result.column += result.column.length > 0 ? ", ?" : "?";
                 result.params.push(value);
             });
             return result;
@@ -413,11 +452,11 @@ export abstract class WhereBaseBuilder<
     }
 
     private buildWhereMetadata(metadata: LambdaMetadata) {
-        if (Utils.isValue(metadata.left)) {
+        if (!Utils.isNameColumn(metadata.left) && Utils.isValue(metadata.left)) {
             this.addParam(metadata.left);
             metadata.left = "?";
         }
-        if (Utils.isValue(metadata.right)) {
+        if (!Utils.isNameColumn(metadata.right) && Utils.isValue(metadata.right)) {
             this.addParam(metadata.right);
             metadata.right = "?";
         }
@@ -455,10 +494,11 @@ export abstract class WhereBaseBuilder<
             case [Condition.Between].toString():
             case [Condition.Not, Condition.Between].toString():
                 // ${column} BETWEEN ? AND ?
-                if (column2.length === 2) {
-                    return `${column1} ${this.builderConditions(conditions)} ${column2[0]} ${WhereBaseBuilder.AND} ${column2[1]}`;
+                if (!Utils.isArray(column2) || column2.length === 2) {
+                    return `${column1} ${this.builderConditions(conditions)} ? ${WhereBaseBuilder.AND} ?`;
+                    // return `${column1} ${this.builderConditions(conditions)} ${column2[0]} ${WhereBaseBuilder.AND} ${column2[1]}`;
                 }
-                throw new DatabaseBuilderError(`Length (${column2.length}) parameter to '${conditions}' condition incorrect!`);
+                throw new DatabaseBuilderError(`Length (${column2.length}) (values: ${column2}) parameter to '${conditions}' condition incorrect!`);
             case [Condition.In].toString():
             case [Condition.Not, Condition.In].toString():
                 // ${column} IN (?, ?, ...)

@@ -11,7 +11,6 @@ import { QueryBuilder } from "./query-builder";
 import { ExpressionOrColumn, ValueType } from "./../../core/utils";
 import { QueryCompilable } from "./../../core/query-compilable";
 import { OrderBy } from "../../core/enums/order-by";
-// import { JoinQueryBuilder } from "./join-query-builder";
 import { JoinType } from "../enums/join-type";
 import { LambdaExpression } from "lambda-expression";
 import { JoinQueryBuilder } from "./join-query-builder";
@@ -43,16 +42,17 @@ export class Query<T> implements QueryCompilable {
         return this._queryBuilder.alias;
     }
 
-    // public ref(expression: ExpressionOrColumn<T>): string {
-    //     return this._queryBuilder.ref(expression);
-    // }
-
-    public ref2(expression: ExpressionOrColumn<T>): ColumnRef {
-        return this._queryBuilder.ref2(expression);
+    public ref(expression: ExpressionOrColumn<T>): ColumnRef {
+        return this._queryBuilder.ref(expression);
     }
 
-    public from(query: QueryCompiled): Query<T> {
+    public from(query: QueryCompiled | QueryCompilable): Query<T> {
         this._queryBuilder.from(query);
+        return this;
+    }
+
+    public union(query: QueryCompiled | QueryCompilable): Query<T> {
+        this._queryBuilder.union(query);
         return this;
     }
 
@@ -90,8 +90,8 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public select(selectCallback: (select: ProjectionBuilder<T>) => void): Query<T> {
-        this._queryBuilder.select(selectCallback);
+    public select(...expressions: Array<ExpressionOrColumn<T>>): Query<T> {
+        this._queryBuilder.select(...expressions);
         return this;
     }
 

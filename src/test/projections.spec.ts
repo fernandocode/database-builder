@@ -20,7 +20,7 @@ describe("Projections", () => {
 
     it("default explicit call", () => {
         const query = new Query(TestClazz);
-        query.select(select => select.all());
+        query.projection(select => select.all());
         const result = query.compile();
         expect(result.params.length).to.equal(0);
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
@@ -28,7 +28,7 @@ describe("Projections", () => {
 
     it("default explicit columns", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.allByMap(mappersTable.getMapper(TestClazz));
         });
         const result = query.compile();
@@ -38,7 +38,7 @@ describe("Projections", () => {
 
     it("add column", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.add(x => x.description);
         });
         const result = query.compile();
@@ -46,9 +46,19 @@ describe("Projections", () => {
         expect(result.query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes");
     });
 
+    it("add column with alias", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            select.add(x => x.description, "abc");
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT tes.description AS abc FROM TestClazz AS tes");
+    });
+
     it("column", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.column("description");
         });
         const result = query.compile();
@@ -58,7 +68,7 @@ describe("Projections", () => {
 
     it("columns", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.columns(x => x.description, x => x.id, x => x.referenceTest.id);
         });
         const result = query.compile();
@@ -68,7 +78,7 @@ describe("Projections", () => {
 
     it("avg", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.avg(x => x.id);
         });
         const result = query.compile();
@@ -78,7 +88,7 @@ describe("Projections", () => {
 
     it("round avg", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.avgRound(x => x.id);
         });
         const result = query.compile();
@@ -88,7 +98,7 @@ describe("Projections", () => {
 
     it("round avg (stacked)", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.round().avg(x => x.id);
         });
         const result = query.compile();
@@ -98,29 +108,19 @@ describe("Projections", () => {
 
     it("case (and group and projection)", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.case((caseInstance) => {
                 caseInstance.when(
                     query.createWhere()
                         .great(select.proj().sum(x => x.referenceTest.id), 1),
-                    // .great(new ProjectionsHelper<TestClazz>(TestClazz, query.alias(), false).sum(x => x.referenceTest.id), 1),
-                    // .great(select.create().projection(Projection.Sum, x => x.referenceTest.id), 1),
-                    // .greatValue(select.create().projection(Projection.Sum, x => x.referenceTest.id).projection, 1),
                     (when) => {
                         when.then(
                             select.proj().group(
                                 "",
                                 select.proj().sum(x => x.referenceTest.id),
-                                // select.projection(Projection.Sum, x => x.referenceTest.id),
                                 select.plan(Operator.Multiply),
                                 select.plan(2)
                             )
-                            // select.create().group(
-                            //     "",
-                            //     select.projection(Projection.Sum, x => x.referenceTest.id),
-                            //     Operator.Multiply,
-                            //     2
-                            // )
                         ).else(0);
                     }
                 );
@@ -134,7 +134,7 @@ describe("Projections", () => {
 
     it("cast", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.cast(x => x.id);
         });
         const result = query.compile();
@@ -144,7 +144,7 @@ describe("Projections", () => {
 
     it("coalesce", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.coalesce(x => x.id);
         });
         const result = query.compile();
@@ -154,7 +154,7 @@ describe("Projections", () => {
 
     it("coalesce builder", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             expect(select.coalesceBuilder(x => x.id, 2)).to.equal("COALESCE(tes.id, 2)");
         });
         const result = query.compile();
@@ -164,7 +164,7 @@ describe("Projections", () => {
 
     it("count", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.count(x => x.id);
         });
         const result = query.compile();
@@ -174,7 +174,7 @@ describe("Projections", () => {
 
     it("count distinct", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.countDistinct(x => x.id);
         });
         const result = query.compile();
@@ -184,7 +184,7 @@ describe("Projections", () => {
 
     it("count distinct (stacked)", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.count().distinct(x => x.id);
         });
         const result = query.compile();
@@ -194,7 +194,7 @@ describe("Projections", () => {
 
     it("distinct", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.distinct(x => x.id);
         });
         const result = query.compile();
@@ -204,19 +204,13 @@ describe("Projections", () => {
 
     it("group (and projection)", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.group(
                 "groupT",
                 select.proj().sum(x => x.referenceTest.id),
                 select.plan(Operator.Multiply),
                 select.plan(2)
             );
-            // select.group(
-            //     "groupT",
-            //     select.projection(Projection.Sum, x => x.referenceTest.id),
-            //     Operator.Multiply,
-            //     2
-            // );
         });
         const result = query.compile();
         expect(result.params.length).to.equal(0);
@@ -225,7 +219,7 @@ describe("Projections", () => {
 
     it("max", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.max(x => x.id);
         });
         const result = query.compile();
@@ -235,7 +229,7 @@ describe("Projections", () => {
 
     it("min", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.min(x => x.id);
         });
         const result = query.compile();
@@ -245,14 +239,12 @@ describe("Projections", () => {
 
     it("subQuery", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.subQuery(
                 new Query(TestClazzRef, "tcr")
-                    .select(s => s.min(x => x.description))
+                    .projection(s => s.min(x => x.description))
                     .where(where =>
-                        // where.equalColumn(x => x.id, query.ref(x => x.referenceTest.id)))
-                        where.equal(x => x.id, query.ref2(x => x.referenceTest.id)))
-                    // where.equal(x => x.id, query.ref(x => x.referenceTest.id)))
+                        where.equal(x => x.id, query.ref(x => x.referenceTest.id)))
                     .compile(),
                 "referenceTest_description"
             );
@@ -264,7 +256,7 @@ describe("Projections", () => {
 
     it("sum", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.sum(x => x.id);
         });
         const result = query.compile();
@@ -274,7 +266,7 @@ describe("Projections", () => {
 
     it("multi projections", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.add(x => x.description);
             select.sum(x => x.id);
             select.max(x => x.referenceTest.id);
@@ -287,7 +279,7 @@ describe("Projections", () => {
 
     it("stacked projections", () => {
         const query = new Query(TestClazz);
-        query.select(select => {
+        query.projection(select => {
             select.sum().count().distinct(x => x.id, "test_id");
             select.avg().max().distinct().min().count(x => x.referenceTest.id);
         });

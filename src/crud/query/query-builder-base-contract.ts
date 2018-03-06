@@ -13,8 +13,7 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     clone(): TQuery;
 
-    // ref(expression: ExpressionOrColumn<T>): string;
-    ref2(expression: ExpressionOrColumn<T>): ColumnRef;
+    ref(expression: ExpressionOrColumn<T>): ColumnRef;
 
     hasAlias(alias: string): boolean;
 
@@ -26,13 +25,9 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     whereExp(expression: LambdaExpression<T>): TQuery;
 
-    /**
-     * @deprecated Use `select`
-     * @param projectionCallback
-     */
     projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): TQuery;
 
-    select(selectCallback: (select: ProjectionBuilder<T>) => void): TQuery;
+    select(...expressions: Array<ExpressionOrColumn<T>>): TQuery;
 
     orderBy(expression: ExpressionOrColumn<T>, order?: OrderBy): TQuery;
 

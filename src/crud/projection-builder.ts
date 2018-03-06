@@ -42,7 +42,7 @@ export class ProjectionBuilder<T> {
         return new ProjectionsHelper(this._typeT, this._aliasTable, false);
     }
 
-    public col(column: string): ColumnRef {
+    public ref(column: string): ColumnRef {
         return new ColumnRef(column, this._aliasTable);
     }
 

@@ -62,14 +62,11 @@ describe("Query method", () => {
     it("test simple select with where and select projections", () => {
         const query =
             new Query(Cliente)
-                .select(select => {
-                    select.columns(
-                        x => x.cidade.id,
-                        x => x.apelido,
-                        x => x.razaoSocial,
-                        x => x.id
-                    );
-                })
+                .select(
+                    x => x.cidade.id,
+                    x => x.apelido,
+                    x => x.razaoSocial,
+                    x => x.id)
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
                     where.greatAndEqualValue(x => x.id, 10);
@@ -84,14 +81,14 @@ describe("Query method", () => {
     it("test select with join", () => {
         const query = new Query(Cliente);
         query
-            .select(select => {
-                select.columns(
-                    x => x.cidade.id,
-                    x => x.apelido,
-                    x => x.razaoSocial,
-                    x => x.id
-                );
-                select.add(x => x.desativo, "inativo");
+            .select(
+                x => x.cidade.id,
+                x => x.apelido,
+                x => x.razaoSocial,
+                x => x.id
+            )
+            .projection(projection => {
+                projection.add(x => x.desativo, "inativo");
             })
             .where(where => {
                 where.not().equalValue(x => x.razaoSocial, "ABC");
@@ -100,11 +97,11 @@ describe("Query method", () => {
             .join(
                 Cidade,
                 onWhere =>
-                    onWhere.equal(x => x.id, query.ref2(x => x.cidade.id)),
+                    onWhere.equal(x => x.id, query.ref(x => x.cidade.id)),
                 join => {
-                    join.select(select => {
-                        select.add(x => x.nome, "cidade_nome");
-                        select.add(x => x.id); // cid_id
+                    join.projection(projection => {
+                        projection.add(x => x.nome, "cidade_nome");
+                        projection.add(x => x.id); // cid_id
                     });
                 }
             );
@@ -119,27 +116,20 @@ describe("Query method", () => {
     it("test select with projection case", () => {
         const query = new Query(Cliente);
         query
-            .select(select => {
-                select.add(x => x.desativo, "inativo");
-                select.case((caseInstance) => {
+            .projection(projection => {
+                projection.add(x => x.desativo, "inativo");
+                projection.case((caseInstance) => {
                     caseInstance.when(
                         query.createWhere()
-                            .great(select.proj().sum(x => x.classificacao.id), 1),
-                        // .greatValue(select.create().projection(Projection.Sum, x => x.classificacao.id).projection, 1),
+                            .great(projection.proj().sum(x => x.classificacao.id), 1),
                         (when) => {
                             when.then(
-                                select.proj().group(
+                                projection.proj().group(
                                     "",
-                                    select.proj().sum(x => x.classificacao.id),
-                                    select.plan(Operator.Multiply),
-                                    select.plan(2)
+                                    projection.proj().sum(x => x.classificacao.id),
+                                    projection.plan(Operator.Multiply),
+                                    projection.plan(2)
                                 )
-                                // select.create().group(
-                                //     "",
-                                //     select.projection(Projection.Sum, x => x.classificacao.id),
-                                //     Operator.Multiply,
-                                //     2
-                                // )
                             ).else(0);
                         }
                     );
@@ -152,10 +142,10 @@ describe("Query method", () => {
             .join(
                 Cidade,
                 onWhere =>
-                    onWhere.equal(x => x.id, query.ref2(x => x.cidade.id)),
+                    onWhere.equal(x => x.id, query.ref(x => x.cidade.id)),
                 join => {
-                    join.select(select => {
-                        select.all();
+                    join.projection(projection => {
+                        projection.all();
                     });
                 }
             );
@@ -172,15 +162,15 @@ describe("Query method", () => {
     it("test select all by mapper", () => {
         const query = new Query(Cliente);
         query
-            .select(select => {
-                select.allByMap(mappersTable.getMapper(Cliente));
+            .projection(projection => {
+                projection.allByMap(mappersTable.getMapper(Cliente));
             })
             .join(Cidade,
                 onWhere =>
-                    onWhere.equal(x => x.id, query.ref2(x => x.cidade.id)),
+                    onWhere.equal(x => x.id, query.ref(x => x.cidade.id)),
                 join => {
-                    join.select(select => {
-                        select.allByMap(mappersTable.getMapper(Cidade));
+                    join.projection(projection => {
+                        projection.allByMap(mappersTable.getMapper(Cidade));
                     });
                 });
 

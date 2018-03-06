@@ -8,6 +8,9 @@ export class ColumnRef {
     }
 
     public result(): string {
-        return `${this.alias}.${this.column}`;
+        if (this.alias) {
+            return `${this.alias}.${this.column}`;
+        }
+        return this.column;
     }
 }

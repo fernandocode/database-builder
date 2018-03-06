@@ -6,8 +6,11 @@ import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
 import { LambdaMetadata } from "../core/lambda-metadata";
 import { DatabaseBuilderError } from "../core/errors";
+import { ColumnRef } from "../core/column-ref";
 
 export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBaseBuilderContract<T, TExpression, TWhere>> {
+
+    ref(column: string, alias?: string): ColumnRef;
 
     not(): TWhere;
 
@@ -29,6 +32,9 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         column: string,
     ): TWhere;
 
+    /**
+     * @deprecated use `equal`
+     */
     equalValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -39,6 +45,9 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression2: TExpression,
     ): TWhere;
 
+    /**
+     * @deprecated use `like`
+     */
     likeValue(
         expression: TExpression,
         value: string,
@@ -49,17 +58,17 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression2: TExpression,
     ): TWhere;
 
-    containsValue(
+    contains(
         expression: TExpression,
         value: string
     ): TWhere;
 
-    startsWithValue(
+    startsWith(
         expression: TExpression,
         value: string,
     ): TWhere;
 
-    endsWithValue(
+    endsWith(
         expression: TExpression,
         value: string,
     ): TWhere;
@@ -68,6 +77,9 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression1: TExpression,
     ): TWhere;
 
+    /**
+     * @deprecated use `great`
+     */
     greatValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -78,6 +90,9 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression2: TExpression,
     ): TWhere;
 
+    /**
+     * @deprecated use `greatAndEqual`
+     */
     greatAndEqualValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -88,6 +103,9 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression2: TExpression,
     ): TWhere;
 
+    /**
+     * @deprecated use `less`
+     */
     lessValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -98,6 +116,9 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression2: TExpression,
     ): TWhere;
 
+    /**
+     * @deprecated use `lessAndEqual`
+     */
     lessAndEqualValue(
         expression: TExpression,
         value: ValueTypeToParse,
@@ -108,17 +129,37 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
         expression2: TExpression,
     ): TWhere;
 
+    /**
+     * @deprecated use `between`
+     */
     betweenValue(
         expression: TExpression,
         value1: ValueTypeToParse,
         value2: ValueTypeToParse,
     ): TWhere;
 
+    between(
+        expression: TExpression,
+        value1: ValueTypeToParse,
+        value2: ValueTypeToParse,
+    ): TWhere;
+
+    /**
+     * @deprecated use `in`
+     */
     inValues(
         expression: TExpression,
         values: ValueTypeToParse[],
     ): TWhere;
 
+    in(
+        expression: TExpression,
+        valuesOrQuery: ValueTypeToParse[] | QueryCompilable,
+    ): TWhere;
+
+    /**
+     * @deprecated use `in`
+     */
     inSelect(
         expression: TExpression,
         query: QueryCompilable,

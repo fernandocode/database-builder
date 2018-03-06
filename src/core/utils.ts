@@ -24,7 +24,7 @@ export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 
 export type ExpressionOrColumn<T> = Expression<T> | string;
 
-export type ExpressionOrValue<T> = Expression<T> | ValueTypeToParse | ColumnRef | ProjectionsHelper<T>;
+export type TypeWhere<T> = Expression<T> | ValueTypeToParse | ColumnRef | ProjectionsHelper<T>;
 
 export type TypeProjection<T> = ProjectionsHelper<T> | ColumnRef | PlanRef;
 
@@ -37,6 +37,10 @@ export class Utils {
 
     public static is(value: any, type: string): boolean {
         return typeof value === type;
+    }
+
+    public static isArray(value: any): boolean {
+        return Array.isArray(value);
     }
 
     public static isString(value: any): boolean {
@@ -128,7 +132,7 @@ export class Utils {
     }
 
     public static expressionOrValue<T>(
-        value: ExpressionOrValue<T>
+        value: TypeWhere<T>
     ): ExpressionOrValueEnum {
         return this.isProjectionsHelper(value)
             ? ExpressionOrValueEnum.Projection
@@ -149,7 +153,7 @@ export class Utils {
         }
     }
 
-    public static getColumnValue<T>(expression: ExpressionOrValue<T>): ColumnParams {
+    public static getColumnWhere<T>(expression: TypeWhere<T>): ColumnParams {
         const type = this.expressionOrValue(expression);
         switch (type) {
             case (ExpressionOrValueEnum.Expression):
@@ -222,12 +226,11 @@ export class Utils {
     }
 
     public static isValue(value: any): boolean {
-        return !this.isNameColumn(value) &&
-            (
-                this.isValueNumber(value) || this.isString(value) || this.isValueBoolean(value)
-                || this.isDate(value)
-                || this.isMoment(value)
-            );
+        return this.isValueNumber(value)
+            || this.isString(value)
+            || this.isValueBoolean(value)
+            || this.isDate(value)
+            || this.isMoment(value);
     }
 
     public static normalizeSqlString(inputSql: string): string {
