@@ -16,8 +16,10 @@
             true,
             "ban-keywords",
             "check-format",
-            "allow-leading-underscore"
+            "allow-leading-underscore",
+            "allow-pascal-case"
         ],
+        "no-shadowed-variable": false,
         "interface-name": [
             true,
             "never-prefix"

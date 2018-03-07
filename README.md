@@ -1,7 +1,8 @@
 [![npm version](https://badge.fury.io/js/database-builder.svg/?a=1)](https://www.npmjs.com/package/database-builder)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/fernandocode/database-builder/issues)
 
 # database-builder
-Framework to assist in database manipulation (DDL and CRUD)
+Library to assist in creating and maintaining SQL commands.
 
 [look at the test for more details of use (`./src/test/`)](https://github.com/fernandocode/database-builder/tree/master/src/test)
 
@@ -143,3 +144,29 @@ export class AppComponent {
 ### Usage Ionic 2+
 
 [*Demo*](https://stackblitz.com/edit/ionic-6sdjng)
+
+
+# Contribution Welcome!
+
+The project is continously evolving with every new release. Give it a star, if you like it. For contribution, setup the development environment as follows:
+
+1. clone and setup the project dependencies
+
+```shell
+$> git clone https://github.com/fernandocode/database-builder.git
+$> npm install
+```
+
+2. Use following commands based on what you'd like to do:
+
+```shell
+$> npm test              # runs test suite once and exit.
+```
+
+3. Have you found a bug, or want to develop a new feature?
+
+3.1. [Look for Pull Requests](https://github.com/fernandocode/database-builder/pulls) if something is not already implemented;
+3.2. [Check if there is no Issue related to this](https://github.com/fernandocode/database-builder/issues)? (If there is not one, so that the use case can be checked);
+3.3. Make the necessary changes, add tests to what has been implemented, run the tests and submit a Pull Request with the changes (Comment what was done, and relate the Issue). As soon as possible it will be verified, and if approved it will be available in the next release of the library.
+
+If you face any problem, then raise an issue [here](https://github.com/fernandocode/database-builder/issues).
