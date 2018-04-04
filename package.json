@@ -1,7 +1,7 @@
 {
   "name": "database-builder",
-  "version": "0.0.17",
-  "description": "Framework to assist in database manipulation (DDL and CRUD)",
+  "version": "0.0.18",
+  "description": "Library to assist in creating and maintaining SQL commands.",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "scripts": {

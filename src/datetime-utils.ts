@@ -6,7 +6,6 @@ export class DatetimeUtils {
     public static datetimeToDatabase(date: moment.Moment): number {
         if (!date.unix) {
             throw new DatabaseBuilderError("Date format incorrect");
-            // console.warn("Date format incorrect");
         }
         return date.unix();
     }
