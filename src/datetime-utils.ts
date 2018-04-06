@@ -1,4 +1,4 @@
-import moment from "moment";
+import * as moment from "moment";
 import { DatabaseBuilderError } from "./core/errors";
 
 export class DatetimeUtils {

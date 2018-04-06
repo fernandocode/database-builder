@@ -1,6 +1,6 @@
 import { DatetimeUtils } from "./datetime-utils";
 import { ValueType, ValueTypeToParse } from "./core/utils";
-import moment from "moment";
+import * as moment from "moment";
 import { FieldType } from "./core/enums/field-type";
 import { ColumnType } from "./core/enums/column-type";
 import { DatabaseBuilderError } from "./core/errors";
