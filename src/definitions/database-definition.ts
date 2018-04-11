@@ -1,6 +1,6 @@
 import { ResultExecuteSql } from "./../core/result-execute-sql";
 
-export type Database = DatabaseTransaction | DatabaseObject;
+export type DatabaseSQLite = DatabaseTransaction | DatabaseObject;
 
 export interface DatabaseTransaction {
     start: () => void;

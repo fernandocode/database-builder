@@ -1,4 +1,4 @@
-import { Database, DatabaseObject, DatabaseTransaction } from "./../definitions/database-definition";
+import { DatabaseObject, DatabaseSQLite, DatabaseTransaction } from "./../definitions/database-definition";
 import { QueryCompiled } from "./query-compiled";
 import { ResultExecuteSql } from "./result-execute-sql";
 
@@ -10,14 +10,14 @@ export class ExecutableBuilder {
 
     public execute(
         compiled: QueryCompiled,
-        database: Database,
+        database: DatabaseSQLite,
     ): Promise<ResultExecuteSql> {
         this.log(compiled);
         return this.executeSql(database, compiled);
     }
 
     private executeSql(
-        database: Database, compiled: QueryCompiled,
+        database: DatabaseSQLite, compiled: QueryCompiled,
     ): Promise<ResultExecuteSql> {
         if ((database as DatabaseObject).addTransaction) {
             return (database as DatabaseObject).executeSql(

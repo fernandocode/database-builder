@@ -1,5 +1,5 @@
 import { ExecutableBuilder } from "./../core/executable-builder";
-import { Database } from "./../definitions/database-definition";
+import { DatabaseSQLite } from "./../definitions/database-definition";
 import { CrudBaseBuilder } from "./crud-base-builder";
 import { ValueType } from "./../core/utils";
 import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
@@ -16,13 +16,13 @@ export class CrudBase<
 
     constructor(
         protected readonly _builder: TBuilder,
-        private readonly _database: Database = void 0,
+        private readonly _database: DatabaseSQLite = void 0,
         enableLog: boolean = true,
     ) {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(database: Database = void 0): Promise<ResultExecuteSql> {
+    public execute(database: DatabaseSQLite = void 0): Promise<ResultExecuteSql> {
         return this._executableBuilder.execute(this.compile(), this.getDatabase(database));
     }
 
@@ -30,7 +30,7 @@ export class CrudBase<
         return this._builder.compile();
     }
 
-    private getDatabase(database: Database): Database {
+    private getDatabase(database: DatabaseSQLite): DatabaseSQLite {
         const result = (database ? database : this._database);
         if (!result) {
             throw new DatabaseBuilderError("Database not specified in query.");

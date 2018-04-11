@@ -1,4 +1,4 @@
-import { Database } from "./../../definitions/database-definition";
+import { DatabaseSQLite } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
 import { QueryBuilder } from "./query-builder";
 import { QueryReadableBuilderBase } from "./query-readable-builder-base";
@@ -15,7 +15,7 @@ export class QueryReadableBuilder<T> extends QueryReadableBuilderBase {
     public executeAndRead(
         queryBuilder: QueryBuilder<T>,
         metadata: MetadataTable<T>,
-        database: Database,
+        database: DatabaseSQLite,
     ): Promise<T[]> {
         return new Promise((resolve, reject) => {
             queryBuilder.execute(database)

@@ -1,27 +1,27 @@
 import { Drop } from "./drop/drop";
 import { Create } from "./create/create";
 import { MetadataTable } from "./../metadata-table";
-import { Database } from "./../definitions/database-definition";
+import { DatabaseSQLite } from "./../definitions/database-definition";
 import { GetMapper } from "../definitions/interface-get-mapper";
 import { DatabaseBuilderError } from "../core/errors";
 
 export class Ddl {
 
     constructor(
-        private _database: Database = void 0,
+        private _database: DatabaseSQLite = void 0,
         private _mappersTable: GetMapper,
         public enableLog: boolean = true) {
     }
 
     public create<T>(typeT: new () => T,
                      metadata: MetadataTable<T> = this._mappersTable.getMapper(typeT),
-                     database: Database = this.getDatabase(),
+                     database: DatabaseSQLite = this.getDatabase(),
     ): Create<T> {
         return new Create(typeT, metadata, database, this.enableLog);
     }
 
     public drop<T>(typeT: new () => T,
-                   database: Database = this.getDatabase(),
+                   database: DatabaseSQLite = this.getDatabase(),
     ): Drop<T> {
         return new Drop(typeT, database, this.enableLog);
     }

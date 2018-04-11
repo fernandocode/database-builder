@@ -1,7 +1,7 @@
 import { ColumnRef } from "./../../core/column-ref";
 import { QueryCompilable } from "../../core/query-compilable";
 import { ExpressionOrColumn } from "../../core/utils";
-import { Database, QueryCompiled, ResultExecuteSql } from "../..";
+import { DatabaseSQLite, QueryCompiled, ResultExecuteSql } from "../..";
 import { WhereBuilder } from "..";
 import { LambdaExpression } from "lambda-expression";
 import { ProjectionBuilder } from "../projection-builder";
@@ -40,7 +40,7 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     union(query: QueryCompiled): TQuery;
 
-    execute(database: Database): Promise<ResultExecuteSql>;
+    execute(database: DatabaseSQLite): Promise<ResultExecuteSql>;
 
     compileTable(): string;
 
