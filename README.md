@@ -143,7 +143,11 @@ export class AppComponent {
 
 ### Usage Ionic 2+
 
-[*Demo*](https://stackblitz.com/edit/ionic-6sdjng)
+[<del>*Demo*</del>](https://stackblitz.com/edit/ionic-6sdjng)
+
+For Ionic 2+ use [**ionic-database-builder**](https://github.com/fernandocode/ionic-database-builder).
+
+>[`npm install --save ionic-database-builder`](https://www.npmjs.com/package/ionic-database-builder)
 
 
 # Contribution Welcome!
