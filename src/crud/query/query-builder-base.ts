@@ -1,9 +1,8 @@
-import { ResultExecuteSql } from "./../../core/result-execute-sql";
 import { QueryCompiled } from "./../../core/query-compiled";
 import { ExecutableBuilder } from "./../../core/executable-builder";
 import { ProjectionBuilder } from "./../projection-builder";
 import { ExpressionOrColumn, Utils, ValueType } from "./../../core/utils";
-import { DatabaseSQLite } from "./../../definitions/database-definition";
+import { DatabaseBase, DatabaseResult } from "./../../definitions/database-definition";
 import { WhereBuilder } from "../where-builder";
 import { OrderBy } from "../../core/enums/order-by";
 import { WhereCompiled } from "../where-compiled";
@@ -193,7 +192,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return this._getInstance();
     }
 
-    public execute(database: DatabaseSQLite): Promise<ResultExecuteSql> {
+    public execute(database: DatabaseBase): Promise<DatabaseResult> {
         return this._executableBuilder.execute(this.compile(), database);
     }
 

@@ -4,9 +4,8 @@ import { QueryCompiled } from "./../../core/query-compiled";
 import { MapperTable } from "./../../mapper-table";
 import { ProjectionBuilder } from "./../projection-builder";
 import { WhereBuilder } from "./../where-builder";
-import { DatabaseSQLite } from "./../../definitions/database-definition";
+import { DatabaseBase, DatabaseResult } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
-import { ResultExecuteSql } from "./../../core/result-execute-sql";
 import { QueryBuilder } from "./query-builder";
 import { ExpressionOrColumn, ValueType } from "./../../core/utils";
 import { QueryCompilable } from "./../../core/query-compilable";
@@ -27,7 +26,7 @@ export class Query<T> implements QueryCompilable {
         typeT: new () => T,
         alias: string = void 0,
         private _metadata: MetadataTable<T> = void 0,
-        private _database: DatabaseSQLite = void 0,
+        private _database: DatabaseBase = void 0,
         enableLog: boolean = true,
     ) {
         this._queryBuilder = new QueryBuilder(typeT, alias, enableLog);
@@ -123,7 +122,7 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public execute(database: DatabaseSQLite = void 0): Promise<ResultExecuteSql> {
+    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult> {
         return this._queryBuilder.execute(this.getDatabase(database));
     }
 
@@ -141,7 +140,7 @@ export class Query<T> implements QueryCompilable {
 
     public executeAndRead(
         metadata: MetadataTable<T> = void 0,
-        database: DatabaseSQLite = void 0,
+        database: DatabaseBase = void 0,
     ): Promise<T[]> {
         return this._queryReadableBuilder.executeAndRead(
             this._queryBuilder,
@@ -210,7 +209,7 @@ export class Query<T> implements QueryCompilable {
         return this._queryReadableBuilder.read(cursor, newable, mapperTable);
     }
 
-    private getDatabase(database: DatabaseSQLite): DatabaseSQLite {
+    private getDatabase(database: DatabaseBase): DatabaseBase {
         const result = (database ? database : this._database);
         if (!result) {
             throw new DatabaseBuilderError("Database not specified in query. Call 'executeAndRead'.");

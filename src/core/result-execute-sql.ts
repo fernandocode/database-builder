@@ -1,7 +1,7 @@
-import { RowsResultExecuteSql } from "./rows-result-execute-sql";
+// import { RowsResultExecuteSql } from "./rows-result-execute-sql";
 
-export interface ResultExecuteSql {
-    rows: RowsResultExecuteSql;
-    rowsAffected: number;
-    insertId: number;
-}
+// export interface DatabaseResult {
+//     rows: RowsResultExecuteSql;
+//     rowsAffected: number;
+//     insertId: number;
+// }

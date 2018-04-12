@@ -1,13 +1,12 @@
-import { ResultExecuteSql } from "./../core/result-execute-sql";
 
-export type DatabaseSQLite = DatabaseTransaction | DatabaseObject;
+export type DatabaseBase = DatabaseTransaction | DatabaseObject;
 
 export interface DatabaseTransaction {
     start: () => void;
     executeSql: (
         sql: any,
         values: any,
-        success: (tx: DatabaseTransaction, result: ResultExecuteSql) => void,
+        success: (tx: DatabaseTransaction, result: DatabaseResult) => void,
         error: (tx: DatabaseTransaction, error: any) => void,
     ) => void;
     addStatement: (sql: any, values: any, success: () => void, error: () => void) => void;
@@ -36,11 +35,22 @@ export interface DatabaseObject {
      * Execute SQL on the opened database. Note, you must call `create` first, and
      * ensure it resolved and successfully opened the database.
      */
-    executeSql(statement: string, params: any): Promise<any>;
+    executeSql(statement: string, params: any): Promise<DatabaseResult>;
     /**
      * @param sqlStatements {Array<string | string[] | any>}
      * @returns {Promise<any>}
      */
     sqlBatch(sqlStatements: Array<string | string[] | any>): Promise<any>;
     abortallPendingTransactions(): void;
+}
+
+export interface DatabaseResult {
+    rows: DatabaseRowList;
+    rowsAffected: number;
+    insertId: number;
+}
+
+export interface DatabaseRowList {
+    length: number;
+    item(index: number): any;
 }

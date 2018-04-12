@@ -1,6 +1,6 @@
 import { DeleteColumnsBuilder } from "./delete-columns-builder";
 import { WhereBuilder } from "./../where-builder";
-import { DatabaseSQLite } from "./../../definitions/database-definition";
+import { DatabaseBase } from "./../../definitions/database-definition";
 import { CrudBase } from "./../crud-base";
 import { DeleteBuilder } from "./delete-builder";
 
@@ -8,7 +8,7 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
 
     constructor(
         typeT: new () => T,
-        database: DatabaseSQLite = void 0,
+        database: DatabaseBase = void 0,
         enableLog: boolean = true,
     ) {
         super(new DeleteBuilder(typeT), database, enableLog);

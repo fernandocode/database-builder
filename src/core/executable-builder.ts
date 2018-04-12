@@ -1,6 +1,5 @@
-import { DatabaseObject, DatabaseSQLite, DatabaseTransaction } from "./../definitions/database-definition";
+import { DatabaseBase, DatabaseObject, DatabaseResult, DatabaseTransaction } from "./../definitions/database-definition";
 import { QueryCompiled } from "./query-compiled";
-import { ResultExecuteSql } from "./result-execute-sql";
 
 export class ExecutableBuilder {
 
@@ -10,15 +9,15 @@ export class ExecutableBuilder {
 
     public execute(
         compiled: QueryCompiled,
-        database: DatabaseSQLite,
-    ): Promise<ResultExecuteSql> {
+        database: DatabaseBase,
+    ): Promise<DatabaseResult> {
         this.log(compiled);
         return this.executeSql(database, compiled);
     }
 
     private executeSql(
-        database: DatabaseSQLite, compiled: QueryCompiled,
-    ): Promise<ResultExecuteSql> {
+        database: DatabaseBase, compiled: QueryCompiled,
+    ): Promise<DatabaseResult> {
         if ((database as DatabaseObject).addTransaction) {
             return (database as DatabaseObject).executeSql(
                 compiled.query,
@@ -29,7 +28,7 @@ export class ExecutableBuilder {
             (database as DatabaseTransaction).executeSql(
                 compiled.query,
                 compiled.params,
-                (tx: DatabaseTransaction, result: ResultExecuteSql) => {
+                (tx: DatabaseTransaction, result: DatabaseResult) => {
                     resolve(result);
                 },
                 (tx: DatabaseTransaction, error: any) => {

@@ -1,6 +1,6 @@
 import { MapperTable } from "./../../mapper-table";
 import { DatabaseHelper } from "./../../database-helper";
-import { ResultExecuteSql } from "./../../core/result-execute-sql";
+import { DatabaseResult } from "../..";
 
 export class QueryReadableBuilderBase {
     private _databaseHelper: DatabaseHelper;
@@ -12,7 +12,7 @@ export class QueryReadableBuilderBase {
     }
 
     public toCast(
-        cursor: ResultExecuteSql,
+        cursor: DatabaseResult,
     ): any {
         const items: any[] = [];
         this.forCursor(cursor, (item) => {
@@ -22,7 +22,7 @@ export class QueryReadableBuilderBase {
     }
 
     public map(
-        cursor: ResultExecuteSql,
+        cursor: DatabaseResult,
         mapper: (row: any) => any,
     ): any {
         const items: any[] = [];
@@ -33,7 +33,7 @@ export class QueryReadableBuilderBase {
     }
 
     public read<TReader>(
-        cursor: ResultExecuteSql,
+        cursor: DatabaseResult,
         newable: new () => TReader,
         mapperTable: MapperTable,
     ): TReader[] {
@@ -41,7 +41,7 @@ export class QueryReadableBuilderBase {
     }
 
     public readCursor<TReader>(
-        cursor: ResultExecuteSql,
+        cursor: DatabaseResult,
         newable: new () => TReader,
         mapperTable: MapperTable,
     ): TReader[] {
@@ -54,7 +54,7 @@ export class QueryReadableBuilderBase {
     }
 
     public forCursor(
-        cursor: ResultExecuteSql,
+        cursor: DatabaseResult,
         forRow: (row: any) => void,
     ): void {
         // verificar se consulta retornou dados

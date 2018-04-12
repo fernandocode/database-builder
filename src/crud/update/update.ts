@@ -1,6 +1,6 @@
 import { UpdateColumnsBuilder } from "./update-columns-builder";
 import { WhereBuilder } from "./../where-builder";
-import { DatabaseSQLite } from "./../../definitions/database-definition";
+import { DatabaseBase } from "./../../definitions/database-definition";
 import { MetadataTable } from "./../../metadata-table";
 import { UpdateBuilder } from "./update-builder";
 import { CrudBase } from "./../crud-base";
@@ -12,7 +12,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
         modelToSave: T = void 0,
         metadata: MetadataTable<T>,
         alias: string = void 0,
-        database: DatabaseSQLite = void 0,
+        database: DatabaseBase = void 0,
         enableLog: boolean = true,
     ) {
         super(new UpdateBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
