@@ -2,6 +2,7 @@ import { ReferencesModelTest } from "./models/reference-model-test";
 import { assert, expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { Query } from "..";
+import * as moment from "moment";
 
 describe("Where", () => {
 
@@ -348,23 +349,34 @@ describe("Where", () => {
     it("between", () => {
         const query = new Query(TestClazz);
         query.where(where => {
+            // number
             where.not().between(x => x.id, 2, 4)
                 .or()
                 .scope(scope => {
+                    // string
                     scope.between(x => x.description, "this value", "b")
                         .or()
+                        // boolean
                         .between(x => x.disabled, false, true);
-                });
+                })
+                .and()
+                // moment
+                .between(x => x.dateMoment,
+                    moment.utc(`2001-1-20`, "YYYY-MM-DD"),
+                    moment.utc(`2001-7-13`, "YYYY-MM-DD"))
+                ;
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(6);
+        expect(result.params.length).to.equal(8);
         expect(result.params[0]).to.equal(2);
         expect(result.params[1]).to.equal(4);
         expect(result.params[2]).to.equal("this value");
         expect(result.params[3]).to.equal("b");
         expect(result.params[4]).to.equal(false);
         expect(result.params[5]).to.equal(true);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?)");
+        expect(result.params[6]).to.equal(979948800);
+        expect(result.params[7]).to.equal(994982400);
+        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?) AND tes.dateMoment BETWEEN ? AND ?");
     });
 
     it("between (deprecated)", () => {
