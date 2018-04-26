@@ -33,7 +33,7 @@ describe("Projections", () => {
         });
         const result = query.compile();
         expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, tes.referenceTest_id AS referenceTest_id FROM TestClazz AS tes");
+        expect(result.query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, tes.date AS date, tes.referenceTest_id AS referenceTest_id FROM TestClazz AS tes");
     });
 
     it("add column", () => {
@@ -286,6 +286,38 @@ describe("Projections", () => {
         const result = query.compile();
         expect(result.params.length).to.equal(0);
         expect(result.query).to.equal("SELECT SUM(COUNT(DISTINCT(tes.id))) AS test_id, AVG(MAX(DISTINCT(MIN(COUNT(tes.referenceTest_id))))) AS referenceTest_id FROM TestClazz AS tes");
+    });
+
+    it("ref string", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            const ref = select.ref("id");
+            expect(ref.result()).to.equal("tes.id");
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+    });
+
+    it("ref expression", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            const ref = select.ref(x => x.id);
+            expect(ref.result()).to.equal("tes.id");
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+    });
+
+    it("add with ref", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes");
     });
 
 });

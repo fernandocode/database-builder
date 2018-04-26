@@ -5,4 +5,5 @@ export class TestClazz {
     public description: string = "";
     public referenceTest: TestClazzRef = new TestClazzRef();
     public disabled: boolean = false;
+    public date: number = 0;
 }

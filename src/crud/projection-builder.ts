@@ -42,8 +42,15 @@ export class ProjectionBuilder<T> {
         return new ProjectionsHelper(this._typeT, this._aliasTable, false);
     }
 
-    public ref(column: string): ColumnRef {
-        return new ColumnRef(column, this._aliasTable);
+    // public ref(column: string): ColumnRef {
+    //     return new ColumnRef(column, this._aliasTable);
+    // }
+
+    public ref(expression: ExpressionOrColumn<T>): ColumnRef {
+        return new ColumnRef(
+            Utils.getColumn(expression),
+            this._aliasTable
+        );
     }
 
     public plan(value: any): PlanRef {

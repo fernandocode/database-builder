@@ -4,7 +4,7 @@ export type DatabaseBase = DatabaseTransaction | DatabaseObject;
 export interface DatabaseTransaction {
     start: () => void;
     executeSql: (
-        sql: any,
+        sql: string,
         values: any,
         success: (tx: DatabaseTransaction, result: DatabaseResult) => void,
         error: (tx: DatabaseTransaction, error: any) => void,
@@ -24,12 +24,12 @@ export interface DatabaseObject {
      * @param fn {any}
      * @returns {Promise<any>}
      */
-    transaction(fn: any): Promise<any>;
+    transaction(fn: (transaction: DatabaseTransaction) => void): Promise<any>;
     /**
      * @param fn {() => void}
      * @returns {Promise<any>}
      */
-    readTransaction(fn: (tx: DatabaseTransaction) => void): Promise<any>;
+    readTransaction(fn: (transaction: DatabaseTransaction) => void): Promise<any>;
     startNextTransaction(): void;
     /**
      * Execute SQL on the opened database. Note, you must call `create` first, and
