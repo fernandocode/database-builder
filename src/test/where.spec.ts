@@ -24,6 +24,17 @@ describe("Where", () => {
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
+    it("column string", () => {
+        const query = new Query(TestClazz);
+        query.where(where => {
+            where.equal(query.ref("id"), 2);
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(1);
+        expect(result.params[0]).to.equal(2);
+        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
+    });
+
     it("multi", () => {
         const query = new Query(TestClazz);
         query.where(where => {

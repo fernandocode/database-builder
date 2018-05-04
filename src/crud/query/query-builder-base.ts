@@ -81,10 +81,6 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
     }
 
-    // public ref(expression: ExpressionOrColumn<T>): string {
-    //     return this.addAlias(Utils.getColumn(expression));
-    // }
-
     public ref(expression: ExpressionOrColumn<T>): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
@@ -167,7 +163,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     }
 
     public orderBy(expression: ExpressionOrColumn<T>, order: OrderBy = OrderBy.ASC): TQuery {
-        this.compileOrderBy(`${this.addAlias(Utils.getColumn(expression))} ${order}`);
+        this.compileOrderBy(`${Utils.addAlias(Utils.getColumn(expression), this._alias)} ${order}`);
         return this._getInstance();
     }
 
@@ -183,7 +179,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         expression: ExpressionOrColumn<T>,
         havingCallback?: (having: HavingBuilder<T>, projection: ProjectionsHelper<T>) => void
     ): TQuery {
-        this.compileGroupBy(this.addAlias(Utils.getColumn(expression)));
+        this.compileGroupBy(Utils.addAlias(Utils.getColumn(expression), this._alias));
         if (havingCallback) {
             const whereHaving = new HavingBuilder(this._typeT, "");
             havingCallback(whereHaving, new ProjectionsHelper(this._typeT, this._alias, false));
@@ -277,9 +273,10 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return queryBase;
     }
 
-    private addAlias(column: string): string {
-        return `${this._alias}.${column}`;
-    }
+    // In Utils
+    // private addAlias(column: string): string {
+    //     return `${this._alias}.${column}`;
+    // }
 
     private compileGroupBy(groupBy: string) {
         if (groupBy && groupBy.length) {

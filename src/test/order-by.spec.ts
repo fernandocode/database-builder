@@ -56,4 +56,15 @@ describe("Order By", () => {
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes ORDER BY tes.id DESC, tes.referenceTest_id ASC, tes.description DESC");
     });
 
+    it("with string", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
+        });
+        query.asc(`strftime('%m', datetime(${query.ref(x => x.date).result()}, 'unixepoch'))`);
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes ORDER BY strftime('%m', datetime(tes.date, 'unixepoch')) ASC");
+    });
+
 });

@@ -85,4 +85,15 @@ describe("Group By", () => {
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id HAVING SUM(COUNT(tes.id)) > ? AND SUM(tes.referenceTest_id) <= MAX(COUNT(tes.id))");
     });
 
+    it("with string", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
+        });
+        query.groupBy(`strftime('%m', datetime(${query.ref(x => x.date).result()}, 'unixepoch'))`);
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes GROUP BY strftime('%m', datetime(tes.date, 'unixepoch'))");
+    });
+
 });

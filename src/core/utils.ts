@@ -260,6 +260,15 @@ export class Utils {
         return param;
     }
 
+    public static addAlias(
+        column: string, alias: string
+    ): string {
+        if (column && alias && Utils.isNameColumn(column)) {
+            return `${alias}.${column}`;
+        }
+        return column;
+    }
+
     private static isColumnReservedNameOrNotAllowed(columnName: string): boolean {
         return this.isStartWithNumber(columnName) || this.isReservedBoolean(columnName);
     }

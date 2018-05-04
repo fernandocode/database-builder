@@ -375,8 +375,8 @@ export abstract class WhereBaseBuilder<
         const columnLeft = this.processParam(left);
         this.buildWhereParams(
             condition,
-            this.addAlias(columnRight.column),
-            this.addAlias(columnLeft.column),
+            Utils.addAlias(columnRight.column, this._alias),
+            Utils.addAlias(columnLeft.column, this._alias),
             columnRight.params.concat(columnLeft.params)
         );
     }
@@ -403,14 +403,15 @@ export abstract class WhereBaseBuilder<
         this._where += this.createWhere(conditions, column1, column2);
     }
 
-    protected addAlias(
-        column: string,
-    ): string {
-        if (column && this._alias && Utils.isNameColumn(column)) {
-            return `${this._alias}.${column}`;
-        }
-        return column;
-    }
+    // In Utils
+    // protected addAlias(
+    //     column: string,
+    // ): string {
+    //     if (column && this._alias && Utils.isNameColumn(column)) {
+    //         return `${this._alias}.${column}`;
+    //     }
+    //     return column;
+    // }
 
     protected addParam(
         param: ValueTypeToParse | ValueTypeToParse[],
@@ -460,7 +461,7 @@ export abstract class WhereBaseBuilder<
             this.addParam(metadata.right);
             metadata.right = "?";
         }
-        this.buildWhere(metadata.condition, this.addAlias(metadata.left), this.addAlias(metadata.right));
+        this.buildWhere(metadata.condition, Utils.addAlias(metadata.left, this._alias), Utils.addAlias(metadata.right, this._alias));
     }
 
     private addValueParam(
