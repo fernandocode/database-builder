@@ -24,7 +24,6 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     implements QueryBuilderBaseContract<T, QueryBuilderBase<T, TQuery>> {
 
     protected _limit: BuilderCompiled = new BuilderCompiled();
-    // protected _offset: BuilderCompiled = new BuilderCompiled();
     protected _orderBy: string = "";
     protected _groupBy: string = "";
     protected _having: WhereCompiled = {
@@ -151,15 +150,10 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         projectionCallback(instanceProjection);
         this.compileProjection(instanceProjection.compile());
         return this._getInstance();
-        // return this.select(projectionCallback);
     }
 
     public select(...expressions: Array<ExpressionOrColumn<T>>): TQuery {
         return this.projection(projection => projection.columns(...expressions));
-        // const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
-        // instanceProjection.columns(...expressions);
-        // this.compileProjection(instanceProjection.compile());
-        // return this._getInstance();
     }
 
     public orderBy(expression: ExpressionOrColumn<T>, order: OrderBy = OrderBy.ASC): TQuery {
@@ -218,10 +212,6 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
             this._limit.builder.length > 0
                 ? `${this.LIMIT}${this._limit.builder}`
                 : "";
-        // const buildOffset = () =>
-        //     this._offset.builder.length > 0
-        //         ? `${this.OFFSET}${this._offset.builder}`
-        //         : "";
         return this.buildUnions({
             params: sqlBase.params.concat(
                 this._joinParams.concat(
@@ -272,11 +262,6 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         }
         return queryBase;
     }
-
-    // In Utils
-    // private addAlias(column: string): string {
-    //     return `${this._alias}.${column}`;
-    // }
 
     private compileGroupBy(groupBy: string) {
         if (groupBy && groupBy.length) {

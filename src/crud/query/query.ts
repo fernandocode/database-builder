@@ -81,7 +81,6 @@ export class Query<T> implements QueryCompilable {
     }
 
     /**
-     * @deprecated Use `select`
      * @param projectionCallback
      */
     public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): Query<T> {

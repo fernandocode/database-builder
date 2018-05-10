@@ -12,8 +12,8 @@
     "publish-npm": "tsc & npm publish"
   },
   "dependencies": {
-    "moment": "2.22.0",
-    "lambda-expression": "0.1.2"
+    "moment": ">=2.22.0",
+    "lambda-expression": ">=0.1.2"
   },
   "devDependencies": {
     "@types/chai": "^4.1.1",
