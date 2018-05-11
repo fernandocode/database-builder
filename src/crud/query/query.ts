@@ -191,12 +191,12 @@ export class Query<T> implements QueryCompilable {
         });
     }
 
-    public firstOrDefault(): Promise<T> {
+    public firstOrDefault(_default?: any): Promise<T> {
         return new Promise((resolve, reject) => {
             this.limit(1)
                 .toList()
                 .then((result) => {
-                    resolve((result && result.length) ? result[0] : void 0);
+                    resolve((result && result.length) ? result[0] : _default);
                 })
                 .catch((err) => {
                     reject(err);
