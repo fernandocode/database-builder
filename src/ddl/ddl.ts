@@ -4,6 +4,7 @@ import { MetadataTable } from "./../metadata-table";
 import { DatabaseBase } from "./../definitions/database-definition";
 import { GetMapper } from "../definitions/interface-get-mapper";
 import { DatabaseBuilderError } from "../core/errors";
+import { TypeOrString } from "../core/utils";
 
 export class Ddl {
 
@@ -20,7 +21,7 @@ export class Ddl {
         return new Create(typeT, metadata, database, this.enableLog);
     }
 
-    public drop<T>(typeT: new () => T,
+    public drop<T>(typeT: TypeOrString<T>,
                    database: DatabaseBase = this.getDatabase(),
     ): Drop<T> {
         return new Drop(typeT, database, this.enableLog);

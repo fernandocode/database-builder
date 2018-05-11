@@ -1,18 +1,21 @@
+import { Utils } from "./../core/utils";
 import { DdlColumnsBuilder } from "./ddl-columns-builder";
 import { ColumnsBaseCompiled } from "./../core/columns-base-compiled";
+import { TypeOrString } from "../core/utils";
 
 export abstract class DdlBaseBuilder<T> {
 
-    protected _tablename: string;
+    // protected _tablename: string;
 
     private _columnsCompiled: ColumnsBaseCompiled = {
         columns: [],
     } as ColumnsBaseCompiled;
 
     constructor(
-        protected readonly _typeT: new () => T,
+        protected _tablename: string
+        // protected readonly _typeT: TypeOrString<T>,
     ) {
-        this._tablename = _typeT.name;
+        // this._tablename = Utils.getValueByTypeOrString(_typeT);
     }
 
     public compile(): string {

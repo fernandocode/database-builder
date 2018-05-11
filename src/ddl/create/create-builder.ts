@@ -5,7 +5,8 @@ import { DdlBaseBuilder } from "../ddl-base-builder";
 export class CreateBuilder<T> extends DdlBaseBuilder<T> {
 
     constructor(typeT: new () => T, private _metadata: MetadataTable<T>) {
-        super(typeT);
+        super(typeT.name);
+        // super(typeT);
     }
 
     public columns(columnsCallback: (columns: DdlColumnsBuilder<T>) => void): CreateBuilder<T> {

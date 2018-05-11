@@ -22,6 +22,8 @@ import { PlanRef } from "./plan-ref";
 export type ValueType = number | string | boolean;
 export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 
+export type TypeOrString<T> = (new () => T) | string;
+
 export type ExpressionOrColumn<T> = Expression<T> | string;
 
 export type TypeWhere<T> = Expression<T> | ValueTypeToParse | ColumnRef | ProjectionsHelper<T>;
@@ -141,6 +143,10 @@ export class Utils {
                 : this.isValue(value)
                     ? ExpressionOrValueEnum.Value
                     : ExpressionOrValueEnum.Expression;
+    }
+
+    public static getValueByTypeOrString<T>(param: TypeOrString<T>): string {
+        return this.isString(param) ? param as string : (param as (new () => T)).name;
     }
 
     public static getColumn<T>(expression: ExpressionOrColumn<T>): string {
