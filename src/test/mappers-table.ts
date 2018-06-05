@@ -1,3 +1,4 @@
+import { TestClazzList } from "./models/test-clazz-list";
 import { DatabaseBuilderError } from "./../core/errors";
 import { Regiao } from "./models/regiao";
 import { SubRegiao } from "./models/sub-regiao";
@@ -49,6 +50,11 @@ export class MappersTable implements GetMapper {
         new MetadataTable(TestClazzRef, this._databaseHelper)
             .autoMapper(false, true, false);
 
+    // tslint:disable-next-line:member-ordering
+    public testClazzListMapper =
+        new MetadataTable(TestClazzList, this._databaseHelper)
+            .autoMapper(false, true, false);
+
     private _mappersKeyValue: Map<string, MetadataTable<any>> = new Map([
         this.createEntry(this.classificacaoMapper),
         this.createEntry(this.clienteMapper),
@@ -58,6 +64,7 @@ export class MappersTable implements GetMapper {
         this.createEntry(this.regiaoMapper),
         this.createEntry(this.testClazzMapper),
         this.createEntry(this.testClazzRefMapper),
+        this.createEntry(this.testClazzListMapper),
     ]);
 
     /**

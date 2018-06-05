@@ -5,17 +5,13 @@ import { TypeOrString } from "../core/utils";
 
 export abstract class DdlBaseBuilder<T> {
 
-    // protected _tablename: string;
-
     private _columnsCompiled: ColumnsBaseCompiled = {
         columns: [],
     } as ColumnsBaseCompiled;
 
     constructor(
         protected _tablename: string
-        // protected readonly _typeT: TypeOrString<T>,
     ) {
-        // this._tablename = Utils.getValueByTypeOrString(_typeT);
     }
 
     public compile(): string {
