@@ -1,6 +1,7 @@
 import { MapperTable } from "./../../mapper-table";
 import { DatabaseHelper } from "./../../database-helper";
 import { DatabaseResult } from "../..";
+import { RowResult } from "../../core/row-result";
 
 export class QueryReadableBuilderBase {
     private _databaseHelper: DatabaseHelper;
@@ -28,6 +29,17 @@ export class QueryReadableBuilderBase {
         const items: any[] = [];
         this.forCursor(cursor, (item) => {
             items.push(mapper(item));
+        });
+        return items;
+    }
+
+    public mapper(
+        cursor: DatabaseResult,
+        mapper: (row: RowResult<any>) => any,
+    ): any {
+        const items: any[] = [];
+        this.forCursor(cursor, (item) => {
+            items.push(mapper(new RowResult(item)));
         });
         return items;
     }

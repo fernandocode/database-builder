@@ -199,7 +199,7 @@ export class Utils {
         return new ProjectionCompiled(expression + "");
     }
 
-    public static getValue<T>(instance: any, expression: ExpressionOrColumn<T>): string {
+    public static getValue<T>(instance: any, expression: ExpressionOrColumn<T>): any {
         return this.expressionOrColumn(expression) === ExpressionOrColumnEnum.Expression
             ? this.getExpressionUtils().getValueByExpression(instance, expression as Expression<T>)
             : this.getExpressionUtils().getValue(instance, expression as string);

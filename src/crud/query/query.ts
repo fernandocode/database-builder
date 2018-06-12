@@ -1,3 +1,4 @@
+import { RowResult } from "./../../core/row-result";
 import { HavingBuilder } from "./../having-builder";
 import { QueryReadableBuilder } from "./query-readable-builder";
 import { QueryCompiled } from "./../../core/query-compiled";
@@ -182,6 +183,16 @@ export class Query<T> implements QueryCompilable {
     }
 
     public map(mapper: (row: any) => any): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            this.execute()
+                .then((cursor) => {
+                    resolve(this._queryReadableBuilder.map(cursor, mapper));
+                })
+                .catch(reject);
+        });
+    }
+
+    public mapper(mapper: (row: RowResult<any>) => any): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.execute()
                 .then((cursor) => {
