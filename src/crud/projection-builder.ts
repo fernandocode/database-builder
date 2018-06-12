@@ -1,13 +1,10 @@
-import { Expression, ExpressionUtils } from "lambda-expression";
 import { PlanRef } from "./../core/plan-ref";
 import { ProjectionsUtils } from "./../core/projections-utils";
 import { BuilderCompiled } from "../core/builder-compiled";
 import { MapperTable } from "./../mapper-table";
-import { WhereBuilder } from "./where-builder";
-import { ExpressionOrColumn, ProjectionOrValue, TypeProjection, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { ExpressionOrColumn, TypeProjection, Utils } from "./../core/utils";
 import { ColumnRef } from "./../core/column-ref";
 import { QueryCompiled } from "./../core/query-compiled";
-import { WhereCompiled } from "./where-compiled";
 import { ProjectionCompiled } from "./projection-compiled";
 import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";
@@ -22,10 +19,11 @@ export class ProjectionBuilder<T> {
     constructor(
         private _typeT: new () => T,
         private _aliasTable: string,
-        private _addAliasTableToAlias: boolean = false
+        private _addAliasTableToAlias: boolean = false,
+        addAliasDefault?: boolean
     ) {
         this._projectionsUtils = new ProjectionsUtils(
-            _typeT, _aliasTable, _addAliasTableToAlias,
+            _aliasTable, _addAliasTableToAlias, addAliasDefault,
             (projection: ProjectionCompiled) => this.applyProjection(projection)
         );
     }
@@ -42,10 +40,6 @@ export class ProjectionBuilder<T> {
         return new ProjectionsHelper(this._typeT, this._aliasTable, false);
     }
 
-    // public ref(column: string): ColumnRef {
-    //     return new ColumnRef(column, this._aliasTable);
-    // }
-
     public ref(expression: ExpressionOrColumn<T>): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
@@ -57,14 +51,9 @@ export class ProjectionBuilder<T> {
         return new PlanRef(value);
     }
 
-    // use `.proj()`
-    // public create(): ProjectionBuilder<T> {
-    //     return new ProjectionBuilder(this._typeT, this._aliasTable);
-    // }
-
     public group(
         alias: string,
-        ...projections: Array<TypeProjection<T>>,
+        ...projections: Array<TypeProjection<T>>
     ): ProjectionBuilder<T> {
         const groupCompiled = this.proj().group(alias, ...projections)._compiled();
         this.apply(
@@ -83,7 +72,7 @@ export class ProjectionBuilder<T> {
      */
     public column(
         column: string,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.apply(column, void 0, alias);
         return this;
@@ -103,7 +92,7 @@ export class ProjectionBuilder<T> {
 
     public add(
         expression: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(void 0,
             expression,
@@ -114,7 +103,7 @@ export class ProjectionBuilder<T> {
 
     public sum(
         expression?: ExpressionOrColumn<T> | string,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Sum,
             expression,
@@ -125,7 +114,7 @@ export class ProjectionBuilder<T> {
 
     public max(
         expression?: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Max,
             expression,
@@ -136,7 +125,7 @@ export class ProjectionBuilder<T> {
 
     public min(
         expression?: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Min,
             expression,
@@ -147,7 +136,7 @@ export class ProjectionBuilder<T> {
 
     public avg(
         expression?: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Avg,
             expression,
@@ -212,7 +201,7 @@ export class ProjectionBuilder<T> {
 
     public cast(
         expression?: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Cast,
             expression,
@@ -223,7 +212,7 @@ export class ProjectionBuilder<T> {
 
     public distinct(
         expression?: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Distinct,
             expression,
@@ -236,7 +225,7 @@ export class ProjectionBuilder<T> {
     public case(
         caseCallback: (caseInstance: ProjectionCase<T>) => void,
         expression: ExpressionOrColumn<T> = void 0,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         const instanceCase: ProjectionCase<T> = new ProjectionCase(expression, alias);
         caseCallback(instanceCase);
@@ -246,11 +235,27 @@ export class ProjectionBuilder<T> {
 
     public coalesce(
         expression: ExpressionOrColumn<T>,
-        alias: string = void 0,
+        alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Coalesce,
             expression,
             alias,
+        );
+        return this;
+    }
+
+    public coalesceP(
+        projectionCallback: (projection: ProjectionBuilder<T>) => void,
+        defaultValue: any,
+        alias: string,
+    ): ProjectionBuilder<T> {
+        const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this._aliasTable, void 0, false);
+        projectionCallback(instanceProjection);
+        const projectionInner = instanceProjection.compile();
+        this.buildProjectionWithExpression(Projection.Coalesce,
+            `${projectionInner.projection}, ${defaultValue}`,
+            alias,
+            projectionInner.params
         );
         return this;
     }
@@ -322,7 +327,7 @@ export class ProjectionBuilder<T> {
     private buildProjectionWithExpression(
         projection: Projection,
         expression: ExpressionOrColumn<T> | string,
-        alias: string = void 0,
+        alias?: string,
         args: any[] = []) {
         this.apply(expression, projection ? [projection] : void 0, alias, args);
     }

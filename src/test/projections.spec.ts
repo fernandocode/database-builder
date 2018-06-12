@@ -1,11 +1,9 @@
 import { Operator } from "./../crud/enums/operator";
-import { Projection } from "./../crud/enums/projection";
 import { TestClazzRef } from "./models/test-clazz-ref";
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { MappersTable } from "./mappers-table";
 import { Query } from "./../crud/query/query";
-import { ProjectionsHelper } from "../core/projections-helper";
 
 const mappersTable = new MappersTable();
 
@@ -150,6 +148,16 @@ describe("Projections", () => {
         const result = query.compile();
         expect(result.params.length).to.equal(0);
         expect(result.query).to.equal("SELECT COALESCE(tes.id) AS id FROM TestClazz AS tes");
+    });
+
+    it("coalesce projection", () => {
+        const query = new Query(TestClazz);
+        query.projection(select => {
+            select.coalesceP(x => x.sum(x => x.id), 0, "id");
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT COALESCE(SUM(tes.id), 0) AS id FROM TestClazz AS tes");
     });
 
     it("coalesce builder", () => {

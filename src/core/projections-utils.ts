@@ -1,7 +1,6 @@
 import { Projection } from "./../crud/enums/projection";
 import { ExpressionOrColumn, Utils } from "./utils";
 import { ProjectionCompiled } from "..";
-import { ProjectionBuilder } from "../crud/projection-builder";
 
 export class ProjectionsUtils<T> {
 
@@ -10,9 +9,9 @@ export class ProjectionsUtils<T> {
     private _pendingProjections: Projection[] = [];
 
     constructor(
-        private _typeT: new () => T,
         private _aliasTable: string,
         private _addAliasTableToAlias: boolean = false,
+        private _addAliasDefault: boolean = true,
         private _registerProjetionCallback?: (projection: ProjectionCompiled) => void
     ) {
     }
@@ -88,7 +87,7 @@ export class ProjectionsUtils<T> {
     }
 
     private defaultAliasAs(column: string): string {
-        if (column === ProjectionsUtils.WILDCARD) {
+        if (column === ProjectionsUtils.WILDCARD || !this._addAliasDefault) {
             return "";
         }
         return this._addAliasTableToAlias

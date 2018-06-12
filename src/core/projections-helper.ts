@@ -1,9 +1,6 @@
-import { PlanRef } from "./plan-ref";
-import { ColumnRef } from "./column-ref";
 import { Projection } from "./../crud/enums/projection";
 import { ExpressionOrColumn, TypeProjection, Utils } from "./utils";
 import { ProjectionCompiled } from "..";
-import { ProjectionBuilder } from "../crud/projection-builder";
 import { ProjectionsUtils } from "./projections-utils";
 
 export class ProjectionsHelper<T> {
@@ -17,8 +14,7 @@ export class ProjectionsHelper<T> {
         private _registerProjetionCallback?: (projection: ProjectionCompiled) => void,
         private _result?: ProjectionCompiled
     ) {
-        this._projectionsUtils = new ProjectionsUtils<T>(
-            _typeT, _aliasTable, _addAliasTableToAlias, _registerProjetionCallback);
+        this._projectionsUtils = new ProjectionsUtils<T>(_aliasTable, _addAliasTableToAlias, void 0, _registerProjetionCallback);
     }
 
     public _compiled(): ProjectionCompiled {
@@ -27,7 +23,7 @@ export class ProjectionsHelper<T> {
 
     public group(
         alias: string,
-        ...projections: Array<TypeProjection<T>>,
+        ...projections: Array<TypeProjection<T>>
     ): ProjectionsHelper<T> {
         const projectionsCompiled = new ProjectionCompiled();
         projections.forEach((projection) => {
