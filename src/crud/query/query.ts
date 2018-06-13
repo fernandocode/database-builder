@@ -196,7 +196,7 @@ export class Query<T> implements QueryCompilable {
         return new Promise((resolve, reject) => {
             this.execute()
                 .then((cursor) => {
-                    resolve(this._queryReadableBuilder.map(cursor, mapper));
+                    resolve(this._queryReadableBuilder.mapper(cursor, mapper));
                 })
                 .catch(reject);
         });
