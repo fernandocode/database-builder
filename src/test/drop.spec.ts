@@ -1,4 +1,4 @@
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { DropBuilder } from "../ddl/drop/drop-builder";
 

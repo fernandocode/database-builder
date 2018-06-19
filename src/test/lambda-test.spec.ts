@@ -1,7 +1,7 @@
 import { Cliente } from "./models/cliente";
 import { Query } from "./../crud/query/query";
 
-import { assert, expect } from "chai";
+import { expect } from "chai";
 
 describe("Lambda Expression", () => {
 

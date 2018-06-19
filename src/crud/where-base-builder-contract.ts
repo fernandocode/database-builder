@@ -1,11 +1,7 @@
-import { DatabaseHelper } from "./../database-helper";
 import { LambdaExpression } from "lambda-expression";
-import { ExpressionOrColumn, Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { ValueTypeToParse } from "./../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
-import { Condition } from "./enums/condition";
-import { LambdaMetadata } from "../core/lambda-metadata";
-import { DatabaseBuilderError } from "../core/errors";
 import { ColumnRef } from "../core/column-ref";
 
 export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBaseBuilderContract<T, TExpression, TWhere>> {

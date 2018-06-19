@@ -1,8 +1,5 @@
 import { RowResult } from "./../core/row-result";
 import { expect } from "chai";
-import { Query } from "..";
-import { TestClazz } from "./models/test-clazz";
-import { TestClazzRef } from "./models/test-clazz-ref";
 
 describe("Row Result", () => {
 

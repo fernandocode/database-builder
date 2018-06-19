@@ -1,15 +1,8 @@
 import { Query } from "./../crud/query/query";
-import { Regiao } from "./models/regiao";
-import { Uf } from "./models/uf";
-import { Classificacao } from "./models/classificacao";
-import { ProjectionCompiled } from "./../crud/projection-compiled";
-import { Projection } from "./../crud/enums/projection";
-import { SubRegiao } from "./models/sub-regiao";
 import { Cliente } from "./models/cliente";
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { Operator } from "../crud/enums/operator";
-import { Crud, Insert } from "../index";
 import { MappersTable } from "./mappers-table";
 
 const mappersTable = new MappersTable();

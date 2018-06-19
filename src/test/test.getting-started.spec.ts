@@ -1,7 +1,6 @@
 import { Query } from "./../crud/query/query";
 import { TestClazz } from "./models/test-clazz";
-import { assert, expect } from "chai";
-import { OrderBy } from "../core/enums/order-by";
+import { expect } from "chai";
 
 describe("Getting Started", () => {
 

@@ -5,7 +5,6 @@ export class DropBuilder<T> extends DdlBaseBuilder<T> {
 
     constructor(typeT: TypeOrString<T>) {
         super(Utils.getValueByTypeOrString(typeT));
-        // super(typeT);
     }
 
     protected buildBase(): string {

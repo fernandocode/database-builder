@@ -1,8 +1,6 @@
 import { ProjectionBuilder } from "./../projection-builder";
-import { QueryBuilder } from ".";
 import { JoinType, ProjectionCompiled, WhereBuilder } from "..";
 import { QueryBuilderBase } from "./query-builder-base";
-import { DatabaseBuilderError } from "../../core/errors";
 import { JoinQueryBuilderContract } from "./join-query-builder-contract";
 import { WhereCompiled } from "../where-compiled";
 

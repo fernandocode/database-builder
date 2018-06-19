@@ -1,7 +1,6 @@
 import { BuilderCompiled } from "../core/builder-compiled";
 import { WhereBuilder } from "./where-builder";
 import { ExpressionOrColumn, Utils, ValueType } from "../core/utils";
-import { ExpressionUtils } from "lambda-expression";
 import { ProjectionCaseWhen } from "./projection-case-when";
 
 export class ProjectionCase<T> {

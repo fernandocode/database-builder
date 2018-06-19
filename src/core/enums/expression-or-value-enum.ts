@@ -1,4 +1,3 @@
-
 export enum ExpressionOrValueEnum {
     Expression,
     Value,

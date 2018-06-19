@@ -1,4 +1,3 @@
-import { Projection } from "./../crud/enums/projection";
 import { ExpressionOrValueEnum } from "./enums/expression-or-value-enum";
 import * as moment from "moment";
 import { ValueTypeToParse } from "./utils";
@@ -13,7 +12,6 @@ import { ColumnType } from "./enums/column-type";
 import { ProjectionCompiled } from "../crud/projection-compiled";
 import { Condition } from "../crud/enums/condition";
 import { DatabaseBuilderError } from "./errors";
-import { ExpressionOrColumnOrProjectionEnum } from "./enums/expression-or-column-or-projection-enum";
 import { ProjectionsHelper } from "./projections-helper";
 import { ColumnParams } from "./column-params";
 import { ColumnRef } from "./column-ref";
@@ -109,19 +107,19 @@ export class Utils {
         return this.isNumber(value) || this.isString(value) || this.isBoolean(value);
     }
 
-    public static isValueTypeToParse<T>(value: any): boolean {
+    public static isValueTypeToParse(value: any): boolean {
         return this.isValueType(value) || this.isDate(value) || this.isMoment(value) || this.isObject(value);
     }
 
-    public static isWhereBuilder<T>(whereCandidate: any): boolean {
+    public static isWhereBuilder(whereCandidate: any): boolean {
         return whereCandidate instanceof WhereBuilder;
     }
 
-    public static isColumnRef<T>(instance: any): boolean {
+    public static isColumnRef(instance: any): boolean {
         return instance instanceof ColumnRef;
     }
 
-    public static isPlanRef<T>(instance: any): boolean {
+    public static isPlanRef(instance: any): boolean {
         return instance instanceof PlanRef;
     }
 

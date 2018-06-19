@@ -1,5 +1,5 @@
 import { ReferencesModelTest } from "./models/reference-model-test";
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { JoinType, Query } from "..";
 

@@ -1,4 +1,4 @@
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { Query } from "..";
 import { OrderBy } from "../core/enums/order-by";
