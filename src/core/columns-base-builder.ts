@@ -33,7 +33,7 @@ export abstract class ColumnsBaseBuilder<
         return this.getInstance();
     }
 
-    public set(expression: ExpressionOrColumn<T>): TThis {
+    public set<TReturn extends ValueTypeToParse>(expression: ExpressionOrColumn<TReturn, T>): TThis {
         return this.setColumn(
             Utils.getColumn(expression),
             Utils.getType(this.metadata.instance, expression),

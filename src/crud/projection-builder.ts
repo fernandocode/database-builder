@@ -40,7 +40,7 @@ export class ProjectionBuilder<T> {
         return new ProjectionsHelper(this._typeT, this._aliasTable, false);
     }
 
-    public ref(expression: ExpressionOrColumn<T>): ColumnRef {
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
             this._aliasTable
@@ -79,7 +79,7 @@ export class ProjectionBuilder<T> {
     }
 
     public columns(
-        ...expressions: Array<ExpressionOrColumn<T>>
+        ...expressions: Array<ExpressionOrColumn<any, T>>
     ): ProjectionBuilder<T> {
         for (const key in expressions) {
             if (expressions.hasOwnProperty(key)) {
@@ -90,8 +90,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public add(
-        expression: ExpressionOrColumn<T>,
+    public add<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(void 0,
@@ -101,8 +101,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public sum(
-        expression?: ExpressionOrColumn<T> | string,
+    public sum<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T> | string,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Sum,
@@ -112,8 +112,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public max(
-        expression?: ExpressionOrColumn<T>,
+    public max<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Max,
@@ -123,8 +123,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public min(
-        expression?: ExpressionOrColumn<T>,
+    public min<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Min,
@@ -134,8 +134,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public avg(
-        expression?: ExpressionOrColumn<T>,
+    public avg<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Avg,
@@ -153,16 +153,16 @@ export class ProjectionBuilder<T> {
      * @returns {ProjectionBuilder<T>}
      * @memberof ProjectionBuilder
      */
-    public avgRound(
-        expression: ExpressionOrColumn<T>,
+    public avgRound<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.apply(expression, [Projection.Round, Projection.Avg], alias);
         return this;
     }
 
-    public round(
-        expression?: ExpressionOrColumn<T>,
+    public round<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Round,
@@ -172,8 +172,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public count(
-        expression?: ExpressionOrColumn<T>,
+    public count<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Count,
@@ -191,16 +191,16 @@ export class ProjectionBuilder<T> {
      * @returns {ProjectionBuilder<T>}
      * @memberof ProjectionBuilder
      */
-    public countDistinct(
-        expression: ExpressionOrColumn<T>,
+    public countDistinct<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.apply(expression, [Projection.Count, Projection.Distinct], alias);
         return this;
     }
 
-    public cast(
-        expression?: ExpressionOrColumn<T>,
+    public cast<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Cast,
@@ -210,8 +210,8 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public distinct(
-        expression?: ExpressionOrColumn<T>,
+    public distinct<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Distinct,
@@ -222,19 +222,19 @@ export class ProjectionBuilder<T> {
     }
 
     // CASE {expression} {when} END
-    public case(
-        caseCallback: (caseInstance: ProjectionCase<T>) => void,
-        expression: ExpressionOrColumn<T> = void 0,
+    public case<TReturn>(
+        caseCallback: (caseInstance: ProjectionCase<TReturn, T>) => void,
+        expression: ExpressionOrColumn<TReturn, T> = void 0,
         alias?: string,
     ): ProjectionBuilder<T> {
-        const instanceCase: ProjectionCase<T> = new ProjectionCase(expression, alias);
+        const instanceCase: ProjectionCase<TReturn, T> = new ProjectionCase(expression, alias);
         caseCallback(instanceCase);
         this.compileCase(instanceCase.compile());
         return this;
     }
 
-    public coalesce(
-        expression: ExpressionOrColumn<T>,
+    public coalesce<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
         this.buildProjectionWithExpression(Projection.Coalesce,
@@ -270,9 +270,9 @@ export class ProjectionBuilder<T> {
      * @returns
      * @memberof ProjectionBuilder
      */
-    public projection(
+    public projection<TReturn>(
         projection: Projection,
-        expression: ExpressionOrColumn<T>,
+        expression: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args: any[] = [],
     ) {
@@ -280,8 +280,8 @@ export class ProjectionBuilder<T> {
     }
 
     // TODO: fazer coalesce para subQuery
-    public coalesceBuilder(
-        expression: ExpressionOrColumn<T>,
+    public coalesceBuilder<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         defaultValue: any,
     ): string {
         return this.builderProjection(Projection.Coalesce,
@@ -324,16 +324,16 @@ export class ProjectionBuilder<T> {
         }
     }
 
-    private buildProjectionWithExpression(
+    private buildProjectionWithExpression<TReturn>(
         projection: Projection,
-        expression: ExpressionOrColumn<T> | string,
+        expression: ExpressionOrColumn<TReturn, T> | string,
         alias?: string,
         args: any[] = []) {
         this.apply(expression, projection ? [projection] : void 0, alias, args);
     }
 
-    private apply(
-        expression?: ExpressionOrColumn<T>,
+    private apply<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]) {

@@ -8,7 +8,8 @@ describe("Row Result", () => {
             id: 1,
             name: "Abc",
             test: true,
-            age: 0
+            age: 0,
+            d: new Date()
         };
 
         const rowResult = new RowResult(model);
@@ -18,6 +19,7 @@ describe("Row Result", () => {
         expect(rowResult.get("ttt")).to.equal(void 0);
         expect(rowResult.coalesce("ttt", 123)).to.equal(123);
         expect(rowResult.coalesce(x => x.age, 123)).to.equal(model.age);
+        expect(rowResult.coalesce(x => x.d, new Date())).to.equal(model.d);
     });
 
     // it("Query", () => {

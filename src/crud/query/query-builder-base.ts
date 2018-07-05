@@ -80,7 +80,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
     }
 
-    public ref(expression: ExpressionOrColumn<T>): ColumnRef {
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
             this.alias
@@ -152,25 +152,25 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return this._getInstance();
     }
 
-    public select(...expressions: Array<ExpressionOrColumn<T>>): TQuery {
+    public select(...expressions: Array<ExpressionOrColumn<any, T>>): TQuery {
         return this.projection(projection => projection.columns(...expressions));
     }
 
-    public orderBy(expression: ExpressionOrColumn<T>, order: OrderBy = OrderBy.ASC): TQuery {
+    public orderBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>, order: OrderBy = OrderBy.ASC): TQuery {
         this.compileOrderBy(`${Utils.addAlias(Utils.getColumn(expression), this._alias)} ${order}`);
         return this._getInstance();
     }
 
-    public asc(expression: ExpressionOrColumn<T>): TQuery {
+    public asc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery {
         return this.orderBy(expression, OrderBy.ASC);
     }
 
-    public desc(expression: ExpressionOrColumn<T>): TQuery {
+    public desc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery {
         return this.orderBy(expression, OrderBy.DESC);
     }
 
-    public groupBy(
-        expression: ExpressionOrColumn<T>,
+    public groupBy<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         havingCallback?: (having: HavingBuilder<T>, projection: ProjectionsHelper<T>) => void
     ): TQuery {
         this.compileGroupBy(Utils.addAlias(Utils.getColumn(expression), this._alias));

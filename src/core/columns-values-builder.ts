@@ -1,6 +1,5 @@
 import { MetadataTable } from "./../metadata-table";
 import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
-import { Expression } from "lambda-expression";
 import { ColumnsBaseBuilder } from "./columns-base-builder";
 import { Column } from "./column";
 import { FieldType } from "./enums/field-type";
@@ -26,7 +25,7 @@ export abstract class ColumnsValuesBuilder<
         return this.getInstance();
     }
 
-    public setValue(expression: ExpressionOrColumn<T>, value: ValueTypeToParse): TThis {
+    public setValue<TReturn extends ValueTypeToParse>(expression: ExpressionOrColumn<TReturn, T>, value: TReturn): TThis {
         return this.setColumnValue(
             Utils.getColumn(expression),
             value,
@@ -34,7 +33,7 @@ export abstract class ColumnsValuesBuilder<
         );
     }
 
-    public set(expression: ExpressionOrColumn<T>): TThis {
+    public set<TReturn extends ValueTypeToParse>(expression: ExpressionOrColumn<TReturn, T>): TThis {
         return this.setValue(
             expression,
             this.getValueByExpression(expression),
@@ -55,7 +54,7 @@ export abstract class ColumnsValuesBuilder<
 
     protected abstract columnFormat(column: Column): string;
 
-    private getValueByExpression(expression: ExpressionOrColumn<T>) {
+    private getValueByExpression<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TReturn {
         return Utils.getValue(this.modelToSave, expression);
     }
 }

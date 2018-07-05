@@ -42,7 +42,7 @@ export class Query<T> implements QueryCompilable {
         return this._queryBuilder.alias;
     }
 
-    public ref(expression: ExpressionOrColumn<T>): ColumnRef {
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef {
         return this._queryBuilder.ref(expression);
     }
 
@@ -89,7 +89,7 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public select(...expressions: Array<ExpressionOrColumn<T>>): Query<T> {
+    public select(...expressions: Array<ExpressionOrColumn<any, T>>): Query<T> {
         this._queryBuilder.select(...expressions);
         return this;
     }
@@ -99,23 +99,23 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public orderBy(expression: ExpressionOrColumn<T>, order: OrderBy = OrderBy.ASC): Query<T> {
+    public orderBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>, order: OrderBy = OrderBy.ASC): Query<T> {
         this._queryBuilder.orderBy(expression, order);
         return this;
     }
 
-    public asc(expression: ExpressionOrColumn<T>): Query<T> {
+    public asc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): Query<T> {
         this._queryBuilder.asc(expression);
         return this;
     }
 
-    public desc(expression: ExpressionOrColumn<T>): Query<T> {
+    public desc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): Query<T> {
         this._queryBuilder.desc(expression);
         return this;
     }
 
-    public groupBy(
-        expression: ExpressionOrColumn<T>,
+    public groupBy<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         havingCallback?: (having: HavingBuilder<T>, projection: ProjectionsHelper<T>) => void
     ): Query<T> {
         this._queryBuilder.groupBy(expression, havingCallback);

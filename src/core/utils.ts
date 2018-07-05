@@ -4,7 +4,7 @@ import { ValueTypeToParse } from "./utils";
 import { WhereBuilder } from "./../crud/where-builder";
 import { DatabaseHelper } from "./../database-helper";
 import { ProjectionBuilder } from "./../crud/projection-builder";
-import { Expression, ExpressionUtils, LambdaColumnMetadata, LambdaExpression } from "lambda-expression";
+import { Expression, ExpressionUtils, LambdaColumnMetadata, LambdaExpression, ReturnExpression } from "lambda-expression";
 import { LambdaMetadata } from "./lambda-metadata";
 import { ExpressionOrColumnEnum } from "./enums/expression-or-column-enum";
 import { FieldType } from "./enums/field-type";
@@ -22,7 +22,7 @@ export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 
 export type TypeOrString<T> = (new () => T) | string;
 
-export type ExpressionOrColumn<T> = Expression<T> | string;
+export type ExpressionOrColumn<TReturn, T> = ReturnExpression<TReturn, T> | string;
 
 export type TypeWhere<T> = Expression<T> | ValueTypeToParse | ColumnRef | ProjectionsHelper<T>;
 
@@ -123,8 +123,8 @@ export class Utils {
         return instance instanceof PlanRef;
     }
 
-    public static expressionOrColumn<T>(
-        value: ExpressionOrColumn<T>
+    public static expressionOrColumn<TReturn, T>(
+        value: ExpressionOrColumn<TReturn, T>
     ): ExpressionOrColumnEnum {
         return this.isString(value)
             ? ExpressionOrColumnEnum.Column
@@ -147,7 +147,7 @@ export class Utils {
         return this.isString(param) ? param as string : (param as (new () => T)).name;
     }
 
-    public static getColumn<T>(expression: ExpressionOrColumn<T>): string {
+    public static getColumn<TReturn, T>(expression: ExpressionOrColumn<TReturn, T>): string {
         const type = this.expressionOrColumn(expression);
         switch (type) {
             case (ExpressionOrColumnEnum.Expression):
@@ -197,7 +197,7 @@ export class Utils {
         return new ProjectionCompiled(expression + "");
     }
 
-    public static getValue<T>(instance: any, expression: ExpressionOrColumn<T>): any {
+    public static getValue<TReturn, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): TReturn {
         return this.expressionOrColumn(expression) === ExpressionOrColumnEnum.Expression
             ? this.getExpressionUtils().getValueByExpression(instance, expression as Expression<T>)
             : this.getExpressionUtils().getValue(instance, expression as string);
@@ -208,8 +208,8 @@ export class Utils {
     }
 
     public static getType(instance: ValueTypeToParse): FieldType;
-    public static getType<T>(instance: any, expression: ExpressionOrColumn<T>): FieldType;
-    public static getType<T>(instance: any, expression?: ExpressionOrColumn<T>): FieldType {
+    public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): FieldType;
+    public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression?: ExpressionOrColumn<TReturn, T>): FieldType {
         if (expression) {
             return this.getTypeByValue(this.getValue(instance, expression));
         }

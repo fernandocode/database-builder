@@ -39,72 +39,72 @@ export class ProjectionsHelper<T> {
             alias, projectionsCompiled.params));
     }
 
-    public sum(
-        expression?: ExpressionOrColumn<T>,
+    public sum<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Sum], alias, args));
     }
 
-    public max(
-        expression?: ExpressionOrColumn<T>,
+    public max<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Max], alias, args));
     }
 
-    public min(
-        expression?: ExpressionOrColumn<T>,
+    public min<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Min], alias, args));
     }
 
-    public avg(
-        expression?: ExpressionOrColumn<T>,
+    public avg<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Avg], alias, args));
     }
 
-    public count(
-        expression?: ExpressionOrColumn<T>,
+    public count<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Count], alias, args));
     }
 
-    public cast(
-        expression?: ExpressionOrColumn<T>,
+    public cast<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Cast], alias, args));
     }
 
-    public distinct(
-        expression?: ExpressionOrColumn<T>,
+    public distinct<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Distinct], alias, args));
     }
 
-    public round(
-        expression?: ExpressionOrColumn<T>,
+    public round<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Round], alias, args));
     }
 
-    public coalesce(
-        expression?: ExpressionOrColumn<T>,
+    public coalesce<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {

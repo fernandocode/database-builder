@@ -13,7 +13,7 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     clone(): TQuery;
 
-    ref(expression: ExpressionOrColumn<T>): ColumnRef;
+    ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef;
 
     hasAlias(alias: string): boolean;
 
@@ -27,16 +27,16 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): TQuery;
 
-    select(...expressions: Array<ExpressionOrColumn<T>>): TQuery;
+    select<TReturn>(...expressions: Array<ExpressionOrColumn<TReturn, T>>): TQuery;
 
-    orderBy(expression: ExpressionOrColumn<T>, order?: OrderBy): TQuery;
+    orderBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>, order?: OrderBy): TQuery;
 
-    asc(expression: ExpressionOrColumn<T>): TQuery;
+    asc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery;
 
-    desc(expression: ExpressionOrColumn<T>): TQuery;
+    desc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery;
 
     // TODO: suportar expressão having: https://sqlite.org/lang_select.html
-    groupBy(expression: ExpressionOrColumn<T>): TQuery;
+    groupBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery;
 
     union(query: QueryCompiled): TQuery;
 

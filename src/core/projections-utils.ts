@@ -16,8 +16,8 @@ export class ProjectionsUtils<T> {
     ) {
     }
 
-    public apply(
-        expression?: ExpressionOrColumn<T>,
+    public apply<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
@@ -35,8 +35,8 @@ export class ProjectionsUtils<T> {
             this.addAliasTable(column), alias, args);
     }
 
-    private _apply(
-        expression: ExpressionOrColumn<T>,
+    private _apply<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
@@ -47,8 +47,8 @@ export class ProjectionsUtils<T> {
         );
     }
 
-    private checkApply(
-        expression?: ExpressionOrColumn<T>,
+    private checkApply<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]

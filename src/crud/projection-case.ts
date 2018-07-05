@@ -3,12 +3,12 @@ import { WhereBuilder } from "./where-builder";
 import { ExpressionOrColumn, Utils, ValueType } from "../core/utils";
 import { ProjectionCaseWhen } from "./projection-case-when";
 
-export class ProjectionCase<T> {
+export class ProjectionCase<TReturn, T> {
 
     private _caseBuilder: BuilderCompiled = new BuilderCompiled();
 
     public constructor(
-        expression: ExpressionOrColumn<T> = void 0,
+        expression: ExpressionOrColumn<TReturn, T> = void 0,
         private _alias: string = void 0,
     ) {
         this._caseBuilder.builder = "CASE";
@@ -20,7 +20,7 @@ export class ProjectionCase<T> {
     public when(
         value: WhereBuilder<T> | ValueType,
         whenCallback: (when: ProjectionCaseWhen<T>) => void,
-    ): ProjectionCase<T> {
+    ): ProjectionCase<TReturn, T> {
         const instanceWhen: ProjectionCaseWhen<T> = new ProjectionCaseWhen(value);
         whenCallback(instanceWhen);
         this.compileWhen(instanceWhen.compile());
