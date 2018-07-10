@@ -8,4 +8,6 @@ export class TestClazz {
     public disabled: boolean = false;
     public date: number = 0;
     public dateMoment: moment.Moment = moment();
+    public dateDate: Date = new Date();
+    public numero = 0;
 }

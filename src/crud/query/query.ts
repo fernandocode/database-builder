@@ -193,10 +193,12 @@ export class Query<T> implements QueryCompilable {
     }
 
     public mapper(mapper: (row: RowResult<any>) => any): Promise<any[]> {
+        const metadata = this.getMetadata();
+        const mapperTable = metadata ? metadata.mapperTable : void 0;
         return new Promise((resolve, reject) => {
             this.execute()
                 .then((cursor) => {
-                    resolve(this._queryReadableBuilder.mapper(cursor, mapper));
+                    resolve(this._queryReadableBuilder.mapper(cursor, mapperTable, mapper));
                 })
                 .catch(reject);
         });
@@ -227,7 +229,7 @@ export class Query<T> implements QueryCompilable {
         return result;
     }
 
-    private getMetadata(metadata: MetadataTable<T>): MetadataTable<T> {
+    private getMetadata(metadata?: MetadataTable<T>): MetadataTable<T> {
         const result = (metadata ? metadata : this._metadata);
         if (!result) {
             throw new DatabaseBuilderError("MetadataTable not specified in query. Call 'executeAndRead'.");

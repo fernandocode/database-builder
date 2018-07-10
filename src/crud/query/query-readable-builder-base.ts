@@ -35,11 +35,12 @@ export class QueryReadableBuilderBase {
 
     public mapper(
         cursor: DatabaseResult,
+        mapperTable: MapperTable,
         mapper: (row: RowResult<any>) => any,
     ): any {
         const items: any[] = [];
         this.forCursor(cursor, (item) => {
-            items.push(mapper(new RowResult(item)));
+            items.push(mapper(new RowResult(item, mapperTable)));
         });
         return items;
     }
