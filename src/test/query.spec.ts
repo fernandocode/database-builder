@@ -127,4 +127,40 @@ describe("Query", () => {
         expect(result.query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
     });
 
+    it("union all", () => {
+        const query = new Query(TestClazz, "p");
+        query.unionAll(
+            new Query(ReferencesModelTest)
+            .select(x => x.id, x => x.name)
+            .where(w => w.equal(x => x.name, "AbC"))
+        );
+        query.where(where => where.great(x => x.id, 2));
+        const result = query.compile();
+        expect(result.params.length).to.equal(2);
+        expect(result.params[0]).to.equal(2);
+        expect(result.params[1]).to.equal("AbC");
+        expect(result.query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
+    });
+
+    it("union all and union", () => {
+        const query = new Query(TestClazz, "p");
+        query.unionAll(
+            new Query(ReferencesModelTest)
+            .select(x => x.id, x => x.name)
+            .where(w => w.equal(x => x.name, "AbC"))
+        );
+        query.union(
+            new Query(ReferencesModelTest)
+            .select(x => x.id)
+            .where(w => w.equal(x => x.id, 10))
+        );
+        query.where(where => where.great(x => x.id, 2));
+        const result = query.compile();
+        expect(result.params.length).to.equal(3);
+        expect(result.params[0]).to.equal(2);
+        expect(result.params[1]).to.equal("AbC");
+        expect(result.params[2]).to.equal(10);
+        expect(result.query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ? UNION SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.id = ?");
+    });
+
 });

@@ -56,6 +56,11 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
+    public unionAll(query: QueryCompiled | QueryCompilable): Query<T> {
+        this._queryBuilder.unionAll(query);
+        return this;
+    }
+
     public join<TJoin>(
         typeTJoin: new () => TJoin,
         onWhere: (where: WhereBuilder<TJoin>) => void,

@@ -1,3 +1,4 @@
+import { UnionType } from "./../../core/union-type";
 import { QueryCompiled } from "./../../core/query-compiled";
 import { ExecutableBuilder } from "./../../core/executable-builder";
 import { ProjectionBuilder } from "./../projection-builder";
@@ -53,7 +54,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
     private _joinParams: ValueType[] = [];
 
-    private _unionsQuery: QueryCompiled[] = [];
+    private _unionsQuery: Array<{ query: QueryCompiled, type: UnionType }> = [];
     private _fromParams: ValueType[] = [];
 
     private _tablename: string;
@@ -112,11 +113,15 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return this._getInstance();
     }
 
-    public union(query: QueryCompiled | QueryCompilable): TQuery {
+    public unionAll(query: QueryCompiled | QueryCompilable): TQuery {
+        return this.union(query, UnionType.All);
+    }
+
+    public union(query: QueryCompiled | QueryCompilable, type: UnionType = UnionType.None): TQuery {
         if ((query as QueryCompilable).compile) {
-            return this.union((query as QueryCompilable).compile());
+            return this.union((query as QueryCompilable).compile(), type);
         }
-        this._unionsQuery.push(query as QueryCompiled);
+        this._unionsQuery.push({ query: query as QueryCompiled, type });
         return this._getInstance();
     }
 
@@ -256,8 +261,8 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         for (const key in this._unionsQuery) {
             if (this._unionsQuery.hasOwnProperty(key)) {
                 const unionQuery = this._unionsQuery[key];
-                queryBase.query += ` UNION ${unionQuery.query}`;
-                queryBase.params = queryBase.params.concat(unionQuery.params);
+                queryBase.query += ` UNION${unionQuery.type === UnionType.All ? " ALL" : ""} ${unionQuery.query.query}`;
+                queryBase.params = queryBase.params.concat(unionQuery.query.params);
             }
         }
         return queryBase;
