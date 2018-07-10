@@ -6,6 +6,7 @@ import { WhereBuilder } from "..";
 import { LambdaExpression } from "lambda-expression";
 import { ProjectionBuilder } from "../projection-builder";
 import { OrderBy } from "../../core/enums/order-by";
+import { UnionType } from "../../core/union-type";
 
 export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseContract<T, TQuery>> extends QueryCompilable {
 
@@ -38,7 +39,9 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
     // TODO: suportar expressão having: https://sqlite.org/lang_select.html
     groupBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery;
 
-    union(query: QueryCompiled): TQuery;
+    union(query: QueryCompiled, type?: UnionType): TQuery;
+
+    unionAll(query: QueryCompiled): TQuery;
 
     execute(database: DatabaseBase): Promise<DatabaseResult>;
 
