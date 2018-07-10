@@ -193,7 +193,7 @@ export class Query<T> implements QueryCompilable {
     }
 
     public mapper(mapper: (row: RowResult<any>) => any): Promise<any[]> {
-        const metadata = this.getMetadata();
+        const metadata = this.getMetadata(void 0, false);
         const mapperTable = metadata ? metadata.mapperTable : void 0;
         return new Promise((resolve, reject) => {
             this.execute()
@@ -229,9 +229,9 @@ export class Query<T> implements QueryCompilable {
         return result;
     }
 
-    private getMetadata(metadata?: MetadataTable<T>): MetadataTable<T> {
+    private getMetadata(metadata: MetadataTable<T>, throwNotFound: boolean = true): MetadataTable<T> {
         const result = (metadata ? metadata : this._metadata);
-        if (!result) {
+        if (!result && throwNotFound) {
             throw new DatabaseBuilderError("MetadataTable not specified in query. Call 'executeAndRead'.");
         }
         return result;
