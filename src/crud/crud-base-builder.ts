@@ -1,5 +1,5 @@
 import { WhereBuilder } from "./where-builder";
-import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
+import { ColumnsValuesBuilder } from "../core/columns-values-builder";
 import { ColumnsCompiled } from "../core/columns-compiled";
 import { QueryCompiled } from "../core/query-compiled";
 import { CrudCompiled } from "../core/crud-compiled";
@@ -11,7 +11,7 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
 
     protected _tablename: string;
 
-    private _columnsCompiled: ColumnsCompiled = { columns: [], params: [] };
+    private _columnsCompiled: ColumnsCompiled = { columns: [], params: [], keyColumns: [] };
     private _whereCompiled: WhereCompiled = { where: "", params: [] };
 
     constructor(

@@ -1,4 +1,4 @@
-import { Condition } from "./../crud/enums/condition";
+import { Condition } from "../crud/enums/condition";
 
 export interface LambdaMetadata {
     left: string;

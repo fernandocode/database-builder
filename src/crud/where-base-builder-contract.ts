@@ -1,5 +1,5 @@
 import { LambdaExpression } from "lambda-expression";
-import { ValueTypeToParse } from "./../core/utils";
+import { ValueTypeToParse } from "../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { ColumnRef } from "../core/column-ref";

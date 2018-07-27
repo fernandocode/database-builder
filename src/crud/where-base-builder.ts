@@ -1,6 +1,6 @@
-import { DatabaseHelper } from "./../database-helper";
+import { DatabaseHelper } from "../database-helper";
 import { LambdaExpression } from "lambda-expression";
-import { Utils, ValueType, ValueTypeToParse } from "./../core/utils";
+import { Utils, ValueType, ValueTypeToParse } from "../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";

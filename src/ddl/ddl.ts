@@ -1,10 +1,10 @@
 import { Drop } from "./drop/drop";
 import { Create } from "./create/create";
-import { MetadataTable } from "./../metadata-table";
-import { DatabaseBase } from "./../definitions/database-definition";
-import { GetMapper } from "../definitions/interface-get-mapper";
+import { MetadataTable } from "../metadata-table";
+import { DatabaseBase } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
 import { TypeOrString } from "../core/utils";
+import { GetMapper } from "..";
 
 export class Ddl {
 

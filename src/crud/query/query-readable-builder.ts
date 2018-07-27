@@ -1,5 +1,5 @@
-import { DatabaseBase } from "./../../definitions/database-definition";
-import { MetadataTable } from "./../../metadata-table";
+import { DatabaseBase } from "../../definitions/database-definition";
+import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
 import { QueryReadableBuilderBase } from "./query-readable-builder-base";
 

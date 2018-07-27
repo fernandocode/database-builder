@@ -1,5 +1,5 @@
 import { DeleteColumnsBuilder } from "./delete-columns-builder";
-import { WhereBuilder } from "./../where-builder";
+import { WhereBuilder } from "../where-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { CrudCompiled } from "../../core/crud-compiled";
 

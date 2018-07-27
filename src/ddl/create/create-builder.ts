@@ -1,5 +1,5 @@
-import { DdlColumnsBuilder } from "./../ddl-columns-builder";
-import { MetadataTable } from "./../../metadata-table";
+import { DdlColumnsBuilder } from "../ddl-columns-builder";
+import { MetadataTable } from "../../metadata-table";
 import { DdlBaseBuilder } from "../ddl-base-builder";
 
 export class CreateBuilder<T> extends DdlBaseBuilder<T> {
@@ -13,9 +13,14 @@ export class CreateBuilder<T> extends DdlBaseBuilder<T> {
     }
 
     protected buildBase(): string {
+        const columns = this.getColumnsCompiled();
+        // ${this._metadata.keyColumn} INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        const primaryColumns = columns.keyColumns.length > 1
+            ? `, PRIMARY KEY (${columns.keyColumns.join(", ")})`
+            : "";
         return `CREATE TABLE IF NOT EXISTS ${this._tablename}(
-            ${this._metadata.keyColumn} INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            ${this.getColumnsCompiled().columns.join(", ")}
+            ${columns.columns.join(", ")}
+            ${primaryColumns}
             );`;
     }
 

@@ -1,8 +1,8 @@
-import { MetadataTable } from "./../metadata-table";
+import { MetadataTable } from "../metadata-table";
 
 export interface GetMapper {
 
-    getMapper<T>(tKey: new () => T): MetadataTable<T>;
+    getMapper<T>(tKey: (new () => T) | string): MetadataTable<T>;
 
     forEachMapper(
         callbackfn: (

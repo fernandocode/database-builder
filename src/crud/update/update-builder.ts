@@ -1,7 +1,7 @@
 import { UpdateColumnsBuilder } from "./update-columns-builder";
-import { WhereBuilder } from "./../where-builder";
-import { MetadataTable } from "./../../metadata-table";
-import { CrudCompiled } from "./../../core/crud-compiled";
+import { WhereBuilder } from "../where-builder";
+import { MetadataTable } from "../../metadata-table";
+import { CrudCompiled } from "../../core/crud-compiled";
 import { CrudBaseBuilder } from "../crud-base-builder";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {

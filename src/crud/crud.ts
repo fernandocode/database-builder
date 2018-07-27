@@ -1,11 +1,11 @@
 import { Query } from "./query/query";
 import { Insert } from "./insert/insert";
 import { Update } from "./update/update";
-import { MetadataTable } from "./../metadata-table";
+import { MetadataTable } from "../metadata-table";
 import { Delete } from "./delete/delete";
-import { DatabaseBase } from "./../definitions/database-definition";
-import { GetMapper } from "../definitions/interface-get-mapper";
+import { DatabaseBase } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
+import { GetMapper } from "..";
 
 export class Crud {
 

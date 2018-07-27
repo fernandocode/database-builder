@@ -1,5 +1,5 @@
 import { HavingBuilderContract } from "./having-builder-contract";
-import { TypeProjection, Utils } from "./../core/utils";
+import { TypeProjection, Utils } from "../core/utils";
 import { WhereBaseBuilder } from "./where-base-builder";
 import { ProjectionsHelper } from "../core/projections-helper";
 import { ColumnParams } from "../core/column-params";

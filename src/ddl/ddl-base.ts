@@ -1,5 +1,5 @@
-import { ExecutableBuilder } from "./../core/executable-builder";
-import { DatabaseBase, DatabaseResult } from "./../definitions/database-definition";
+import { ExecutableBuilder } from "../core/executable-builder";
+import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
 import { DdlBaseBuilder } from "./ddl-base-builder";
 import { DatabaseBuilderError } from "../core/errors";
 

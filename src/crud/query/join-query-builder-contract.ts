@@ -1,4 +1,4 @@
-import { ProjectionCompiled } from "./../projection-compiled";
+import { ProjectionCompiled } from "../projection-compiled";
 import { QueryBuilderBaseContract } from "./query-builder-base-contract";
 import { WhereCompiled } from "../where-compiled";
 

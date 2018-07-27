@@ -1,6 +1,6 @@
-import { Utils } from "./../../core/utils";
+import { Utils } from "../../core/utils";
 import { InsertColumnsBuilder } from "./insert-columns-builder";
-import { MetadataTable } from "./../../metadata-table";
+import { MetadataTable } from "../../metadata-table";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { CrudCompiled } from "../../core/crud-compiled";
 
@@ -22,15 +22,17 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
 
     protected buildBase(): CrudCompiled {
         const parameterValues: any[] = [];
-        this.getColumnsCompiled().columns.forEach((column) => {
+
+        const columnsCompiled = this.getColumnsCompiled();
+        columnsCompiled.columns.forEach((column) => {
             parameterValues.push("?");
         });
 
         return {
-            params: this.getColumnsCompiled().params,
+            params: columnsCompiled.params,
             sql: Utils.normalizeSqlString(
                 `INSERT INTO ${this._tablename}
-                    (${this.getColumnsCompiled().columns.join(", ")})
+                    (${columnsCompiled.columns.join(", ")})
                     VALUES (${parameterValues.join(", ")})`
             ),
         };

@@ -1,10 +1,10 @@
-import { PlanRef } from "./../core/plan-ref";
-import { ProjectionsUtils } from "./../core/projections-utils";
+import { PlanRef } from "../core/plan-ref";
+import { ProjectionsUtils } from "../core/projections-utils";
 import { BuilderCompiled } from "../core/builder-compiled";
-import { MapperTable } from "./../mapper-table";
-import { ExpressionOrColumn, TypeProjection, Utils } from "./../core/utils";
-import { ColumnRef } from "./../core/column-ref";
-import { QueryCompiled } from "./../core/query-compiled";
+import { MapperTable } from "../mapper-table";
+import { ExpressionOrColumn, TypeProjection, Utils } from "../core/utils";
+import { ColumnRef } from "../core/column-ref";
+import { QueryCompiled } from "../core/query-compiled";
 import { ProjectionCompiled } from "./projection-compiled";
 import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";

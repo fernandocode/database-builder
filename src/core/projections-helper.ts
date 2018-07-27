@@ -1,4 +1,4 @@
-import { Projection } from "./../crud/enums/projection";
+import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, TypeProjection, Utils } from "./utils";
 import { ProjectionCompiled } from "..";
 import { ProjectionsUtils } from "./projections-utils";

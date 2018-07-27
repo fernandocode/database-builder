@@ -1,9 +1,9 @@
-import { UnionType } from "./../../core/union-type";
-import { QueryCompiled } from "./../../core/query-compiled";
-import { ExecutableBuilder } from "./../../core/executable-builder";
-import { ProjectionBuilder } from "./../projection-builder";
-import { ExpressionOrColumn, Utils, ValueType } from "./../../core/utils";
-import { DatabaseBase, DatabaseResult } from "./../../definitions/database-definition";
+import { UnionType } from "../../core/union-type";
+import { QueryCompiled } from "../../core/query-compiled";
+import { ExecutableBuilder } from "../../core/executable-builder";
+import { ProjectionBuilder } from "../projection-builder";
+import { ExpressionOrColumn, Utils, ValueType } from "../../core/utils";
+import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { WhereBuilder } from "../where-builder";
 import { OrderBy } from "../../core/enums/order-by";
 import { WhereCompiled } from "../where-compiled";

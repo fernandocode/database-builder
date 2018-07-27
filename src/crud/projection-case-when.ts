@@ -1,4 +1,4 @@
-import { ProjectionsHelper } from "./../core/projections-helper";
+import { ProjectionsHelper } from "../core/projections-helper";
 import { ProjectionOrValue, Utils, ValueType, ValueTypeToParse } from "../core/utils";
 import { CaseWhen } from "./enums/case-when";
 import { BuilderCompiled } from "../core/builder-compiled";

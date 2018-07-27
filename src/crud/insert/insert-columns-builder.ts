@@ -8,6 +8,6 @@ export class InsertColumnsBuilder<T> extends ColumnsValuesBuilder<T, InsertColum
     }
 
     protected columnFormat(column: Column): string {
-        return column.name;
+        return column.isAutoIncrement ? void 0 : column.name;
     }
 }

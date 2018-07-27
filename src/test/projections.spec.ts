@@ -1,11 +1,11 @@
-import { Operator } from "./../crud/enums/operator";
+import { Operator } from "../crud/enums/operator";
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { MappersTable } from "./mappers-table";
-import { Query } from "./../crud/query/query";
+// import { MappersTable } from "./mappers-table";
+import { Query } from "../crud/query/query";
 
-const mappersTable = new MappersTable();
+// const mappersTable = new MappersTable();
 
 describe("Projections", () => {
 
@@ -26,12 +26,13 @@ describe("Projections", () => {
 
     it("default explicit columns", () => {
         const query = new Query(TestClazz);
-        query.projection(select => {
-            select.allByMap(mappersTable.getMapper(TestClazz));
-        });
+        // TODO: comment
+        // query.projection(select => {
+        //     select.allByMap(mappersTable.getMapper(TestClazz));
+        // });
         const result = query.compile();
         expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id FROM TestClazz AS tes");
+        expect(result.query).to.equal("SELECT tes.internalKey AS internalKey, tes.referenceTestCode_code AS referenceTestCode_code, tes.id AS id, tes.description AS description, tes.disabled AS disabled, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id FROM TestClazz AS tes");
     });
 
     it("add column", () => {

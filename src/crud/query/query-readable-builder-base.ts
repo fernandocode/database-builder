@@ -1,5 +1,5 @@
-import { MapperTable } from "./../../mapper-table";
-import { DatabaseHelper } from "./../../database-helper";
+import { MapperTable } from "../../mapper-table";
+import { DatabaseHelper } from "../../database-helper";
 import { DatabaseResult } from "../..";
 import { RowResult } from "../../core/row-result";
 

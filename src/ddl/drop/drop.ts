@@ -1,5 +1,5 @@
-import { DatabaseBase } from "./../../definitions/database-definition";
-import { DdlBase } from "./../ddl-base";
+import { DatabaseBase } from "../../definitions/database-definition";
+import { DdlBase } from "../ddl-base";
 import { DropBuilder } from "./drop-builder";
 import { TypeOrString } from "../../core/utils";
 

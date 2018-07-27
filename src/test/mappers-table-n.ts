@@ -110,47 +110,6 @@
 //         this.createEntry(this.testClazzCompositeIdMapper),
 //     ]);
 
-//     /**
-//      * Find mapper metadata by key
-//      *
-//      * @public
-//      * @param {string} tKey
-//      * @returns {MetadataTable}
-//      * @memberof MappersTable
-//      */
-//     public getMapper<T>(tKey: new () => T): MetadataTable<T> {
-//         return this._mappersKeyValue.get(tKey.name);
-//     }
-
-//     public forEachMapper(
-//         callbackfn: (
-//             value: MetadataTable<any>,
-//             key: string,
-//             map: Map<string, MetadataTable<any>>
-//         ) => void,
-//         thisArg?: any
-//     ) {
-//         this._mappersKeyValue.forEach(callbackfn);
-//     }
-
-//     /**
-//      * Find mapper metadata by key and merge with new instance of data
-//      *
-//      * @param {string} tKey
-//      * @param {*} newInstance
-//      * @returns {MetadataTable}
-//      * @memberof MappersTable
-//      */
-//     public getMapperMerge<T>(tKey: new () => T, newInstance: any): MetadataTable<T> {
-//         const mapper = this.getMapper(tKey);
-//         if (!mapper) {
-//             throw new DatabaseBuilderError(`Mapper to ${tKey.name} not found!`);
-//         }
-//         const metadataCopy: MetadataTable<T> = Object.assign({}, mapper);
-//         metadataCopy.instance = Object.assign(metadataCopy.instance, newInstance);
-//         return metadataCopy;
-//     }
-
 //     private createEntry(metadataTable: MetadataTable<any>): [string, MetadataTable<any>] {
 //         return [metadataTable.instance.constructor.name, metadataTable];
 //     }

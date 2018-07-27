@@ -1,4 +1,4 @@
-import { ColumnRef } from "./../../core/column-ref";
+import { ColumnRef } from "../../core/column-ref";
 import { QueryCompilable } from "../../core/query-compilable";
 import { ExpressionOrColumn } from "../../core/utils";
 import { DatabaseBase, DatabaseResult, QueryCompiled } from "../..";

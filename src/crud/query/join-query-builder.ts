@@ -1,4 +1,4 @@
-import { ProjectionBuilder } from "./../projection-builder";
+import { ProjectionBuilder } from "../projection-builder";
 import { JoinType, ProjectionCompiled, WhereBuilder } from "..";
 import { QueryBuilderBase } from "./query-builder-base";
 import { JoinQueryBuilderContract } from "./join-query-builder-contract";

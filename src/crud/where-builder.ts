@@ -1,5 +1,5 @@
 import { WhereBuilderContract } from "./where-builder-contract";
-import { TypeWhere, Utils } from "./../core/utils";
+import { TypeWhere, Utils } from "../core/utils";
 import { WhereBaseBuilder } from "./where-base-builder";
 import { ColumnParams } from "../core/column-params";
 

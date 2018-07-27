@@ -1,4 +1,4 @@
-import { DatabaseBase, DatabaseObject, DatabaseResult, DatabaseTransaction } from "./../definitions/database-definition";
+import { DatabaseBase, DatabaseObject, DatabaseResult, DatabaseTransaction } from "../definitions/database-definition";
 import { QueryCompiled } from "./query-compiled";
 
 export class ExecutableBuilder {

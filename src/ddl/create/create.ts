@@ -1,5 +1,5 @@
-import { MetadataTable } from "./../../metadata-table";
-import { DatabaseBase } from "./../../definitions/database-definition";
+import { MetadataTable } from "../../metadata-table";
+import { DatabaseBase } from "../../definitions/database-definition";
 import { CreateBuilder } from "./create-builder";
 import { DdlBase } from "../ddl-base";
 

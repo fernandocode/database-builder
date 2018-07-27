@@ -1,8 +1,8 @@
-import { ExecutableBuilder } from "./../core/executable-builder";
-import { DatabaseBase, DatabaseResult } from "./../definitions/database-definition";
+import { ExecutableBuilder } from "../core/executable-builder";
+import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
 import { CrudBaseBuilder } from "./crud-base-builder";
-import { ValueType } from "./../core/utils";
-import { ColumnsValuesBuilder } from "./../core/columns-values-builder";
+import { ValueType } from "../core/utils";
+import { ColumnsValuesBuilder } from "../core/columns-values-builder";
 import { DatabaseBuilderError } from "../core/errors";
 
 export class CrudBase<

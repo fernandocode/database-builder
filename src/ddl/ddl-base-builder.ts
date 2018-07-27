@@ -1,10 +1,11 @@
 import { DdlColumnsBuilder } from "./ddl-columns-builder";
-import { ColumnsBaseCompiled } from "./../core/columns-base-compiled";
+import { ColumnsBaseCompiled } from "../core/columns-base-compiled";
 
 export abstract class DdlBaseBuilder<T> {
 
     private _columnsCompiled: ColumnsBaseCompiled = {
         columns: [],
+        keyColumns: []
     } as ColumnsBaseCompiled;
 
     constructor(
@@ -13,7 +14,11 @@ export abstract class DdlBaseBuilder<T> {
     }
 
     public compile(): string {
-        return this.buildBase();
+        return this.removeMultiSpacesAndBreakLines(this.buildBase());
+    }
+
+    protected removeMultiSpacesAndBreakLines(str: string) {
+        return str.replace(/\s\s+/g, " ");
     }
 
     protected getColumnsCompiled(): ColumnsBaseCompiled {
@@ -40,6 +45,7 @@ export abstract class DdlBaseBuilder<T> {
     private compileColumns(compiled: ColumnsBaseCompiled) {
         if (compiled.columns.length) {
             this._columnsCompiled.columns = this._columnsCompiled.columns.concat(compiled.columns);
+            this._columnsCompiled.keyColumns = this._columnsCompiled.keyColumns.concat(compiled.keyColumns);
         }
     }
 }

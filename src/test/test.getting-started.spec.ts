@@ -1,4 +1,4 @@
-import { Query } from "./../crud/query/query";
+import { Query } from "../crud/query/query";
 import { TestClazz } from "./models/test-clazz";
 import { expect } from "chai";
 

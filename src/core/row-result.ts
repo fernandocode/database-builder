@@ -1,4 +1,4 @@
-import { MapperTable } from "./../mapper-table";
+import { MapperTable } from "../mapper-table";
 import { ExpressionOrColumn, Utils } from "./utils";
 import { DatabaseHelper } from "..";
 import { FieldType } from "./enums/field-type";

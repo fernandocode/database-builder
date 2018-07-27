@@ -9,7 +9,7 @@ export class Cidade extends BaseModel<number> {
     public subRegiao: SubRegiao = new SubRegiao();
 
     constructor(instance?: Cidade) {
-        super(instance ? instance.id : -1);
+        super(instance ? instance.codeImport : -1);
         if (instance) {
             Object.assign(this, instance);
         }
