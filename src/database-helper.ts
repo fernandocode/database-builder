@@ -7,6 +7,16 @@ import { DatabaseBuilderError } from "./core/errors";
 
 export class DatabaseHelper {
 
+    public isTypeSimple(value: ValueTypeToParse): boolean {
+        const type = this.getType(value);
+        return type !== FieldType.OBJECT && type !== FieldType.FUNCTION && type !== FieldType.ARRAY;
+    }
+
+    public isTypeIgnoredInMapper(value: ValueTypeToParse): boolean {
+        const type = this.getType(value);
+        return type === FieldType.ARRAY;
+    }
+
     public getType(value: ValueTypeToParse): FieldType {
         const valueFormatted = this.preFormatValue(value);
         const tipo = typeof valueFormatted;
@@ -19,14 +29,21 @@ export class DatabaseHelper {
                 return FieldType.BOOLEAN;
             case "object":
                 // tratar date como inteiro
-                if (valueFormatted.constructor.name === "Date"
-                    || valueFormatted.constructor.name === "Moment") {
+                if (
+                    valueFormatted.constructor.name === "Date"
+                    || valueFormatted.constructor.name === "Moment"
+                ) {
                     return FieldType.DATE;
+                }
+                if (Array.isArray(valueFormatted)) {
+                    return FieldType.ARRAY;
                 }
                 // serializar todos os objetos
                 return FieldType.OBJECT;
             case "function":
                 return FieldType.FUNCTION;
+            case "undefined":
+                return FieldType.NULL;
             default:
                 throw new DatabaseBuilderError(`type: '${tipo}', value: '${valueFormatted}' não configurado!`);
         }

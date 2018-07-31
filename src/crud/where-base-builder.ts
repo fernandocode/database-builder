@@ -477,9 +477,46 @@ export abstract class WhereBaseBuilder<
         column1: string,
         column2: string | string[],
     ) {
-        const conditionsArray = this._pendingConditions.concat(conditions);
+        // TODO: verificar se colunas não são condition, para remover a condition
+        let conditionsArray = this._pendingConditions.concat(conditions);
         this._pendingConditions = [];
-        return this.buildConditions(conditionsArray, column1, column2);
+        const isConditionIsNullInColumn2 = column2 === Condition.IsNull;
+        if (isConditionIsNullInColumn2) {
+            conditionsArray = this.conditionIsNull(conditionsArray);
+        }
+        // const isConditionInColumn2 = this.isEqualAnyCondition(column2);
+        return this.buildConditions(
+            conditionsArray,
+            column1,
+            isConditionIsNullInColumn2 ? void 0 : column2);
+    }
+
+    private conditionIsNull(currentConditions: Condition[]): Condition[] {
+        // new scope
+        if (!currentConditions || (currentConditions.length === 1 && currentConditions[0] === void 0)) {
+            return [Condition.IsNull];
+        }
+        switch (currentConditions.toString()) {
+            case [Condition.Equal].toString():
+                return [Condition.IsNull];
+            case [Condition.Not, Condition.Equal].toString():
+                return [Condition.Not, Condition.IsNull];
+            default:
+                return currentConditions;
+        }
+    }
+
+    private isEqualAnyCondition(value: string | string[]): boolean {
+        if (Array.isArray(value)) {
+            for (const v of value) {
+                const r = this.isEqualAnyCondition(v);
+                if (r) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return (Object as any).values(Condition).filter((x: string) => x === value).length > 0;
     }
 
     private buildConditions(

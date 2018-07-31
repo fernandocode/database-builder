@@ -134,13 +134,15 @@ export class Utils {
     public static expressionOrValue<T>(
         value: TypeWhere<T>
     ): ExpressionOrValueEnum {
-        return this.isProjectionsHelper(value)
-            ? ExpressionOrValueEnum.Projection
-            : this.isColumnRef(value)
-                ? ExpressionOrValueEnum.Ref
-                : this.isValue(value)
-                    ? ExpressionOrValueEnum.Value
-                    : ExpressionOrValueEnum.Expression;
+        return value === void 0
+            ? ExpressionOrValueEnum.Null
+            : this.isProjectionsHelper(value)
+                ? ExpressionOrValueEnum.Projection
+                : this.isColumnRef(value)
+                    ? ExpressionOrValueEnum.Ref
+                    : this.isValue(value)
+                        ? ExpressionOrValueEnum.Value
+                        : ExpressionOrValueEnum.Expression;
     }
 
     public static getValueByTypeOrString<T>(param: TypeOrString<T>): string {
@@ -180,6 +182,11 @@ export class Utils {
                 return {
                     column: compiled.projection,
                     params: compiled.params
+                };
+            case (ExpressionOrValueEnum.Null):
+                return {
+                    column: Condition.IsNull,
+                    params: []
                 };
         }
     }

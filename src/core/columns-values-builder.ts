@@ -20,8 +20,8 @@ export abstract class ColumnsValuesBuilder<
         column: string,
         value: ValueTypeToParse,
         fieldType: FieldType,
-        isKeyColumn: boolean,
-        isAutoIncrement: boolean): TThis {
+        isKeyColumn?: boolean,
+        isAutoIncrement?: boolean): TThis {
         this.columns.push({
             name: column,
             type: fieldType,
@@ -35,8 +35,8 @@ export abstract class ColumnsValuesBuilder<
     public setValue<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
         value: TReturn,
-        isKeyColumn: boolean,
-        isAutoIncrement: boolean
+        isKeyColumn?: boolean,
+        isAutoIncrement?: boolean
     ): TThis {
         return this.setColumnValue(
             Utils.getColumn(expression),
@@ -49,8 +49,8 @@ export abstract class ColumnsValuesBuilder<
 
     public set<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
-        isKeyColumn: boolean,
-        isAutoIncrement: boolean
+        isKeyColumn?: boolean,
+        isAutoIncrement?: boolean
     ): TThis {
         return this.setValue(
             expression,
@@ -66,6 +66,7 @@ export abstract class ColumnsValuesBuilder<
             keyColumns: [],
             params: [],
         };
+        result.keyColumns = this.columns.filter(x => x.isKeyColumn).map(x => x.name);
         this.columns.forEach((column) => {
             const columnName = this.columnFormat(column);
             if (columnName !== void 0) {

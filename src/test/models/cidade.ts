@@ -1,8 +1,8 @@
-import { BaseModel } from "./base-model";
 import { SubRegiao } from "./sub-regiao";
 import { Uf } from "./uf";
+import { BaseImport } from "./base-import";
 
-export class Cidade extends BaseModel<number> {
+export class Cidade extends BaseImport<number> {
 
     public nome: string = "";
     public uf: Uf = new Uf();

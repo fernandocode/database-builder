@@ -3,11 +3,11 @@ import { Cliente } from "./models/cliente";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { Operator } from "../crud/enums/operator";
-// import { MappersTable } from "./mappers-table";
-
-// const mappersTable = new MappersTable();
+import { MappersTableNew } from "./mappers-table-new";
 
 describe("Query method", () => {
+
+    const mapper = new MappersTableNew();
 
     it("test simple select", () => {
         const query = new Query(Cliente);
@@ -155,24 +155,22 @@ describe("Query method", () => {
     it("test select all by mapper", () => {
         const query = new Query(Cliente);
         query
-            // TODO: comment
-            // .projection(projection => {
-            //     projection.allByMap(mappersTable.getMapper(Cliente));
-            // })
+            .projection(projection => {
+                projection.allByMap(mapper.get(Cliente));
+            })
             .join(Cidade,
                 onWhere =>
                     onWhere.equal(x => x.codeImport, query.ref(x => x.cidade.codeImport)),
                 join => {
-                    // TODO: comment
-                    // join.projection(projection => {
-                    //     projection.allByMap(mappersTable.getMapper(Cidade));
-                    // });
+                    join.projection(projection => {
+                        projection.allByMap(mapper.get(Cidade));
+                    });
                 });
 
         const result = query.compile();
 
         expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal(`SELECT cli.internalKey AS internalKey, cli.cidade_codeImport AS cidade_codeImport, cli.classificacao_codeImport AS classificacao_codeImport, cli.codeImport AS codeImport, cli.razaoSocial AS razaoSocial, cli.apelido AS apelido, cli.desativo AS desativo, cid.internalKey AS cid_internalKey, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport)`);
+        expect(result.query).to.equal(`SELECT cli.internalKey AS internalKey, cli.codeImport AS codeImport, cli.razaoSocial AS razaoSocial, cli.apelido AS apelido, cli.desativo AS desativo, cli.cidade_codeImport AS cidade_codeImport, cli.classificacao_codeImport AS classificacao_codeImport, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport)`);
     });
 
     // TODO: query from query

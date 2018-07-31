@@ -1,10 +1,10 @@
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { RowResult } from "../core/row-result";
 import { expect } from "chai";
-// import { MappersTable } from "./mappers-table";
 import { TestClazz } from "./models/test-clazz";
 import * as moment from "moment";
 import { FieldType } from "../core/enums/field-type";
+import { MappersTableNew } from "./mappers-table-new";
 
 describe("Row Result", () => {
 
@@ -27,9 +27,10 @@ describe("Row Result", () => {
         expect(rowResult.coalesce(x => x.d, new Date())).to.equal(model.d);
     });
 
-    // const mappersTable = new MappersTable();
-
     it("With Mapper", () => {
+
+        const mapper = new MappersTableNew();
+
         const defaultMoment = moment.utc();
 
         const model: any = {};
@@ -42,20 +43,19 @@ describe("Row Result", () => {
         model.date = 1;
         model.referenceTest = new TestClazzRef();
 
-        // TODO: comment
-        // const rowResult = new RowResult(model, mappersTable.getMapper(TestClazz).mapperTable);
-        // expect(rowResult.get(x => x.description)).to.equal(model.description);
-        // expect(rowResult.get(x => x.id)).to.equal(model.id);
-        // expect(rowResult.get(x => x.disabled)).to.equal(model.disabled);
-        // expect(rowResult.get("ttt")).to.equal(void 0);
-        // expect(rowResult.coalesce("ttt", 123)).to.equal(123);
-        // expect(rowResult.coalesce(x => x.numero, 123)).to.equal(model.numero);
-        // expect(rowResult.get(x => x.dateDate)).to.equal(model.dateDate);
-        // expect(rowResult.get(x => x.dateMoment)).to.equal(defaultMoment.unix());
-        // expect(rowResult.autoParse(x => x.dateMoment).format("DD/MM/YYYY")).to.equal(defaultMoment.format("DD/MM/YYYY"));
-        // expect(rowResult.parse(x => x.dateMoment, FieldType.DATE).format("DD/MM/YYYY")).to.equal(defaultMoment.format("DD/MM/YYYY"));
-        // const defaultDate = new Date();
-        // expect(rowResult.coalesce(x => x.dateDate, defaultDate)).to.equal(defaultDate);
+        const rowResult = new RowResult(model, mapper.getThrowErrorNotFound(TestClazz).mapperTable);
+        expect(rowResult.get(x => x.description)).to.equal(model.description);
+        expect(rowResult.get(x => x.id)).to.equal(model.id);
+        expect(rowResult.get(x => x.disabled)).to.equal(model.disabled);
+        expect(rowResult.get("ttt")).to.equal(void 0);
+        expect(rowResult.coalesce("ttt", 123)).to.equal(123);
+        expect(rowResult.coalesce(x => x.numero, 123)).to.equal(model.numero);
+        expect(rowResult.get(x => x.dateDate)).to.equal(model.dateDate);
+        expect(rowResult.get(x => x.dateMoment)).to.equal(defaultMoment.unix());
+        expect(rowResult.autoParse(x => x.dateMoment).format("DD/MM/YYYY")).to.equal(defaultMoment.format("DD/MM/YYYY"));
+        expect(rowResult.parse(x => x.dateMoment, FieldType.DATE).format("DD/MM/YYYY")).to.equal(defaultMoment.format("DD/MM/YYYY"));
+        const defaultDate = new Date();
+        expect(rowResult.coalesce(x => x.dateDate, defaultDate)).to.equal(defaultDate);
     });
 
 });

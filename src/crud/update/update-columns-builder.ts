@@ -8,6 +8,6 @@ export class UpdateColumnsBuilder<T> extends ColumnsValuesBuilder<T, UpdateColum
     }
 
     protected columnFormat(column: Column): string {
-        return `${column.name} = ?`;
+        return column.isKeyColumn ? void 0 : `${column.name} = ?`;
     }
 }

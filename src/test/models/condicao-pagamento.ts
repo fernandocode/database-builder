@@ -1,6 +1,6 @@
-import { BaseModel } from "./base-model";
+import { BaseImport } from "./base-import";
 
-export class CondicaoPagamento extends BaseModel<number> {
+export class CondicaoPagamento extends BaseImport<number> {
 
     public nome: string = "";
 

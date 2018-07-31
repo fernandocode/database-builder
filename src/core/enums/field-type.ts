@@ -5,4 +5,6 @@ export enum FieldType {
     DATE,
     OBJECT,
     FUNCTION,
+    ARRAY,
+    NULL
 }

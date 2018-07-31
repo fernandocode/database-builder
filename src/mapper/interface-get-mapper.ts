@@ -2,7 +2,7 @@ import { MetadataTable } from "../metadata-table";
 
 export interface GetMapper {
 
-    getMapper<T>(tKey: (new () => T) | string): MetadataTable<T>;
+    get<T>(tKey: (new () => T) | string): MetadataTable<T>;
 
     forEachMapper(
         callbackfn: (

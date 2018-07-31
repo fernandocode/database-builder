@@ -10,6 +10,7 @@ import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";
 import { MetadataTable } from "../metadata-table";
 import { ProjectionsHelper } from "../core/projections-helper";
+import { DatabaseBuilderError } from "..";
 
 export class ProjectionBuilder<T> {
     private _projection: ProjectionCompiled = new ProjectionCompiled();
@@ -32,8 +33,11 @@ export class ProjectionBuilder<T> {
         this.apply(ProjectionsUtils.WILDCARD);
     }
 
-    public allByMap(metadade: MetadataTable<T>) {
-        this.selectAllColumns(metadade.mapperTable);
+    public allByMap(metadata: MetadataTable<T>) {
+        if (metadata === void 0) {
+            throw new DatabaseBuilderError(`Mapper not found for '${this._typeT.name}'`);
+        }
+        this.selectAllColumns(metadata.mapperTable);
     }
 
     public proj(): ProjectionsHelper<T> {

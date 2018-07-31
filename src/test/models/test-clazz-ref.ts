@@ -1,6 +1,5 @@
-import { BaseKey } from "./base-key";
 
-export class TestClazzRef extends BaseKey {
+export class TestClazzRef {
     public id: number = 0;
     public description: string = "";
 }

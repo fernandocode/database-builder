@@ -2,5 +2,6 @@ export enum ExpressionOrValueEnum {
     Expression,
     Value,
     Ref,
-    Projection
+    Projection,
+    Null
 }

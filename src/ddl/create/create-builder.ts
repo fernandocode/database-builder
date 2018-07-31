@@ -1,11 +1,15 @@
 import { DdlColumnsBuilder } from "../ddl-columns-builder";
 import { MetadataTable } from "../../metadata-table";
 import { DdlBaseBuilder } from "../ddl-base-builder";
+import { DatabaseBuilderError } from "../..";
 
 export class CreateBuilder<T> extends DdlBaseBuilder<T> {
 
     constructor(typeT: new () => T, private _metadata: MetadataTable<T>) {
         super(typeT.name);
+        if (_metadata === void 0) {
+            throw new DatabaseBuilderError(`Mapper not found for '${typeT.name}'`);
+        }
     }
 
     public columns(columnsCallback: (columns: DdlColumnsBuilder<T>) => void): CreateBuilder<T> {

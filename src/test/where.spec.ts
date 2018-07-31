@@ -24,6 +24,28 @@ describe("Where", () => {
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
+    it("value is null", () => {
+        const query = new Query(TestClazz);
+        const idParam: number = void 0;
+        query.where(where => {
+            where.equal(x => x.id, idParam);
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NULL");
+    });
+
+    it("value is not null", () => {
+        const query = new Query(TestClazz);
+        const idParam: number = void 0;
+        query.where(where => {
+            where.not().equal(x => x.id, idParam);
+        });
+        const result = query.compile();
+        expect(result.params.length).to.equal(0);
+        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
+    });
+
     it("column string", () => {
         const query = new Query(TestClazz);
         query.where(where => {

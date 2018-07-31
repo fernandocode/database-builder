@@ -15,7 +15,7 @@ export class Ddl {
     }
 
     public create<T>(typeT: new () => T,
-                     metadata: MetadataTable<T> = this._mappersTable.getMapper(typeT),
+                     metadata: MetadataTable<T> = this._mappersTable.get(typeT),
                      database: DatabaseBase = this.getDatabase(),
     ): Create<T> {
         return new Create(typeT, metadata, database, this.enableLog);

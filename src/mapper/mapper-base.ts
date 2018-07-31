@@ -1,5 +1,5 @@
 import { Utils } from "./../core/utils";
-import { DatabaseHelper, GetMapper, MetadataTable } from "..";
+import { DatabaseBuilderError, DatabaseHelper, GetMapper, MetadataTable } from "..";
 import { MapperSettingsModel } from "./mapper-settings-model";
 import { Expression } from "lambda-expression";
 
@@ -53,12 +53,21 @@ export class MapperBase implements GetMapper {
         // return this;
     }
 
-    public getMapper<T>(tKey: (new () => T) | string): MetadataTable<T> {
+    public has<T>(tKey: (new () => T) | string): boolean {
+        return this._mappers.has(this.resolveKey(tKey));
+    }
+
+    public get<T>(tKey: (new () => T) | string): MetadataTable<T> {
         return this._mappers.get(
-            Utils.isString(tKey)
-                ? tKey as string
-                : (tKey as (new () => T)).name
+            this.resolveKey(tKey)
         );
+    }
+
+    public getThrowErrorNotFound<T>(tKey: (new () => T) | string): MetadataTable<T> {
+        if (!this.has(tKey)) {
+            throw new DatabaseBuilderError(`Mapper not found for '${this.resolveKey(tKey)}'`);
+        }
+        return this.get(tKey);
     }
 
     public forEachMapper(
@@ -70,5 +79,11 @@ export class MapperBase implements GetMapper {
 
     private push(metadataTable: MetadataTable<any>): void {
         this._mappers.set(metadataTable.instance.constructor.name, metadataTable);
+    }
+
+    private resolveKey<T>(tKey: (new () => T) | string): string {
+        return Utils.isString(tKey)
+            ? tKey as string
+            : (tKey as (new () => T)).name;
     }
 }
