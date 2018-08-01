@@ -163,7 +163,7 @@ $> npm install
 2. Use following commands based on what you'd like to do:
 
 ```shell
-$> npm test              # runs test suite once and exit.
+$> npm run test              # runs test suite once and exit.
 ```
 
 3. Have you found a bug, or want to develop a new feature?

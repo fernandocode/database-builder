@@ -20,8 +20,7 @@ export class MetadataTable<T> {
         public newable: new () => T,
         private _databaseHelper: DatabaseHelper,
         private _getMapper: GetMapper,
-        public readOnly: boolean = false,
-        // public keyColumn: string | string[] = "key",
+        public readOnly: boolean = false
     ) {
         this.instance = new newable();
         this.mapperTable = new MapperTable(newable.name);
@@ -46,7 +45,7 @@ export class MetadataTable<T> {
         referencesIdRecursive: boolean = true
     ): MetadataTable<T> {
         if (this.keyColumns().length === 0) {
-            throw new DatabaseBuilderError("No column as key was informed to the Mapper");
+            throw new DatabaseBuilderError(`Mapper '${this.newable.name}', no column as key was informed to the Mapper`);
         }
         this.autoMapperColumns(references, referencesId, referencesIdRecursive);
         this._autoMapperCalled = true;
@@ -58,7 +57,7 @@ export class MetadataTable<T> {
         isAutoIncrement?: boolean
     ): MetadataTable<T> {
         if (this._autoMapperCalled) {
-            throw new DatabaseBuilderError("Column key must be informed before the call to 'autoMapper()'");
+            throw new DatabaseBuilderError(`Mapper '${this.newable.name}', column key must be informed before the call to 'autoMapper()'`);
         }
         return this.mapper(expression, true, isAutoIncrement);
     }
@@ -77,10 +76,6 @@ export class MetadataTable<T> {
 
     private isKeyColumn(key: string) {
         return (this.keyColumns().filter(x => x.column === key).length > 0);
-        // if (Array.isArray(this.keyColumn)) {
-        //     return this.keyColumn.filter(x => x === key).length > 0;
-        // }
-        // return key === this.keyColumn;
     }
 
     private autoMapperColumns(
@@ -90,14 +85,10 @@ export class MetadataTable<T> {
     ): void {
         for (const key in this.instance) {
             if (key !== "constructor" && typeof this.instance[key] !== "function") {
-                // const type = this._databaseHelper.getType(this.instance[key]);
-                // if (((type !== FieldType.OBJECT)
                 if (
                     this._databaseHelper.isTypeSimple(this.instance[key])
                     || references
                 ) {
-                    // && !this.isKeyColumn(key)) {
-                    // && key !== this.keyColumn) {
                     if (!this.isKeyColumn(key)) {
                         this.setColumn(key, this.getTypeByValue(this.instance[key]));
                     }
@@ -120,14 +111,13 @@ export class MetadataTable<T> {
 
                 if (key !== "constructor" && typeof keyInstanceMapper !== "function") {
                     if (!this._databaseHelper.isTypeSimple(keyInstanceMapper)) {
-                        // if (keyInstanceMapper instanceof Object) {
                         const mapperKey = this.getMapper(keyInstanceMapper.constructor.name);
                         if (mapperKey !== void 0) {
                             if (mapperKey.keyColumns() === void 0 || mapperKey.keyColumns().length < 1) {
-                                throw new DatabaseBuilderError(`Not key column for Key '${key}' the type '${keyInstanceMapper.constructor.name}'`);
+                                throw new DatabaseBuilderError(`Mapper '${this.newable.name}', not key column for Key '${key}' the type '${keyInstanceMapper.constructor.name}'`);
                             }
                             if (mapperKey.keyColumns().length > 1) {
-                                throw new DatabaseBuilderError(`Composite Id not supported (Key '${key}' the type '${keyInstanceMapper.constructor.name}')`);
+                                throw new DatabaseBuilderError(`Mapper '${this.newable.name}', composite Id not supported (Key '${key}' the type '${keyInstanceMapper.constructor.name}')`);
                             }
                             const keyMapped = mapperKey.keyColumns()[0];
                             this.setColumn(
@@ -136,28 +126,15 @@ export class MetadataTable<T> {
                             );
                         } else {
                             if (!this._databaseHelper.isTypeIgnoredInMapper(keyInstanceMapper)) {
-                                throw new DatabaseBuilderError(`Key '${key}' the type '${keyInstanceMapper.constructor.name}' not before mapped`);
+                                throw new DatabaseBuilderError(`Mapper '${this.newable.name}', key '${key}' the type '${keyInstanceMapper.constructor.name}' not before mapped`);
                             }
                         }
                     }
                     if (recursive && !this._databaseHelper.isTypeSimple(keyInstanceMapper)) {
-                        // if (recursive && keyInstanceMapper instanceof Object) {
                         this.autoColumnsModelReferencesRecursive(
                             keyInstanceMapper, `${ascendingRefName}${key}_`,
                             recursive);
                     }
-                    // if (
-                    //     (instanceMapper[key] instanceof Object && instanceMapper[key].hasOwnProperty(referencesIdColumn))) {
-                    //     this.setColumn(
-                    //         `${ascendingRefName}${key}_${referencesIdColumn}`,
-                    //         this.getTypeByValue(instanceMapper[key][referencesIdColumn]),
-                    //     );
-                    // }
-                    // if (recursive && instanceMapper[key] instanceof Object) {
-                    //     this.autoColumnsModelReferencesRecursive(
-                    //         instanceMapper[key], `${ascendingRefName}${key}_`,
-                    //         recursive);
-                    // }
                 }
             }
         }

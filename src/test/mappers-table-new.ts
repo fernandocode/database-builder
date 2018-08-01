@@ -1,3 +1,4 @@
+import { LoginOffline } from "./models/login-offline";
 import { TestClazzList } from "./models/test-clazz-list";
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazz } from "./models/test-clazz";
@@ -13,6 +14,7 @@ import { MapperBase } from "./../mapper/mapper-base";
 import { DatabaseHelper } from "../database-helper";
 import { Regiao } from "./models/regiao";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
+import { MapperSettingsModel } from "..";
 
 export class MappersTableNew extends MapperBase {
 
@@ -41,6 +43,13 @@ export class MappersTableNew extends MapperBase {
         this.add(TestClazz, x => x.internalKey, true);
 
         this.add(TestClazzList, x => x.internalKey, true);
+
+        const settingsReference: MapperSettingsModel = {
+            references: true,
+            referencesId: false,
+            referencesIdRecursive: false
+        };
+        this.add(LoginOffline, x => x.internalKey, true, false, settingsReference);
 
     }
 }

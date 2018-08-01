@@ -1,3 +1,4 @@
+import { LoginOffline } from "./models/login-offline";
 import { Create } from "./../ddl/create/create";
 import { CondicaoPagamento } from "./models/condicao-pagamento";
 import { Marca } from "./models/marca";
@@ -92,6 +93,13 @@ describe("Create", () => {
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
         expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazz( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, description TEXT, disabled BOOLEAN, date INTEGER, dateMoment INTEGER, dateDate INTEGER, numero INTEGER, referenceTest_id INTEGER, referenceTestCode_code TEXT );`);
+    });
+
+    it("LoginOffline", () => {
+        const create = new Create(LoginOffline, mapper.get(LoginOffline));
+        const result = create.compile();
+        expect(result.length > 0).to.equal(true);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS LoginOffline( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, hash TEXT, permissions TEXT );`);
     });
 
 });

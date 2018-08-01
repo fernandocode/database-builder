@@ -52,6 +52,7 @@ export class DatabaseHelper {
     public parseToColumnType(type: FieldType): ColumnType {
         switch (type) {
             case FieldType.STRING:
+            case FieldType.ARRAY:
             case FieldType.OBJECT:
                 return ColumnType.TEXT;
             case FieldType.DATE:
@@ -80,6 +81,7 @@ export class DatabaseHelper {
     public databaseToValue(columnValue: any, fieldType: FieldType) {
         switch (fieldType) {
             case FieldType.OBJECT:
+            case FieldType.ARRAY:
                 return JSON.parse(columnValue);
             case FieldType.DATE:
                 return DatetimeUtils.databaseToDatetime(columnValue);
@@ -94,6 +96,7 @@ export class DatabaseHelper {
         const type = value !== void 0 ? this.getType(value) : fieldType;
         switch (type) {
             case FieldType.OBJECT:
+            case FieldType.ARRAY:
                 return JSON.stringify(value);
             case FieldType.DATE:
                 return DatetimeUtils.datetimeToDatabase(value as moment.Moment);

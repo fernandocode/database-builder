@@ -29,6 +29,14 @@ export class MapperBase implements GetMapper {
     //     return this;
     // }
 
+    /**
+     * Added mapper for column
+     * @param newable Type Model
+     * @param keyColumn Expression primary key
+     * @param isAutoIncrement If primary key is autoincrement, default 'false'
+     * @param readOnly if column is readonly, default 'false'
+     * @param settings settings mapper, default settings construtor
+     */
     public add<T>(
         newable: new () => T,
         keyColumn: Expression<T>,

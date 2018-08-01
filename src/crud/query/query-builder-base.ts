@@ -66,7 +66,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
             alias = this.createUniqueAlias(this.defaultAlias(_typeT));
         }
         if (this.hasAlias(alias)) {
-            throw new DatabaseBuilderError(`Alias: ${alias} já está sendo utilizado nesse contexto de query
+            throw new DatabaseBuilderError(`Mapper '${this._typeT.name}', alias: ${alias} já está sendo utilizado nesse contexto de query
             (query: ${this.compile().query}).`);
         }
         this._alias = alias;
