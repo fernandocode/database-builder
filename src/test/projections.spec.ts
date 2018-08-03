@@ -31,7 +31,7 @@ describe("Projections", () => {
         });
         const result = query.compile();
         expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.disabled AS disabled, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result.query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
     });
 
     it("add column", () => {

@@ -40,6 +40,5 @@ export class DdlColumnsBuilder<T> extends ColumnsBaseBuilder<DdlColumnsBuilder<T
             throw new DatabaseBuilderError(`Mapper '${this.metadata.newable.name}', column '${column.name}' of type 'NULL' not supported!`);
         }
         return `${column.name} ${Utils.parseColumnType(column.type)}${column.isKeyColumn ? ` NOT NULL PRIMARY KEY` : ""}${column.isAutoIncrement ? ` AUTOINCREMENT` : ""}`;
-        // return `${column.name} ${Utils.parseColumnType(column.type)}${column.isAutoIncrement ? ` AUTOINCREMENT` : ""}`;
     }
 }

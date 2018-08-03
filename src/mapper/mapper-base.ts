@@ -18,34 +18,21 @@ export class MapperBase implements GetMapper {
     ) {
     }
 
-    // public mapper(
-    //     readOnly?: boolean,
-    //     settings: MapperSettingsModel = this._defaultSettings,
-    //     ...defaultsMapper: Array<new () => any>
-    // ): MapperBase {
-    //     defaultsMapper.forEach(mapper => {
-    //         this.add(mapper, readOnly, settings);
-    //     });
-    //     return this;
-    // }
-
     /**
-     * Added mapper for column
+     * Auto Mapper Table for Model, primary key and all column initialized in model class
      * @param newable Type Model
      * @param keyColumn Expression primary key
      * @param isAutoIncrement If primary key is autoincrement, default 'false'
      * @param readOnly if column is readonly, default 'false'
      * @param settings settings mapper, default settings construtor
      */
-    public add<T>(
+    public autoMapper<T>(
         newable: new () => T,
         keyColumn: Expression<T>,
         isAutoIncrement?: boolean,
         readOnly?: boolean,
-        settings: MapperSettingsModel = this._defaultSettings,
-        // advancedMapper: (metadata: MetadataTable<T>) => void = void 0
+        settings: MapperSettingsModel = this._defaultSettings
     ): MetadataTable<T> {
-        // ): MapperBase {
         const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly)
             .key(keyColumn, isAutoIncrement)
             .autoMapper(
@@ -53,12 +40,22 @@ export class MapperBase implements GetMapper {
                 settings.referencesId,
                 settings.referencesIdRecursive
             );
-        // if (advancedMapper) {
-        //     advancedMapper(metadata);
-        // }
         this.push(metadata);
         return metadata;
-        // return this;
+    }
+
+    /**
+     * Mapper Table for Model
+     * @param newable Type Model
+     * @param readOnly if column is readonly, default 'false'
+     */
+    public mapper<T>(
+        newable: new () => T,
+        readOnly?: boolean
+    ): MetadataTable<T> {
+        const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly);
+        this.push(metadata);
+        return metadata;
     }
 
     public has<T>(tKey: (new () => T) | string): boolean {
@@ -86,7 +83,10 @@ export class MapperBase implements GetMapper {
     }
 
     private push(metadataTable: MetadataTable<any>): void {
-        this._mappers.set(metadataTable.instance.constructor.name, metadataTable);
+        if (this.has(metadataTable.newable.name)) {
+            throw new DatabaseBuilderError(`Duplicate mapper: '${metadataTable.newable.name}'`);
+        }
+        this._mappers.set(metadataTable.newable.name, metadataTable);
     }
 
     private resolveKey<T>(tKey: (new () => T) | string): string {

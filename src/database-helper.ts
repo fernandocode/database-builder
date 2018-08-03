@@ -1,5 +1,5 @@
 import { DatetimeUtils } from "./datetime-utils";
-import { ValueType, ValueTypeToParse } from "./core/utils";
+import { Utils, ValueType, ValueTypeToParse } from "./core/utils";
 import * as moment from "moment";
 import { FieldType } from "./core/enums/field-type";
 import { ColumnType } from "./core/enums/column-type";
@@ -7,20 +7,27 @@ import { DatabaseBuilderError } from "./core/errors";
 
 export class DatabaseHelper {
 
+    public isTypeSimpleByType(type: FieldType): boolean {
+        return type !== FieldType.OBJECT && type !== FieldType.FUNCTION && type !== FieldType.ARRAY;
+    }
+
     public isTypeSimple(value: ValueTypeToParse): boolean {
         const type = this.getType(value);
-        return type !== FieldType.OBJECT && type !== FieldType.FUNCTION && type !== FieldType.ARRAY;
+        return this.isTypeSimpleByType(type);
+    }
+
+    public isTypeIgnoredInMapperByType(type: FieldType): boolean {
+        return type === FieldType.ARRAY;
     }
 
     public isTypeIgnoredInMapper(value: ValueTypeToParse): boolean {
         const type = this.getType(value);
-        return type === FieldType.ARRAY;
+        return this.isTypeIgnoredInMapperByType(type);
     }
 
-    public getType(value: ValueTypeToParse): FieldType {
-        const valueFormatted = this.preFormatValue(value);
-        const tipo = typeof valueFormatted;
-        switch (tipo) {
+    public getFieldType<T>(type: string | (new () => T), constructorName?: string) {
+        const typeCase: string = (Utils.isString(type) ? type as string : (type as new () => void).name).toLowerCase();
+        switch (typeCase) {
             case "string":
                 return FieldType.STRING;
             case "number":
@@ -28,15 +35,18 @@ export class DatabaseHelper {
             case "boolean":
                 return FieldType.BOOLEAN;
             case "object":
-                // tratar date como inteiro
-                if (
-                    valueFormatted.constructor.name === "Date"
-                    || valueFormatted.constructor.name === "Moment"
-                ) {
-                    return FieldType.DATE;
-                }
-                if (Array.isArray(valueFormatted)) {
-                    return FieldType.ARRAY;
+                if (constructorName) {
+                    // tratar date como inteiro
+                    if (
+                        constructorName === "Date"
+                        ||
+                        constructorName === "Moment"
+                    ) {
+                        return FieldType.DATE;
+                    }
+                    if (constructorName === "Array") {
+                        return FieldType.ARRAY;
+                    }
                 }
                 // serializar todos os objetos
                 return FieldType.OBJECT;
@@ -45,8 +55,20 @@ export class DatabaseHelper {
             case "undefined":
                 return FieldType.NULL;
             default:
-                throw new DatabaseBuilderError(`type: '${tipo}', value: '${valueFormatted}' não configurado!`);
+                if (
+                    !Utils.isString(type) &&
+                        type.constructor.length === 0 ? new (type as (new () => T))() : {} instanceof Object
+                ) {
+                    return FieldType.OBJECT;
+                }
+                throw new DatabaseBuilderError(`type: '${type}', constructor name: '${constructorName}' não configurado!`);
         }
+    }
+
+    public getType(value: ValueTypeToParse): FieldType {
+        const valueFormatted = this.preFormatValue(value);
+        const tipo = typeof valueFormatted;
+        return this.getFieldType(tipo, valueFormatted ? valueFormatted.constructor.name : void 0);
     }
 
     public parseToColumnType(type: FieldType): ColumnType {

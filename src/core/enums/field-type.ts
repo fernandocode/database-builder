@@ -1,5 +1,5 @@
 export enum FieldType {
-    STRING,
+    STRING = 1,
     NUMBER,
     BOOLEAN,
     DATE,

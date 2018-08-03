@@ -13,6 +13,8 @@ import { Uf } from "./models/uf";
 import { SubRegiao } from "./models/sub-regiao";
 import { Regiao } from "./models/regiao";
 import { Classificacao } from "./models/classificacao";
+import { TestClazzRef } from "./models/test-clazz-ref";
+import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 
 describe("Create", () => {
 
@@ -88,11 +90,18 @@ describe("Create", () => {
         expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzList( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, description TEXT, reference_id INTEGER );`);
     });
 
+    it("TestClazzRefCode", () => {
+        const create = new Create(TestClazzRefCode, mapper.get(TestClazzRefCode));
+        const result = create.compile();
+        expect(result.length > 0).to.equal(true);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRefCode( code TEXT NOT NULL PRIMARY KEY AUTOINCREMENT, description TEXT, reference_id INTEGER );`);
+    });
+
     it("TestClazz", () => {
         const create = new Create(TestClazz, mapper.get(TestClazz));
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
-        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazz( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, description TEXT, disabled BOOLEAN, date INTEGER, dateMoment INTEGER, dateDate INTEGER, numero INTEGER, referenceTest_id INTEGER, referenceTestCode_code TEXT );`);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazz( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, description TEXT, date INTEGER, dateMoment INTEGER, dateDate INTEGER, numero INTEGER, referenceTest_id INTEGER, referenceTestCode_code TEXT );`);
     });
 
     it("LoginOffline", () => {
@@ -100,6 +109,13 @@ describe("Create", () => {
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
         expect(result).to.equal(`CREATE TABLE IF NOT EXISTS LoginOffline( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, hash TEXT, permissions TEXT );`);
+    });
+
+    it("Test circular references", () => {
+        const create = new Create(TestClazzRef, mapper.get(TestClazzRef));
+        const result = create.compile();
+        expect(result.length > 0).to.equal(true);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRef( id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, description TEXT, autoReference_id INTEGER );`);
     });
 
 });

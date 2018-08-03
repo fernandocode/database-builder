@@ -28,28 +28,36 @@ export class MappersTableNew extends MapperBase {
             }
         );
 
-        this.add(Regiao, x => x.codeImport, false);
-        this.add(SubRegiao, x => x.codeImport, false);
-        this.add(Uf, x => x.codeImport, false);
-        this.add(Cidade, x => x.codeImport, false);
-        this.add(Classificacao, x => x.codeImport, false);
-        this.add(Cliente, x => x.internalKey, true);
-        this.add(Marca, x => x.internalKey, true);
-        this.add(CondicaoPagamento, x => x.codeImport, false);
-        this.add(Pedido, x => x.internalKey, true);
+        this.autoMapper(Regiao, x => x.codeImport, false);
+        this.autoMapper(SubRegiao, x => x.codeImport, false);
+        this.autoMapper(Uf, x => x.codeImport, false);
+        this.autoMapper(Cidade, x => x.codeImport, false);
+        this.autoMapper(Classificacao, x => x.codeImport, false);
+        this.autoMapper(Cliente, x => x.internalKey, true);
+        this.autoMapper(Marca, x => x.internalKey, true);
+        this.autoMapper(CondicaoPagamento, x => x.codeImport, false);
+        this.autoMapper(Pedido, x => x.internalKey, true);
 
-        this.add(TestClazzRef, x => x.id, true);
-        this.add(TestClazzRefCode, x => x.code, true);
-        this.add(TestClazz, x => x.internalKey, true);
+        this.autoMapper(TestClazzRef, x => x.id, true)
+            .reference(x => x.autoReference, TestClazzRef)
+            ;
 
-        this.add(TestClazzList, x => x.internalKey, true);
+        this.mapper(TestClazzRefCode)
+            .key(x => x.code, true, String)
+            .column(x => x.description, String)
+            .reference(x => x.reference)
+            ;
+        this.autoMapper(TestClazz, x => x.internalKey, true)
+            .ignore(x => x.disabled);
+
+        this.autoMapper(TestClazzList, x => x.internalKey, true);
 
         const settingsReference: MapperSettingsModel = {
             references: true,
             referencesId: false,
             referencesIdRecursive: false
         };
-        this.add(LoginOffline, x => x.internalKey, true, false, settingsReference);
+        this.autoMapper(LoginOffline, x => x.internalKey, true, false, settingsReference);
 
     }
 }
