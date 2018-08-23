@@ -2,6 +2,7 @@ import { ReferencesModelTest } from "./models/reference-model-test";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { JoinType, Query } from "..";
+import { ColumnRef } from "../core/column-ref";
 
 describe("Query", () => {
 
@@ -101,8 +102,8 @@ describe("Query", () => {
         const query = new Query(TestClazz, "p");
         query.from(
             new Query(ReferencesModelTest)
-            .select(x => x.id, x => x.name)
-            .where(w => w.equal(x => x.name, "AbC"))
+                .select(x => x.id, x => x.name)
+                .where(w => w.equal(x => x.name, "AbC"))
         );
         query.where(where => where.great(x => x.id, 2));
         const result = query.compile();
@@ -116,8 +117,8 @@ describe("Query", () => {
         const query = new Query(TestClazz, "p");
         query.union(
             new Query(ReferencesModelTest)
-            .select(x => x.id, x => x.name)
-            .where(w => w.equal(x => x.name, "AbC"))
+                .select(x => x.id, x => x.name)
+                .where(w => w.equal(x => x.name, "AbC"))
         );
         query.where(where => where.great(x => x.id, 2));
         const result = query.compile();
@@ -131,8 +132,8 @@ describe("Query", () => {
         const query = new Query(TestClazz, "p");
         query.unionAll(
             new Query(ReferencesModelTest)
-            .select(x => x.id, x => x.name)
-            .where(w => w.equal(x => x.name, "AbC"))
+                .select(x => x.id, x => x.name)
+                .where(w => w.equal(x => x.name, "AbC"))
         );
         query.where(where => where.great(x => x.id, 2));
         const result = query.compile();
@@ -146,13 +147,13 @@ describe("Query", () => {
         const query = new Query(TestClazz, "p");
         query.unionAll(
             new Query(ReferencesModelTest)
-            .select(x => x.id, x => x.name)
-            .where(w => w.equal(x => x.name, "AbC"))
+                .select(x => x.id, x => x.name)
+                .where(w => w.equal(x => x.name, "AbC"))
         );
         query.union(
             new Query(ReferencesModelTest)
-            .select(x => x.id)
-            .where(w => w.equal(x => x.id, 10))
+                .select(x => x.id)
+                .where(w => w.equal(x => x.id, 10))
         );
         query.where(where => where.great(x => x.id, 2));
         const result = query.compile();
@@ -161,6 +162,26 @@ describe("Query", () => {
         expect(result.params[1]).to.equal("AbC");
         expect(result.params[2]).to.equal(10);
         expect(result.query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ? UNION SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.id = ?");
+    });
+
+    it("join where concat columns", () => {
+        const query = new Query(TestClazz);
+        query.select(
+            x => x.id,
+            x => x.description,
+            x => x.disabled);
+        query.join(ReferencesModelTest,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                join.select(x => x.name, x => x.id);
+                join.where(where => {
+                    where.contains(new ColumnRef(`${query.ref(x => x.description).result()} || '|' || ${join.ref(x => x.name).result()}`), "abcd");
+                });
+            });
+        const result = query.compile();
+        expect(result.params.length).to.equal(1);
+        expect(result.params[0]).to.equal("%abcd%");
+        expect(result.query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE tes.description || '|' || ref.name LIKE ?");
     });
 
 });
