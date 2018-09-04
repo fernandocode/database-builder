@@ -16,6 +16,7 @@ import { ProjectionsHelper } from "./projections-helper";
 import { ColumnParams } from "./column-params";
 import { ColumnRef } from "./column-ref";
 import { PlanRef } from "./plan-ref";
+import * as uuidv4 from "uuid/v4";
 
 export type ValueType = number | string | boolean;
 export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
@@ -34,6 +35,11 @@ export class Utils {
 
     private static _expressionUtils: ExpressionUtils;
     private static _databaseHelper: DatabaseHelper;
+
+    // Fonte: https://www.npmjs.com/package/uuid
+    public static GUID() {
+        return uuidv4();
+    }
 
     public static is(value: any, type: string): boolean {
         return typeof value === type;

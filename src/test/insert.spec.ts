@@ -11,6 +11,7 @@ import { Cidade } from "./models/cidade";
 import { Insert } from "..";
 import { MappersTableNew } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
+import { GuidClazz } from "./models/guid-clazz";
 
 describe("Insert", () => {
     const mapper = new MappersTableNew();
@@ -90,6 +91,13 @@ describe("Insert", () => {
             ObjectToTest.pedido.condicaoPagamento.codeImport
         ].toString());
         expect(result.query).to.equal("INSERT INTO Pedido (codeImport, cliente_internalKey, marca_internalKey, condicaoPagamento_codeImport) VALUES (?, ?, ?, ?)");
+    });
+
+    it("GuidClazz", () => {
+        const result = new Insert(GuidClazz, ObjectToTest.guidClazz, mapper.get(GuidClazz)).compile();
+        expect(result.params[0]).to.length(36);
+        expect(result.params[1]).to.equal(ObjectToTest.guidClazz.description);
+        expect(result.query).to.equal("INSERT INTO GuidClazz (guid, description) VALUES (?, ?)");
     });
 
 });

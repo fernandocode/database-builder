@@ -5,6 +5,7 @@ import { DatabaseHelper } from "./database-helper";
 import { MapperColumn } from "./mapper-column";
 import { FieldType } from "./core/enums/field-type";
 import { DatabaseBuilderError, GetMapper } from ".";
+import { PrimaryKeyType } from "./core/enums/primary-key-type";
 
 export class MetadataTable<T> {
 
@@ -29,8 +30,9 @@ export class MetadataTable<T> {
     public column<TReturn>(
         expression: ReturnExpression<TReturn, T>,
         type?: new () => TReturn,
-        isPrimaryKey?: boolean,
-        isAutoIncrement?: boolean
+        primaryKeyType?: PrimaryKeyType
+        // isPrimaryKey?: boolean,
+        // isAutoIncrement?: boolean
     ): MetadataTable<T> {
         const column = this.columnName(expression);
         const validExpression = (expression: ReturnExpression<TReturn, T>): ReturnExpression<TReturn, T> => {
@@ -42,7 +44,9 @@ export class MetadataTable<T> {
         this.addColumn(
             column,
             type ? this._databaseHelper.getFieldType(type) : this.getTypeByExpression(validExpression(expression)),
-            isPrimaryKey, isAutoIncrement);
+            primaryKeyType
+            // isPrimaryKey, isAutoIncrement
+        );
         return this;
     }
 
@@ -61,15 +65,36 @@ export class MetadataTable<T> {
         return this;
     }
 
+    // public guid<TReturn>(
+    //     expression: ReturnExpression<TReturn, T>
+    // ): MetadataTable<T> {
+    //     if (this._autoMapperCalled) {
+    //         throw new DatabaseBuilderError(`Mapper '${this.newable.name}', column key must be informed before the call to 'autoMapper()'`);
+    //     }
+    //     this.addColumn(
+    //         this.columnName(expression),
+    //         FieldType.GUID,
+    //         PrimaryKeyType.Guid
+    //         // true, false
+    //     );
+    //     return this;
+    //     // return this.column(expression, FieldType.STRING, true, isAutoIncrement);
+    // }
+
     public key<TReturn>(
         expression: ReturnExpression<TReturn, T>,
-        isAutoIncrement?: boolean,
+        primaryKeyType: PrimaryKeyType = PrimaryKeyType.AutoIncrement,
+        // isAutoIncrement?: boolean,
         type?: new () => TReturn
     ): MetadataTable<T> {
         if (this._autoMapperCalled) {
             throw new DatabaseBuilderError(`Mapper '${this.newable.name}', column key must be informed before the call to 'autoMapper()'`);
         }
-        return this.column(expression, type, true, isAutoIncrement);
+        return this.column(expression, type,
+            primaryKeyType
+            // isAutoIncrement ? PrimaryKeyType.AutoIncrement : void 0
+            // true, isAutoIncrement
+        );
     }
 
     public ignore<TReturn>(
@@ -114,7 +139,8 @@ export class MetadataTable<T> {
     }
 
     private keyColumns(): MapperColumn[] {
-        return this.mapperTable.columns.filter(x => x.isKeyColumn);
+        return this.mapperTable.columns.filter(x => !!x.primaryKeyType);
+        // return this.mapperTable.columns.filter(x => x.isKeyColumn);
     }
 
     private isKeyColumn(key: string) {
@@ -143,7 +169,7 @@ export class MetadataTable<T> {
         }
     }
 
-    private mapperReference<TReturn>(
+    private mapperReference(
         instanceMapper: any,
         propertyName: string,
         ascendingRefName: string = "",
@@ -175,7 +201,6 @@ export class MetadataTable<T> {
         ascendingRefName: string,
         recursive: boolean
     ) {
-        const newable: new () => T = (instanceMapper as any).constructor;
         for (const key in instanceMapper) {
             if (instanceMapper.hasOwnProperty(key)) {
                 const keyInstanceMapper = instanceMapper[key];
@@ -213,8 +238,9 @@ export class MetadataTable<T> {
     private addColumn(
         name: string,
         fieldType: FieldType,
-        isPrimaryKey?: boolean,
-        isAutoIncrement?: boolean
+        primaryKeyType?: PrimaryKeyType
+        // isPrimaryKey?: boolean,
+        // isAutoIncrement?: boolean
     ) {
         if (fieldType === FieldType.NULL) {
             throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped column ('${name}')`);
@@ -225,7 +251,8 @@ export class MetadataTable<T> {
         this.mapperTable.columns.push(
             new MapperColumn(
                 name, fieldType, void 0,
-                isPrimaryKey, isAutoIncrement
+                primaryKeyType
+                // isPrimaryKey, isAutoIncrement
             )
         );
     }

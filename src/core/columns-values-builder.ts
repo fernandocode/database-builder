@@ -1,3 +1,4 @@
+import { PrimaryKeyType } from "./enums/primary-key-type";
 import { MetadataTable } from "../metadata-table";
 import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
 import { ColumnsBaseBuilder } from "./columns-base-builder";
@@ -20,14 +21,22 @@ export abstract class ColumnsValuesBuilder<
         column: string,
         value: ValueTypeToParse,
         fieldType: FieldType,
-        isKeyColumn?: boolean,
-        isAutoIncrement?: boolean): TThis {
+        primaryKeyType?: PrimaryKeyType
+        // isKeyColumn?: boolean,
+        // isAutoIncrement?: boolean
+    ): TThis {
+        // verificar se é GUID, se for gerar um valor para o mesmo
+        if (primaryKeyType === PrimaryKeyType.Guid) {
+            // gerar GUID
+            value = Utils.GUID();
+        }
         this.columns.push({
             name: column,
             type: fieldType,
             value: Utils.getValueType(value, fieldType),
-            isKeyColumn,
-            isAutoIncrement
+            primaryKeyType
+            // isKeyColumn,
+            // isAutoIncrement
         });
         return this.getInstance();
     }
@@ -35,28 +44,32 @@ export abstract class ColumnsValuesBuilder<
     public setValue<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
         value: TReturn,
-        isKeyColumn?: boolean,
-        isAutoIncrement?: boolean
+        primaryKeyType?: PrimaryKeyType
+        // isKeyColumn?: boolean,
+        // isAutoIncrement?: boolean
     ): TThis {
         return this.setColumnValue(
             Utils.getColumn(expression),
             value,
             Utils.getType(value),
-            isKeyColumn,
-            isAutoIncrement
+            primaryKeyType
+            // isKeyColumn,
+            // isAutoIncrement
         );
     }
 
     public set<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
-        isKeyColumn?: boolean,
-        isAutoIncrement?: boolean
+        primaryKeyType?: PrimaryKeyType
+        // isKeyColumn?: boolean,
+        // isAutoIncrement?: boolean
     ): TThis {
         return this.setValue(
             expression,
             this.getValueByExpression(expression),
-            isKeyColumn,
-            isAutoIncrement
+            primaryKeyType
+            // isKeyColumn,
+            // isAutoIncrement
         );
     }
 
@@ -66,7 +79,8 @@ export abstract class ColumnsValuesBuilder<
             keyColumns: [],
             params: [],
         };
-        result.keyColumns = this.columns.filter(x => x.isKeyColumn).map(x => x.name);
+        result.keyColumns = this.columns.filter(x => !!x.primaryKeyType).map(x => x.name);
+        // result.keyColumns = this.columns.filter(x => x.isKeyColumn).map(x => x.name);
         this.columns.forEach((column) => {
             const columnName = this.columnFormat(column);
             if (columnName !== void 0) {

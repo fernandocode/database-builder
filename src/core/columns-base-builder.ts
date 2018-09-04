@@ -4,6 +4,7 @@ import { MapperTable } from "../mapper-table";
 import { Column } from "./column";
 import { FieldType } from "./enums/field-type";
 import { ColumnsCompiled } from "./columns-compiled";
+import { PrimaryKeyType } from "./enums/primary-key-type";
 
 export abstract class ColumnsBaseBuilder<
     TThis extends ColumnsBaseBuilder<TThis, T, TColumn>,
@@ -28,28 +29,32 @@ export abstract class ColumnsBaseBuilder<
     public setColumn(
         column: string,
         type: FieldType,
-        isKeyColumn: boolean,
-        isAutoIncrement: boolean
+        primaryKeyType: PrimaryKeyType
+        // isKeyColumn: boolean,
+        // isAutoIncrement: boolean
     ): TThis {
         this.columns.push({
             name: column,
             type,
-            isKeyColumn,
-            isAutoIncrement
+            primaryKeyType
+            // isKeyColumn,
+            // isAutoIncrement
         } as TColumn);
         return this.getInstance();
     }
 
     public set<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
-        isKeyColumn: boolean,
-        isAutoIncrement: boolean
+        primaryKeyType: PrimaryKeyType
+        // isKeyColumn: boolean,
+        // isAutoIncrement: boolean
     ): TThis {
         return this.setColumn(
             Utils.getColumn(expression),
             Utils.getType(this.metadata.instance, expression),
-            isKeyColumn,
-            isAutoIncrement
+            primaryKeyType
+            // isKeyColumn,
+            // isAutoIncrement
         );
     }
 
@@ -62,7 +67,8 @@ export abstract class ColumnsBaseBuilder<
         for (const key in this.columns) {
             if (this.columns.hasOwnProperty(key)) {
                 const column = this.columns[key];
-                if (column.isKeyColumn) {
+                if (column.primaryKeyType) {
+                // if (column.isKeyColumn) {
                     result.keyColumns.push(column.name);
                 }
                 result.columns.push(this.columnFormat(column));
@@ -72,7 +78,8 @@ export abstract class ColumnsBaseBuilder<
     }
 
     protected isCompositeKey(): boolean {
-        return this.metadata.mapperTable.columns.filter(x => x.isKeyColumn === true).length > 1;
+        return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
+        // return this.metadata.mapperTable.columns.filter(x => x.isKeyColumn === true).length > 1;
     }
 
     protected abstract columnFormat(column: TColumn): string;
@@ -83,8 +90,9 @@ export abstract class ColumnsBaseBuilder<
         column: string,
         value: ValueTypeToParse,
         fieldType: FieldType,
-        isKeyColumn: boolean,
-        isAutoIncrement: boolean
+        primaryKeyType: PrimaryKeyType
+        // isKeyColumn: boolean,
+        // isAutoIncrement: boolean
     ): TThis;
 
     private setAllColumns(mapper: MapperTable, modelWithValue: T): void {
@@ -95,8 +103,9 @@ export abstract class ColumnsBaseBuilder<
                     column.column,
                     Utils.getValue(modelWithValue, column.fieldReference),
                     column.fieldType,
-                    column.isKeyColumn,
-                    column.isAutoIncrement
+                    column.primaryKeyType
+                    // column.isKeyColumn,
+                    // column.isAutoIncrement
                 );
             }
         }

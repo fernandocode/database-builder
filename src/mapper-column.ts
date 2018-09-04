@@ -1,4 +1,5 @@
 import { FieldType } from "./core/enums/field-type";
+import { PrimaryKeyType } from "./core/enums/primary-key-type";
 
 export class MapperColumn {
 
@@ -6,8 +7,9 @@ export class MapperColumn {
         public column: string = void 0,
         public fieldType: FieldType = void 0,
         public fieldReference: string = column ? column.replace(/_/g, ".") : void 0,
-        public isKeyColumn: boolean = false,
-        public isAutoIncrement: boolean = false
+        public primaryKeyType?: PrimaryKeyType
+        // public isKeyColumn: boolean = false,
+        // public isAutoIncrement: boolean = false
     ) {
 
     }

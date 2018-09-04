@@ -1,5 +1,6 @@
 import { ColumnsValuesBuilder } from "../../core/columns-values-builder";
 import { Column } from "../../core/column";
+import { PrimaryKeyType } from "../../core/enums/primary-key-type";
 
 export class InsertColumnsBuilder<T> extends ColumnsValuesBuilder<T, InsertColumnsBuilder<T>> {
 
@@ -8,6 +9,7 @@ export class InsertColumnsBuilder<T> extends ColumnsValuesBuilder<T, InsertColum
     }
 
     protected columnFormat(column: Column): string {
-        return column.isAutoIncrement ? void 0 : column.name;
+        return column.primaryKeyType === PrimaryKeyType.AutoIncrement  ? void 0 : column.name;
+        // return column.isAutoIncrement ? void 0 : column.name;
     }
 }

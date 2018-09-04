@@ -1,3 +1,4 @@
+import { PrimaryKeyType } from "./../core/enums/primary-key-type";
 import { Utils } from "./../core/utils";
 import { DatabaseBuilderError, DatabaseHelper, GetMapper, MetadataTable } from "..";
 import { MapperSettingsModel } from "./mapper-settings-model";
@@ -29,12 +30,13 @@ export class MapperBase implements GetMapper {
     public autoMapper<T>(
         newable: new () => T,
         keyColumn: Expression<T>,
-        isAutoIncrement?: boolean,
+        primaryKeyType?: PrimaryKeyType,
+        // isAutoIncrement?: boolean,
         readOnly?: boolean,
         settings: MapperSettingsModel = this._defaultSettings
     ): MetadataTable<T> {
         const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly)
-            .key(keyColumn, isAutoIncrement)
+            .key(keyColumn, primaryKeyType)
             .autoMapper(
                 settings.references,
                 settings.referencesId,

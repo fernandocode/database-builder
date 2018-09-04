@@ -15,6 +15,7 @@ import { Regiao } from "./models/regiao";
 import { Classificacao } from "./models/classificacao";
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
+import { GuidClazz } from "./models/guid-clazz";
 
 describe("Create", () => {
 
@@ -116,6 +117,13 @@ describe("Create", () => {
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
         expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRef( id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, description TEXT, autoReference_id INTEGER );`);
+    });
+
+    it("GuidClazz", () => {
+        const create = new Create(GuidClazz, mapper.get(GuidClazz));
+        const result = create.compile();
+        expect(result.length > 0).to.equal(true);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS GuidClazz( guid TEXT NOT NULL PRIMARY KEY, description TEXT );`);
     });
 
 });

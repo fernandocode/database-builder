@@ -1,6 +1,7 @@
-import { TestClazzRefCode } from './models/test-clazz-ref-code';
-import { TestClazzRef } from './models/test-clazz-ref';
-import { TestClazz } from './models/test-clazz';
+import { GuidClazz } from "./models/guid-clazz";
+import { TestClazzRefCode } from "./models/test-clazz-ref-code";
+import { TestClazzRef } from "./models/test-clazz-ref";
+import { TestClazz } from "./models/test-clazz";
 import { CondicaoPagamento } from "./models/condicao-pagamento";
 import { Marca } from "./models/marca";
 import { Pedido } from "./models/pedido";
@@ -67,6 +68,11 @@ export class ObjectToTest {
         marca: ObjectToTest.marca,
         condicaoPagamento: ObjectToTest.condicaoPagamento
     } as Pedido;
+
+    public static guidClazz = {
+        // guid: "hdasjhas",
+        description: "Condicao Pagamento 25"
+    } as GuidClazz;
 
     public static testClazz = {
         internalKey: 1,

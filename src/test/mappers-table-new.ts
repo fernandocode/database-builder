@@ -1,3 +1,4 @@
+import { GuidClazz } from "./models/guid-clazz";
 import { LoginOffline } from "./models/login-offline";
 import { TestClazzList } from "./models/test-clazz-list";
 import { TestClazzRef } from "./models/test-clazz-ref";
@@ -15,6 +16,7 @@ import { DatabaseHelper } from "../database-helper";
 import { Regiao } from "./models/regiao";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { MapperSettingsModel } from "..";
+import { PrimaryKeyType } from "../core/enums/primary-key-type";
 
 export class MappersTableNew extends MapperBase {
 
@@ -28,36 +30,40 @@ export class MappersTableNew extends MapperBase {
             }
         );
 
-        this.autoMapper(Regiao, x => x.codeImport, false);
-        this.autoMapper(SubRegiao, x => x.codeImport, false);
-        this.autoMapper(Uf, x => x.codeImport, false);
-        this.autoMapper(Cidade, x => x.codeImport, false);
-        this.autoMapper(Classificacao, x => x.codeImport, false);
-        this.autoMapper(Cliente, x => x.internalKey, true);
-        this.autoMapper(Marca, x => x.internalKey, true);
-        this.autoMapper(CondicaoPagamento, x => x.codeImport, false);
-        this.autoMapper(Pedido, x => x.internalKey, true);
+        this.mapper(GuidClazz)
+            .key(x => x.guid, PrimaryKeyType.Guid, String)
+            .column(x => x.description, String);
 
-        this.autoMapper(TestClazzRef, x => x.id, true)
+        this.autoMapper(Regiao, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(SubRegiao, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Uf, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Cidade, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Classificacao, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Cliente, x => x.internalKey, PrimaryKeyType.AutoIncrement);
+        this.autoMapper(Marca, x => x.internalKey, PrimaryKeyType.AutoIncrement);
+        this.autoMapper(CondicaoPagamento, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Pedido, x => x.internalKey, PrimaryKeyType.AutoIncrement);
+
+        this.autoMapper(TestClazzRef, x => x.id, PrimaryKeyType.AutoIncrement)
             .reference(x => x.autoReference, TestClazzRef)
             ;
 
         this.mapper(TestClazzRefCode)
-            .key(x => x.code, true, String)
+            .key(x => x.code, PrimaryKeyType.AutoIncrement, String)
             .column(x => x.description, String)
             .reference(x => x.reference)
             ;
-        this.autoMapper(TestClazz, x => x.internalKey, true)
+        this.autoMapper(TestClazz, x => x.internalKey, PrimaryKeyType.AutoIncrement)
             .ignore(x => x.disabled);
 
-        this.autoMapper(TestClazzList, x => x.internalKey, true);
+        this.autoMapper(TestClazzList, x => x.internalKey, PrimaryKeyType.AutoIncrement);
 
         const settingsReference: MapperSettingsModel = {
             references: true,
             referencesId: false,
             referencesIdRecursive: false
         };
-        this.autoMapper(LoginOffline, x => x.internalKey, true, false, settingsReference);
+        this.autoMapper(LoginOffline, x => x.internalKey, PrimaryKeyType.AutoIncrement, false, settingsReference);
 
     }
 }

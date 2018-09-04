@@ -76,6 +76,7 @@ export class DatabaseHelper {
             case FieldType.STRING:
             case FieldType.ARRAY:
             case FieldType.OBJECT:
+            // case FieldType.GUID:
                 return ColumnType.TEXT;
             case FieldType.DATE:
             case FieldType.NUMBER:

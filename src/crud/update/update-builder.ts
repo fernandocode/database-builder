@@ -10,9 +10,9 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
         typeT: new () => T,
         private _metadata: MetadataTable<T>,
         alias: string = void 0,
-        modelToSave: T = void 0,
+        protected readonly _modelToSave: T = void 0,
     ) {
-        super(typeT, alias, modelToSave);
+        super(typeT, alias);
     }
 
     public columns(

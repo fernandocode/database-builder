@@ -6,5 +6,6 @@ export enum FieldType {
     OBJECT,
     FUNCTION,
     ARRAY,
-    NULL
+    NULL,
+    // GUID
 }
