@@ -47,7 +47,7 @@ export interface DatabaseObject {
 export interface DatabaseResult {
     rows: DatabaseRowList;
     rowsAffected: number;
-    insertId: number;
+    insertId: any;
 }
 
 export interface DatabaseRowList {

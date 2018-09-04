@@ -17,7 +17,6 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
     constructor(
         protected readonly _typeT: new () => T,
         protected readonly _alias: string = void 0,
-        // protected readonly _modelToSave: T = void 0,
     ) {
         this._tablename = _typeT.name;
         if (!this._alias) {
