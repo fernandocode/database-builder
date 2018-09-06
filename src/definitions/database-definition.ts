@@ -1,14 +1,17 @@
 
 export type DatabaseBase = DatabaseTransaction | DatabaseObject;
 
-export interface DatabaseTransaction {
-    start: () => void;
+export interface DatabaseBaseTransaction {
     executeSql: (
         sql: string,
         values: any,
         success: (tx: DatabaseTransaction, result: DatabaseResult) => void,
         error: (tx: DatabaseTransaction, error: any) => void,
     ) => void;
+}
+
+export interface DatabaseTransaction extends DatabaseBaseTransaction {
+    start: () => void;
     addStatement: (sql: any, values: any, success: () => void, error: () => void) => void;
     handleStatementSuccess: (handler: () => void, response: any) => void;
     handleStatementFailure: (handler: () => void, response: any) => void;
@@ -24,7 +27,7 @@ export interface DatabaseObject {
      * @param fn {any}
      * @returns {Promise<any>}
      */
-    transaction(fn: (transaction: DatabaseTransaction) => void): Promise<any>;
+    transaction(fn: (transaction: DatabaseBaseTransaction) => void): Promise<any>;
     /**
      * @param fn {() => void}
      * @returns {Promise<any>}
