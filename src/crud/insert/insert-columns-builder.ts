@@ -9,7 +9,11 @@ export class InsertColumnsBuilder<T> extends ColumnsValuesBuilder<T, InsertColum
     }
 
     protected columnFormat(column: Column): string {
-        return column.primaryKeyType === PrimaryKeyType.AutoIncrement  ? void 0 : column.name;
+        return column.primaryKeyType === PrimaryKeyType.AutoIncrement ? void 0 : column.name;
         // return column.isAutoIncrement ? void 0 : column.name;
+    }
+
+    protected allowGenerateKey(): boolean {
+        return true;
     }
 }

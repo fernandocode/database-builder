@@ -40,6 +40,13 @@ describe("SQLite", async () => {
         expect(queryUpdateResult.length).to.equal(1);
         expect(queryUpdateResult[0].description).to.equal(modelUpdate.description);
         expect(queryUpdateResult[0].guid).to.equal(ObjectToTest.guidClazz.guid);
+
+        const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
+        const updateByDescriptionResult = await crud.update(GuidClazz, modelUpdateByDescription)
+            .where(where => where.equal(x => x.description, modelUpdate.description))
+            .execute();
+        expect(updateByDescriptionResult.rowsAffected, "update").to.equal(1);
+        expect(modelUpdateByDescription.guid).to.equal(void 0);
     });
 
     it("Cidade", async () => {

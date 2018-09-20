@@ -24,8 +24,11 @@ export abstract class ColumnsValuesBuilder<
         fieldType: FieldType,
         primaryKeyType?: PrimaryKeyType
     ): TThis {
-        // verificar se é GUID, se for gerar um valor para o mesmo
-        if (primaryKeyType === PrimaryKeyType.Guid && !value) {
+        if (
+            primaryKeyType === PrimaryKeyType.Guid
+            && !value
+            && this.allowGenerateKey()
+        ) {
             // gerar GUID
             value = Utils.GUID();
             // set value GUID in model
@@ -80,6 +83,10 @@ export abstract class ColumnsValuesBuilder<
             }
         });
         return result;
+    }
+
+    protected allowGenerateKey(): boolean {
+        return false;
     }
 
     protected abstract columnFormat(column: Column): string;
