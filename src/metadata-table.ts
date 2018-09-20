@@ -88,8 +88,14 @@ export class MetadataTable<T> {
     public ignore<TReturn>(
         expression: ReturnExpression<TReturn, T>
     ): MetadataTable<T> {
-        const column = this.columnName(expression);
-        this.removeColumn(column);
+        const instanceExpression = this.validExpressionMapper(this.instance, expression)(this.instance);
+        const mapperColumn =
+            instanceExpression && (!this._databaseHelper.isTypeSimple(instanceExpression as any))
+                ? this.getMapperColumnReference(this.instance, this.columnName(expression))
+                : new MapperColumn(this.columnName(expression));
+        if (mapperColumn) {
+            this.removeColumn(mapperColumn.column);
+        }
         return this;
     }
 
@@ -187,6 +193,19 @@ export class MetadataTable<T> {
         propertyName: string,
         ascendingRefName: string = "",
     ) {
+        const mapperColumn = this.getMapperColumnReference(instanceMapper, propertyName);
+        if (mapperColumn) {
+            this.addReference(
+                `${ascendingRefName}${mapperColumn.column}`,
+                mapperColumn.fieldType
+            );
+        }
+    }
+
+    private getMapperColumnReference<TRef>(
+        instanceMapper: TRef,
+        propertyName: string
+    ): MapperColumn {
         if (this._databaseHelper.isTypeSimple(instanceMapper as any)) {
             throw new DatabaseBuilderError(`Mapper '${this.newable.name}', it is not allowed to map property '${propertyName}' of type '${instanceMapper.constructor.name}' as a reference. For it is not of a composite type (Ex: object)`);
         }
@@ -199,8 +218,8 @@ export class MetadataTable<T> {
                 throw new DatabaseBuilderError(`Mapper '${this.newable.name}', composite Id not supported (property '${propertyName}' of type '${instanceMapper.constructor.name}')`);
             }
             const keyMapped = mapperKey.keyColumns()[0];
-            this.addReference(
-                `${ascendingRefName}${propertyName}_${keyMapped.column}`,
+            return new MapperColumn(
+                `${propertyName}_${keyMapped.column}`,
                 keyMapped.fieldType
             );
         } else {
@@ -208,6 +227,7 @@ export class MetadataTable<T> {
                 throw new DatabaseBuilderError(`Mapper '${this.newable.name}', key '${propertyName}' of type '${instanceMapper.constructor.name}' not before mapped`);
             }
         }
+        return void 0;
     }
 
     private autoColumnsModelReferencesRecursive(
@@ -251,18 +271,24 @@ export class MetadataTable<T> {
         }
     }
 
+    private add(
+        mapperColumn: MapperColumn
+    ) {
+        if (mapperColumn.fieldType === FieldType.NULL) {
+            throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped column ('${mapperColumn.column}')`);
+        }
+        if (this.hasColumn(mapperColumn.column)) {
+            throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, duplicate column: '${mapperColumn.column}'`);
+        }
+        this.mapperTable.columns.push(mapperColumn);
+    }
+
     private addColumn(
         name: string,
         fieldType: FieldType,
         primaryKeyType?: PrimaryKeyType
     ) {
-        if (fieldType === FieldType.NULL) {
-            throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped column ('${name}')`);
-        }
-        if (this.hasColumn(name)) {
-            throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, duplicate column: '${name}'`);
-        }
-        this.mapperTable.columns.push(
+        this.add(
             new MapperColumn(
                 name, fieldType, void 0,
                 primaryKeyType

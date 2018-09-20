@@ -17,6 +17,7 @@ import { Regiao } from "./models/regiao";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { PrimaryKeyType } from "../core/enums/primary-key-type";
 import { MapperSettingsModel } from "../mapper/mapper-settings-model";
+import { ContasReceber } from "./models/contas-receber";
 
 export class MappersTableNew extends MapperBase {
 
@@ -43,6 +44,9 @@ export class MappersTableNew extends MapperBase {
         this.autoMapper(Marca, x => x.internalKey, PrimaryKeyType.AutoIncrement);
         this.autoMapper(CondicaoPagamento, x => x.codeImport, PrimaryKeyType.Assigned);
         this.autoMapper(Pedido, x => x.internalKey, PrimaryKeyType.AutoIncrement);
+        this.autoMapper(ContasReceber, x => x.internalKey, PrimaryKeyType.AutoIncrement)
+            .ignore(x => x.cliente)
+            .referenceKey(x => x.cliente, x => x.codeImport);
 
         this.autoMapper(TestClazzRef, x => x.id, PrimaryKeyType.AutoIncrement)
             .reference(x => x.autoReference, TestClazzRef)
@@ -57,6 +61,7 @@ export class MappersTableNew extends MapperBase {
             .ignore(x => x.disabled);
 
         this.autoMapper(TestClazzList, x => x.internalKey, PrimaryKeyType.AutoIncrement);
+
 
         const settingsReference: MapperSettingsModel = {
             references: true,

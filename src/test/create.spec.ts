@@ -1,3 +1,4 @@
+import { ContasReceber } from './models/contas-receber';
 import { LoginOffline } from "./models/login-offline";
 import { Create } from "./../ddl/create/create";
 import { CondicaoPagamento } from "./models/condicao-pagamento";
@@ -82,6 +83,13 @@ describe("Create", () => {
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
         expect(result).to.equal(`CREATE TABLE IF NOT EXISTS Pedido( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, cliente_internalKey INTEGER, marca_internalKey INTEGER, condicaoPagamento_codeImport INTEGER );`);
+    });
+
+    it("ContasReceber", () => {
+        const create = new Create(ContasReceber, mapper.get(ContasReceber));
+        const result = create.compile();
+        expect(result.length > 0).to.equal(true);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, valor INTEGER, cliente_codeImport INTEGER );`);
     });
 
     it("Test create", () => {
