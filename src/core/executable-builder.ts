@@ -1,3 +1,4 @@
+import { DatabaseBaseTransaction } from './../definitions/database-definition';
 import { DatabaseBase, DatabaseObject, DatabaseResult, DatabaseTransaction } from "../definitions/database-definition";
 import { QueryCompiled } from "./query-compiled";
 
@@ -25,13 +26,13 @@ export class ExecutableBuilder {
             );
         }
         return new Promise<any>((resolve, reject) => {
-            (database as DatabaseTransaction).executeSql(
+            (database as DatabaseBaseTransaction).executeSql(
                 compiled.query,
                 compiled.params,
-                (tx: DatabaseTransaction, result: DatabaseResult) => {
+                (tx: DatabaseBaseTransaction, result: DatabaseResult) => {
                     resolve(result);
                 },
-                (tx: DatabaseTransaction, error: any) => {
+                (tx: DatabaseBaseTransaction, error: any) => {
                     reject(error);
                 },
             );
