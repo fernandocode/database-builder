@@ -74,6 +74,15 @@ export class ObjectToTest {
         description: "Condicao Pagamento 25"
     } as GuidClazz;
 
+    public static testClazzRefCode = {
+        code: "hdasjhas",
+        description: "Test AD",
+        reference: {
+            id: 39,
+            description: "abc"
+        } as TestClazzRef
+    } as TestClazzRefCode;
+
     public static testClazz = {
         internalKey: 1,
         id: 2,

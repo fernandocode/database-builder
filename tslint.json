@@ -34,7 +34,9 @@
         "arrow-parens": false,
         "trailing-comma": false,
         "max-line-length": false,
-        "object-literal-sort-keys": false
+        "object-literal-sort-keys": false,
+        "eofline": false,
+        "space-before-function-paren": false
     },
     "linterOptions": {
         "exclude": [

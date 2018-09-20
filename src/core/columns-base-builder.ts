@@ -30,15 +30,11 @@ export abstract class ColumnsBaseBuilder<
         column: string,
         type: FieldType,
         primaryKeyType: PrimaryKeyType
-        // isKeyColumn: boolean,
-        // isAutoIncrement: boolean
     ): TThis {
         this.columns.push({
             name: column,
             type,
             primaryKeyType
-            // isKeyColumn,
-            // isAutoIncrement
         } as TColumn);
         return this.getInstance();
     }
@@ -46,15 +42,11 @@ export abstract class ColumnsBaseBuilder<
     public set<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
         primaryKeyType: PrimaryKeyType
-        // isKeyColumn: boolean,
-        // isAutoIncrement: boolean
     ): TThis {
         return this.setColumn(
             Utils.getColumn(expression),
             Utils.getType(this.metadata.instance, expression),
             primaryKeyType
-            // isKeyColumn,
-            // isAutoIncrement
         );
     }
 
@@ -68,7 +60,6 @@ export abstract class ColumnsBaseBuilder<
             if (this.columns.hasOwnProperty(key)) {
                 const column = this.columns[key];
                 if (column.primaryKeyType) {
-                // if (column.isKeyColumn) {
                     result.keyColumns.push(column.name);
                 }
                 result.columns.push(this.columnFormat(column));
@@ -79,7 +70,6 @@ export abstract class ColumnsBaseBuilder<
 
     protected isCompositeKey(): boolean {
         return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
-        // return this.metadata.mapperTable.columns.filter(x => x.isKeyColumn === true).length > 1;
     }
 
     protected abstract columnFormat(column: TColumn): string;
@@ -91,8 +81,6 @@ export abstract class ColumnsBaseBuilder<
         value: ValueTypeToParse,
         fieldType: FieldType,
         primaryKeyType: PrimaryKeyType
-        // isKeyColumn: boolean,
-        // isAutoIncrement: boolean
     ): TThis;
 
     private setAllColumns(mapper: MapperTable, modelWithValue: T): void {
@@ -104,8 +92,6 @@ export abstract class ColumnsBaseBuilder<
                     Utils.getValue(modelWithValue, column.fieldReference),
                     column.fieldType,
                     column.primaryKeyType
-                    // column.isKeyColumn,
-                    // column.isAutoIncrement
                 );
             }
         }

@@ -1,8 +1,9 @@
 import { ReferencesModelTest } from "./models/reference-model-test";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { JoinType, Query } from "..";
 import { ColumnRef } from "../core/column-ref";
+import { Query } from "../crud/query/query";
+import { JoinType } from "../crud/enums/join-type";
 
 describe("Query", () => {
 

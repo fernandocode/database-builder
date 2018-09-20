@@ -5,7 +5,7 @@ import { MetadataTable } from "../metadata-table";
 import { Delete } from "./delete/delete";
 import { DatabaseBase } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
-import { GetMapper } from "..";
+import { GetMapper } from "../mapper/interface-get-mapper";
 
 export class Crud {
 

@@ -4,6 +4,7 @@ import { DatabaseBase } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { UpdateBuilder } from "./update-builder";
 import { CrudBase } from "../crud-base";
+import { TypeCrud } from "../enums/type-crud";
 
 export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>> {
 
@@ -15,7 +16,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
         database: DatabaseBase = void 0,
         enableLog: boolean = true,
     ) {
-        super(new UpdateBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
+        super(TypeCrud.UPDATE, new UpdateBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
     }
 
     public columns(columnsCallback: (columns: UpdateColumnsBuilder<T>) => void): Update<T> {

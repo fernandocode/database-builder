@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { Query } from "..";
 import { OrderBy } from "../core/enums/order-by";
+import { Query } from "../crud/query/query";
 
 describe("Order By", () => {
 

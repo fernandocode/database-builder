@@ -1,3 +1,4 @@
+import { KeyUtils } from "./key-utils";
 import { PrimaryKeyType } from "./enums/primary-key-type";
 import { MetadataTable } from "../metadata-table";
 import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
@@ -22,21 +23,19 @@ export abstract class ColumnsValuesBuilder<
         value: ValueTypeToParse,
         fieldType: FieldType,
         primaryKeyType?: PrimaryKeyType
-        // isKeyColumn?: boolean,
-        // isAutoIncrement?: boolean
     ): TThis {
         // verificar se é GUID, se for gerar um valor para o mesmo
-        if (primaryKeyType === PrimaryKeyType.Guid) {
+        if (primaryKeyType === PrimaryKeyType.Guid && !value) {
             // gerar GUID
             value = Utils.GUID();
+            // set value GUID in model
+            KeyUtils.setKey(this.metadata, this.modelToSave, value);
         }
         this.columns.push({
             name: column,
             type: fieldType,
             value: Utils.getValueType(value, fieldType),
             primaryKeyType
-            // isKeyColumn,
-            // isAutoIncrement
         });
         return this.getInstance();
     }
@@ -45,31 +44,23 @@ export abstract class ColumnsValuesBuilder<
         expression: ExpressionOrColumn<TReturn, T>,
         value: TReturn,
         primaryKeyType?: PrimaryKeyType
-        // isKeyColumn?: boolean,
-        // isAutoIncrement?: boolean
     ): TThis {
         return this.setColumnValue(
             Utils.getColumn(expression),
             value,
             Utils.getType(value),
             primaryKeyType
-            // isKeyColumn,
-            // isAutoIncrement
         );
     }
 
     public set<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
         primaryKeyType?: PrimaryKeyType
-        // isKeyColumn?: boolean,
-        // isAutoIncrement?: boolean
     ): TThis {
         return this.setValue(
             expression,
             this.getValueByExpression(expression),
             primaryKeyType
-            // isKeyColumn,
-            // isAutoIncrement
         );
     }
 

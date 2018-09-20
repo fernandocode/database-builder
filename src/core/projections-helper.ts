@@ -1,7 +1,7 @@
 import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, TypeProjection, Utils } from "./utils";
-import { ProjectionCompiled } from "..";
 import { ProjectionsUtils } from "./projections-utils";
+import { ProjectionCompiled } from "../crud/projection-compiled";
 
 export class ProjectionsHelper<T> {
 

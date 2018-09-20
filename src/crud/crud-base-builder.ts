@@ -4,6 +4,7 @@ import { ColumnsCompiled } from "../core/columns-compiled";
 import { QueryCompiled } from "../core/query-compiled";
 import { CrudCompiled } from "../core/crud-compiled";
 import { WhereCompiled } from "./where-compiled";
+import { MetadataTable } from "../metadata-table";
 
 let NEXT_VALUE_ALIAS: number = 0;
 
@@ -16,12 +17,17 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
 
     constructor(
         protected readonly _typeT: new () => T,
+        protected metadata: MetadataTable<T>,
         protected readonly _alias: string = void 0,
     ) {
         this._tablename = _typeT.name;
         if (!this._alias) {
             this._alias = this.createUniqueAlias(this.defaultAlias(_typeT));
         }
+    }
+
+    public getMetadata(): MetadataTable<T> {
+        return this.metadata;
     }
 
     public hasAlias(alias: string): boolean {
@@ -38,6 +44,30 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
             query: `${compiledBase.sql}${this._whereCompiled.where}`,
         };
     }
+
+    // public setKeyByModel(keyValue: any): void {
+    //     (this.getModel() as any)[this.primaryKeyMapper().fieldReference] = keyValue;
+    // }
+
+    // public getKeyByModel(): any {
+    //     return Utils.getValue(this.getModel(), this.primaryKeyMapper().fieldReference);
+    // }
+
+    // public primaryKeyType(): PrimaryKeyType {
+    //     return this.primaryKeyMapper().primaryKeyType;
+    // }
+
+    // public isCompositeKey(): boolean {
+    //     return this.primaryKeysMapper().length > 1;
+    // }
+
+    // public primaryKeyMapper(): MapperColumn {
+    //     return this.primaryKeysMapper().find(_ => true);
+    // }
+
+    // public primaryKeysMapper(): MapperColumn[] {
+    //     return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType);
+    // }
 
     protected getColumnsCompiled(): ColumnsCompiled {
         if (!this._columnsCompiled.columns.length) {
@@ -69,6 +99,8 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
     protected abstract buildBase(): CrudCompiled;
 
     protected abstract setDefaultColumns(): void;
+
+    public abstract getModel(): T;
 
     private compileWhere(compiled: WhereCompiled) {
         if (compiled.where.length) {

@@ -4,7 +4,7 @@ import { MetadataTable } from "../metadata-table";
 import { DatabaseBase } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
 import { TypeOrString } from "../core/utils";
-import { GetMapper } from "..";
+import { GetMapper } from "../mapper/interface-get-mapper";
 
 export class Ddl {
 

@@ -1,8 +1,11 @@
 import { PrimaryKeyType } from "./../core/enums/primary-key-type";
 import { Utils } from "./../core/utils";
-import { DatabaseBuilderError, DatabaseHelper, GetMapper, MetadataTable } from "..";
 import { MapperSettingsModel } from "./mapper-settings-model";
 import { Expression } from "lambda-expression";
+import { GetMapper } from "./interface-get-mapper";
+import { MetadataTable } from "../metadata-table";
+import { DatabaseHelper } from "../database-helper";
+import { DatabaseBuilderError } from "../core/errors";
 
 export class MapperBase implements GetMapper {
 

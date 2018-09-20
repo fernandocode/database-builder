@@ -1,7 +1,8 @@
 import { MapperTable } from "../../mapper-table";
 import { DatabaseHelper } from "../../database-helper";
-import { DatabaseResult } from "../..";
 import { RowResult } from "../../core/row-result";
+import * as lodash from "lodash";
+import { DatabaseResult } from "../../definitions/database-definition";
 
 export class QueryReadableBuilderBase {
     private _databaseHelper: DatabaseHelper;
@@ -86,7 +87,11 @@ export class QueryReadableBuilderBase {
         mapperTable.columns.forEach((column) => {
             // TODO: refatorar para recuperar valores de forma correta para objetos complexos
             // Exemplo: column: "cliente_cidade_uf_id", recuperar o valor para: "cliente.cidade.uf.id"
-            result[column.column] = this._databaseHelper.databaseToValue(row[column.column], column.fieldType);
+            const value = this._databaseHelper.databaseToValue(row[column.column], column.fieldType);
+            lodash.set(result as any, column.fieldReference, value);
+            // TODO: essa associação será redundante para itens de primeiro nivel, mas será mantida para compatibilidade com itens de segundo nivel ou mais, pois há mapper que buscam a propriedade de sub nivel pelo nome da coluna por exemplo: 'cliente_cidade_uf_id'
+            // BREAKING-CHANGE: Na proxima versão da aplicação essa compatibilidade deve ser removida, o que era causar quebra de versão, onde terá que ser alterada implementações que o "mapper" para obter valores de propriedades de sub nivel.
+            result[column.column] = value;
         });
         return result;
     }

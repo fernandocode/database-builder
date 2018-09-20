@@ -8,17 +8,17 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
 
     constructor(
         typeT: new () => T,
-        private _metadata: MetadataTable<T>,
+        metadata: MetadataTable<T>,
         alias: string = void 0,
         protected readonly _modelToSave: T = void 0,
     ) {
-        super(typeT, alias);
+        super(typeT, metadata, alias);
     }
 
     public columns(
         columnsCallback: (columns: UpdateColumnsBuilder<T>) => void,
     ): UpdateBuilder<T> {
-        return super.columnsBase(columnsCallback, new UpdateColumnsBuilder<T>(this._metadata, this._modelToSave), this);
+        return super.columnsBase(columnsCallback, new UpdateColumnsBuilder<T>(this.metadata, this._modelToSave), this);
     }
 
     public where(
@@ -32,6 +32,10 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
             params: this.getColumnsCompiled().params,
             sql: `UPDATE ${this._tablename} SET ${this.getColumnsCompiled().columns.join(", ")}`,
         };
+    }
+
+    public getModel(): T {
+        return this._modelToSave;
     }
 
     protected setDefaultColumns(): void {

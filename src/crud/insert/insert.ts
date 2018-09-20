@@ -3,6 +3,7 @@ import { DatabaseBase } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { CrudBase } from "../crud-base";
 import { InsertBuilder } from "./insert-builder";
+import { TypeCrud } from "../enums/type-crud";
 
 export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilder<T>> {
 
@@ -14,7 +15,7 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
         database: DatabaseBase = void 0,
         enableLog: boolean = true,
     ) {
-        super(new InsertBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
+        super(TypeCrud.CREATE, new InsertBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
     }
 
     public columns(columnsCallback: (columns: InsertColumnsBuilder<T>) => void): Insert<T> {

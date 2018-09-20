@@ -1,8 +1,10 @@
 import { ProjectionBuilder } from "../projection-builder";
-import { JoinType, ProjectionCompiled, WhereBuilder } from "..";
 import { QueryBuilderBase } from "./query-builder-base";
 import { JoinQueryBuilderContract } from "./join-query-builder-contract";
 import { WhereCompiled } from "../where-compiled";
+import { WhereBuilder } from "../where-builder";
+import { ProjectionCompiled } from "../projection-compiled";
+import { JoinType } from "../enums/join-type";
 
 export class JoinQueryBuilder<T>
     extends QueryBuilderBase<T, JoinQueryBuilder<T>>

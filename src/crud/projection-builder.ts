@@ -10,7 +10,7 @@ import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";
 import { MetadataTable } from "../metadata-table";
 import { ProjectionsHelper } from "../core/projections-helper";
-import { DatabaseBuilderError } from "..";
+import { DatabaseBuilderError } from "../core/errors";
 
 export class ProjectionBuilder<T> {
     private _projection: ProjectionCompiled = new ProjectionCompiled();

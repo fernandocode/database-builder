@@ -8,8 +8,6 @@ export class MapperColumn {
         public fieldType: FieldType = void 0,
         public fieldReference: string = column ? column.replace(/_/g, ".") : void 0,
         public primaryKeyType?: PrimaryKeyType
-        // public isKeyColumn: boolean = false,
-        // public isAutoIncrement: boolean = false
     ) {
 
     }

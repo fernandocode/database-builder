@@ -1,12 +1,13 @@
 import { ColumnRef } from "../../core/column-ref";
 import { QueryCompilable } from "../../core/query-compilable";
 import { ExpressionOrColumn } from "../../core/utils";
-import { DatabaseBase, DatabaseResult, QueryCompiled } from "../..";
-import { WhereBuilder } from "..";
 import { LambdaExpression } from "lambda-expression";
 import { ProjectionBuilder } from "../projection-builder";
 import { OrderBy } from "../../core/enums/order-by";
 import { UnionType } from "../../core/union-type";
+import { QueryCompiled } from "../../core/query-compiled";
+import { WhereBuilder } from "../where-builder";
+import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 
 export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseContract<T, TQuery>> extends QueryCompilable {
 

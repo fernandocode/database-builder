@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { Query } from "..";
+import { Query } from "../crud/query/query";
 
 describe("Limit and Offset", () => {
 

@@ -1,7 +1,7 @@
 import { MapperTable } from "../mapper-table";
 import { ExpressionOrColumn, Utils } from "./utils";
-import { DatabaseHelper } from "..";
 import { FieldType } from "./enums/field-type";
+import { DatabaseHelper } from "../database-helper";
 
 export class RowResult<T> {
     private _databaseHelper: DatabaseHelper;

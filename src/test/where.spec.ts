@@ -1,8 +1,8 @@
 import { ReferencesModelTest } from "./models/reference-model-test";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { Query } from "..";
 import * as moment from "moment";
+import { Query } from "../crud/query/query";
 
 describe("Where", () => {
 

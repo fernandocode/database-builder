@@ -1,7 +1,6 @@
 import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, Utils } from "./utils";
-import { ProjectionCompiled } from "..";
-
+import { ProjectionCompiled } from "../crud/projection-compiled";
 export class ProjectionsUtils<T> {
 
     public static readonly WILDCARD = "*";

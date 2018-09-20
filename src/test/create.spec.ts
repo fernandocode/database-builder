@@ -95,7 +95,8 @@ describe("Create", () => {
         const create = new Create(TestClazzRefCode, mapper.get(TestClazzRefCode));
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
-        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRefCode( code TEXT NOT NULL PRIMARY KEY AUTOINCREMENT, description TEXT, reference_id INTEGER );`);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRefCode( code TEXT NOT NULL PRIMARY KEY, description TEXT, reference_description TEXT );`);
+        // expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRefCode( code TEXT NOT NULL PRIMARY KEY AUTOINCREMENT, description TEXT, reference_id INTEGER );`);
     });
 
     it("TestClazz", () => {

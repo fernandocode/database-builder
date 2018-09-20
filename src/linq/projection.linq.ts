@@ -1,10 +1,7 @@
-import { ExpressionOrColumn } from "../core/utils";
-import { Projection } from "..";
 
 export class ProjectionLinq<T> {
 
     constructor(
-        private _typeT: new () => T
     ) {
     }
 

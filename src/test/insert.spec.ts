@@ -8,10 +8,11 @@ import { SubRegiao } from "./models/sub-regiao";
 import { Cliente } from "./models/cliente";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
-import { Insert } from "..";
 import { MappersTableNew } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
 import { GuidClazz } from "./models/guid-clazz";
+import { TestClazzRefCode } from "./models/test-clazz-ref-code";
+import { Insert } from "../crud/insert/insert";
 
 describe("Insert", () => {
     const mapper = new MappersTableNew();
@@ -98,6 +99,14 @@ describe("Insert", () => {
         expect(result.params[0]).to.length(36);
         expect(result.params[1]).to.equal(ObjectToTest.guidClazz.description);
         expect(result.query).to.equal("INSERT INTO GuidClazz (guid, description) VALUES (?, ?)");
+    });
+
+    it("TestClazzRefCode", () => {
+        const result = new Insert(TestClazzRefCode, ObjectToTest.testClazzRefCode, mapper.get(TestClazzRefCode)).compile();
+        expect(result.params.toString()).to.equal([
+            ObjectToTest.testClazzRefCode.code, ObjectToTest.testClazzRefCode.description, ObjectToTest.testClazzRefCode.reference.description
+        ].toString());
+        expect(result.query).to.equal("INSERT INTO TestClazzRefCode (code, description, reference_description) VALUES (?, ?, ?)");
     });
 
 });

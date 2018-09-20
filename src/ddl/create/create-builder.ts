@@ -1,7 +1,7 @@
 import { DdlColumnsBuilder } from "../ddl-columns-builder";
 import { MetadataTable } from "../../metadata-table";
 import { DdlBaseBuilder } from "../ddl-base-builder";
-import { DatabaseBuilderError } from "../..";
+import { DatabaseBuilderError } from "../../core/errors";
 
 export class CreateBuilder<T> extends DdlBaseBuilder<T> {
 

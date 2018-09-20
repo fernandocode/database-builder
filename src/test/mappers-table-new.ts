@@ -15,8 +15,8 @@ import { MapperBase } from "./../mapper/mapper-base";
 import { DatabaseHelper } from "../database-helper";
 import { Regiao } from "./models/regiao";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
-import { MapperSettingsModel } from "..";
 import { PrimaryKeyType } from "../core/enums/primary-key-type";
+import { MapperSettingsModel } from "../mapper/mapper-settings-model";
 
 export class MappersTableNew extends MapperBase {
 
@@ -49,9 +49,9 @@ export class MappersTableNew extends MapperBase {
             ;
 
         this.mapper(TestClazzRefCode)
-            .key(x => x.code, PrimaryKeyType.AutoIncrement, String)
+            .key(x => x.code, PrimaryKeyType.Assigned, String)
             .column(x => x.description, String)
-            .reference(x => x.reference)
+            .referenceKey(x => x.reference, x => x.description)
             ;
         this.autoMapper(TestClazz, x => x.internalKey, PrimaryKeyType.AutoIncrement)
             .ignore(x => x.disabled);
