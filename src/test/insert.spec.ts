@@ -13,6 +13,7 @@ import { ObjectToTest } from "./objeto-to-test";
 import { GuidClazz } from "./models/guid-clazz";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { Insert } from "../crud/insert/insert";
+import { ContasReceber } from "./models/contas-receber";
 
 describe("Insert", () => {
     const mapper = new MappersTableNew();
@@ -109,4 +110,21 @@ describe("Insert", () => {
         expect(result.query).to.equal("INSERT INTO TestClazzRefCode (code, description, reference_description) VALUES (?, ?, ?)");
     });
 
+    it("TestClazzRefCode", () => {
+        const result = new Insert(TestClazzRefCode, ObjectToTest.testClazzRefCode, mapper.get(TestClazzRefCode)).compile();
+        expect(result.params.toString()).to.equal([
+            ObjectToTest.testClazzRefCode.code, ObjectToTest.testClazzRefCode.description, ObjectToTest.testClazzRefCode.reference.description
+        ].toString());
+        expect(result.query).to.equal("INSERT INTO TestClazzRefCode (code, description, reference_description) VALUES (?, ?, ?)");
+    });
+
+    it("ContasAReceber", () => {
+        const result = new Insert(ContasReceber, ObjectToTest.contasReceber, mapper.get(ContasReceber)).compile();
+        expect(result.params.toString()).to.equal([
+            ObjectToTest.contasReceber.codeImport, ObjectToTest.contasReceber.valor,
+            void 0, ObjectToTest.contasReceber.dataVencimento.unix(),
+            ObjectToTest.contasReceber.cliente.codeImport
+        ].toString());
+        expect(result.query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataRecebimento, dataVencimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
+    });
 });

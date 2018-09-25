@@ -12,6 +12,7 @@ import { Uf } from "./models/uf";
 import { Cidade } from "./models/cidade";
 import { Cliente } from "./models/cliente";
 import * as moment from "moment";
+import { ContasReceber } from "./models/contas-receber";
 
 export class ObjectToTest {
 
@@ -101,4 +102,12 @@ export class ObjectToTest {
             description: "jgagdada"
         } as TestClazzRefCode
     } as TestClazz;
+
+    public static contasReceber = {
+        codeImport: 10,
+        valor: 1023.45,
+        cliente: ObjectToTest.cliente,
+        dataRecebimento: void 0,
+        dataVencimento: moment()
+    } as ContasReceber;
 }

@@ -89,7 +89,7 @@ describe("Create", () => {
         const create = new Create(ContasReceber, mapper.get(ContasReceber));
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
-        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, valor INTEGER, cliente_codeImport INTEGER );`);
+        expect(result).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, valor INTEGER, dataRecebimento INTEGER, dataVencimento INTEGER, cliente_codeImport INTEGER );`);
     });
 
     it("Test create", () => {
@@ -104,7 +104,6 @@ describe("Create", () => {
         const result = create.compile();
         expect(result.length > 0).to.equal(true);
         expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRefCode( code TEXT NOT NULL PRIMARY KEY, description TEXT, reference_description TEXT );`);
-        // expect(result).to.equal(`CREATE TABLE IF NOT EXISTS TestClazzRefCode( code TEXT NOT NULL PRIMARY KEY AUTOINCREMENT, description TEXT, reference_id INTEGER );`);
     });
 
     it("TestClazz", () => {

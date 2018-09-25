@@ -4,10 +4,13 @@ import { DatabaseBuilderError } from "./core/errors";
 export class DatetimeUtils {
 
     public static datetimeToDatabase(date: moment.Moment): number {
-        if (!date.unix) {
-            throw new DatabaseBuilderError("Date format incorrect");
+        if (date) {
+            if (!date.unix) {
+                throw new DatabaseBuilderError("Date format incorrect");
+            }
+            return date.unix();
         }
-        return date.unix();
+        return void 0;
     }
 
     public static dateToDatabase(date: any): number {
@@ -19,6 +22,9 @@ export class DatetimeUtils {
     }
 
     public static databaseToDatetime(unix: number) {
-        return moment.utc(unix * 1000);
+        if (unix) {
+            return moment.utc(unix * 1000);
+        }
+        return void 0;
     }
 }

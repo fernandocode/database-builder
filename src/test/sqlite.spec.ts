@@ -1,3 +1,4 @@
+import { ContasReceber } from "./models/contas-receber";
 import { Ddl } from "./../ddl/ddl";
 import { SQLiteDatabase } from "./database/sqlite-database";
 import { expect } from "chai";
@@ -7,6 +8,7 @@ import { MappersTableNew } from "./mappers-table-new";
 import { Crud } from "../crud";
 import { GuidClazz } from "./models/guid-clazz";
 import { Uf } from "./models/uf";
+import * as moment from "moment";
 
 describe("SQLite", async () => {
     const mapper = new MappersTableNew();
@@ -81,6 +83,22 @@ describe("SQLite", async () => {
             expect(itemResult.uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
         }
         expect(queryResult[0].codeImport).to.equal(ObjectToTest.cidade.codeImport);
+    });
+
+    it("ContasAReceber", async () => {
+
+        await ddl.create(ContasReceber).execute();
+
+        const insertResult1 = await crud.insert(ContasReceber, ObjectToTest.contasReceber).execute();
+        expect(insertResult1.rowsAffected, "insert").to.equal(1);
+
+        const queryResult = await crud.query(ContasReceber)
+            .where(where => where.equal(x => x.cliente.codeImport, ObjectToTest.contasReceber.cliente.codeImport))
+            .toList();
+
+        expect(queryResult.length).to.equal(1);
+        expect(queryResult[0].codeImport).to.equal(ObjectToTest.contasReceber.codeImport);
+        expect(queryResult[0].dataRecebimento).to.equal(void 0);
     });
 
 });
