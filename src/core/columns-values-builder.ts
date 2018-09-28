@@ -1,3 +1,4 @@
+import { DatabaseBuilderError } from "./errors";
 import { KeyUtils } from "./key-utils";
 import { PrimaryKeyType } from "./enums/primary-key-type";
 import { MetadataTable } from "../metadata-table";
@@ -24,15 +25,22 @@ export abstract class ColumnsValuesBuilder<
         fieldType: FieldType,
         primaryKeyType?: PrimaryKeyType
     ): TThis {
-        if (
-            primaryKeyType === PrimaryKeyType.Guid
-            && !value
-            && this.allowGenerateKey()
-        ) {
-            // gerar GUID
-            value = Utils.GUID();
-            // set value GUID in model
-            KeyUtils.setKey(this.metadata, this.modelToSave, value);
+        switch (primaryKeyType) {
+            case PrimaryKeyType.Assigned:
+                if (!value) {
+                    throw new DatabaseBuilderError("Primary key to be informed when generation strategy is 'Assigned'!");
+                }
+            case PrimaryKeyType.Guid:
+                if (!value && this.allowGenerateKey()) {
+                    // gerar GUID
+                    value = Utils.GUID();
+                    // set value GUID in model
+                    KeyUtils.setKey(this.metadata, this.modelToSave, value);
+                }
+                break;
+            case PrimaryKeyType.AutoIncrement:
+            default:
+                break;
         }
         this.columns.push({
             name: column,
@@ -74,7 +82,6 @@ export abstract class ColumnsValuesBuilder<
             params: [],
         };
         result.keyColumns = this.columns.filter(x => !!x.primaryKeyType).map(x => x.name);
-        // result.keyColumns = this.columns.filter(x => x.isKeyColumn).map(x => x.name);
         this.columns.forEach((column) => {
             const columnName = this.columnFormat(column);
             if (columnName !== void 0) {

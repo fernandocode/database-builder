@@ -1,3 +1,4 @@
+import { DatabaseBuilderError } from './../core/errors';
 import { Pedido } from "./models/pedido";
 import { Marca } from "./models/marca";
 import { CondicaoPagamento } from "./models/condicao-pagamento";
@@ -32,6 +33,13 @@ describe("Insert", () => {
             ObjectToTest.regiao.codeImport, ObjectToTest.regiao.nome
         ].toString());
         expect(result.query).to.equal("INSERT INTO Regiao (codeImport, nome) VALUES (?, ?)");
+    });
+
+    it("Regiao (primary key Assigned) key not informed!", () => {
+        const sql = new Insert(Regiao, {
+            nome: "Sul"
+        } as Regiao, mapper.get(Regiao));
+        expect(() => sql.compile()).to.throw("Primary key to be informed when generation strategy is 'Assigned'!");
     });
 
     it("SubRegiao", () => {

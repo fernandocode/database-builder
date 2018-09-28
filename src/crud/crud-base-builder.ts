@@ -45,30 +45,6 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
         };
     }
 
-    // public setKeyByModel(keyValue: any): void {
-    //     (this.getModel() as any)[this.primaryKeyMapper().fieldReference] = keyValue;
-    // }
-
-    // public getKeyByModel(): any {
-    //     return Utils.getValue(this.getModel(), this.primaryKeyMapper().fieldReference);
-    // }
-
-    // public primaryKeyType(): PrimaryKeyType {
-    //     return this.primaryKeyMapper().primaryKeyType;
-    // }
-
-    // public isCompositeKey(): boolean {
-    //     return this.primaryKeysMapper().length > 1;
-    // }
-
-    // public primaryKeyMapper(): MapperColumn {
-    //     return this.primaryKeysMapper().find(_ => true);
-    // }
-
-    // public primaryKeysMapper(): MapperColumn[] {
-    //     return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType);
-    // }
-
     protected getColumnsCompiled(): ColumnsCompiled {
         if (!this._columnsCompiled.columns.length) {
             this.setDefaultColumns();
