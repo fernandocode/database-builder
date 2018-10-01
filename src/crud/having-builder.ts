@@ -17,7 +17,8 @@ export class HavingBuilder<T>
     }
 
     protected getColumnParams(expression: ProjectionsHelper<T>): ColumnParams {
-        const compiled = Utils.resolveProjection(expression);
+        const compiled = Utils.resolveExpressionProjection(expression);
+        // const compiled = Utils.resolveProjection(expression);
         return {
             column: compiled.projection,
             params: compiled.params

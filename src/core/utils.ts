@@ -29,6 +29,8 @@ export type TypeWhere<T> = Expression<T> | ValueTypeToParse | ColumnRef | Projec
 
 export type TypeProjection<T> = ProjectionsHelper<T> | ColumnRef | PlanRef;
 
+export type ExpressionProjection<TReturn, T> = TypeProjection<T> | ExpressionOrColumn<TReturn, T>;
+
 export type ProjectionOrValue<T> = ProjectionBuilder<T> | ProjectionsHelper<T> | ValueTypeToParse;
 
 export class Utils {
@@ -184,7 +186,8 @@ export class Utils {
                     params: [expression]
                 };
             case (ExpressionOrValueEnum.Projection):
-                const compiled = this.resolveProjection(expression as ProjectionsHelper<T>);
+                const compiled = this.resolveExpressionProjection(expression as ProjectionsHelper<T>);
+                // const compiled = this.resolveProjection(expression as ProjectionsHelper<T>);
                 return {
                     column: compiled.projection,
                     params: compiled.params
@@ -197,17 +200,34 @@ export class Utils {
         }
     }
 
-    public static resolveProjection<T>(expression: TypeProjection<T>): ProjectionCompiled {
-        if (this.isProjectionsHelper(expression)) {
-            return (expression as ProjectionsHelper<T>)._compiled();
+    // public static resolveProjection<T>(projection: TypeProjection<T>): ProjectionCompiled {
+    //     if (this.isProjectionsHelper(projection)) {
+    //         return (projection as ProjectionsHelper<T>)._compiled();
+    //     }
+    //     if (this.isColumnRef(projection)) {
+    //         return new ProjectionCompiled((projection as ColumnRef).result());
+    //     }
+    //     if (this.isPlanRef(projection)) {
+    //         return new ProjectionCompiled((projection as PlanRef).result());
+    //     }
+    //     return new ProjectionCompiled(projection + "");
+    // }
+
+    public static resolveExpressionProjection<TReturn, T>(projection: ExpressionProjection<TReturn, T>): ProjectionCompiled {
+        if (this.isProjectionsHelper(projection)) {
+            return (projection as ProjectionsHelper<T>)._compiled();
         }
-        if (this.isColumnRef(expression)) {
-            return new ProjectionCompiled((expression as ColumnRef).result());
+        if (this.isColumnRef(projection)) {
+            return new ProjectionCompiled((projection as ColumnRef).result());
         }
-        if (this.isPlanRef(expression)) {
-            return new ProjectionCompiled((expression as PlanRef).result());
+        if (this.isPlanRef(projection)) {
+            return new ProjectionCompiled((projection as PlanRef).result());
         }
-        return new ProjectionCompiled(expression + "");
+        // const expressionOrColumn = this.expressionOrColumn(projection as ExpressionOrColumn<TReturn, T>);
+        // if(expressionOrColumn === ExpressionOrColumnEnum.Expression){
+        //     return this.getColumn(projection as Expression)
+        // }
+        return new ProjectionCompiled(this.getColumn(projection as ExpressionOrColumn<TReturn, T>));
     }
 
     public static getValue<TReturn, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): TReturn {

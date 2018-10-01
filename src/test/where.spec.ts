@@ -1,3 +1,4 @@
+import { JoinQueryBuilder } from "./../crud/query/join-query-builder";
 import { ReferencesModelTest } from "./models/reference-model-test";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
@@ -490,6 +491,73 @@ describe("Where", () => {
         expect(result.params[6]).to.equal("b");
         expect(result.params[7]).to.equal(false);
         expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
+    });
+
+    it("projection concat 1", () => {
+        const query = new Query(TestClazz);
+        query
+            .projection(projection => {
+                projection.group("iddescription", projection.proj().exp(x => x.id),
+                    projection.plan("||"), projection.proj().exp(x => x.description));
+            })
+            .where(where => {
+                where.equal(x => x.id, 2);
+            });
+        const result = query.compile();
+        expect(result.params.length).to.equal(1);
+        expect(result.params[0]).to.equal(2);
+        expect(result.query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE tes.id = ?");
+    });
+
+    it("projection concat 2", () => {
+        const query = new Query(TestClazz);
+        query
+            .projection(projection => {
+                projection.group("iddescription", projection.ref(x => x.id), "||", projection.ref(x => x.description));
+            })
+            .where(where => {
+                where.equal(x => x.id, 2);
+            });
+        const result = query.compile();
+        expect(result.params.length).to.equal(1);
+        expect(result.params[0]).to.equal(2);
+        expect(result.query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE tes.id = ?");
+    });
+
+    it("projection concat cross query", () => {
+        const query = new Query(TestClazz);
+        let joinReferenceModelTest: JoinQueryBuilder<ReferencesModelTest>;
+        query.join(ReferencesModelTest,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                joinReferenceModelTest = join;
+            });
+        query
+            .projection(projection => {
+                projection.group("idname", projection.ref(x => x.id), "||", joinReferenceModelTest.ref(x => x.name));
+            })
+            .where(where => {
+                where.equal(x => x.id, 2);
+            });
+        const result = query.compile();
+        expect(result.params.length).to.equal(1);
+        expect(result.params[0]).to.equal(2);
+        expect(result.query).to.equal("SELECT (tes.id || ref.name) AS idname FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE tes.id = ?");
+    });
+
+    it("where concat", () => {
+        const query = new Query(TestClazz);
+        query
+            .projection(projection => {
+                projection.group("iddescription", projection.ref(x => x.id), "||", projection.ref(x => x.description));
+            })
+            .where(where => {
+                where.equal(where.concat(where.ref(x => x.id), "||", where.ref(x => x.description)), 2 + "isso");
+            });
+        const result = query.compile();
+        expect(result.params.length).to.equal(1);
+        expect(result.params[0]).to.equal("2isso");
+        expect(result.query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE (tes.id || tes.description) = ?");
     });
 
 });

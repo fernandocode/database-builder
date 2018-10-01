@@ -1,5 +1,5 @@
 import { Projection } from "../crud/enums/projection";
-import { ExpressionOrColumn, TypeProjection, Utils } from "./utils";
+import { ExpressionOrColumn, ExpressionProjection, Utils } from "./utils";
 import { ProjectionsUtils } from "./projections-utils";
 import { ProjectionCompiled } from "../crud/projection-compiled";
 
@@ -21,13 +21,29 @@ export class ProjectionsHelper<T> {
         return this._result;
     }
 
+    public exp<TReturn>(
+        expression?: ExpressionOrColumn<TReturn, T>,
+        alias: string = "",
+        args?: any[]
+    ): ProjectionsHelper<T> {
+        return this.getResult(this._projectionsUtils.apply(expression, [], alias, args));
+    }
+
+    public concat(
+        alias: string,
+        ...projections: Array<ExpressionProjection<any, T>>
+    ): ProjectionsHelper<T> {
+        return this.group(alias, ...projections);
+    }
+
     public group(
         alias: string,
-        ...projections: Array<TypeProjection<T>>
+        ...projections: Array<ExpressionProjection<any, T>>
     ): ProjectionsHelper<T> {
         const projectionsCompiled = new ProjectionCompiled();
         projections.forEach((projection) => {
-            const compiled = Utils.resolveProjection(projection);
+            const compiled = Utils.resolveExpressionProjection(projection);
+            // const compiled = Utils.resolveProjection(projection);
             projectionsCompiled.projection += `${compiled.projection} `;
             projectionsCompiled.params = projectionsCompiled.params.concat(compiled.params);
         });

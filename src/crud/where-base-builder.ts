@@ -1,6 +1,6 @@
 import { DatabaseHelper } from "../database-helper";
 import { LambdaExpression } from "lambda-expression";
-import { Utils, ValueType, ValueTypeToParse } from "../core/utils";
+import { Utils, ValueType, ValueTypeToParse, ExpressionOrColumn, ExpressionProjection } from "../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
@@ -9,6 +9,7 @@ import { DatabaseBuilderError } from "../core/errors";
 import { WhereBaseBuilderContract } from "./where-base-builder-contract";
 import { ColumnParams } from "../core/column-params";
 import { ColumnRef } from "../core/column-ref";
+import { ProjectionsHelper } from "../core/projections-helper";
 
 export abstract class WhereBaseBuilder<
     T,
@@ -34,8 +35,25 @@ export abstract class WhereBaseBuilder<
         this._databaseHelper = new DatabaseHelper();
     }
 
-    public ref(column: string, alias: string = this._alias): ColumnRef {
-        return new ColumnRef(column, alias);
+    public proj(): ProjectionsHelper<T> {
+        return new ProjectionsHelper(this._typeT, this._alias, false);
+    }
+
+    public concat(
+        ...projections: Array<ExpressionProjection<any, T>>
+    ): ProjectionsHelper<T> {
+        return this.proj().concat("", ...projections);
+    }
+
+    // public ref(column: string, alias: string = this._alias): ColumnRef {
+    //     return new ColumnRef(column, alias);
+    // }
+
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this._alias): ColumnRef {
+        return new ColumnRef(
+            Utils.getColumn(expression),
+            alias
+        );
     }
 
     public not(): TWhere {

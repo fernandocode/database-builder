@@ -1,10 +1,10 @@
-import { PlanRef } from "../core/plan-ref";
+import { QueryCompiled } from "../core/query-compiled";
 import { ProjectionsUtils } from "../core/projections-utils";
 import { BuilderCompiled } from "../core/builder-compiled";
 import { MapperTable } from "../mapper-table";
-import { ExpressionOrColumn, TypeProjection, Utils } from "../core/utils";
+import { ExpressionOrColumn, ExpressionProjection, Utils } from "../core/utils";
 import { ColumnRef } from "../core/column-ref";
-import { QueryCompiled } from "../core/query-compiled";
+import { PlanRef } from "../core/plan-ref";
 import { ProjectionCompiled } from "./projection-compiled";
 import { Projection } from "./enums/projection";
 import { ProjectionCase } from "./projection-case";
@@ -44,10 +44,10 @@ export class ProjectionBuilder<T> {
         return new ProjectionsHelper(this._typeT, this._aliasTable, false);
     }
 
-    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef {
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this._aliasTable): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
-            this._aliasTable
+            alias
         );
     }
 
@@ -57,7 +57,8 @@ export class ProjectionBuilder<T> {
 
     public group(
         alias: string,
-        ...projections: Array<TypeProjection<T>>
+        ...projections: Array<ExpressionProjection<any, T>>
+        // ...projections: Array<TypeProjection<T>>
     ): ProjectionBuilder<T> {
         const groupCompiled = this.proj().group(alias, ...projections)._compiled();
         this.apply(

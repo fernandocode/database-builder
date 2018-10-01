@@ -81,10 +81,10 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
     }
 
-    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef {
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this.alias): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
-            this.alias
+            alias
         );
     }
 
