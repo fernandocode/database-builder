@@ -1,5 +1,7 @@
 import { DdlColumnsBuilder } from "./ddl-columns-builder";
 import { ColumnsBaseCompiled } from "../core/columns-base-compiled";
+import { DdlCompiled } from "../core/ddl-compided";
+import { MapperTable } from "../mapper-table";
 
 export abstract class DdlBaseBuilder<T> {
 
@@ -13,8 +15,15 @@ export abstract class DdlBaseBuilder<T> {
     ) {
     }
 
-    public compile(): string {
-        return this.removeMultiSpacesAndBreakLines(this.buildBase());
+    public build(): DdlCompiled {
+        const dependenciesCompiled: DdlCompiled[] = [];
+        this.dependencies().forEach(dependency => {
+            dependenciesCompiled.push(this.resolveDependency(dependency));
+        });
+        return {
+            script: this.removeMultiSpacesAndBreakLines(this.buildBase()),
+            dependencies: dependenciesCompiled
+        } as DdlCompiled;
     }
 
     protected removeMultiSpacesAndBreakLines(str: string) {
@@ -37,6 +46,10 @@ export abstract class DdlBaseBuilder<T> {
         this.compileColumns(instanceSetColumnsBuilder.compile());
         return instanceReturn;
     }
+
+    protected abstract resolveDependency(dependency: MapperTable): DdlCompiled;
+
+    protected abstract dependencies(): MapperTable[];
 
     protected abstract buildBase(): string;
 

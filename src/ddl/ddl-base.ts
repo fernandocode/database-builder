@@ -1,3 +1,4 @@
+import { DdlCompiled } from "./../core/ddl-compided";
 import { ExecutableBuilder } from "../core/executable-builder";
 import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
 import { DdlBaseBuilder } from "./ddl-base-builder";
@@ -16,11 +17,22 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
     }
 
     public execute(database: DatabaseBase = void 0): Promise<DatabaseResult> {
-        return this._executableBuilder.execute({ query: this.compile(), params: [] }, this.getDatabase(database));
+        return this._executableBuilder.execute(
+            { query: this.compile(), params: [] },
+            this.getDatabase(database));
     }
 
     public compile(): string {
-        return this._builder.compile();
+        const compiled = this.build();
+        let script = compiled.script;
+        compiled.dependencies.forEach(dependency => {
+            script += `\n${dependency.script}`;
+        });
+        return script;
+    }
+
+    public build(): DdlCompiled {
+        return this._builder.build();
     }
 
     private getDatabase(database: DatabaseBase): DatabaseBase {

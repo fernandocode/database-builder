@@ -3,11 +3,11 @@ import { Cliente } from "./models/cliente";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { Operator } from "../crud/enums/operator";
-import { MappersTableNew } from "./mappers-table-new";
+import { getMapper } from "./mappers-table-new";
 
 describe("Query method", () => {
 
-    const mapper = new MappersTableNew();
+    const mapper = getMapper();
 
     it("test simple select", () => {
         const query = new Query(Cliente);

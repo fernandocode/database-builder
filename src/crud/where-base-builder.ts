@@ -1,10 +1,10 @@
+import { LambdaMetadata } from "../core/lambda-metadata";
 import { DatabaseHelper } from "../database-helper";
-import { LambdaExpression } from "lambda-expression";
-import { Utils, ValueType, ValueTypeToParse, ExpressionOrColumn, ExpressionProjection } from "../core/utils";
+import { ExpressionOrColumn, ExpressionProjection, Utils, ValueType, ValueTypeToParse } from "../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
-import { LambdaMetadata } from "../core/lambda-metadata";
+import { LambdaExpression } from "lambda-expression";
 import { DatabaseBuilderError } from "../core/errors";
 import { WhereBaseBuilderContract } from "./where-base-builder-contract";
 import { ColumnParams } from "../core/column-params";
@@ -21,7 +21,7 @@ export abstract class WhereBaseBuilder<
     private static readonly OR: string = "OR";
 
     private _where: string = "";
-    private readonly _params: ValueType[] = [];
+    private _params: ValueType[] = [];
 
     private _pendingConditions: Condition[] = [];
     private _pendingAndOr: string = WhereBaseBuilder.AND;
@@ -44,10 +44,6 @@ export abstract class WhereBaseBuilder<
     ): ProjectionsHelper<T> {
         return this.proj().concat("", ...projections);
     }
-
-    // public ref(column: string, alias: string = this._alias): ColumnRef {
-    //     return new ColumnRef(column, alias);
-    // }
 
     public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this._alias): ColumnRef {
         return new ColumnRef(
@@ -366,6 +362,11 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
+    public _addParams(params: ValueType[]): TWhere {
+        this._params = this._params.concat(params);
+        return this._getInstance();
+    }
+
     protected abstract _getInstance(): TWhere;
     protected abstract _create(
         typeT: new () => T,
@@ -420,16 +421,6 @@ export abstract class WhereBaseBuilder<
         this.checkWhere();
         this._where += this.createWhere(conditions, column1, column2);
     }
-
-    // In Utils
-    // protected addAlias(
-    //     column: string,
-    // ): string {
-    //     if (column && this._alias && Utils.isNameColumn(column)) {
-    //         return `${this._alias}.${column}`;
-    //     }
-    //     return column;
-    // }
 
     protected addParam(
         param: ValueTypeToParse | ValueTypeToParse[],
@@ -502,7 +493,6 @@ export abstract class WhereBaseBuilder<
         if (isConditionIsNullInColumn2) {
             conditionsArray = this.conditionIsNull(conditionsArray);
         }
-        // const isConditionInColumn2 = this.isEqualAnyCondition(column2);
         return this.buildConditions(
             conditionsArray,
             column1,

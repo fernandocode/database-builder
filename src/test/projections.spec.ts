@@ -3,11 +3,11 @@ import { TestClazzRef } from "./models/test-clazz-ref";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { Query } from "../crud/query/query";
-import { MappersTableNew } from "./mappers-table-new";
+import { getMapper } from "./mappers-table-new";
 
 describe("Projections", () => {
 
-    const mapper = new MappersTableNew();
+    const mapper = getMapper();
 
     it("default", () => {
         const query = new Query(TestClazz);

@@ -18,6 +18,8 @@ import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { PrimaryKeyType } from "../core/enums/primary-key-type";
 import { MapperSettingsModel } from "../mapper/mapper-settings-model";
 import { ContasReceber } from "./models/contas-receber";
+import { HeaderSimple } from "./models/header-simple";
+import { GetMapper } from "../mapper/interface-get-mapper";
 
 export class MappersTableNew extends MapperBase {
 
@@ -62,7 +64,6 @@ export class MappersTableNew extends MapperBase {
 
         this.autoMapper(TestClazzList, x => x.internalKey, PrimaryKeyType.AutoIncrement);
 
-
         const settingsReference: MapperSettingsModel = {
             references: true,
             referencesId: false,
@@ -70,5 +71,16 @@ export class MappersTableNew extends MapperBase {
         };
         this.autoMapper(LoginOffline, x => x.internalKey, PrimaryKeyType.AutoIncrement, false, settingsReference);
 
+        const t = this.mapper(HeaderSimple)
+            .key(x => x.id, PrimaryKeyType.AutoIncrement, Number)
+            .column(x => x.descricao, String)
+            .hasMany(x => x.items, String, "ItemHeaderSimple")
+            ;
     }
 }
+
+// tslint:disable-next-line:label-position
+let _mapper: GetMapper = void 0;
+export const getMapper = (): GetMapper => {
+    return _mapper ? _mapper : _mapper = new MappersTableNew();
+};

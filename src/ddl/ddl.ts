@@ -1,10 +1,10 @@
 import { Drop } from "./drop/drop";
 import { Create } from "./create/create";
-import { MetadataTable } from "../metadata-table";
 import { DatabaseBase } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
 import { TypeOrString } from "../core/utils";
 import { GetMapper } from "../mapper/interface-get-mapper";
+import { MapperTable } from "../mapper-table";
 
 export class Ddl {
 
@@ -15,10 +15,11 @@ export class Ddl {
     }
 
     public create<T>(typeT: new () => T,
-                     metadata: MetadataTable<T> = this._mappersTable.get(typeT),
+                     mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
+                    //  metadata: MetadataTable<T> = this._mappersTable.get(typeT),
                      database: DatabaseBase = this.getDatabase(),
     ): Create<T> {
-        return new Create(typeT, metadata, database, this.enableLog);
+        return new Create(typeT, mapperTable, database, this.enableLog);
     }
 
     public drop<T>(typeT: TypeOrString<T>,

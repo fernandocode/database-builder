@@ -36,7 +36,8 @@
         "max-line-length": false,
         "object-literal-sort-keys": false,
         "eofline": false,
-        "space-before-function-paren": false
+        "space-before-function-paren": false,
+        "no-bitwise": false
     },
     "linterOptions": {
         "exclude": [

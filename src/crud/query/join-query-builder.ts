@@ -5,6 +5,7 @@ import { WhereCompiled } from "../where-compiled";
 import { WhereBuilder } from "../where-builder";
 import { ProjectionCompiled } from "../projection-compiled";
 import { JoinType } from "../enums/join-type";
+import { ValueType } from "../../core/utils";
 
 export class JoinQueryBuilder<T>
     extends QueryBuilderBase<T, JoinQueryBuilder<T>>
@@ -42,6 +43,11 @@ export class JoinQueryBuilder<T>
 
     public _getOrderBy(): string {
         return this._orderBy;
+    }
+
+    public addParamsOn(params: ValueType[]): JoinQueryBuilder<T> {
+        this._on._addParams(params);
+        return this;
     }
 
     constructor(

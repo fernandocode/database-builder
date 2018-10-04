@@ -1,5 +1,5 @@
 import { Expression, ExpressionUtils, ReturnExpression } from "lambda-expression";
-import { ValueTypeToParse } from "./core/utils";
+import { Utils, ValueTypeToParse } from "./core/utils";
 import { MapperTable } from "./mapper-table";
 import { DatabaseHelper } from "./database-helper";
 import { MapperColumn } from "./mapper-column";
@@ -34,12 +34,26 @@ export class MetadataTable<T> {
         primaryKeyType?: PrimaryKeyType
     ): MetadataTable<T> {
         const column = this.columnName(expression);
-        this.addColumn(
+        this.mapperTable.addColumn(
             column,
             type
                 ? this._databaseHelper.getFieldType(type)
                 : this.getTypeByExpression(this.instance, this.validExpressionMapper(this.instance, expression)),
             primaryKeyType
+        );
+        return this;
+    }
+
+    public hasMany<TArray, TReturn extends TArray[]>(
+        expression: ReturnExpression<TReturn, T>,
+        type: new () => TArray,
+        tableName: string,
+    ): MetadataTable<T> {
+        const column = this.columnName(expression);
+        this.addDependency(
+            column,
+            FieldType.ARRAY | this._databaseHelper.getFieldType(type),
+            tableName
         );
         return this;
     }
@@ -94,7 +108,7 @@ export class MetadataTable<T> {
                 ? this.getMapperColumnReference(this.instance, this.columnName(expression))
                 : new MapperColumn(this.columnName(expression));
         if (mapperColumn) {
-            this.removeColumn(mapperColumn.column);
+            this.mapperTable.removeColumn(mapperColumn.column);
         }
         return this;
     }
@@ -168,7 +182,7 @@ export class MetadataTable<T> {
                     || references
                 ) {
                     if (!this.isKeyColumn(key)) {
-                        this.addColumn(key, this.getTypeByValue(this.instance[key] as any));
+                        this.mapperTable.addColumn(key, this.getTypeByValue(this.instance[key] as any));
                     }
                 }
             }
@@ -182,7 +196,7 @@ export class MetadataTable<T> {
         name: string,
         fieldType: FieldType
     ) {
-        this.addColumn(
+        this.mapperTable.addColumn(
             name,
             fieldType
         );
@@ -254,45 +268,76 @@ export class MetadataTable<T> {
         }
     }
 
-    private hasColumn(columnName: string): boolean {
-        return this.getColumn(columnName) !== void 0;
-    }
+    // private hasColumn(columnName: string): boolean {
+    //     return this.getColumn(columnName) !== void 0;
+    // }
 
-    private getColumn(columnName: string): MapperColumn {
-        return this.mapperTable.columns.find(x => x.column === columnName);
-    }
+    // private getColumn(columnName: string): MapperColumn {
+    //     return this.mapperTable.columns.find(x => x.column === columnName);
+    // }
 
-    private removeColumn(columnName: string) {
-        if (this.hasColumn(columnName)) {
-            const index = this.mapperTable.columns.findIndex(x => x.column === columnName);
-            if (index > -1) {
-                this.mapperTable.columns.splice(index, 1);
-            }
-        }
-    }
+    // private removeColumn(columnName: string) {
+    //     if (this.hasColumn(columnName)) {
+    //         const index = this.mapperTable.columns.findIndex(x => x.column === columnName);
+    //         if (index > -1) {
+    //             this.mapperTable.columns.splice(index, 1);
+    //         }
+    //     }
+    // }
 
-    private add(
-        mapperColumn: MapperColumn
-    ) {
-        if (mapperColumn.fieldType === FieldType.NULL) {
-            throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped column ('${mapperColumn.column}')`);
-        }
-        if (this.hasColumn(mapperColumn.column)) {
-            throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, duplicate column: '${mapperColumn.column}'`);
-        }
-        this.mapperTable.columns.push(mapperColumn);
-    }
+    // private isDependencyTable(type: FieldType) {
+    //     if (
+    //         Utils.isFlag(type, FieldType.ARRAY) &&
+    //         type !== FieldType.ARRAY
+    //     ) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
-    private addColumn(
+    // private add(
+    //     mapperColumn: MapperColumn
+    // ) {
+    //     if (Utils.isFlag(mapperColumn.fieldType, FieldType.NULL)) {
+    //         throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped column ('${mapperColumn.column}')`);
+    //     }
+    //     if (this.hasColumn(mapperColumn.column)) {
+    //         throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, duplicate column: '${mapperColumn.column}'`);
+    //     }
+    //     this.mapperTable.columns.push(mapperColumn);
+    // }
+
+    // private addColumn(
+    //     name: string,
+    //     fieldType: FieldType,
+    //     primaryKeyType?: PrimaryKeyType
+    // ) {
+    //     this.add(
+    //         new MapperColumn(
+    //             name, fieldType, void 0,
+    //             primaryKeyType
+    //         )
+    //     );
+    // }
+
+    private addDependency(
         name: string,
         fieldType: FieldType,
-        primaryKeyType?: PrimaryKeyType
+        tablename: string
     ) {
-        this.add(
-            new MapperColumn(
-                name, fieldType, void 0,
-                primaryKeyType
-            )
-        );
+        this.mapperTable.addColumn(name, fieldType, void 0);
+        const dependency = new MapperTable(tablename);
+        fieldType &= ~FieldType.ARRAY;
+        dependency.addColumn("indexArray", FieldType.NUMBER, PrimaryKeyType.Assigned);
+        dependency.addColumn("value", fieldType);
+        const keyColumns = this.keyColumns();
+        if (keyColumns.length < 1) {
+            throw new DatabaseBuilderError(`It is not possible to create a dependency mapper ("${name}") if the primary key of the parent entity ("${this.mapperTable.tableName}") is not yet mapped.`);
+        }
+        if (keyColumns.length > 1) {
+            throw new DatabaseBuilderError(`Dependency mapper ("${name}") not support relation with entity ("${this.mapperTable.tableName}") with composite key [${keyColumns.join(", ")}]!`);
+        }
+        dependency.addColumn(`${this.mapperTable.tableName}_${keyColumns[0].column}`, keyColumns[0].fieldType, PrimaryKeyType.Assigned);
+        this.mapperTable.dependencies.push(dependency);
     }
 }

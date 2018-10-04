@@ -4,14 +4,14 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { ObjectToTest } from "./objeto-to-test";
-import { MappersTableNew } from "./mappers-table-new";
+import { getMapper } from "./mappers-table-new";
 import { Crud } from "../crud";
 import { GuidClazz } from "./models/guid-clazz";
 import { Uf } from "./models/uf";
-import * as moment from "moment";
+import { HeaderSimple } from "./models/header-simple";
 
 describe("SQLite", async () => {
-    const mapper = new MappersTableNew();
+    const mapper = getMapper();
 
     const database = new SQLiteDatabase();
     const crud = new Crud(database, mapper, false);
@@ -99,6 +99,23 @@ describe("SQLite", async () => {
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].codeImport).to.equal(ObjectToTest.contasReceber.codeImport);
         expect(queryResult[0].dataRecebimento).to.equal(void 0);
+    });
+
+    it("HeaderSimple", async () => {
+
+        await ddl.create(HeaderSimple).execute();
+
+
+        // const insertResult1 = await crud.insert(HeaderSimple, headerSimple).execute();
+        // expect(insertResult1.rowsAffected, "insert").to.equal(1);
+
+        // const queryResult = await crud.query(HeaderSimple)
+        //     .where(where => where.equal(x => x.descricao, headerSimple.descricao))
+        //     .toList();
+
+        // expect(queryResult.length).to.equal(1);
+        // expect(queryResult[0].id).to.equal(1);
+        // expect(queryResult[0].descricao).to.equal(headerSimple.descricao);
     });
 
 });

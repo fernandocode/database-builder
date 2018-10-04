@@ -1,17 +1,17 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { DropBuilder } from "../ddl/drop/drop-builder";
+import { Drop } from "../ddl/drop/drop";
 
 describe("Drop", () => {
 
     it("by type", () => {
-        const drop = new DropBuilder(TestClazz);
+        const drop = new Drop(TestClazz);
         const result = drop.compile();
         expect(result).to.equal("DROP TABLE IF EXISTS TestClazz;");
     });
 
     it("by name", () => {
-        const drop = new DropBuilder("AbC");
+        const drop = new Drop("AbC");
         const result = drop.compile();
         expect(result).to.equal("DROP TABLE IF EXISTS AbC;");
     });

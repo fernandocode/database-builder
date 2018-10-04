@@ -7,8 +7,14 @@ import { DatabaseBuilderError } from "./core/errors";
 
 export class DatabaseHelper {
 
+    public isFlag(value: any, flag: any) {
+        return !!(value & flag);
+    }
+
     public isTypeSimpleByType(type: FieldType): boolean {
-        return type !== FieldType.OBJECT && type !== FieldType.FUNCTION && type !== FieldType.ARRAY;
+        return !this.isFlag(type, FieldType.OBJECT)
+            && !this.isFlag(type, FieldType.FUNCTION)
+            && !this.isFlag(type, FieldType.ARRAY);
     }
 
     public isTypeSimple(value: ValueTypeToParse): boolean {
@@ -17,7 +23,7 @@ export class DatabaseHelper {
     }
 
     public isTypeIgnoredInMapperByType(type: FieldType): boolean {
-        return type === FieldType.ARRAY;
+        return this.isFlag(type, FieldType.ARRAY);
     }
 
     public isTypeIgnoredInMapper(value: ValueTypeToParse): boolean {
@@ -72,20 +78,45 @@ export class DatabaseHelper {
     }
 
     public parseToColumnType(type: FieldType): ColumnType {
-        switch (type) {
-            case FieldType.STRING:
-            case FieldType.ARRAY:
-            case FieldType.OBJECT:
-            // case FieldType.GUID:
-                return ColumnType.TEXT;
-            case FieldType.DATE:
-            case FieldType.NUMBER:
-                return ColumnType.INTEGER;
-            case FieldType.BOOLEAN:
-                return ColumnType.BOOLEAN;
-            default:
-                throw new DatabaseBuilderError(`type '${type}' não configurado!`);
+        // TODO: list
+        if (
+            this.isFlag(type, FieldType.ARRAY) &&
+            type !== FieldType.ARRAY
+        ) {
+            return ColumnType.TABLE_REFERENCE;
         }
+        if (
+            this.isFlag(type, FieldType.STRING) ||
+            this.isFlag(type, FieldType.ARRAY) ||
+            this.isFlag(type, FieldType.OBJECT)
+        ) {
+            return ColumnType.TEXT;
+        }
+        if (
+            this.isFlag(type, FieldType.DATE) ||
+            this.isFlag(type, FieldType.NUMBER)
+        ) {
+            return ColumnType.INTEGER;
+        }
+        if (
+            this.isFlag(type, FieldType.BOOLEAN)
+        ) {
+            return ColumnType.BOOLEAN;
+        }
+        throw new DatabaseBuilderError(`type '${type}' não configurado!`);
+        // switch (type) {
+        //     case FieldType.STRING:
+        //     case FieldType.ARRAY:
+        //     case FieldType.OBJECT:
+        //         return ColumnType.TEXT;
+        //     case FieldType.DATE:
+        //     case FieldType.NUMBER:
+        //         return ColumnType.INTEGER;
+        //     case FieldType.BOOLEAN:
+        //         return ColumnType.BOOLEAN;
+        //     default:
+        //         throw new DatabaseBuilderError(`type '${type}' não configurado!`);
+        // }
     }
 
     public parseToValueType(value: ValueTypeToParse, type: FieldType = this.getType(value)): ValueType {
@@ -101,31 +132,60 @@ export class DatabaseHelper {
         return value;
     }
 
-    public databaseToValue(columnValue: any, fieldType: FieldType) {
-        switch (fieldType) {
-            case FieldType.OBJECT:
-            case FieldType.ARRAY:
-                return JSON.parse(columnValue);
-            case FieldType.DATE:
-                return DatetimeUtils.databaseToDatetime(columnValue);
-            case FieldType.BOOLEAN:
-                return typeof columnValue === "string" ? columnValue === "true" : columnValue;
-            default:
-                return columnValue;
+    public databaseToValue(columnValue: any, fieldType: FieldType): any {
+        if (
+            this.isFlag(fieldType, FieldType.ARRAY) ||
+            this.isFlag(fieldType, FieldType.OBJECT)
+        ) {
+            return JSON.parse(columnValue);
         }
+        if (
+            this.isFlag(fieldType, FieldType.DATE)
+        ) {
+            return DatetimeUtils.databaseToDatetime(columnValue);
+        }
+        if (
+            this.isFlag(fieldType, FieldType.BOOLEAN)
+        ) {
+            return typeof columnValue === "string" ? columnValue === "true" : columnValue;
+        }
+        return columnValue;
+        // switch (fieldType) {
+        //     case FieldType.OBJECT:
+        //     case FieldType.ARRAY:
+        //         return JSON.parse(columnValue);
+        //     case FieldType.DATE:
+        //         return DatetimeUtils.databaseToDatetime(columnValue);
+        //     case FieldType.BOOLEAN:
+        //         return typeof columnValue === "string" ? columnValue === "true" : columnValue;
+        //     default:
+        //         return columnValue;
+        // }
     }
 
     public valueToDatabase(value: ValueTypeToParse, fieldType: FieldType): ValueType {
         const type = value !== void 0 ? this.getType(value) : fieldType;
-        switch (type) {
-            case FieldType.OBJECT:
-            case FieldType.ARRAY:
-                return JSON.stringify(value);
-            case FieldType.DATE:
-                return DatetimeUtils.datetimeToDatabase(value as moment.Moment);
-            default:
-                return value as ValueType;
+        if (
+            this.isFlag(fieldType, FieldType.ARRAY) ||
+            this.isFlag(fieldType, FieldType.OBJECT)
+        ) {
+            return JSON.stringify(value);
         }
+        if (
+            this.isFlag(fieldType, FieldType.DATE)
+        ) {
+            return DatetimeUtils.datetimeToDatabase(value as moment.Moment);
+        }
+        return value as ValueType;
+        // switch (type) {
+        //     case FieldType.OBJECT:
+        //     case FieldType.ARRAY:
+        //         return JSON.stringify(value);
+        //     case FieldType.DATE:
+        //         return DatetimeUtils.datetimeToDatabase(value as moment.Moment);
+        //     default:
+        //         return value as ValueType;
+        // }
     }
 
     public getValue(instance: any, fieldReference: string): ValueTypeToParse {

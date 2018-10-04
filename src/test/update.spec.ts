@@ -10,11 +10,11 @@ import { SubRegiao } from "./models/sub-regiao";
 import { Cliente } from "./models/cliente";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
-import { MappersTableNew } from "./mappers-table-new";
+import { getMapper } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
 
 describe("Update", () => {
-    const mapper = new MappersTableNew();
+    const mapper = getMapper();
 
     it("Classificacao", () => {
         const result = new Update(Classificacao, ObjectToTest.classificacao, mapper.get(Classificacao))

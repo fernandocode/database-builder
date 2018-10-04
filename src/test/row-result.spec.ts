@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import * as moment from "moment";
 import { FieldType } from "../core/enums/field-type";
-import { MappersTableNew } from "./mappers-table-new";
+import { getMapper } from "./mappers-table-new";
 
 describe("Row Result", () => {
 
@@ -29,7 +29,7 @@ describe("Row Result", () => {
 
     it("With Mapper", () => {
 
-        const mapper = new MappersTableNew();
+        const mapper = getMapper();
 
         const defaultMoment = moment.utc();
 
@@ -43,7 +43,8 @@ describe("Row Result", () => {
         model.date = 1;
         model.referenceTest = new TestClazzRef();
 
-        const rowResult = new RowResult(model, mapper.getThrowErrorNotFound(TestClazz).mapperTable);
+        const rowResult = new RowResult(model, mapper.get(TestClazz).mapperTable);
+        // const rowResult = new RowResult(model, mapper.getThrowErrorNotFound(TestClazz).mapperTable);
         expect(rowResult.get(x => x.description)).to.equal(model.description);
         expect(rowResult.get(x => x.id)).to.equal(model.id);
         expect(rowResult.get(x => x.disabled)).to.equal(model.disabled);

@@ -15,15 +15,18 @@ export abstract class ColumnsBaseBuilder<
     protected columns: TColumn[] = [];
 
     constructor(
-        protected readonly metadata: MetadataTable<T>,
-        protected readonly modelToSave: T = metadata.instance,
+        // protected readonly metadata: MetadataTable<T>,
+        protected readonly mapperTable: MapperTable,
+        protected readonly modelToSave: T,
+        // protected readonly modelToSave: T = metadata.instance,
     ) {
     }
 
     public allColumns() {
         // clear columns
         this.columns = [];
-        this.setAllColumns(this.metadata.mapperTable, this.modelToSave);
+        this.setAllColumns(this.mapperTable, this.modelToSave);
+        // this.setAllColumns(this.metadata.mapperTable, this.modelToSave);
     }
 
     public setColumn(
@@ -45,7 +48,8 @@ export abstract class ColumnsBaseBuilder<
     ): TThis {
         return this.setColumn(
             Utils.getColumn(expression),
-            Utils.getType(this.metadata.instance, expression),
+            Utils.getType(this.modelToSave, expression),
+            // Utils.getType(this.metadata.instance, expression),
             primaryKeyType
         );
     }
@@ -62,14 +66,18 @@ export abstract class ColumnsBaseBuilder<
                 if (column.primaryKeyType) {
                     result.keyColumns.push(column.name);
                 }
-                result.columns.push(this.columnFormat(column));
+                const columnFormat = this.columnFormat(column);
+                if (columnFormat) {
+                    result.columns.push(columnFormat);
+                }
             }
         }
         return result;
     }
 
     protected isCompositeKey(): boolean {
-        return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
+        return this.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
+        // return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
     }
 
     protected abstract columnFormat(column: TColumn): string;
@@ -95,5 +103,10 @@ export abstract class ColumnsBaseBuilder<
                 );
             }
         }
+        // for (const key in mapper.dependencies) {
+        //     if (mapper.dependencies.hasOwnProperty(key)) {
+        //         const dependency = mapper.dependencies[key];
+        //     }
+        // }
     }
 }

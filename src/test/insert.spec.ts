@@ -1,4 +1,3 @@
-import { DatabaseBuilderError } from './../core/errors';
 import { Pedido } from "./models/pedido";
 import { Marca } from "./models/marca";
 import { CondicaoPagamento } from "./models/condicao-pagamento";
@@ -9,7 +8,7 @@ import { SubRegiao } from "./models/sub-regiao";
 import { Cliente } from "./models/cliente";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
-import { MappersTableNew } from "./mappers-table-new";
+import { getMapper } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
 import { GuidClazz } from "./models/guid-clazz";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
@@ -17,7 +16,8 @@ import { Insert } from "../crud/insert/insert";
 import { ContasReceber } from "./models/contas-receber";
 
 describe("Insert", () => {
-    const mapper = new MappersTableNew();
+    const mapper = getMapper();
+    // const mapper = new MappersTableNew();
 
     it("Classificacao", () => {
         const result = new Insert(Classificacao, ObjectToTest.classificacao, mapper.get(Classificacao)).compile();

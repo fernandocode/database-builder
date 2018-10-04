@@ -6,7 +6,5 @@ export interface Column {
     value: ValueType;
     name: string;
     type: FieldType;
-    // isKeyColumn?: boolean;
-    // isAutoIncrement?: boolean;
     primaryKeyType?: PrimaryKeyType;
 }

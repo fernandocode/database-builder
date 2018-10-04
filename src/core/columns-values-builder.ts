@@ -12,11 +12,14 @@ export abstract class ColumnsValuesBuilder<
     T, TThis extends ColumnsValuesBuilder<T, TThis>>
     extends ColumnsBaseBuilder<TThis, T, Column> {
 
+    // TODO: fixed list task
     constructor(
         metadata: MetadataTable<T>,
-        modelToSave: T = void 0,
+        modelToSave: T = metadata.instance,
+        // modelToSave: T = void 0,
     ) {
-        super(metadata, modelToSave);
+        super(metadata.mapperTable, modelToSave);
+        // super(metadata, modelToSave);
     }
 
     public setColumnValue(
@@ -35,7 +38,8 @@ export abstract class ColumnsValuesBuilder<
                     // gerar GUID
                     value = Utils.GUID();
                     // set value GUID in model
-                    KeyUtils.setKey(this.metadata, this.modelToSave, value);
+                    KeyUtils.setKey(this.mapperTable, this.modelToSave, value);
+                    // KeyUtils.setKey(this.metadata, this.modelToSave, value);
                 }
                 break;
             case PrimaryKeyType.AutoIncrement:

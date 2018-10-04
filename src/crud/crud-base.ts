@@ -39,10 +39,10 @@ export class CrudBase<
         if (this._typeCrud === TypeCrud.CREATE) {
             return new Promise<DatabaseResult>((resolve, reject) => {
                 promise.then(result => {
-                    if (KeyUtils.primaryKeyType(this._builder.getMetadata()) === PrimaryKeyType.AutoIncrement) {
-                        KeyUtils.setKey(this._builder.getMetadata(), this._builder.getModel(), result.insertId);
+                    if (KeyUtils.primaryKeyType(this._builder.getMetadata().mapperTable) === PrimaryKeyType.AutoIncrement) {
+                        KeyUtils.setKey(this._builder.getMetadata().mapperTable, this._builder.getModel(), result.insertId);
                     } else {
-                        result.insertId = KeyUtils.getKey(this._builder.getMetadata(), this._builder.getModel());
+                        result.insertId = KeyUtils.getKey(this._builder.getMetadata().mapperTable, this._builder.getModel());
                     }
                     resolve(result);
                 }).catch(reject);
