@@ -1,24 +1,24 @@
 import { Utils } from "../../core/utils";
 import { InsertColumnsBuilder } from "./insert-columns-builder";
-import { MetadataTable } from "../../metadata-table";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { CrudCompiled } from "../../core/crud-compiled";
-import { TypeCrud } from "../enums/type-crud";
+import { MapperTable } from "../../mapper-table";
 
 export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
-        metadata: MetadataTable<T>,
+        // metadata: MetadataTable<T>,
+        mapperTable: MapperTable,
         alias: string = void 0,
         protected readonly _modelToSave: T = void 0,
     ) {
-        super(typeT, metadata, alias);
+        super(typeT, mapperTable, alias);
     }
 
     public columns(columnsCallback: (columns: InsertColumnsBuilder<T>) => void): InsertBuilder<T> {
         return super.columnsBase(columnsCallback,
-            new InsertColumnsBuilder<T>(this.metadata, this._modelToSave), this);
+            new InsertColumnsBuilder<T>(this.mapperTable, this._modelToSave), this);
     }
 
     protected buildBase(): CrudCompiled {

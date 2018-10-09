@@ -19,7 +19,7 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     hasAlias(alias: string): boolean;
 
-    from(query: QueryCompiled): TQuery;
+    from(query: QueryCompiled[] | QueryCompilable): TQuery;
 
     createWhere(): WhereBuilder<T>;
 
@@ -40,13 +40,13 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
     // TODO: suportar expressão having: https://sqlite.org/lang_select.html
     groupBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery;
 
-    union(query: QueryCompiled, type?: UnionType): TQuery;
+    union(query: QueryCompiled[] | QueryCompilable, type?: UnionType): TQuery;
 
-    unionAll(query: QueryCompiled): TQuery;
+    unionAll(query: QueryCompiled[] | QueryCompilable): TQuery;
 
-    execute(database: DatabaseBase): Promise<DatabaseResult>;
+    execute(database: DatabaseBase): Promise<DatabaseResult[]>;
 
     compileTable(): string;
 
-    compile(): QueryCompiled;
+    compile(): QueryCompiled[];
 }

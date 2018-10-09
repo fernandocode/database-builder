@@ -3,22 +3,24 @@ import { WhereBuilder } from "../where-builder";
 import { MetadataTable } from "../../metadata-table";
 import { CrudCompiled } from "../../core/crud-compiled";
 import { CrudBaseBuilder } from "../crud-base-builder";
+import { MapperTable } from "../../mapper-table";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
-        metadata: MetadataTable<T>,
+        mapperTable: MapperTable,
+        // metadata: MetadataTable<T>,
         alias: string = void 0,
         protected readonly _modelToSave: T = void 0,
     ) {
-        super(typeT, metadata, alias);
+        super(typeT, mapperTable, alias);
     }
 
     public columns(
         columnsCallback: (columns: UpdateColumnsBuilder<T>) => void,
     ): UpdateBuilder<T> {
-        return super.columnsBase(columnsCallback, new UpdateColumnsBuilder<T>(this.metadata, this._modelToSave), this);
+        return super.columnsBase(columnsCallback, new UpdateColumnsBuilder<T>(this.mapperTable, this._modelToSave), this);
     }
 
     public where(

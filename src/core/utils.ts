@@ -17,6 +17,9 @@ import { ColumnParams } from "./column-params";
 import { ColumnRef } from "./column-ref";
 import { PlanRef } from "./plan-ref";
 import * as uuidv4 from "uuid/v4";
+import { ReplacementParam } from "./replacement-param";
+
+export type ParamType = ValueType | ReplacementParam;
 
 export type ValueType = number | string | boolean;
 export type ValueTypeToParse = ValueType | moment.Moment | Date | object;

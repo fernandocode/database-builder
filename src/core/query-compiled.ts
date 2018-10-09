@@ -1,6 +1,6 @@
-import { ValueType } from "./utils";
+import { ParamType } from "./utils";
 
 export interface QueryCompiled {
     query: string;
-    params: ValueType[];
+    params: ParamType[];
 }

@@ -14,10 +14,10 @@ describe("Lambda Expression", () => {
                 where.equalValue(x => x.razaoSocial, "R");
             });
         const result = query.compile();
-        expect(result.params.length).to.equal(2);
-        expect(result.params[0]).to.equal("Test");
-        expect(result.params[1]).to.equal("R");
-        expect(result.query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.razaoSocial = ?");
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal("Test");
+        expect(result[0].params[1]).to.equal("R");
+        expect(result[0].query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.razaoSocial = ?");
     });
 
     it("simple lambda with whereExp", () => {
@@ -25,10 +25,10 @@ describe("Lambda Expression", () => {
             .whereExp(x => x.apelido === "Test")
             .whereExp(x => x.codeImport > 10)
             .compile();
-        expect(result.params.length).to.equal(2);
-        expect(result.params[0]).to.equal("Test");
-        expect(result.params[1]).to.equal(10);
-        expect(result.query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.codeImport > ?");
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal("Test");
+        expect(result[0].params[1]).to.equal(10);
+        expect(result[0].query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.codeImport > ?");
     });
 
     it("lambda with ValueType's", () => {
@@ -41,11 +41,11 @@ describe("Lambda Expression", () => {
                     ;
             })
             .compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal("Test");
-        expect(result.params[1]).to.equal(2);
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.codeImport > ? AND cli.desativo <> ?");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal("Test");
+        expect(result[0].params[1]).to.equal(2);
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.codeImport > ? AND cli.desativo <> ?");
     });
 
     // // Not work in lambda expression
@@ -61,10 +61,10 @@ describe("Lambda Expression", () => {
     //     })
     //     .compile();
     //     console.log(result);
-    //     expect(result.params.length).to.equal(3);
-    //     expect(result.params[0]).to.equal("Test");
-    //     expect(result.params[1]).to.equal(2);
-    //     expect(result.params[2]).to.equal(false);
-    //     expect(result.query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.id > ? AND cli.desativo <> ?");
+    //     expect(result[0].params.length).to.equal(3);
+    //     expect(result[0].params[0]).to.equal("Test");
+    //     expect(result[0].params[1]).to.equal(2);
+    //     expect(result[0].params[2]).to.equal(false);
+    //     expect(result[0].query).to.equal("SELECT cli.* FROM Cliente AS cli WHERE cli.apelido = ? AND cli.id > ? AND cli.desativo <> ?");
     // });
 });

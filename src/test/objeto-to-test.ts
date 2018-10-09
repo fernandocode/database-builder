@@ -13,6 +13,7 @@ import { Cidade } from "./models/cidade";
 import { Cliente } from "./models/cliente";
 import * as moment from "moment";
 import { ContasReceber } from "./models/contas-receber";
+import { HeaderSimple } from "./models/header-simple";
 
 export class ObjectToTest {
 
@@ -110,4 +111,9 @@ export class ObjectToTest {
         dataRecebimento: void 0,
         dataVencimento: moment()
     } as ContasReceber;
+
+    public static headerSimple = {
+        descricao: "Header Test",
+        items: ["1", "2", "3"]
+    } as HeaderSimple;
 }

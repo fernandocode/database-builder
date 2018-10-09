@@ -1,10 +1,10 @@
-import { ValueType } from "../core/utils";
+import { ParamType } from "../core/utils";
 
 export class ProjectionCompiled {
 
     constructor(
         public projection: string = "",
-        public params: ValueType[] = [],
+        public params: ParamType[] = [],
     ) {
 
     }

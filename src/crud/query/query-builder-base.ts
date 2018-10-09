@@ -1,14 +1,14 @@
+import { ProjectionCompiled } from "../projection-compiled";
 import { UnionType } from "../../core/union-type";
-import { QueryCompiled } from "../../core/query-compiled";
 import { ExecutableBuilder } from "../../core/executable-builder";
 import { ProjectionBuilder } from "../projection-builder";
-import { ExpressionOrColumn, Utils, ValueType } from "../../core/utils";
+import { ExpressionOrColumn, ParamType, Utils } from "../../core/utils";
 import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { WhereBuilder } from "../where-builder";
 import { OrderBy } from "../../core/enums/order-by";
 import { WhereCompiled } from "../where-compiled";
 import { SqlAndParams } from "../sql-and-params";
-import { ProjectionCompiled } from "../projection-compiled";
+import { QueryCompiled } from "../../core/query-compiled";
 import { LambdaExpression } from "lambda-expression";
 import { DatabaseBuilderError } from "../../core/errors";
 import { JoinQueryBuilderContract } from "./join-query-builder-contract";
@@ -52,10 +52,10 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
 
     private _joinsQuery: Array<JoinQueryBuilderContract<any, any>> = [];
     // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
-    private _joinParams: ValueType[] = [];
+    private _joinParams: ParamType[] = [];
 
     private _unionsQuery: Array<{ query: QueryCompiled, type: UnionType }> = [];
-    private _fromParams: ValueType[] = [];
+    private _fromParams: ParamType[] = [];
 
     private _tablename: string;
     private readonly _alias: string;
@@ -66,8 +66,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
             alias = this.createUniqueAlias(this.defaultAlias(_typeT));
         }
         if (this.hasAlias(alias)) {
-            throw new DatabaseBuilderError(`Mapper '${this._typeT.name}', alias: ${alias} já está sendo utilizado nesse contexto de query
-            (query: ${this.compile().query}).`);
+            throw new DatabaseBuilderError(`Mapper '${this._typeT.name}', alias: ${alias} já está sendo utilizado nesse contexto de query (query: ${this.compile().map(x => x.query).join("\n")}).`);
         }
         this._alias = alias;
         this._executableBuilder = new ExecutableBuilder(enableLog);
@@ -104,24 +103,37 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return false;
     }
 
-    public from(query: QueryCompiled | QueryCompilable): TQuery {
+    public from(
+        query: QueryCompiled[] | QueryCompilable
+    ): TQuery {
         if ((query as QueryCompilable).compile) {
             return this.from((query as QueryCompilable).compile());
         }
-        this._tablename = `(${(query as QueryCompiled).query})`;
-        this._fromParams = (query as QueryCompiled).params;
+        (query as QueryCompiled[])
+            .forEach(compiled => {
+                this._tablename = `(${compiled.query})`;
+                this._fromParams = compiled.params;
+            });
         return this._getInstance();
     }
 
-    public unionAll(query: QueryCompiled | QueryCompilable): TQuery {
+    public unionAll(
+        query: QueryCompiled[] | QueryCompilable
+    ): TQuery {
         return this.union(query, UnionType.All);
     }
 
-    public union(query: QueryCompiled | QueryCompilable, type: UnionType = UnionType.None): TQuery {
+    public union(
+        query: QueryCompiled[] | QueryCompilable,
+        type: UnionType = UnionType.None
+    ): TQuery {
         if ((query as QueryCompilable).compile) {
             return this.union((query as QueryCompilable).compile(), type);
         }
-        this._unionsQuery.push({ query: query as QueryCompiled, type });
+        (query as QueryCompiled[])
+            .forEach(compiled => {
+                this._unionsQuery.push({ query: compiled, type });
+            });
         return this._getInstance();
     }
 
@@ -129,7 +141,9 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return new WhereBuilder(this._typeT, this.alias);
     }
 
-    public where(whereCallback: (where: WhereBuilder<T>) => void): TQuery {
+    public where(
+        whereCallback: (where: WhereBuilder<T>) => void
+    ): TQuery {
         const instanceWhere: WhereBuilder<T> = this.createWhere();
         whereCallback(instanceWhere);
         this.compileWhere(instanceWhere.compile());
@@ -143,34 +157,47 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
      * @returns {TQuery}
      * @memberof QueryBuilderBase
      */
-    public whereExp(expression: LambdaExpression<T>): TQuery {
+    public whereExp(
+        expression: LambdaExpression<T>
+    ): TQuery {
         const instanceWhere: WhereBuilder<T> = this.createWhere();
         instanceWhere.expression(expression);
         this.compileWhere(instanceWhere.compile());
         return this._getInstance();
     }
 
-    public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): TQuery {
+    public projection(
+        projectionCallback: (projection: ProjectionBuilder<T>) => void
+    ): TQuery {
         const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
         projectionCallback(instanceProjection);
         this.compileProjection(instanceProjection.compile());
         return this._getInstance();
     }
 
-    public select(...expressions: Array<ExpressionOrColumn<any, T>>): TQuery {
+    public select(
+        ...expressions: Array<ExpressionOrColumn<any, T>>
+    ): TQuery {
         return this.projection(projection => projection.columns(...expressions));
     }
 
-    public orderBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>, order: OrderBy = OrderBy.ASC): TQuery {
+    public orderBy<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
+        order: OrderBy = OrderBy.ASC
+    ): TQuery {
         this.compileOrderBy(`${Utils.addAlias(Utils.getColumn(expression), this._alias)} ${order}`);
         return this._getInstance();
     }
 
-    public asc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery {
+    public asc<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>
+    ): TQuery {
         return this.orderBy(expression, OrderBy.ASC);
     }
 
-    public desc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TQuery {
+    public desc<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>
+    ): TQuery {
         return this.orderBy(expression, OrderBy.DESC);
     }
 
@@ -187,7 +214,9 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return this._getInstance();
     }
 
-    public execute(database: DatabaseBase): Promise<DatabaseResult> {
+    public execute(
+        database: DatabaseBase
+    ): Promise<DatabaseResult[]> {
         return this._executableBuilder.execute(this.compile(), database);
     }
 
@@ -195,7 +224,7 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return `${this._tablename} AS ${this._alias}`;
     }
 
-    public compile(): QueryCompiled {
+    public compile(): QueryCompiled[] {
         const sqlBase: SqlAndParams = this.buildSelectBase();
         const buildWhere = () =>
             this._whereCompiled.where.length > 0
@@ -217,19 +246,21 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
             this._limit.builder.length > 0
                 ? `${this.LIMIT}${this._limit.builder}`
                 : "";
-        return this.buildUnions({
-            params: sqlBase.params.concat(
-                this._joinParams.concat(
-                    this._whereCompiled.params.concat(
-                        this._having.params.concat(
-                            this._limit.params
+        return [
+            this.buildUnions({
+                params: sqlBase.params.concat(
+                    this._joinParams.concat(
+                        this._whereCompiled.params.concat(
+                            this._having.params.concat(
+                                this._limit.params
+                            )
                         )
                     )
-                )
-            ),
-            // Template: https://sqlite.org/lang_select.html
-            query: `${sqlBase.sql}${buildWhere()}${buildGroupBy()}${buildHaving()}${buildOrderBy()}${buildLimit()}`,
-        });
+                ),
+                // Template: https://sqlite.org/lang_select.html
+                query: `${sqlBase.sql}${buildWhere()}${buildGroupBy()}${buildHaving()}${buildOrderBy()}${buildLimit()}`,
+            })
+        ];
     }
 
     protected createProjectionBuilder(): ProjectionBuilder<T> {

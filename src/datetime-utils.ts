@@ -1,14 +1,18 @@
 import * as moment from "moment";
 import { DatabaseBuilderError } from "./core/errors";
+import { Utils } from "./core/utils";
 
 export class DatetimeUtils {
 
-    public static datetimeToDatabase(date: moment.Moment): number {
+    public static datetimeToDatabase(date: moment.Moment | number): number {
         if (date) {
-            if (!date.unix) {
+            if (Utils.isNumber(date)) {
+                return date as number;
+            }
+            if (!(date as moment.Moment).unix) {
                 throw new DatabaseBuilderError("Date format incorrect");
             }
-            return date.unix();
+            return (date as moment.Moment).unix();
         }
         return void 0;
     }

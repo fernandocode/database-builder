@@ -25,14 +25,14 @@ export class Crud {
                      metadata: MetadataTable<T> = this._getMapper.get(typeT),
                      database: DatabaseBase = this.getDatabase(),
     ): Update<T> {
-        return new Update(typeT, modelToSave, metadata, alias, database, this.enableLog);
+        return new Update(typeT, modelToSave, metadata.mapperTable, alias, database, this.enableLog);
     }
 
     public insert<T>(typeT: new () => T, modelToSave: T = void 0, alias: string = void 0,
                      metadata: MetadataTable<T> = this._getMapper.get(typeT),
                      database: DatabaseBase = this.getDatabase(),
     ): Insert<T> {
-        return new Insert(typeT, modelToSave, metadata, alias, database, this.enableLog);
+        return new Insert(typeT, modelToSave, metadata.mapperTable, alias, database, this.enableLog);
     }
 
     public query<T>(typeT: new () => T, alias: string = void 0,

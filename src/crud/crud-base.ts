@@ -7,6 +7,7 @@ import { ValueType } from "../core/utils";
 import { ColumnsValuesBuilder } from "../core/columns-values-builder";
 import { DatabaseBuilderError } from "../core/errors";
 import { PrimaryKeyType } from "../core/enums/primary-key-type";
+import { QueryCompiled } from "..";
 
 export class CrudBase<
     T,
@@ -25,26 +26,29 @@ export class CrudBase<
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult> {
+    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult[]> {
         return this.checkDatabaseResult(
             this._executableBuilder.execute(this.compile(), this.getDatabase(database))
         );
     }
 
-    public compile(): { query: string, params: ValueType[] } {
-        return this._builder.compile();
+    public compile(): QueryCompiled[] {
+        // TODO: verificar como fazer multiplos scripts no builder
+        return [this._builder.compile()];
     }
 
-    private checkDatabaseResult(promise: Promise<DatabaseResult>): Promise<DatabaseResult> {
+    private checkDatabaseResult(promise: Promise<DatabaseResult[]>): Promise<DatabaseResult[]> {
         if (this._typeCrud === TypeCrud.CREATE) {
-            return new Promise<DatabaseResult>((resolve, reject) => {
-                promise.then(result => {
-                    if (KeyUtils.primaryKeyType(this._builder.getMetadata().mapperTable) === PrimaryKeyType.AutoIncrement) {
-                        KeyUtils.setKey(this._builder.getMetadata().mapperTable, this._builder.getModel(), result.insertId);
-                    } else {
-                        result.insertId = KeyUtils.getKey(this._builder.getMetadata().mapperTable, this._builder.getModel());
-                    }
-                    resolve(result);
+            return new Promise<DatabaseResult[]>((resolve, reject) => {
+                promise.then(results => {
+                    results.forEach(result => {
+                        if (KeyUtils.primaryKeyType(this._builder.getMapper()) === PrimaryKeyType.AutoIncrement) {
+                            KeyUtils.setKey(this._builder.getMapper(), this._builder.getModel(), result.insertId);
+                        } else {
+                            result.insertId = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
+                        }
+                    });
+                    resolve(results);
                 }).catch(reject);
             });
         }

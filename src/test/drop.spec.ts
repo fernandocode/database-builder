@@ -7,12 +7,12 @@ describe("Drop", () => {
     it("by type", () => {
         const drop = new Drop(TestClazz);
         const result = drop.compile();
-        expect(result).to.equal("DROP TABLE IF EXISTS TestClazz;");
+        expect(result[0]).to.equal("DROP TABLE IF EXISTS TestClazz;");
     });
 
     it("by name", () => {
         const drop = new Drop("AbC");
         const result = drop.compile();
-        expect(result).to.equal("DROP TABLE IF EXISTS AbC;");
+        expect(result[0]).to.equal("DROP TABLE IF EXISTS AbC;");
     });
 });

@@ -1,12 +1,12 @@
 import { DatabaseBuilderError } from "./errors";
 import { KeyUtils } from "./key-utils";
 import { PrimaryKeyType } from "./enums/primary-key-type";
-import { MetadataTable } from "../metadata-table";
 import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
 import { ColumnsBaseBuilder } from "./columns-base-builder";
 import { Column } from "./column";
 import { FieldType } from "./enums/field-type";
 import { ColumnsCompiled } from "./columns-compiled";
+import { MapperTable } from "../mapper-table";
 
 export abstract class ColumnsValuesBuilder<
     T, TThis extends ColumnsValuesBuilder<T, TThis>>
@@ -14,11 +14,13 @@ export abstract class ColumnsValuesBuilder<
 
     // TODO: fixed list task
     constructor(
-        metadata: MetadataTable<T>,
-        modelToSave: T = metadata.instance,
+        // metadata: MetadataTable<T>,
+        mapperTable: MapperTable,
+        modelToSave: T,
+        // modelToSave: T = metadata.instance,
         // modelToSave: T = void 0,
     ) {
-        super(metadata.mapperTable, modelToSave);
+        super(mapperTable, modelToSave);
         // super(metadata, modelToSave);
     }
 

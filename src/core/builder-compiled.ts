@@ -1,9 +1,9 @@
-import { ValueType } from "./utils";
+import { ParamType } from "./utils";
 
 export class BuilderCompiled {
 
     constructor(
         public builder: string = "",
-        public params: ValueType[] = []) {
+        public params: ParamType[] = []) {
     }
 }

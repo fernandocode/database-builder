@@ -22,7 +22,7 @@ describe("SQLite", async () => {
         await ddl.create(GuidClazz).execute();
 
         const insertResult = await crud.insert(GuidClazz, ObjectToTest.guidClazz).execute();
-        expect(insertResult.rowsAffected, "insert").to.equal(1);
+        expect(insertResult[0].rowsAffected, "insert").to.equal(1);
 
         const queryInsertResult = await crud.query(GuidClazz).toList();
         expect(queryInsertResult.length).to.equal(1);
@@ -36,7 +36,7 @@ describe("SQLite", async () => {
         const updateResult = await crud.update(GuidClazz, modelUpdate)
             .where(where => where.equal(x => x.guid, ObjectToTest.guidClazz.guid))
             .execute();
-        expect(updateResult.rowsAffected, "update").to.equal(1);
+        expect(updateResult[0].rowsAffected, "update").to.equal(1);
 
         const queryUpdateResult = await crud.query(GuidClazz).toList();
         expect(queryUpdateResult.length).to.equal(1);
@@ -47,7 +47,7 @@ describe("SQLite", async () => {
         const updateByDescriptionResult = await crud.update(GuidClazz, modelUpdateByDescription)
             .where(where => where.equal(x => x.description, modelUpdate.description))
             .execute();
-        expect(updateByDescriptionResult.rowsAffected, "update").to.equal(1);
+        expect(updateByDescriptionResult[0].rowsAffected, "update").to.equal(1);
         expect(modelUpdateByDescription.guid).to.equal(void 0);
     });
 
@@ -56,14 +56,14 @@ describe("SQLite", async () => {
         await ddl.create(Cidade).execute();
 
         const insertResult1 = await crud.insert(Cidade, ObjectToTest.cidade).execute();
-        expect(insertResult1.rowsAffected, "insert").to.equal(1);
+        expect(insertResult1[0].rowsAffected, "insert").to.equal(1);
         const insertResult2 = await crud.insert(Cidade, {
             codeImport: 3,
             nome: "São João Batisa",
             uf: ObjectToTest.uf,
             subRegiao: ObjectToTest.subRegiao,
         } as Cidade).execute();
-        expect(insertResult2.rowsAffected, "insert").to.equal(1);
+        expect(insertResult2[0].rowsAffected, "insert").to.equal(1);
         const insertResult3 = await crud.insert(Cidade, {
             codeImport: 4,
             nome: "São Paulo",
@@ -73,7 +73,7 @@ describe("SQLite", async () => {
             } as Uf,
             subRegiao: ObjectToTest.subRegiao,
         } as Cidade).execute();
-        expect(insertResult3.rowsAffected, "insert").to.equal(1);
+        expect(insertResult3[0].rowsAffected, "insert").to.equal(1);
 
         const queryResult = await crud.query(Cidade)
             .where(where => where.equal(x => x.uf.codeImport, ObjectToTest.uf.codeImport))
@@ -90,7 +90,7 @@ describe("SQLite", async () => {
         await ddl.create(ContasReceber).execute();
 
         const insertResult1 = await crud.insert(ContasReceber, ObjectToTest.contasReceber).execute();
-        expect(insertResult1.rowsAffected, "insert").to.equal(1);
+        expect(insertResult1[0].rowsAffected, "insert").to.equal(1);
 
         const queryResult = await crud.query(ContasReceber)
             .where(where => where.equal(x => x.cliente.codeImport, ObjectToTest.contasReceber.cliente.codeImport))
@@ -104,7 +104,6 @@ describe("SQLite", async () => {
     it("HeaderSimple", async () => {
 
         await ddl.create(HeaderSimple).execute();
-
 
         // const insertResult1 = await crud.insert(HeaderSimple, headerSimple).execute();
         // expect(insertResult1.rowsAffected, "insert").to.equal(1);

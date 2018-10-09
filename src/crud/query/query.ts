@@ -46,17 +46,17 @@ export class Query<T> implements QueryCompilable {
         return this._queryBuilder.ref(expression);
     }
 
-    public from(query: QueryCompiled | QueryCompilable): Query<T> {
+    public from(query: QueryCompiled[] | QueryCompilable): Query<T> {
         this._queryBuilder.from(query);
         return this;
     }
 
-    public union(query: QueryCompiled | QueryCompilable): Query<T> {
+    public union(query: QueryCompiled[] | QueryCompilable): Query<T> {
         this._queryBuilder.union(query);
         return this;
     }
 
-    public unionAll(query: QueryCompiled | QueryCompilable): Query<T> {
+    public unionAll(query: QueryCompiled[] | QueryCompilable): Query<T> {
         this._queryBuilder.unionAll(query);
         return this;
     }
@@ -127,16 +127,16 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult> {
+    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult[]> {
         return this._queryBuilder.execute(this.getDatabase(database));
     }
 
-    public compile(): { query: string, params: ValueType[] } {
+    public compile(): QueryCompiled[] {
         return this._queryBuilder.compile();
     }
 
     public toString() {
-        return this.compile().query;
+        return this.compile().map(x => x.query).join("\n");
     }
 
     /**
@@ -180,8 +180,11 @@ export class Query<T> implements QueryCompilable {
     public toCast(): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.execute()
-                .then((cursor) => {
-                    resolve(this._queryReadableBuilder.toCast(cursor));
+                .then((cursors) => {
+                    if (cursors.length !== 1) {
+                        throw new DatabaseBuilderError(`"toCast" is not ready to solve multiple queries in one batch!`);
+                    }
+                    resolve(this._queryReadableBuilder.toCast(cursors[0]));
                 })
                 .catch(reject);
         });
@@ -190,8 +193,11 @@ export class Query<T> implements QueryCompilable {
     public map(mapper: (row: any) => any): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.execute()
-                .then((cursor) => {
-                    resolve(this._queryReadableBuilder.map(cursor, mapper));
+                .then((cursors) => {
+                    if (cursors.length !== 1) {
+                        throw new DatabaseBuilderError(`"map" is not ready to solve multiple queries in one batch!`);
+                    }
+                    resolve(this._queryReadableBuilder.map(cursors[0], mapper));
                 })
                 .catch(reject);
         });
@@ -202,8 +208,11 @@ export class Query<T> implements QueryCompilable {
         const mapperTable = metadata ? metadata.mapperTable : void 0;
         return new Promise((resolve, reject) => {
             this.execute()
-                .then((cursor) => {
-                    resolve(this._queryReadableBuilder.mapper(cursor, mapperTable, mapper));
+                .then((cursors) => {
+                    if (cursors.length !== 1) {
+                        throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
+                    }
+                    resolve(this._queryReadableBuilder.mapper(cursors[0], mapperTable, mapper));
                 })
                 .catch(reject);
         });

@@ -7,16 +7,16 @@ describe("Group By", () => {
     it("none", () => {
         const query = new Query(TestClazz);
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("simple", () => {
         const query = new Query(TestClazz);
         query.groupBy(x => x.id);
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id");
     });
 
     it("multi", () => {
@@ -25,8 +25,8 @@ describe("Group By", () => {
         query.groupBy(x => x.referenceTest.id);
         query.groupBy(x => x.description);
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id, tes.description");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id, tes.description");
     });
 
     it("with having", () => {
@@ -36,10 +36,10 @@ describe("Group By", () => {
             having.greatValue(projection.sum(x => x.referenceTest.id), 3);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(2);
-        expect(result.params[0]).to.equal(10);
-        expect(result.params[1]).to.equal(3);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal(10);
+        expect(result[0].params[1]).to.equal(3);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
     });
 
     it("with multi having", () => {
@@ -52,11 +52,11 @@ describe("Group By", () => {
             having.greatValue(projection.max(x => x.id), 2);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(10);
-        expect(result.params[1]).to.equal(3);
-        expect(result.params[2]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ? AND MAX(tes.id) > ?");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(10);
+        expect(result[0].params[1]).to.equal(3);
+        expect(result[0].params[2]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ? AND MAX(tes.id) > ?");
     });
 
     it("multi with having", () => {
@@ -67,10 +67,10 @@ describe("Group By", () => {
         });
         query.groupBy(x => x.referenceTest.id);
         const result = query.compile();
-        expect(result.params.length).to.equal(2);
-        expect(result.params[0]).to.equal(10);
-        expect(result.params[1]).to.equal(3);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal(10);
+        expect(result[0].params[1]).to.equal(3);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
     });
 
     it("with having (stacked)", () => {
@@ -80,9 +80,9 @@ describe("Group By", () => {
             having.lessAndEqual(projection.sum(x => x.referenceTest.id), projection.max().count(x => x.id));
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(10);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id HAVING SUM(COUNT(tes.id)) > ? AND SUM(tes.referenceTest_id) <= MAX(COUNT(tes.id))");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(10);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id HAVING SUM(COUNT(tes.id)) > ? AND SUM(tes.referenceTest_id) <= MAX(COUNT(tes.id))");
     });
 
     it("with string", () => {
@@ -92,8 +92,8 @@ describe("Group By", () => {
         });
         query.groupBy(`strftime('%m', datetime(${query.ref(x => x.date).result()}, 'unixepoch'))`);
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes GROUP BY strftime('%m', datetime(tes.date, 'unixepoch'))");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes GROUP BY strftime('%m', datetime(tes.date, 'unixepoch'))");
     });
 
 });

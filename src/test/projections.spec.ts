@@ -12,16 +12,16 @@ describe("Projections", () => {
     it("default", () => {
         const query = new Query(TestClazz);
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("default explicit call", () => {
         const query = new Query(TestClazz);
         query.projection(select => select.all());
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("default explicit columns", () => {
@@ -30,8 +30,8 @@ describe("Projections", () => {
             select.allByMap(mapper.get(TestClazz));
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
     });
 
     it("add column", () => {
@@ -40,8 +40,8 @@ describe("Projections", () => {
             select.add(x => x.description);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes");
     });
 
     it("add column with alias", () => {
@@ -50,8 +50,8 @@ describe("Projections", () => {
             select.add(x => x.description, "abc");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.description AS abc FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.description AS abc FROM TestClazz AS tes");
     });
 
     it("column", () => {
@@ -60,8 +60,8 @@ describe("Projections", () => {
             select.column("description");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes");
     });
 
     it("columns", () => {
@@ -70,8 +70,8 @@ describe("Projections", () => {
             select.columns(x => x.description, x => x.id, x => x.referenceTest.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.description AS description, tes.id AS id, tes.referenceTest_id AS referenceTest_id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.description AS description, tes.id AS id, tes.referenceTest_id AS referenceTest_id FROM TestClazz AS tes");
     });
 
     it("avg", () => {
@@ -80,8 +80,8 @@ describe("Projections", () => {
             select.avg(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT AVG(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT AVG(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("round avg", () => {
@@ -90,8 +90,8 @@ describe("Projections", () => {
             select.avgRound(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT ROUND(AVG(tes.id)) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT ROUND(AVG(tes.id)) AS id FROM TestClazz AS tes");
     });
 
     it("round avg (stacked)", () => {
@@ -100,8 +100,8 @@ describe("Projections", () => {
             select.round().avg(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT ROUND(AVG(tes.id)) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT ROUND(AVG(tes.id)) AS id FROM TestClazz AS tes");
     });
 
     it("case (and group and projection)", () => {
@@ -125,9 +125,9 @@ describe("Projections", () => {
             }, void 0, "referenceTest");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(1);
-        expect(result.query).to.equal("SELECT CASE WHEN SUM(tes.referenceTest_id) > ? THEN (SUM(tes.referenceTest_id) * 2) ELSE 0 END AS referenceTest FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(1);
+        expect(result[0].query).to.equal("SELECT CASE WHEN SUM(tes.referenceTest_id) > ? THEN (SUM(tes.referenceTest_id) * 2) ELSE 0 END AS referenceTest FROM TestClazz AS tes");
     });
 
     it("cast", () => {
@@ -136,8 +136,8 @@ describe("Projections", () => {
             select.cast(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT CAST(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT CAST(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("coalesce", () => {
@@ -146,8 +146,8 @@ describe("Projections", () => {
             select.coalesce(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT COALESCE(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT COALESCE(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("coalesce projection", () => {
@@ -156,8 +156,8 @@ describe("Projections", () => {
             select.coalesceP(x => x.sum(x => x.id), 0, "id");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT COALESCE(SUM(tes.id), 0) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT COALESCE(SUM(tes.id), 0) AS id FROM TestClazz AS tes");
     });
 
     it("coalesce builder", () => {
@@ -166,8 +166,8 @@ describe("Projections", () => {
             expect(select.coalesceBuilder(x => x.id, 2)).to.equal("COALESCE(tes.id, 2)");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("count", () => {
@@ -176,8 +176,8 @@ describe("Projections", () => {
             select.count(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT COUNT(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT COUNT(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("count distinct", () => {
@@ -186,8 +186,8 @@ describe("Projections", () => {
             select.countDistinct(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT COUNT(DISTINCT(tes.id)) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT COUNT(DISTINCT(tes.id)) AS id FROM TestClazz AS tes");
     });
 
     it("count distinct (stacked)", () => {
@@ -196,8 +196,8 @@ describe("Projections", () => {
             select.count().distinct(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT COUNT(DISTINCT(tes.id)) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT COUNT(DISTINCT(tes.id)) AS id FROM TestClazz AS tes");
     });
 
     it("distinct", () => {
@@ -206,8 +206,8 @@ describe("Projections", () => {
             select.distinct(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT DISTINCT(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT DISTINCT(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("group (and projection)", () => {
@@ -221,8 +221,8 @@ describe("Projections", () => {
             );
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT (SUM(tes.referenceTest_id) * 2) AS groupT FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT (SUM(tes.referenceTest_id) * 2) AS groupT FROM TestClazz AS tes");
     });
 
     it("max", () => {
@@ -231,8 +231,8 @@ describe("Projections", () => {
             select.max(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT MAX(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT MAX(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("min", () => {
@@ -241,8 +241,8 @@ describe("Projections", () => {
             select.min(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT MIN(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT MIN(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("subQuery", () => {
@@ -252,14 +252,13 @@ describe("Projections", () => {
                 new Query(TestClazzRef, "tcr")
                     .projection(s => s.min(x => x.description))
                     .where(where =>
-                        where.equal(x => x.id, query.ref(x => x.referenceTest.id)))
-                    .compile(),
+                        where.equal(x => x.id, query.ref(x => x.referenceTest.id))),
                 "referenceTest_description"
             );
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT (SELECT MIN(tcr.description) AS description FROM TestClazzRef AS tcr WHERE tcr.id = tes.referenceTest_id) AS referenceTest_description FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT (SELECT MIN(tcr.description) AS description FROM TestClazzRef AS tcr WHERE tcr.id = tes.referenceTest_id) AS referenceTest_description FROM TestClazz AS tes");
     });
 
     it("sum", () => {
@@ -268,8 +267,8 @@ describe("Projections", () => {
             select.sum(x => x.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT SUM(tes.id) AS id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT SUM(tes.id) AS id FROM TestClazz AS tes");
     });
 
     it("multi projections", () => {
@@ -281,8 +280,8 @@ describe("Projections", () => {
             select.count(x => x.id, "countId");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.description AS description, SUM(tes.id) AS id, MAX(tes.referenceTest_id) AS referenceTest_id, COUNT(tes.id) AS countId FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.description AS description, SUM(tes.id) AS id, MAX(tes.referenceTest_id) AS referenceTest_id, COUNT(tes.id) AS countId FROM TestClazz AS tes");
     });
 
     it("stacked projections", () => {
@@ -292,8 +291,8 @@ describe("Projections", () => {
             select.avg().max().distinct().min().count(x => x.referenceTest.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT SUM(COUNT(DISTINCT(tes.id))) AS test_id, AVG(MAX(DISTINCT(MIN(COUNT(tes.referenceTest_id))))) AS referenceTest_id FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT SUM(COUNT(DISTINCT(tes.id))) AS test_id, AVG(MAX(DISTINCT(MIN(COUNT(tes.referenceTest_id))))) AS referenceTest_id FROM TestClazz AS tes");
     });
 
     it("ref string", () => {
@@ -303,8 +302,8 @@ describe("Projections", () => {
             expect(ref.result()).to.equal("tes.id");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("ref expression", () => {
@@ -314,8 +313,8 @@ describe("Projections", () => {
             expect(ref.result()).to.equal("tes.id");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("add with ref", () => {
@@ -324,8 +323,8 @@ describe("Projections", () => {
             select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes");
     });
 
 });

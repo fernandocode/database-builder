@@ -1,6 +1,6 @@
 import { LambdaMetadata } from "../core/lambda-metadata";
 import { DatabaseHelper } from "../database-helper";
-import { ExpressionOrColumn, ExpressionProjection, Utils, ValueType, ValueTypeToParse } from "../core/utils";
+import { ExpressionOrColumn, ExpressionProjection, Utils, ValueType, ValueTypeToParse, ParamType } from "../core/utils";
 import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
@@ -21,7 +21,7 @@ export abstract class WhereBaseBuilder<
     private static readonly OR: string = "OR";
 
     private _where: string = "";
-    private _params: ValueType[] = [];
+    private _params: ParamType[] = [];
 
     private _pendingConditions: Condition[] = [];
     private _pendingAndOr: string = WhereBaseBuilder.AND;
@@ -329,12 +329,14 @@ export abstract class WhereBaseBuilder<
                 this.getColumnParams(expression),
                 valuesOrQuery as ValueTypeToParse[]);
         } else {
-            const compiled = (valuesOrQuery as QueryCompilable).compile();
-            this.buildWhereColumn(
-                [Condition.In],
-                this.getColumnParams(expression),
-                compiled.query);
-            this.addParam(compiled.params);
+            const compileds = (valuesOrQuery as QueryCompilable).compile();
+            compileds.forEach(compiled => {
+                this.buildWhereColumn(
+                    [Condition.In],
+                    this.getColumnParams(expression),
+                    compiled.query);
+                this.addParam(compiled.params);
+            });
         }
         return this._getInstance();
     }
@@ -362,7 +364,7 @@ export abstract class WhereBaseBuilder<
         return this._getInstance();
     }
 
-    public _addParams(params: ValueType[]): TWhere {
+    public _addParams(params: ParamType[]): TWhere {
         this._params = this._params.concat(params);
         return this._getInstance();
     }

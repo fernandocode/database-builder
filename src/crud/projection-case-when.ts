@@ -1,5 +1,5 @@
 import { ProjectionsHelper } from "../core/projections-helper";
-import { ProjectionOrValue, Utils, ValueType, ValueTypeToParse } from "../core/utils";
+import { ParamType, ProjectionOrValue, Utils, ValueTypeToParse } from "../core/utils";
 import { CaseWhen } from "./enums/case-when";
 import { BuilderCompiled } from "../core/builder-compiled";
 import { ProjectionBuilder } from "./projection-builder";
@@ -33,7 +33,7 @@ export class ProjectionCaseWhen<T> {
         return this._whenBuilder;
     }
 
-    private build(value: ValueTypeToParse, params: ValueType[]) {
+    private build(value: ValueTypeToParse, params: ParamType[]) {
         this._whenBuilder.builder += Utils.getValueType(value);
         this._whenBuilder.params = this._whenBuilder.params.concat(params);
     }

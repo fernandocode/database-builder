@@ -11,6 +11,7 @@ import { ProjectionCase } from "./projection-case";
 import { MetadataTable } from "../metadata-table";
 import { ProjectionsHelper } from "../core/projections-helper";
 import { DatabaseBuilderError } from "../core/errors";
+import { QueryCompilable } from "../core/query-compilable";
 
 export class ProjectionBuilder<T> {
     private _projection: ProjectionCompiled = new ProjectionCompiled();
@@ -296,11 +297,17 @@ export class ProjectionBuilder<T> {
     }
 
     public subQuery(
-        subQuery: QueryCompiled,
+        subQuery: QueryCompiled[] | QueryCompilable,
         alias: string = "",
     ): ProjectionBuilder<T> {
-        this.apply(subQuery.query, [Projection.BetweenParenthesis], alias);
-        this._projection.params = this._projection.params.concat(subQuery.params);
+        if ((subQuery as QueryCompilable).compile) {
+            return this.subQuery((subQuery as QueryCompilable).compile(), alias);
+        }
+        (subQuery as QueryCompiled[])
+            .forEach(compiled => {
+                this.apply(compiled.query, [Projection.BetweenParenthesis], alias);
+                this._projection.params = this._projection.params.concat(compiled.params);
+            });
         return this;
     }
 
@@ -333,7 +340,8 @@ export class ProjectionBuilder<T> {
         projection: Projection,
         expression: ExpressionOrColumn<TReturn, T> | string,
         alias?: string,
-        args: any[] = []) {
+        args: any[] = []
+    ) {
         this.apply(expression, projection ? [projection] : void 0, alias, args);
     }
 
@@ -341,7 +349,8 @@ export class ProjectionBuilder<T> {
         expression?: ExpressionOrColumn<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
-        args?: any[]) {
+        args?: any[]
+    ) {
         this._projectionsUtils.apply(expression, projections, alias, args);
     }
 

@@ -10,8 +10,8 @@ describe("Where", () => {
     it("none", () => {
         const query = new Query(TestClazz);
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("simple", () => {
@@ -20,9 +20,9 @@ describe("Where", () => {
             where.equal(x => x.id, 2);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("value is null", () => {
@@ -32,8 +32,8 @@ describe("Where", () => {
             where.equal(x => x.id, idParam);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NULL");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NULL");
     });
 
     it("value is not null", () => {
@@ -43,8 +43,8 @@ describe("Where", () => {
             where.not().equal(x => x.id, idParam);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
     });
 
     it("column string", () => {
@@ -53,9 +53,9 @@ describe("Where", () => {
             where.equal(query.ref("id"), 2);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("multi", () => {
@@ -65,9 +65,9 @@ describe("Where", () => {
             where.equal(x => x.id, x => x.referenceTest.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
     });
 
     it("multi and", () => {
@@ -78,9 +78,9 @@ describe("Where", () => {
                 .equal(x => x.id, x => x.referenceTest.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
     });
 
     it("multi or", () => {
@@ -91,9 +91,9 @@ describe("Where", () => {
                 .equal(x => x.id, x => x.referenceTest.id);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? OR tes.id = tes.referenceTest_id");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? OR tes.id = tes.referenceTest_id");
     });
 
     it("compare to value", () => {
@@ -102,9 +102,9 @@ describe("Where", () => {
             where.equal(x => x.id, 2);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("compare to value (deprecated)", () => {
@@ -113,9 +113,9 @@ describe("Where", () => {
             where.equalValue(x => x.id, 2);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("compare to column", () => {
@@ -124,8 +124,8 @@ describe("Where", () => {
             where.equal(x => x.id, where.ref("referenceTest_id"));
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
     });
 
     it("compare to column (deprecated)", () => {
@@ -134,8 +134,8 @@ describe("Where", () => {
             where.equalColumn(x => x.id, "referenceTest_id");
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
     });
 
     it("compare to column (ref secundary ref)", () => {
@@ -144,8 +144,8 @@ describe("Where", () => {
             where.equal(x => x.id, where.ref("referenceTest_id", "abc"));
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = abc.referenceTest_id");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = abc.referenceTest_id");
     });
 
     it("simple cross", () => {
@@ -163,9 +163,9 @@ describe("Where", () => {
         });
         const result2 = query2.compile();
 
-        expect(result1.params.length).to.equal(result2.params.length);
-        expect(result1.params[0]).to.equal(result2.params[0]);
-        expect(result1.query).to.equal(result2.query);
+        expect(result1[0].params.length).to.equal(result2[0].params.length);
+        expect(result1[0].params[0]).to.equal(result2[0].params[0]);
+        expect(result1[0].query).to.equal(result2[0].query);
     });
 
     it("scope", () => {
@@ -181,11 +181,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal("this value");
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id OR (tes.description = ? OR ? = tes.disabled)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("this value");
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id OR (tes.description = ? OR ? = tes.disabled)");
     });
 
     it("equal", () => {
@@ -202,11 +202,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal("this value");
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id AND tes.description <> tes.disabled OR (tes.description = ? OR ? = tes.disabled)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("this value");
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id AND tes.description <> tes.disabled OR (tes.description = ? OR ? = tes.disabled)");
     });
 
     it("great", () => {
@@ -223,11 +223,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal("this value");
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id > ? AND tes.id > tes.referenceTest_id AND tes.description <= tes.disabled OR (tes.description > ? OR ? > tes.disabled)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("this value");
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id > ? AND tes.id > tes.referenceTest_id AND tes.description <= tes.disabled OR (tes.description > ? OR ? > tes.disabled)");
     });
 
     it("less", () => {
@@ -244,11 +244,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal("this value");
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id < ? AND tes.id < tes.referenceTest_id AND tes.description >= tes.disabled OR (tes.description < ? OR ? < tes.disabled)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("this value");
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id < ? AND tes.id < tes.referenceTest_id AND tes.description >= tes.disabled OR (tes.description < ? OR ? < tes.disabled)");
     });
 
     it("lessAndEqual", () => {
@@ -265,11 +265,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal("this value");
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id <= ? AND tes.id <= tes.referenceTest_id AND tes.description > tes.disabled OR (tes.description <= ? OR ? <= tes.disabled)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("this value");
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id <= ? AND tes.id <= tes.referenceTest_id AND tes.description > tes.disabled OR (tes.description <= ? OR ? <= tes.disabled)");
     });
 
     it("greatAndEqual", () => {
@@ -286,11 +286,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal("this value");
-        expect(result.params[2]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id >= ? AND tes.id >= tes.referenceTest_id AND tes.description < tes.disabled OR (tes.description >= ? OR ? >= tes.disabled)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("this value");
+        expect(result[0].params[2]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id >= ? AND tes.id >= tes.referenceTest_id AND tes.description < tes.disabled OR (tes.description >= ? OR ? >= tes.disabled)");
     });
 
     it("contains", () => {
@@ -305,11 +305,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal("%2%");
-        expect(result.params[1]).to.equal("%this value%");
-        expect(result.params[2]).to.equal("%false%");
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal("%2%");
+        expect(result[0].params[1]).to.equal("%this value%");
+        expect(result[0].params[2]).to.equal("%false%");
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("startsWith", () => {
@@ -324,11 +324,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal("2%");
-        expect(result.params[1]).to.equal("this value%");
-        expect(result.params[2]).to.equal("false%");
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal("2%");
+        expect(result[0].params[1]).to.equal("this value%");
+        expect(result[0].params[2]).to.equal("false%");
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("endsWith", () => {
@@ -343,11 +343,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal("%2");
-        expect(result.params[1]).to.equal("%this value");
-        expect(result.params[2]).to.equal("%false");
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal("%2");
+        expect(result[0].params[1]).to.equal("%this value");
+        expect(result[0].params[2]).to.equal("%false");
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("like", () => {
@@ -362,11 +362,11 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(3);
-        expect(result.params[0]).to.equal("%2%");
-        expect(result.params[1]).to.equal("%this value");
-        expect(result.params[2]).to.equal("false%");
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal("%2%");
+        expect(result[0].params[1]).to.equal("%this value");
+        expect(result[0].params[2]).to.equal("false%");
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("is (not) null", () => {
@@ -376,8 +376,8 @@ describe("Where", () => {
                 .not().isNull(x => x.description);
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(0);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NULL AND tes.description IS NOT NULL");
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id IS NULL AND tes.description IS NOT NULL");
     });
 
     it("between", () => {
@@ -401,16 +401,16 @@ describe("Where", () => {
                 ;
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(8);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal(4);
-        expect(result.params[2]).to.equal("this value");
-        expect(result.params[3]).to.equal("b");
-        expect(result.params[4]).to.equal(false);
-        expect(result.params[5]).to.equal(true);
-        expect(result.params[6]).to.equal(979948800);
-        expect(result.params[7]).to.equal(994982400);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?) AND tes.dateMoment BETWEEN ? AND ?");
+        expect(result[0].params.length).to.equal(8);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal(4);
+        expect(result[0].params[2]).to.equal("this value");
+        expect(result[0].params[3]).to.equal("b");
+        expect(result[0].params[4]).to.equal(false);
+        expect(result[0].params[5]).to.equal(true);
+        expect(result[0].params[6]).to.equal(979948800);
+        expect(result[0].params[7]).to.equal(994982400);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?) AND tes.dateMoment BETWEEN ? AND ?");
     });
 
     it("between (deprecated)", () => {
@@ -425,14 +425,14 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(6);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal(4);
-        expect(result.params[2]).to.equal("this value");
-        expect(result.params[3]).to.equal("b");
-        expect(result.params[4]).to.equal(false);
-        expect(result.params[5]).to.equal(true);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?)");
+        expect(result[0].params.length).to.equal(6);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal(4);
+        expect(result[0].params[2]).to.equal("this value");
+        expect(result[0].params[3]).to.equal("b");
+        expect(result[0].params[4]).to.equal(false);
+        expect(result[0].params[5]).to.equal(true);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?)");
     });
 
     it("in", () => {
@@ -452,16 +452,16 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(8);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal(4);
-        expect(result.params[2]).to.equal(7);
-        expect(result.params[3]).to.equal(1000);
-        expect(result.params[4]).to.equal("AbC");
-        expect(result.params[5]).to.equal("this value");
-        expect(result.params[6]).to.equal("b");
-        expect(result.params[7]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
+        expect(result[0].params.length).to.equal(8);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal(4);
+        expect(result[0].params[2]).to.equal(7);
+        expect(result[0].params[3]).to.equal(1000);
+        expect(result[0].params[4]).to.equal("AbC");
+        expect(result[0].params[5]).to.equal("this value");
+        expect(result[0].params[6]).to.equal("b");
+        expect(result[0].params[7]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
     });
 
     it("in (deprecated)", () => {
@@ -481,16 +481,16 @@ describe("Where", () => {
                 });
         });
         const result = query.compile();
-        expect(result.params.length).to.equal(8);
-        expect(result.params[0]).to.equal(2);
-        expect(result.params[1]).to.equal(4);
-        expect(result.params[2]).to.equal(7);
-        expect(result.params[3]).to.equal(1000);
-        expect(result.params[4]).to.equal("AbC");
-        expect(result.params[5]).to.equal("this value");
-        expect(result.params[6]).to.equal("b");
-        expect(result.params[7]).to.equal(false);
-        expect(result.query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
+        expect(result[0].params.length).to.equal(8);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal(4);
+        expect(result[0].params[2]).to.equal(7);
+        expect(result[0].params[3]).to.equal(1000);
+        expect(result[0].params[4]).to.equal("AbC");
+        expect(result[0].params[5]).to.equal("this value");
+        expect(result[0].params[6]).to.equal("b");
+        expect(result[0].params[7]).to.equal(false);
+        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
     });
 
     it("projection concat 1", () => {
@@ -504,9 +504,9 @@ describe("Where", () => {
                 where.equal(x => x.id, 2);
             });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("projection concat 2", () => {
@@ -519,9 +519,9 @@ describe("Where", () => {
                 where.equal(x => x.id, 2);
             });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("projection concat cross query", () => {
@@ -540,9 +540,9 @@ describe("Where", () => {
                 where.equal(x => x.id, 2);
             });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal(2);
-        expect(result.query).to.equal("SELECT (tes.id || ref.name) AS idname FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT (tes.id || ref.name) AS idname FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE tes.id = ?");
     });
 
     it("where concat", () => {
@@ -555,9 +555,9 @@ describe("Where", () => {
                 where.equal(where.concat(where.ref(x => x.id), "||", where.ref(x => x.description)), 2 + "isso");
             });
         const result = query.compile();
-        expect(result.params.length).to.equal(1);
-        expect(result.params[0]).to.equal("2isso");
-        expect(result.query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE (tes.id || tes.description) = ?");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal("2isso");
+        expect(result[0].query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE (tes.id || tes.description) = ?");
     });
 
 });

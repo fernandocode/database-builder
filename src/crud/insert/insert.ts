@@ -4,18 +4,20 @@ import { MetadataTable } from "../../metadata-table";
 import { CrudBase } from "../crud-base";
 import { InsertBuilder } from "./insert-builder";
 import { TypeCrud } from "../enums/type-crud";
+import { MapperTable } from "../../mapper-table";
 
 export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
         modelToSave: T,
-        metadata: MetadataTable<T>,
+        mapperTable: MapperTable,
+        // metadata: MetadataTable<T>,
         alias: string = void 0,
         database: DatabaseBase = void 0,
         enableLog: boolean = true,
     ) {
-        super(TypeCrud.CREATE, new InsertBuilder(typeT, metadata, alias, modelToSave), database, enableLog);
+        super(TypeCrud.CREATE, new InsertBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog);
     }
 
     public columns(columnsCallback: (columns: InsertColumnsBuilder<T>) => void): Insert<T> {

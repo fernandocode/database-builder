@@ -4,7 +4,7 @@ import { ColumnsCompiled } from "../core/columns-compiled";
 import { QueryCompiled } from "../core/query-compiled";
 import { CrudCompiled } from "../core/crud-compiled";
 import { WhereCompiled } from "./where-compiled";
-import { MetadataTable } from "../metadata-table";
+import { MapperTable } from "../mapper-table";
 
 let NEXT_VALUE_ALIAS: number = 0;
 
@@ -17,7 +17,8 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
 
     constructor(
         protected readonly _typeT: new () => T,
-        protected metadata: MetadataTable<T>,
+        // protected metadata: MetadataTable<T>,
+        protected mapperTable: MapperTable,
         protected readonly _alias: string = void 0,
     ) {
         this._tablename = _typeT.name;
@@ -26,8 +27,12 @@ export abstract class CrudBaseBuilder<T, TColumnsBuilder extends ColumnsValuesBu
         }
     }
 
-    public getMetadata(): MetadataTable<T> {
-        return this.metadata;
+    // public getMetadata(): MetadataTable<T> {
+    //     return this.metadata;
+    // }
+
+    public getMapper(): MapperTable {
+        return this.mapperTable;
     }
 
     public hasAlias(alias: string): boolean {
