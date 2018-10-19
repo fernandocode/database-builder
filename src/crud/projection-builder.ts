@@ -11,7 +11,7 @@ import { ProjectionCase } from "./projection-case";
 import { MetadataTable } from "../metadata-table";
 import { ProjectionsHelper } from "../core/projections-helper";
 import { DatabaseBuilderError } from "../core/errors";
-import { QueryCompilable } from "../core/query-compilable";
+import { SqlCompilable } from "./sql-compilable";
 
 export class ProjectionBuilder<T> {
     private _projection: ProjectionCompiled = new ProjectionCompiled();
@@ -297,11 +297,11 @@ export class ProjectionBuilder<T> {
     }
 
     public subQuery(
-        subQuery: QueryCompiled[] | QueryCompilable,
+        subQuery: QueryCompiled[] | SqlCompilable,
         alias: string = "",
     ): ProjectionBuilder<T> {
-        if ((subQuery as QueryCompilable).compile) {
-            return this.subQuery((subQuery as QueryCompilable).compile(), alias);
+        if ((subQuery as SqlCompilable).compile) {
+            return this.subQuery((subQuery as SqlCompilable).compile(), alias);
         }
         (subQuery as QueryCompiled[])
             .forEach(compiled => {

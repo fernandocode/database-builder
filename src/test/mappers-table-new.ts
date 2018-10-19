@@ -20,6 +20,11 @@ import { MapperSettingsModel } from "../mapper/mapper-settings-model";
 import { ContasReceber } from "./models/contas-receber";
 import { HeaderSimple } from "./models/header-simple";
 import { GetMapper } from "../mapper/interface-get-mapper";
+import { ReferencesModelTest } from "./models/reference-model-test";
+import { Linha } from "./models/linha";
+import { Referencia } from "./models/referencia";
+import { Estrutura } from "./models/estrutura";
+import { Imagem } from "./models/imagem";
 
 export class MappersTableNew extends MapperBase {
 
@@ -64,6 +69,10 @@ export class MappersTableNew extends MapperBase {
 
         this.autoMapper(TestClazzList, x => x.internalKey, PrimaryKeyType.AutoIncrement);
 
+        this.mapper(ReferencesModelTest)
+            .key(x => x.id, PrimaryKeyType.AutoIncrement, Number)
+            .column(x => x.name, String);
+
         const settingsReference: MapperSettingsModel = {
             references: true,
             referencesId: false,
@@ -71,11 +80,18 @@ export class MappersTableNew extends MapperBase {
         };
         this.autoMapper(LoginOffline, x => x.internalKey, PrimaryKeyType.AutoIncrement, false, settingsReference);
 
-        const t = this.mapper(HeaderSimple)
+        this.mapper(HeaderSimple)
             .key(x => x.id, PrimaryKeyType.AutoIncrement, Number)
             .column(x => x.descricao, String)
             .hasMany(x => x.items, String, "ItemHeaderSimple")
             ;
+
+        this.autoMapper(Imagem, x => x.internalKey, PrimaryKeyType.Assigned);
+        this.autoMapper(Linha, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Referencia, x => x.codeImport, PrimaryKeyType.Assigned)
+            // .hasMany(x => x.referenciasRelacionadas, Referencia, "ReferenciasRelacionadas")
+            ;
+        this.autoMapper(Estrutura, x => x.codeImport, PrimaryKeyType.Assigned);
     }
 }
 

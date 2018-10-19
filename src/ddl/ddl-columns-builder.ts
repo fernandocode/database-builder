@@ -36,7 +36,7 @@ export class DdlColumnsBuilder<T> extends ColumnsBaseBuilder<DdlColumnsBuilder<T
         if (Utils.isFlag(column.type, FieldType.NULL)) {
             throw new DatabaseBuilderError(`Mapper '${this.mapperTable.tableName}', column '${column.name}' of type 'NULL' not supported!`);
         }
-        // TODO: list
+        // is table reference/list
         const columnType = Utils.parseColumnType(column.type);
         if (columnType === ColumnType.TABLE_REFERENCE) {
             return void 0;

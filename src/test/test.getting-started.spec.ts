@@ -1,18 +1,22 @@
 import { Query } from "../crud/query/query";
 import { TestClazz } from "./models/test-clazz";
 import { expect } from "chai";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
 
 describe("Getting Started", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("query", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("where", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.contains(x => x.description, "abc");
             where.greatValue(x => x.id, 1);
@@ -25,7 +29,7 @@ describe("Getting Started", () => {
     });
 
     it("select (projections)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.projection(projection => {
             projection.add(x => x.description);
             projection.sum(x => x.id);
@@ -38,7 +42,7 @@ describe("Getting Started", () => {
     });
 
     it("order by", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.orderBy(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
@@ -46,7 +50,7 @@ describe("Getting Started", () => {
     });
 
     it("group by", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id, (having, projection) => {
             having.greatValue(projection.count(x => x.id), 10);
         });
@@ -57,7 +61,7 @@ describe("Getting Started", () => {
     });
 
     it("limit and offset", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.limit(10, 5);
         const result = query.compile();
         expect(result[0].params.length).to.equal(2);

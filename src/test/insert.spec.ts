@@ -21,7 +21,7 @@ import { DatetimeUtils } from "../datetime-utils";
 describe("Insert", () => {
     const mapper = getMapper();
 
-    it("Classificacao", () => {
+    it("Classificacao (insert key Assigned value 0)", () => {
         const result = new Insert(Classificacao, ObjectToTest.classificacao, mapper.get(Classificacao).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.classificacao.codeImport, ObjectToTest.classificacao.descricao
@@ -128,7 +128,7 @@ describe("Insert", () => {
         expect(result[0].query).to.equal("INSERT INTO TestClazzRefCode (code, description, reference_description) VALUES (?, ?, ?)");
     });
 
-    it("ContasAReceber", () => {
+    it("ContasReceber", () => {
         const result = new Insert(ContasReceber, ObjectToTest.contasReceber, mapper.get(ContasReceber).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.contasReceber.codeImport, ObjectToTest.contasReceber.valor,
@@ -138,7 +138,7 @@ describe("Insert", () => {
         expect(result[0].query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataRecebimento, dataVencimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
     });
 
-    it("ContasAReceber date string", () => {
+    it("ContasReceber date string", () => {
         const contasReceber = {
             codeImport: 11,
             valor: 1034.42,
@@ -154,20 +154,4 @@ describe("Insert", () => {
         ].toString());
         expect(result[0].query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataRecebimento, dataVencimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
     });
-
-    // it("HeaderSimple", () => {
-    //     const result = new Insert(HeaderSimple, ObjectToTest.headerSimple, mapper.get(HeaderSimple).mapperTable).compile();
-    //     expect(result.length).to.equal(2);
-    //     expect(result[0].params.toString()).to.equal([
-    //         ObjectToTest.headerSimple.descricao
-    //     ].toString());
-    //     expect(result[0].query).to.equal("INSERT INTO HeaderSimple (id, descricao) VALUES (?, ?)");
-    //     for (let index = 0; index < ObjectToTest.headerSimple.items.length; index++) {
-    //         const item = ObjectToTest.headerSimple.items[index];
-    //         expect(result[index + 1].params.toString()).to.equal([
-    //             index, item, new Object()
-    //         ].toString());
-    //         expect(result[index + 1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
-    //     }
-    // });
 });

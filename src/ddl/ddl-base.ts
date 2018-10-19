@@ -17,8 +17,8 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult[]> {
-        const compiled = this.compile();
+    public execute(cascade: boolean = true, database: DatabaseBase = void 0): Promise<DatabaseResult[]> {
+        const compiled = this.compile(cascade);
         return this._executableBuilder.execute(
             compiled.map(query => {
                 return {
@@ -26,51 +26,20 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
                     params: []
                 } as QueryCompiled;
             }),
-            // { query: this.compile(), params: [] },
             this.getDatabase(database));
     }
 
-    // public executorLinked(scripts: string[], database: DatabaseBase): Promise<DatabaseResult[]> {
-    //     return new Promise((resolve, reject) => {
-    //         if (scripts && scripts.length > 0) {
-    //             this._executableBuilder.execute(
-    //                 scripts.map(x => {
-    //                     return {
-    //                         query: x,
-    //                         params: []
-    //                     } as QueryCompiled;
-    //                 }),
-    //                 // { query: scripts[0], params: [] },
-    //                 database
-    //             )
-    //                 .then(result => {
-    //                     // remove o item executado
-    //                     scripts.shift();
-    //                     this.executorLinked(scripts, database)
-    //                         .then(res => {
-    //                             resolve(res.concat(result));
-    //                         })
-    //                         .catch(err => reject(err));
-    //                 })
-    //                 .catch(err => reject(err));
-    //         } else {
-    //             resolve([]);
-    //         }
-    //     });
-    // }
-
-    public compile(): string[] {
-        const compiled = this.build();
+    public compile(cascade: boolean = true): string[] {
+        const compiled = this.build(cascade);
         const script = [compiled.script];
         compiled.dependencies.forEach(dependency => {
             script.push(dependency.script);
-            // script += `\n${dependency.script}`;
         });
         return script;
     }
 
-    public build(): DdlCompiled {
-        return this._builder.build();
+    public build(cascade: boolean = true): DdlCompiled {
+        return this._builder.build(cascade);
     }
 
     private getDatabase(database: DatabaseBase): DatabaseBase {

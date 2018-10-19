@@ -1,8 +1,8 @@
 import { Utils } from "../../core/utils";
 import { InsertColumnsBuilder } from "./insert-columns-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
-import { CrudCompiled } from "../../core/crud-compiled";
 import { MapperTable } from "../../mapper-table";
+import { QueryCompiled } from "../../core/query-compiled";
 
 export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>> {
 
@@ -21,7 +21,7 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
             new InsertColumnsBuilder<T>(this.mapperTable, this._modelToSave), this);
     }
 
-    protected buildBase(): CrudCompiled {
+    protected buildBase(): QueryCompiled {
         const parameterValues: any[] = [];
 
         const columnsCompiled = this.getColumnsCompiled();
@@ -31,7 +31,7 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
 
         return {
             params: columnsCompiled.params,
-            sql: Utils.normalizeSqlString(
+            query: Utils.normalizeSqlString(
                 `INSERT INTO ${this._tablename}
                     (${columnsCompiled.columns.join(", ")})
                     VALUES (${parameterValues.join(", ")})`

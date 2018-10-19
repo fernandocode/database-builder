@@ -6,7 +6,6 @@ describe("Test", () => {
     it("recursive method test", () => {
         const apply = (script: Script): Promise<DatabaseResult> => {
             return new Promise((resolve, reject) => {
-                console.log(`Apply: ${script.sql} - params: ${script.params}`);
                 resolve({
                     insertId: script.sql
                 } as DatabaseResult);

@@ -1,19 +1,22 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { OrderBy } from "../core/enums/order-by";
-import { Query } from "../crud/query/query";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
 
 describe("Order By", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("none", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("simple", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.orderBy(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
@@ -21,7 +24,7 @@ describe("Order By", () => {
     });
 
     it("multi", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.orderBy(x => x.id);
         query.orderBy(x => x.referenceTest.id);
         query.orderBy(x => x.description);
@@ -31,7 +34,7 @@ describe("Order By", () => {
     });
 
     it("asc", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.asc(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
@@ -39,7 +42,7 @@ describe("Order By", () => {
     });
 
     it("desc", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.desc(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
@@ -47,7 +50,7 @@ describe("Order By", () => {
     });
 
     it("multi order", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.desc(x => x.id);
         query.asc(x => x.referenceTest.id);
         query.orderBy(x => x.description, OrderBy.DESC);
@@ -57,7 +60,7 @@ describe("Order By", () => {
     });
 
     it("with string", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.projection(select => {
             select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
         });

@@ -9,18 +9,25 @@ import { Cliente } from "./models/cliente";
 import { Cidade } from "./models/cidade";
 import { Uf } from "./models/uf";
 import { JoinQueryBuilder } from "../crud/query/join-query-builder";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
+import { Estrutura } from "./models/estrutura";
+import { Referencia } from "./models/referencia";
+import { Imagem } from "./models/imagem";
 
 describe("Query", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("none", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("join default (LEFT)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
@@ -37,7 +44,7 @@ describe("Query", () => {
     });
 
     it("join (LEFT)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
@@ -54,7 +61,7 @@ describe("Query", () => {
     });
 
     it("join (RIGHT)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
@@ -71,7 +78,7 @@ describe("Query", () => {
     });
 
     it("join (INNER)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
@@ -88,7 +95,7 @@ describe("Query", () => {
     });
 
     it("join (FULL_OUTER)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
@@ -105,9 +112,9 @@ describe("Query", () => {
     });
 
     it("from", () => {
-        const query = new Query(TestClazz, "p");
+        const query = crud.query(TestClazz, "p");
         query.from(
-            new Query(ReferencesModelTest)
+            crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
                 .where(w => w.equal(x => x.name, "AbC"))
         );
@@ -120,9 +127,9 @@ describe("Query", () => {
     });
 
     it("union", () => {
-        const query = new Query(TestClazz, "p");
+        const query = crud.query(TestClazz, "p");
         query.union(
-            new Query(ReferencesModelTest)
+            crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
                 .where(w => w.equal(x => x.name, "AbC"))
         );
@@ -135,9 +142,9 @@ describe("Query", () => {
     });
 
     it("union all", () => {
-        const query = new Query(TestClazz, "p");
+        const query = crud.query(TestClazz, "p");
         query.unionAll(
-            new Query(ReferencesModelTest)
+            crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
                 .where(w => w.equal(x => x.name, "AbC"))
         );
@@ -150,14 +157,14 @@ describe("Query", () => {
     });
 
     it("union all and union", () => {
-        const query = new Query(TestClazz, "p");
+        const query = crud.query(TestClazz, "p");
         query.unionAll(
-            new Query(ReferencesModelTest)
+            crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
                 .where(w => w.equal(x => x.name, "AbC"))
         );
         query.union(
-            new Query(ReferencesModelTest)
+            crud.query(ReferencesModelTest)
                 .select(x => x.id)
                 .where(w => w.equal(x => x.id, 10))
         );
@@ -171,7 +178,7 @@ describe("Query", () => {
     });
 
     it("join where concat columns", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
@@ -191,7 +198,7 @@ describe("Query", () => {
     });
 
     it("join linked", () => {
-        const query = new Query(Cliente);
+        const query = crud.query(Cliente);
         let joinCidade: JoinQueryBuilder<Cidade>;
         query
             .select(
@@ -236,12 +243,12 @@ describe("Query", () => {
     });
 
     it("join with on subquery", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.select(
             x => x.id,
             x => x.description,
             x => x.disabled);
-        const subQueryJoinWhere = new Query(ReferencesModelTest)
+        const subQueryJoinWhere = crud.query(ReferencesModelTest)
             .projection(projection => {
                 projection.min(x => x.id);
             })
@@ -263,6 +270,50 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(1);
         expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = (SELECT MIN(ref.id) AS id FROM ReferencesModelTest AS ref WHERE ref.id = tes.referenceTest_id ORDER BY ref.id ASC LIMIT ?)) ORDER BY ref.id DESC");
+    });
+
+    it("join with where internal and external", () => {
+        const query = crud.query(Estrutura);
+        query.projection(projection => {
+            projection.all();
+        });
+        query.where(where => {
+            where.equalValue(x => x.deleted, false);
+        });
+        query.join(Referencia, where => {
+            where.equal(x => x.codeImport, query.ref(x => x.referencia.codeImport));
+        }, join => {
+            join.projection(projection => {
+                projection
+                    .add(x => x.codeImport)
+                    .add(x => x.codigo)
+                    .add(x => x.deleted)
+                    .add(x => x.descricao);
+            });
+            join.where(where => {
+                where.contains(new ColumnRef(`${join.ref(x => x.codigo).result()} || '|' || ${join.ref(x => x.descricao).result()}`), "likeValor".toUpperCase());
+            });
+        }, JoinType.LEFT, "ref");
+        query.join(Imagem, where => {
+            where.equal(x => x.internalKey, query.ref(x => x.imagem.internalKey));
+            where.equalValue(x => x.deleted, false);
+        }, join => {
+            join.projection(projection => {
+                projection
+                    .add(x => x.internalKey)
+                    .add(x => x.tipoImagem)
+                    .add(x => x.urlBase64)
+                    .add(x => x.etiquetaBase64);
+            });
+        }, JoinType.LEFT, "img");
+        query.orderBy(x => x.codeImport);
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(false);
+        expect(result[0].params[1]).to.equal(false);
+        expect(result[0].params[2]).to.equal("%LIKEVALOR%");
+        expect(result[0].query).to.equal("SELECT est.*, ref.codeImport AS ref_codeImport, ref.codigo AS ref_codigo, ref.deleted AS ref_deleted, ref.descricao AS ref_descricao, img.internalKey AS img_internalKey, img.tipoImagem AS img_tipoImagem, img.urlBase64 AS img_urlBase64, img.etiquetaBase64 AS img_etiquetaBase64 FROM Estrutura AS est LEFT JOIN Referencia AS ref ON (ref.codeImport = est.referencia_codeImport) LEFT JOIN Imagem AS img ON (img.internalKey = est.imagem_internalKey AND img.deleted = ?) WHERE est.deleted = ? AND ref.codigo || \'|\' || ref.descricao LIKE ? ORDER BY est.codeImport ASC");
+
     });
 
 });

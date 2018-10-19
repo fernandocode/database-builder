@@ -1,18 +1,21 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { Query } from "../crud/query/query";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
 
 describe("Group By", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("none", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("simple", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
@@ -20,7 +23,7 @@ describe("Group By", () => {
     });
 
     it("multi", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id);
         query.groupBy(x => x.referenceTest.id);
         query.groupBy(x => x.description);
@@ -30,7 +33,7 @@ describe("Group By", () => {
     });
 
     it("with having", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id, (having, projection) => {
             having.greatValue(projection.count(x => x.id), 10);
             having.greatValue(projection.sum(x => x.referenceTest.id), 3);
@@ -43,7 +46,7 @@ describe("Group By", () => {
     });
 
     it("with multi having", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id, (having, projection) => {
             having.greatValue(projection.count(x => x.id), 10);
             having.greatValue(projection.sum(x => x.referenceTest.id), 3);
@@ -60,7 +63,7 @@ describe("Group By", () => {
     });
 
     it("multi with having", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id, (having, projection) => {
             having.greatValue(projection.count(x => x.id), 10);
             having.greatValue(projection.sum(x => x.referenceTest.id), 3);
@@ -74,7 +77,7 @@ describe("Group By", () => {
     });
 
     it("with having (stacked)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.groupBy(x => x.id, (having, projection) => {
             having.greatValue(projection.sum().count(x => x.id), 10);
             having.lessAndEqual(projection.sum(x => x.referenceTest.id), projection.max().count(x => x.id));
@@ -86,7 +89,7 @@ describe("Group By", () => {
     });
 
     it("with string", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.projection(select => {
             select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
         });

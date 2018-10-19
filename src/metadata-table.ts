@@ -7,6 +7,7 @@ import { FieldType } from "./core/enums/field-type";
 import { PrimaryKeyType } from "./core/enums/primary-key-type";
 import { GetMapper } from "./mapper/interface-get-mapper";
 import { DatabaseBuilderError } from "./core/errors";
+import { DEPENDENCY_LIST_SIMPLE_COLUMNS, DependencyListSimpleModel } from "./definitions/dependency-definition";
 
 export class MetadataTable<T> {
 
@@ -325,11 +326,13 @@ export class MetadataTable<T> {
         fieldType: FieldType,
         tablename: string
     ) {
-        this.mapperTable.addColumn(name, fieldType, void 0);
+        this.mapperTable.addColumn(name, fieldType, void 0, void 0, tablename);
         const dependency = new MapperTable(tablename);
         fieldType &= ~FieldType.ARRAY;
-        dependency.addColumn("indexArray", FieldType.NUMBER, PrimaryKeyType.Assigned);
-        dependency.addColumn("value", fieldType);
+        dependency.addColumn(DEPENDENCY_LIST_SIMPLE_COLUMNS.INDEX, FieldType.NUMBER, PrimaryKeyType.Assigned,
+            Utils.getFieldExpression<DependencyListSimpleModel>(x => x.index));
+        dependency.addColumn(DEPENDENCY_LIST_SIMPLE_COLUMNS.VALUE, fieldType, void 0,
+            Utils.getFieldExpression<DependencyListSimpleModel>(x => x.value));
         const keyColumns = this.keyColumns();
         if (keyColumns.length < 1) {
             throw new DatabaseBuilderError(`It is not possible to create a dependency mapper ("${name}") if the primary key of the parent entity ("${this.mapperTable.tableName}") is not yet mapped.`);
@@ -337,7 +340,11 @@ export class MetadataTable<T> {
         if (keyColumns.length > 1) {
             throw new DatabaseBuilderError(`Dependency mapper ("${name}") not support relation with entity ("${this.mapperTable.tableName}") with composite key [${keyColumns.join(", ")}]!`);
         }
-        dependency.addColumn(`${this.mapperTable.tableName}_${keyColumns[0].column}`, keyColumns[0].fieldType, PrimaryKeyType.Assigned);
+        dependency.addColumn(
+            DEPENDENCY_LIST_SIMPLE_COLUMNS.REFERENCE(this.mapperTable.tableName, keyColumns[0].column),
+            keyColumns[0].fieldType, PrimaryKeyType.Assigned,
+            Utils.getFieldExpression<DependencyListSimpleModel>(x => x.reference));
+        // dependency.addColumn(`${this.mapperTable.tableName}_${keyColumns[0].column}`, keyColumns[0].fieldType, PrimaryKeyType.Assigned);
         this.mapperTable.dependencies.push(dependency);
     }
 }

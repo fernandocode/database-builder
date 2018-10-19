@@ -1,8 +1,8 @@
 import { LambdaExpression } from "lambda-expression";
 import { ValueTypeToParse } from "../core/utils";
-import { QueryCompilable } from "../core/query-compilable";
 import { WhereCompiled } from "./where-compiled";
 import { ColumnRef } from "../core/column-ref";
+import { SqlCompilable } from "./sql-compilable";
 
 export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBaseBuilderContract<T, TExpression, TWhere>> {
 
@@ -150,7 +150,7 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
 
     in(
         expression: TExpression,
-        valuesOrQuery: ValueTypeToParse[] | QueryCompilable,
+        valuesOrQuery: ValueTypeToParse[] | SqlCompilable,
     ): TWhere;
 
     /**
@@ -158,7 +158,7 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
      */
     inSelect(
         expression: TExpression,
-        query: QueryCompilable,
+        query: SqlCompilable,
     ): TWhere;
 
     compile(): WhereCompiled;

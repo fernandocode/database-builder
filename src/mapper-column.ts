@@ -7,7 +7,8 @@ export class MapperColumn {
         public column: string = void 0,
         public fieldType: FieldType = void 0,
         public fieldReference: string = column ? column.replace(/_/g, ".") : void 0,
-        public primaryKeyType?: PrimaryKeyType
+        public primaryKeyType?: PrimaryKeyType,
+        public tableReference?: string
     ) {
 
     }

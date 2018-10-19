@@ -18,7 +18,7 @@ import { HeaderSimple } from "./models/header-simple";
 export class ObjectToTest {
 
     public static classificacao = {
-        codeImport: 3,
+        codeImport: 0,
         descricao: "Top"
     } as Classificacao;
 
@@ -114,6 +114,6 @@ export class ObjectToTest {
 
     public static headerSimple = {
         descricao: "Header Test",
-        items: ["1", "2", "3"]
+        items: ["abc", "def", "ghi"]
     } as HeaderSimple;
 }

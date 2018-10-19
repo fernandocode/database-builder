@@ -1,6 +1,6 @@
-import { ParamType } from "./utils";
+// import { ParamType } from "./utils";
 
-export interface CrudCompiled {
-    sql: string;
-    params: ParamType[];
-}
+// export interface CrudCompiled {
+//     sql: string;
+//     params: ParamType[];
+// }

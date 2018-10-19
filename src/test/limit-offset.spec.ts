@@ -1,11 +1,14 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { Query } from "../crud/query/query";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
 
 describe("Limit and Offset", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("limit", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.limit(12);
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
@@ -14,7 +17,7 @@ describe("Limit and Offset", () => {
     });
 
     it("limit with offset", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.limit(9, 3);
         const result = query.compile();
         expect(result[0].params.length).to.equal(2);

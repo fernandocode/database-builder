@@ -1,4 +1,3 @@
-import { MetadataTable } from "../metadata-table";
 import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
 import { MapperTable } from "../mapper-table";
 import { Column } from "./column";
@@ -103,10 +102,5 @@ export abstract class ColumnsBaseBuilder<
                 );
             }
         }
-        // for (const key in mapper.dependencies) {
-        //     if (mapper.dependencies.hasOwnProperty(key)) {
-        //         const dependency = mapper.dependencies[key];
-        //     }
-        // }
     }
 }

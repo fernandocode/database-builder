@@ -1,6 +1,6 @@
-import { ParamType } from "../core/utils";
+// import { ParamType } from "../core/utils";
 
-export interface SqlAndParams {
-    sql: string;
-    params: ParamType[];
-}
+// export interface SqlAndParams {
+//     sql: string;
+//     params: ParamType[];
+// }

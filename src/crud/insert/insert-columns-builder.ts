@@ -8,10 +8,14 @@ export class InsertColumnsBuilder<T> extends ColumnsValuesBuilder<T, InsertColum
         return this;
     }
 
-    protected columnFormat(column: Column): string {
-        return column.primaryKeyType === PrimaryKeyType.AutoIncrement ? void 0 : column.name;
-        // return column.isAutoIncrement ? void 0 : column.name;
+    protected isAddColumn(column: Column): boolean {
+        return super.isAddColumn(column) && !(column.primaryKeyType === PrimaryKeyType.AutoIncrement);
     }
+
+    // protected columnFormat(column: Column): string {
+    //     // return column.primaryKeyType === PrimaryKeyType.AutoIncrement ? void 0 : column.name;
+    //     // return column.isAutoIncrement ? void 0 : column.name;
+    // }
 
     protected allowGenerateKey(): boolean {
         return true;

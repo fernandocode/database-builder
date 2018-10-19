@@ -15,11 +15,13 @@ export abstract class DdlBaseBuilder<T> {
     ) {
     }
 
-    public build(): DdlCompiled {
+    public build(cascade: boolean = true): DdlCompiled {
         const dependenciesCompiled: DdlCompiled[] = [];
-        this.dependencies().forEach(dependency => {
-            dependenciesCompiled.push(this.resolveDependency(dependency));
-        });
+        if (cascade) {
+            this.dependencies().forEach(dependency => {
+                dependenciesCompiled.push(this.resolveDependency(dependency));
+            });
+        }
         return {
             script: this.removeMultiSpacesAndBreakLines(this.buildBase()),
             dependencies: dependenciesCompiled

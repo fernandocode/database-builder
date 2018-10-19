@@ -1,29 +1,30 @@
-import { Query } from "../crud/query/query";
 import { Cliente } from "./models/cliente";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { Operator } from "../crud/enums/operator";
 import { getMapper } from "./mappers-table-new";
+import { Crud } from "../crud/crud";
 
 describe("Query method", () => {
 
     const mapper = getMapper();
+    const crud = new Crud({} as any, mapper);
 
     it("test simple select", () => {
-        const query = new Query(Cliente);
+        const query = crud.query(Cliente);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT cli.* FROM Cliente AS cli");
     });
 
     it("test simple select with custom alias", () => {
-        const result = new Query(Cliente, "abc").compile()[0].query;
+        const result = crud.query(Cliente, "abc").compile()[0].query;
         expect(result).to.equal("SELECT abc.* FROM Cliente AS abc");
     });
 
     it("test simple select with custom alias and where equal", () => {
         const result =
-            new Query(Cliente, "abc")
+            crud.query(Cliente, "abc")
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
                 })
@@ -35,7 +36,7 @@ describe("Query method", () => {
 
     it("test select with scope", () => {
         const query =
-            new Query(Cliente, "abc")
+            crud.query(Cliente, "abc")
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
                     where.scope(scope => {
@@ -54,7 +55,7 @@ describe("Query method", () => {
 
     it("test simple select with where and select projections", () => {
         const query =
-            new Query(Cliente)
+            crud.query(Cliente)
                 .select(
                     x => x.cidade.codeImport,
                     x => x.apelido,
@@ -72,7 +73,7 @@ describe("Query method", () => {
     });
 
     it("test select with join", () => {
-        const query = new Query(Cliente);
+        const query = crud.query(Cliente);
         query
             .select(
                 x => x.cidade.codeImport,
@@ -107,7 +108,7 @@ describe("Query method", () => {
     });
 
     it("test select with projection case", () => {
-        const query = new Query(Cliente);
+        const query = crud.query(Cliente);
         query
             .projection(projection => {
                 projection.add(x => x.desativo, "inativo");
@@ -153,7 +154,7 @@ describe("Query method", () => {
     });
 
     it("test select all by mapper", () => {
-        const query = new Query(Cliente);
+        const query = crud.query(Cliente);
         query
             .projection(projection => {
                 projection.allByMap(mapper.get(Cliente));

@@ -1,18 +1,22 @@
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
-import { Drop } from "../ddl/drop/drop";
+import { Ddl } from "../ddl";
+import { getMapper } from "./mappers-table-new";
 
 describe("Drop", () => {
 
+    const dll = new Ddl({} as any, getMapper());
+
     it("by type", () => {
-        const drop = new Drop(TestClazz);
+        const drop = dll.drop(TestClazz);
         const result = drop.compile();
         expect(result[0]).to.equal("DROP TABLE IF EXISTS TestClazz;");
     });
 
-    it("by name", () => {
-        const drop = new Drop("AbC");
-        const result = drop.compile();
-        expect(result[0]).to.equal("DROP TABLE IF EXISTS AbC;");
-    });
+    // Deprecated
+    // it("by name", () => {
+    //     const drop = dll.drop("AbC");
+    //     const result = drop.compile();
+    //     expect(result[0]).to.equal("DROP TABLE IF EXISTS AbC;");
+    // });
 });

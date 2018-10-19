@@ -6,6 +6,7 @@ import { WhereBuilder } from "../where-builder";
 import { ProjectionCompiled } from "../projection-compiled";
 import { JoinType } from "../enums/join-type";
 import { ValueType } from "../../core/utils";
+import { MapperTable } from "../../mapper-table";
 
 export class JoinQueryBuilder<T>
     extends QueryBuilderBase<T, JoinQueryBuilder<T>>
@@ -26,7 +27,7 @@ export class JoinQueryBuilder<T>
     }
 
     public _getWhere(): WhereCompiled {
-        return this._whereCompiled;
+        return this.whereCompiled;
     }
 
     public _getSelect(): ProjectionCompiled {
@@ -53,11 +54,11 @@ export class JoinQueryBuilder<T>
     constructor(
         typeT: new () => T,
         onWhereCallback: (where: WhereBuilder<T>) => void,
+        mapperTable: MapperTable,
         private _typeJoin: JoinType = JoinType.LEFT,
         alias: string = void 0,
-        enableLog: boolean = true,
     ) {
-        super(typeT, alias, enableLog);
+        super(typeT, mapperTable, alias);
 
         this._on = new WhereBuilder(typeT, this.alias);
         onWhereCallback(this._on);
@@ -66,5 +67,29 @@ export class JoinQueryBuilder<T>
     // Para adicionar alias da tabela no apelido da projeção padrão
     protected createProjectionBuilder(): ProjectionBuilder<T> {
         return new ProjectionBuilder(this._typeT, this.alias, true);
+    }
+
+    // default false para não adicionar comandos em expressões em join,
+    // ao adicionar o join na consulta principal que será verificado se o commando deve ser adicionado
+    protected compileWhere(compiled: WhereCompiled, addCommand: boolean = false) {
+        super.compileWhere(compiled, addCommand);
+    }
+
+    // default false para não adicionar comandos em expressões em join,
+    // ao adicionar o join na consulta principal que será verificado se o commando deve ser adicionado
+    protected compileGroupBy(groupBy: string, addCommand: boolean = false) {
+        super.compileGroupBy(groupBy, addCommand);
+    }
+
+    // default false para não adicionar comandos em expressões em join,
+    // ao adicionar o join na consulta principal que será verificado se o commando deve ser adicionado
+    protected compileHaving(having: WhereCompiled, addCommand: boolean = false) {
+        super.compileHaving(having, addCommand);
+    }
+
+    // default false para não adicionar comandos em expressões em join,
+    // ao adicionar o join na consulta principal que será verificado se o commando deve ser adicionado
+    protected compileOrderBy(orderBy: string, addCommand: boolean = false) {
+        super.compileOrderBy(orderBy, addCommand);
     }
 }

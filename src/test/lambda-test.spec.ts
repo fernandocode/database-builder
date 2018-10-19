@@ -2,11 +2,15 @@ import { Cliente } from "./models/cliente";
 import { Query } from "../crud/query/query";
 
 import { expect } from "chai";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
 
 describe("Lambda Expression", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("simple lambda", () => {
-        const query = new Query(Cliente)
+        const query = crud.query(Cliente)
             .where(where => {
                 // For test double equals
                 // tslint:disable-next-line:triple-equals
@@ -21,7 +25,7 @@ describe("Lambda Expression", () => {
     });
 
     it("simple lambda with whereExp", () => {
-        const result = new Query(Cliente)
+        const result = crud.query(Cliente)
             .whereExp(x => x.apelido === "Test")
             .whereExp(x => x.codeImport > 10)
             .compile();
@@ -32,7 +36,7 @@ describe("Lambda Expression", () => {
     });
 
     it("lambda with ValueType's", () => {
-        const result = new Query(Cliente)
+        const result = crud.query(Cliente)
             .where(where => {
                 where
                     .expression(x => x.apelido === "Test")
@@ -51,7 +55,7 @@ describe("Lambda Expression", () => {
     // // Not work in lambda expression
     // it("lambda column vs variable", () => {
     //     let p1 = "Test";
-    //     const result = new Query(Cliente)
+    //     const result = crud.query(Cliente)
     //     .where(where => {
     //         where
     //         .exp(x => x.apelido == p1)

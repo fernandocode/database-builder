@@ -1,15 +1,15 @@
+import { LambdaExpression } from "lambda-expression";
 import { LambdaMetadata } from "../core/lambda-metadata";
-import { DatabaseHelper } from "../database-helper";
-import { ExpressionOrColumn, ExpressionProjection, Utils, ValueType, ValueTypeToParse, ParamType } from "../core/utils";
-import { QueryCompilable } from "../core/query-compilable";
+import { ExpressionOrColumn, ExpressionProjection, ParamType, Utils, ValueTypeToParse } from "../core/utils";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
-import { LambdaExpression } from "lambda-expression";
+import { DatabaseHelper } from "../database-helper";
 import { DatabaseBuilderError } from "../core/errors";
 import { WhereBaseBuilderContract } from "./where-base-builder-contract";
 import { ColumnParams } from "../core/column-params";
 import { ColumnRef } from "../core/column-ref";
 import { ProjectionsHelper } from "../core/projections-helper";
+import { SqlCompilable } from "./sql-compilable";
 
 export abstract class WhereBaseBuilder<
     T,
@@ -321,7 +321,7 @@ export abstract class WhereBaseBuilder<
 
     public in(
         expression: TExpression,
-        valuesOrQuery: ValueTypeToParse[] | QueryCompilable,
+        valuesOrQuery: ValueTypeToParse[] | SqlCompilable,
     ): TWhere {
         if (Utils.isArray(valuesOrQuery)) {
             this.buildWhereColumn(
@@ -329,7 +329,8 @@ export abstract class WhereBaseBuilder<
                 this.getColumnParams(expression),
                 valuesOrQuery as ValueTypeToParse[]);
         } else {
-            const compileds = (valuesOrQuery as QueryCompilable).compile();
+            // const compiled = (valuesOrQuery as QueryCompilable).compile();
+            const compileds = (valuesOrQuery as SqlCompilable).compile();
             compileds.forEach(compiled => {
                 this.buildWhereColumn(
                     [Condition.In],
@@ -346,7 +347,7 @@ export abstract class WhereBaseBuilder<
      */
     public inSelect(
         expression: TExpression,
-        query: QueryCompilable,
+        query: SqlCompilable,
     ): TWhere {
         return this.in(expression, query);
     }
@@ -516,18 +517,6 @@ export abstract class WhereBaseBuilder<
         }
     }
 
-    private isEqualAnyCondition(value: string | string[]): boolean {
-        if (Array.isArray(value)) {
-            for (const v of value) {
-                const r = this.isEqualAnyCondition(v);
-                if (r) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return (Object as any).values(Condition).filter((x: string) => x === value).length > 0;
-    }
 
     private buildConditions(
         conditions: Condition[],

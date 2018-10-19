@@ -1,9 +1,8 @@
 import { UpdateColumnsBuilder } from "./update-columns-builder";
 import { WhereBuilder } from "../where-builder";
-import { MetadataTable } from "../../metadata-table";
-import { CrudCompiled } from "../../core/crud-compiled";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
+import { QueryCompiled } from "../../core";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {
 
@@ -29,10 +28,10 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
         return super.whereBase(whereCallback, this, false);
     }
 
-    protected buildBase(): CrudCompiled {
+    protected buildBase(): QueryCompiled {
         return {
             params: this.getColumnsCompiled().params,
-            sql: `UPDATE ${this._tablename} SET ${this.getColumnsCompiled().columns.join(", ")}`,
+            query: `UPDATE ${this._tablename} SET ${this.getColumnsCompiled().columns.join(", ")}`,
         };
     }
 

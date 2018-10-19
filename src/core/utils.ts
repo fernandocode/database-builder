@@ -226,6 +226,10 @@ export class Utils {
         return new ProjectionCompiled(this.getColumn(projection as ExpressionOrColumn<TReturn, T>));
     }
 
+    public static getFieldExpression<T>(expression: Expression<T>): string {
+        return this.getExpressionUtils().getColumnByExpression(expression, ".");
+    }
+
     public static getValue<TReturn, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): TReturn {
         return this.expressionOrColumn(expression) === ExpressionOrColumnEnum.Expression
             ? this.getExpressionUtils().getValueByExpression(instance, expression as Expression<T>)

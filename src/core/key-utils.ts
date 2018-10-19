@@ -1,18 +1,19 @@
 import { MapperTable } from "./../mapper-table";
 import { MapperColumn } from "../mapper-column";
 import { PrimaryKeyType } from "./enums/primary-key-type";
-import { Utils } from "./utils";
-import * as lodash from "lodash";
+import { ModelUtils } from "./model-utils";
 
 export class KeyUtils {
 
     public static setKey(mapperTable: MapperTable, model: any, keyValue: any): void {
         // model[this.primaryKeyMapper(metadata).fieldReference] = keyValue;
-        lodash.set(model, this.primaryKeyMapper(mapperTable).fieldReference, keyValue);
+        ModelUtils.set(model, this.primaryKeyMapper(mapperTable).fieldReference, keyValue);
+        // lodash.set(model, this.primaryKeyMapper(mapperTable).fieldReference, keyValue);
     }
 
     public static getKey(mapperTable: MapperTable, model: any): any {
-        return Utils.getValue(model, this.primaryKeyMapper(mapperTable).fieldReference);
+        return ModelUtils.get(model, this.primaryKeyMapper(mapperTable).fieldReference);
+        // return Utils.getValue(model, this.primaryKeyMapper(mapperTable).fieldReference);
     }
 
     public static primaryKeyType(mapperTable: MapperTable): PrimaryKeyType {

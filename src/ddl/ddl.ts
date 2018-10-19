@@ -14,18 +14,21 @@ export class Ddl {
         public enableLog: boolean = true) {
     }
 
-    public create<T>(typeT: new () => T,
-                     mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
-                    //  metadata: MetadataTable<T> = this._mappersTable.get(typeT),
-                     database: DatabaseBase = this.getDatabase(),
+    public create<T>(
+        typeT: new () => T,
+        mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
+        //  metadata: MetadataTable<T> = this._mappersTable.get(typeT),
+        database: DatabaseBase = this.getDatabase()
     ): Create<T> {
         return new Create(typeT, mapperTable, database, this.enableLog);
     }
 
-    public drop<T>(typeT: TypeOrString<T>,
-                   database: DatabaseBase = this.getDatabase(),
+    public drop<T>(
+        typeT: new () => T,
+        mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
+        database: DatabaseBase = this.getDatabase()
     ): Drop<T> {
-        return new Drop(typeT, database, this.enableLog);
+        return new Drop(typeT, mapperTable, database, this.enableLog);
     }
 
     // TODO: create ALTER TABLE: https://sqlite.org/lang_altertable.html

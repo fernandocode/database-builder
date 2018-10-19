@@ -1,54 +1,55 @@
 import { ProjectionCompiled } from "../projection-compiled";
 import { UnionType } from "../../core/union-type";
-import { ExecutableBuilder } from "../../core/executable-builder";
 import { ProjectionBuilder } from "../projection-builder";
 import { ExpressionOrColumn, ParamType, Utils } from "../../core/utils";
-import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { WhereBuilder } from "../where-builder";
 import { OrderBy } from "../../core/enums/order-by";
 import { WhereCompiled } from "../where-compiled";
-import { SqlAndParams } from "../sql-and-params";
 import { QueryCompiled } from "../../core/query-compiled";
 import { LambdaExpression } from "lambda-expression";
-import { DatabaseBuilderError } from "../../core/errors";
 import { JoinQueryBuilderContract } from "./join-query-builder-contract";
 import { QueryBuilderBaseContract } from "./query-builder-base-contract";
 import { HavingBuilder } from "../having-builder";
 import { ProjectionsHelper } from "../../core/projections-helper";
 import { BuilderCompiled } from "../../core/builder-compiled";
 import { ColumnRef } from "../../core/column-ref";
-import { QueryCompilable } from "../../core/query-compilable";
+import { MapperTable } from "../../mapper-table";
+import { SqlCompilable } from "../sql-compilable";
+import { SqlBaseBuilder } from "../sql-base-builder";
 
-let NEXT_VALUE_ALIAS: number = 0;
+// let NEXT_VALUE_ALIAS: number = 0;
 
-export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQuery>>
+export abstract class QueryBuilderBase<T,
+    TQuery extends QueryBuilderBase<T, TQuery>>
+    extends SqlBaseBuilder<T>
     implements QueryBuilderBaseContract<T, QueryBuilderBase<T, TQuery>> {
 
+    protected _groupBy: string = "";
     protected _limit: BuilderCompiled = new BuilderCompiled();
     protected _orderBy: string = "";
-    protected _groupBy: string = "";
     protected _having: WhereCompiled = {
         where: "",
         params: []
     } as WhereCompiled;
 
-    protected _whereCompiled: WhereCompiled = {
-        where: "",
-        params: []
-    } as WhereCompiled;
+    // protected _whereCompiled: WhereCompiled = {
+    //     where: "",
+    //     params: []
+    // } as WhereCompiled;
 
     protected _projectionCompiled: ProjectionCompiled = {
         projection: "",
         params: []
     } as ProjectionCompiled;
 
-    private readonly _executableBuilder: ExecutableBuilder;
+    // private readonly _executableBuilder: ExecutableBuilder;
 
-    private readonly WHERE = " WHERE ";
+    // private readonly WHERE = " WHERE ";
     private readonly GROUP_BY = " GROUP BY ";
     private readonly HAVING = " HAVING ";
     private readonly ORDER_BY = " ORDER BY ";
     private readonly LIMIT = " LIMIT";
+    private readonly OFFSET = "OFFSET";
 
     private _joinsQuery: Array<JoinQueryBuilderContract<any, any>> = [];
     // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
@@ -57,19 +58,26 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     private _unionsQuery: Array<{ query: QueryCompiled, type: UnionType }> = [];
     private _fromParams: ParamType[] = [];
 
-    private _tablename: string;
-    private readonly _alias: string;
+    // private _tablename: string;
+    // private readonly _alias: string;
 
-    constructor(protected _typeT: new () => T, alias: string = void 0, enableLog: boolean = true) {
-        this._tablename = _typeT.name;
-        if (!alias) {
-            alias = this.createUniqueAlias(this.defaultAlias(_typeT));
-        }
-        if (this.hasAlias(alias)) {
-            throw new DatabaseBuilderError(`Mapper '${this._typeT.name}', alias: ${alias} já está sendo utilizado nesse contexto de query (query: ${this.compile().map(x => x.query).join("\n")}).`);
-        }
-        this._alias = alias;
-        this._executableBuilder = new ExecutableBuilder(enableLog);
+    constructor(
+        typeT: new () => T,
+        mapperTable: MapperTable,
+        alias: string = void 0,
+        // enableLog: boolean = true
+    ) {
+        super(typeT, mapperTable, alias);
+        // this._tablename = _typeT ? _typeT.name : mapperTable.tableName;
+        // this._tablename = _typeT.name;
+        // if (!alias) {
+        //     alias = this.createUniqueAlias(this.defaultAlias(_typeT));
+        // }
+        // if (this.hasAlias(alias)) {
+        //     throw new DatabaseBuilderError(`Mapper '${this._typeT.name}', alias: ${alias} já está sendo utilizado nesse contexto de query (query: ${this.compile().query}).`);
+        // }
+        // this._alias = alias;
+        // this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
     public get alias(): string {
@@ -88,9 +96,12 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     }
 
     public hasAlias(alias: string): boolean {
-        if (this._alias === alias) {
+        if (super.hasAlias(alias)) {
             return true;
         }
+        // if (this._alias === alias) {
+        //     return true;
+        // }
         // check in joins
         for (const key in this._joinsQuery) {
             if (this._joinsQuery.hasOwnProperty(key)) {
@@ -104,36 +115,39 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
     }
 
     public from(
-        query: QueryCompiled[] | QueryCompilable
+        query: QueryCompiled[] | SqlCompilable
     ): TQuery {
-        if ((query as QueryCompilable).compile) {
-            return this.from((query as QueryCompilable).compile());
+        if ((query as SqlCompilable).compile) {
+            return this.from((query as SqlCompilable).compile());
         }
         (query as QueryCompiled[])
             .forEach(compiled => {
                 this._tablename = `(${compiled.query})`;
                 this._fromParams = compiled.params;
             });
+        // this._tablename = `(${(query as QueryCompiled).query})`;
+        // this._fromParams = (query as QueryCompiled).params;
         return this._getInstance();
     }
 
     public unionAll(
-        query: QueryCompiled[] | QueryCompilable
+        query: QueryCompiled[] | SqlCompilable
     ): TQuery {
         return this.union(query, UnionType.All);
     }
 
     public union(
-        query: QueryCompiled[] | QueryCompilable,
+        query: QueryCompiled[] | SqlCompilable,
         type: UnionType = UnionType.None
     ): TQuery {
-        if ((query as QueryCompilable).compile) {
-            return this.union((query as QueryCompilable).compile(), type);
+        if ((query as SqlCompilable).compile) {
+            return this.union((query as SqlCompilable).compile(), type);
         }
         (query as QueryCompiled[])
             .forEach(compiled => {
                 this._unionsQuery.push({ query: compiled, type });
             });
+        // this._unionsQuery.push({ query: query as QueryCompiled, type });
         return this._getInstance();
     }
 
@@ -214,53 +228,67 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return this._getInstance();
     }
 
-    public execute(
-        database: DatabaseBase
-    ): Promise<DatabaseResult[]> {
-        return this._executableBuilder.execute(this.compile(), database);
+    public limit(limit: number, offset?: number): TQuery {
+        this._limit.builder = `${this.LIMIT} ?`;
+        this._limit.params = [limit];
+        if (offset) {
+            this._limit.builder += ` ${this.OFFSET} ?`;
+            this._limit.params.push(offset);
+        }
+        return this._getInstance();
     }
+
+    // public execute(
+    //     database: DatabaseBase
+    // ): Promise<DatabaseResult[]> {
+    //     return this._executableBuilder.execute([this.compile()], database);
+    // }
 
     public compileTable(): string {
         return `${this._tablename} AS ${this._alias}`;
     }
 
-    public compile(): QueryCompiled[] {
-        const sqlBase: SqlAndParams = this.buildSelectBase();
-        const buildWhere = () =>
-            this._whereCompiled.where.length > 0
-                ? `${this.WHERE}${this._whereCompiled.where}`
-                : "";
-        const buildGroupBy = () =>
-            this._groupBy.length > 0
-                ? `${this.GROUP_BY}${this._groupBy}`
-                : "";
-        const buildHaving = () =>
-            this._having.where.length > 0
-                ? `${this.HAVING}${this._having.where}`
-                : "";
-        const buildOrderBy = () =>
-            this._orderBy.length > 0
-                ? `${this.ORDER_BY}${this._orderBy}`
-                : "";
-        const buildLimit = () =>
-            this._limit.builder.length > 0
-                ? `${this.LIMIT}${this._limit.builder}`
-                : "";
-        return [
-            this.buildUnions({
-                params: sqlBase.params.concat(
-                    this._joinParams.concat(
-                        this._whereCompiled.params.concat(
-                            this._having.params.concat(
-                                this._limit.params
-                            )
-                        )
-                    )
-                ),
-                // Template: https://sqlite.org/lang_select.html
-                query: `${sqlBase.sql}${buildWhere()}${buildGroupBy()}${buildHaving()}${buildOrderBy()}${buildLimit()}`,
-            })
-        ];
+    public compile(): QueryCompiled {
+        const compiled: QueryCompiled = this.buildBase();
+        // const buildWhere = () =>
+        //     this.whereCompiled.where.length > 0
+        //         ? `${this.WHERE}${this.whereCompiled.where}`
+        //         : "";
+        // const buildGroupBy = () =>
+        //     this._groupBy.length > 0
+        //         ? `${this.GROUP_BY}${this._groupBy}`
+        //         : "";
+        // const buildHaving = () =>
+        //     this._having.where.length > 0
+        //         ? `${this.HAVING}${this._having.where}`
+        //         : "";
+        // const buildOrderBy = () =>
+        //     this._orderBy.length > 0
+        //         ? `${this.ORDER_BY}${this._orderBy}`
+        //         : "";
+        // const buildLimit = () =>
+        //     this._limit.builder.length > 0
+        //         ? `${this.LIMIT}${this._limit.builder}`
+        //         : "";
+        return this.buildUnions({
+            params: compiled.params
+                .concat(this._joinParams)
+                .concat(this.whereCompiled.params)
+                .concat(this._having.params)
+                .concat(this._limit.params),
+            query: `${compiled.query}${this.whereCompiled.where}${this._groupBy}${this._having.where}${this._orderBy}${this._limit.builder}`
+            // params: sqlBase.params.concat(
+            //     this._joinParams.concat(
+            //         this.whereCompiled.params.concat(
+            //             this._having.params.concat(
+            //                 this._limit.params
+            //             )
+            //         )
+            //     )
+            // ),
+            // // Template: https://sqlite.org/lang_select.html
+            // query: `${sqlBase.query}${buildWhere()}${buildGroupBy()}${buildHaving()}${buildOrderBy()}${buildLimit()}`,
+        });
     }
 
     protected createProjectionBuilder(): ProjectionBuilder<T> {
@@ -278,15 +306,69 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         this.compileOrderBy(joinQuery._getOrderBy());
     }
 
+    protected setDefaultColumns(): void {
+        this.projection((projection) => projection.all());
+    }
+
+    protected getColumnsCompiled(): ProjectionCompiled {
+        if (!this._projectionCompiled.projection.length) {
+            this.setDefaultColumns();
+        }
+        return this._projectionCompiled;
+    }
+
+    protected buildBase(): QueryCompiled {
+        const columnsCompiled = this.getColumnsCompiled();
+        // if (!this._projectionCompiled.projection.length) {
+        //     this.projection((projection) => projection.all());
+        // }
+
+        let tablenameAndJoins: QueryCompiled = { query: this.compileTable(), params: this._fromParams };
+        for (const key in this._joinsQuery) {
+            if (this._joinsQuery.hasOwnProperty(key)) {
+                const joinQuery = this._joinsQuery[key];
+                tablenameAndJoins = this.compileTableJoins(tablenameAndJoins, joinQuery);
+            }
+        }
+
+        this._joinParams = tablenameAndJoins.params;
+
+        return {
+            params: columnsCompiled.params,
+            query: `SELECT ${columnsCompiled.projection} FROM ${tablenameAndJoins.query}`,
+            // params: this._projectionCompiled.params,
+            // query: `SELECT ${this._projectionCompiled.projection} FROM ${tablenameAndJoins.query}`,
+        } as QueryCompiled;
+    }
+
+    protected compileGroupBy(groupBy: string, addCommand: boolean = true) {
+        if (groupBy && groupBy.length) {
+            this._groupBy += `${this._groupBy.length ? ", " : (addCommand ? this.GROUP_BY : "")}${groupBy}`;
+        }
+    }
+
+    protected compileHaving(having: WhereCompiled, addCommand: boolean = true) {
+        if (having && having.where && having.where.length) {
+            this._having.where += `${this._having.where.length ? " AND " : (addCommand ? this.HAVING : "")}${having.where}`;
+            this._having.params = this._having.params.concat(having.params);
+        }
+    }
+
+    protected compileOrderBy(orderBy: string, addCommand: boolean = true) {
+        if (orderBy && orderBy.length) {
+            this._orderBy += `${this._orderBy.length ? ", " : (addCommand ? this.ORDER_BY : "")}${orderBy}`;
+        }
+    }
+
     protected abstract _getInstance(): TQuery;
 
-    private createUniqueAlias(aliasProposed: string): string {
-        aliasProposed = aliasProposed ? aliasProposed.toLowerCase() : aliasProposed;
-        if (this.hasAlias(aliasProposed)) {
-            return this.createUniqueAlias(`${aliasProposed}${NEXT_VALUE_ALIAS++}`);
-        }
-        return aliasProposed;
-    }
+    // private createUniqueAlias(aliasProposed: string): string {
+    //     aliasProposed = aliasProposed ? aliasProposed.toLowerCase() : aliasProposed;
+    //     if (this.hasAlias(aliasProposed)) {
+    //         return this.createUniqueAlias(`${aliasProposed}${NEXT_VALUE_ALIAS++}`);
+    //     }
+    //     return aliasProposed;
+    // }
 
     private buildUnions(queryBase: QueryCompiled): QueryCompiled {
         for (const key in this._unionsQuery) {
@@ -299,34 +381,15 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         return queryBase;
     }
 
-    private compileGroupBy(groupBy: string) {
-        if (groupBy && groupBy.length) {
-            this._groupBy += `${this._groupBy.length ? ", " : ""}${groupBy}`;
-        }
-    }
-
-    private compileHaving(having: WhereCompiled) {
-        if (having && having.where && having.where.length) {
-            this._having.where += `${this._having.where.length ? " AND " : ""}${having.where}`;
-            this._having.params = this._having.params.concat(having.params);
-        }
-    }
-
-    private compileOrderBy(orderBy: string) {
-        if (orderBy && orderBy.length) {
-            this._orderBy += `${this._orderBy.length ? ", " : ""}${orderBy}`;
-        }
-    }
-
-    private compileWhere(compiled: WhereCompiled) {
-        if (compiled.where.length) {
-            this._whereCompiled.where +=
-                `${(this._whereCompiled.where.length ? " AND " : "")}${compiled.where}`;
-            compiled.params.forEach((value) => {
-                this._whereCompiled.params.push(value);
-            });
-        }
-    }
+    // private compileWhere(compiled: WhereCompiled) {
+    //     if (compiled.where.length) {
+    //         this.whereCompiled.where +=
+    //             `${(this.whereCompiled.where.length ? " AND " : "")}${compiled.where}`;
+    //         compiled.params.forEach((value) => {
+    //             this.whereCompiled.params.push(value);
+    //         });
+    //     }
+    // }
 
     private compileProjection(compiled: ProjectionCompiled) {
         if (compiled.projection.length) {
@@ -338,42 +401,21 @@ export abstract class QueryBuilderBase<T, TQuery extends QueryBuilderBase<T, TQu
         }
     }
 
-    private buildSelectBase(): SqlAndParams {
-        if (!this._projectionCompiled.projection.length) {
-            this.projection((projection) => projection.all());
-        }
-
-        let tablenameAndJoins: SqlAndParams = { sql: this.compileTable(), params: this._fromParams };
-        for (const key in this._joinsQuery) {
-            if (this._joinsQuery.hasOwnProperty(key)) {
-                const joinQuery = this._joinsQuery[key];
-                tablenameAndJoins = this.compileTableJoins(tablenameAndJoins, joinQuery);
-            }
-        }
-
-        this._joinParams = tablenameAndJoins.params;
-
-        return {
-            params: this._projectionCompiled.params,
-            sql: `SELECT ${this._projectionCompiled.projection} FROM ${tablenameAndJoins.sql}`,
-        } as SqlAndParams;
-    }
-
     private compileTableJoins<TJoin, TQueryJoin extends JoinQueryBuilderContract<TJoin, TQueryJoin>>(
-        tablesBase: SqlAndParams,
+        tablesBase: QueryCompiled,
         join: JoinQueryBuilderContract<TJoin, TQueryJoin>
-    ): SqlAndParams {
+    ): QueryCompiled {
         const onWhereCompiled = join._getOn();
         return {
             params: tablesBase.params.concat(onWhereCompiled.params),
-            sql: `${tablesBase.sql} ${join._getTypeJoin()} JOIN ${join.compileTable()} ON (${onWhereCompiled.where})`,
+            query: `${tablesBase.query} ${join._getTypeJoin()} JOIN ${join.compileTable()} ON (${onWhereCompiled.where})`,
         };
     }
 
-    private defaultAlias(typeT: new () => T) {
-        if (typeT.name.length > 3) {
-            return typeT.name.substring(0, 3);
-        }
-        return typeT.name;
-    }
+    // private defaultAlias(typeT: new () => T) {
+    //     if (typeT.name.length > 3) {
+    //         return typeT.name.substring(0, 3);
+    //     }
+    //     return typeT.name;
+    // }
 }

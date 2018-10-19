@@ -13,7 +13,7 @@ export class ExecutableBuilder {
         compiled: QueryCompiled[],
         database: DatabaseBase,
     ): Promise<DatabaseResult[]> {
-        this.log(compiled);
+        // this.log(compiled);
         return this.executorLinked(compiled, [], database);
         // return this.executeSql(database, compiled);
     }
@@ -21,6 +21,7 @@ export class ExecutableBuilder {
     private executeSql(
         database: DatabaseBase, compiled: QueryCompiled,
     ): Promise<DatabaseResult> {
+        this.log(compiled);
         if ((database as DatabaseObject).addTransaction) {
             return (database as DatabaseObject).executeSql(
                 compiled.query,

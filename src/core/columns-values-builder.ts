@@ -7,6 +7,7 @@ import { Column } from "./column";
 import { FieldType } from "./enums/field-type";
 import { ColumnsCompiled } from "./columns-compiled";
 import { MapperTable } from "../mapper-table";
+import { ColumnType } from "./enums/column-type";
 
 export abstract class ColumnsValuesBuilder<
     T, TThis extends ColumnsValuesBuilder<T, TThis>>
@@ -32,11 +33,12 @@ export abstract class ColumnsValuesBuilder<
     ): TThis {
         switch (primaryKeyType) {
             case PrimaryKeyType.Assigned:
-                if (!value) {
+                if (value === void 0) {
                     throw new DatabaseBuilderError("Primary key to be informed when generation strategy is 'Assigned'!");
                 }
+                break;
             case PrimaryKeyType.Guid:
-                if (!value && this.allowGenerateKey()) {
+                if (value === void 0 && this.allowGenerateKey()) {
                     // gerar GUID
                     value = Utils.GUID();
                     // set value GUID in model
@@ -89,10 +91,12 @@ export abstract class ColumnsValuesBuilder<
         };
         result.keyColumns = this.columns.filter(x => !!x.primaryKeyType).map(x => x.name);
         this.columns.forEach((column) => {
-            const columnName = this.columnFormat(column);
-            if (columnName !== void 0) {
-                result.columns.push(columnName);
-                result.params.push(column.value);
+            if (this.isAddColumn(column)) {
+                const columnName = this.columnFormat(column);
+                if (columnName !== void 0) {
+                    result.columns.push(columnName);
+                    result.params.push(column.value);
+                }
             }
         });
         return result;
@@ -102,7 +106,18 @@ export abstract class ColumnsValuesBuilder<
         return false;
     }
 
-    protected abstract columnFormat(column: Column): string;
+    protected isAddColumn(column: Column): boolean {
+        // is table reference/list
+        const columnType = Utils.parseColumnType(column.type);
+        if (columnType === ColumnType.TABLE_REFERENCE) {
+            return false;
+        }
+        return true;
+    }
+
+    protected columnFormat(column: Column): string {
+        return column.name;
+    }
 
     private getValueByExpression<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TReturn {
         return Utils.getValue(this.modelToSave, expression);

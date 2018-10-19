@@ -3,19 +3,22 @@ import { ReferencesModelTest } from "./models/reference-model-test";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import * as moment from "moment";
-import { Query } from "../crud/query/query";
+import { Crud } from "../crud/crud";
+import { getMapper } from "./mappers-table-new";
 
 describe("Where", () => {
 
+    const crud = new Crud({} as any, getMapper());
+
     it("none", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
     });
 
     it("simple", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2);
         });
@@ -26,7 +29,7 @@ describe("Where", () => {
     });
 
     it("value is null", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const idParam: number = void 0;
         query.where(where => {
             where.equal(x => x.id, idParam);
@@ -37,7 +40,7 @@ describe("Where", () => {
     });
 
     it("value is not null", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         const idParam: number = void 0;
         query.where(where => {
             where.not().equal(x => x.id, idParam);
@@ -48,7 +51,7 @@ describe("Where", () => {
     });
 
     it("column string", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(query.ref("id"), 2);
         });
@@ -59,7 +62,7 @@ describe("Where", () => {
     });
 
     it("multi", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2);
             where.equal(x => x.id, x => x.referenceTest.id);
@@ -71,7 +74,7 @@ describe("Where", () => {
     });
 
     it("multi and", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2)
                 .and()
@@ -84,7 +87,7 @@ describe("Where", () => {
     });
 
     it("multi or", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2)
                 .or()
@@ -97,7 +100,7 @@ describe("Where", () => {
     });
 
     it("compare to value", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2);
         });
@@ -108,7 +111,7 @@ describe("Where", () => {
     });
 
     it("compare to value (deprecated)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equalValue(x => x.id, 2);
         });
@@ -119,7 +122,7 @@ describe("Where", () => {
     });
 
     it("compare to column", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, where.ref("referenceTest_id"));
         });
@@ -129,7 +132,7 @@ describe("Where", () => {
     });
 
     it("compare to column (deprecated)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equalColumn(x => x.id, "referenceTest_id");
         });
@@ -139,7 +142,7 @@ describe("Where", () => {
     });
 
     it("compare to column (ref secundary ref)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, where.ref("referenceTest_id", "abc"));
         });
@@ -149,14 +152,14 @@ describe("Where", () => {
     });
 
     it("simple cross", () => {
-        const query1 = new Query(TestClazz);
+        const query1 = crud.query(TestClazz);
         query1.where(where => {
             where.equalValue(x => x.id, 2);
             where.equalColumn(x => x.id, "referenceTest_id");
         });
         const result1 = query1.compile();
 
-        const query2 = new Query(TestClazz);
+        const query2 = crud.query(TestClazz);
         query2.where(where => {
             where.equal(x => x.id, 2);
             where.equal(x => x.id, x => x.referenceTest.id);
@@ -169,7 +172,7 @@ describe("Where", () => {
     });
 
     it("scope", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2)
                 .equal(x => x.id, x => x.referenceTest.id)
@@ -189,7 +192,7 @@ describe("Where", () => {
     });
 
     it("equal", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.equal(x => x.id, 2)
                 .equal(x => x.id, x => x.referenceTest.id)
@@ -210,7 +213,7 @@ describe("Where", () => {
     });
 
     it("great", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.great(x => x.id, 2)
                 .great(x => x.id, x => x.referenceTest.id)
@@ -231,7 +234,7 @@ describe("Where", () => {
     });
 
     it("less", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.less(x => x.id, 2)
                 .less(x => x.id, x => x.referenceTest.id)
@@ -252,7 +255,7 @@ describe("Where", () => {
     });
 
     it("lessAndEqual", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.lessAndEqual(x => x.id, 2)
                 .lessAndEqual(x => x.id, x => x.referenceTest.id)
@@ -273,7 +276,7 @@ describe("Where", () => {
     });
 
     it("greatAndEqual", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.greatAndEqual(x => x.id, 2)
                 .greatAndEqual(x => x.id, x => x.referenceTest.id)
@@ -294,7 +297,7 @@ describe("Where", () => {
     });
 
     it("contains", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().contains(x => x.id, "2")
                 .or()
@@ -313,7 +316,7 @@ describe("Where", () => {
     });
 
     it("startsWith", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().startsWith(x => x.id, "2")
                 .or()
@@ -332,7 +335,7 @@ describe("Where", () => {
     });
 
     it("endsWith", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().endsWith(x => x.id, "2")
                 .or()
@@ -351,7 +354,7 @@ describe("Where", () => {
     });
 
     it("like", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().like(x => x.id, "%2%")
                 .or()
@@ -370,7 +373,7 @@ describe("Where", () => {
     });
 
     it("is (not) null", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.isNull(x => x.id)
                 .not().isNull(x => x.description);
@@ -381,7 +384,7 @@ describe("Where", () => {
     });
 
     it("between", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             // number
             where.not().between(x => x.id, 2, 4)
@@ -414,7 +417,7 @@ describe("Where", () => {
     });
 
     it("between (deprecated)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().betweenValue(x => x.id, 2, 4)
                 .or()
@@ -436,11 +439,11 @@ describe("Where", () => {
     });
 
     it("in", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().in(x => x.id, [2, 4, 7, 1000])
                 .in(x => x.referenceTest.id,
-                    new Query(ReferencesModelTest)
+                    crud.query(ReferencesModelTest)
                         .select(x => x.id)
                         .where(w => w.equal(x => x.name, "AbC"))
                 )
@@ -465,11 +468,11 @@ describe("Where", () => {
     });
 
     it("in (deprecated)", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query.where(where => {
             where.not().inValues(x => x.id, [2, 4, 7, 1000])
                 .inSelect(x => x.referenceTest.id,
-                    new Query(ReferencesModelTest)
+                    crud.query(ReferencesModelTest)
                         .select(x => x.id)
                         .where(w => w.equal(x => x.name, "AbC"))
                 )
@@ -494,7 +497,7 @@ describe("Where", () => {
     });
 
     it("projection concat 1", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query
             .projection(projection => {
                 projection.group("iddescription", projection.proj().exp(x => x.id),
@@ -510,7 +513,7 @@ describe("Where", () => {
     });
 
     it("projection concat 2", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query
             .projection(projection => {
                 projection.group("iddescription", projection.ref(x => x.id), "||", projection.ref(x => x.description));
@@ -525,7 +528,7 @@ describe("Where", () => {
     });
 
     it("projection concat cross query", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         let joinReferenceModelTest: JoinQueryBuilder<ReferencesModelTest>;
         query.join(ReferencesModelTest,
             on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
@@ -546,7 +549,7 @@ describe("Where", () => {
     });
 
     it("where concat", () => {
-        const query = new Query(TestClazz);
+        const query = crud.query(TestClazz);
         query
             .projection(projection => {
                 projection.group("iddescription", projection.ref(x => x.id), "||", projection.ref(x => x.description));

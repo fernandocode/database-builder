@@ -134,8 +134,9 @@ export class DatabaseHelper {
 
     public databaseToValue(columnValue: any, fieldType: FieldType): any {
         if (
-            this.isFlag(fieldType, FieldType.ARRAY) ||
-            this.isFlag(fieldType, FieldType.OBJECT)
+            (this.isFlag(fieldType, FieldType.ARRAY) ||
+                this.isFlag(fieldType, FieldType.OBJECT))
+            && columnValue
         ) {
             return JSON.parse(columnValue);
         }

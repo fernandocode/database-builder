@@ -8,8 +8,7 @@ import { WhereBuilder } from "../where-builder";
 import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
-import { ExpressionOrColumn, ValueType } from "../../core/utils";
-import { QueryCompilable } from "../../core/query-compilable";
+import { ExpressionOrColumn, Utils } from "../../core/utils";
 import { OrderBy } from "../../core/enums/order-by";
 import { JoinType } from "../enums/join-type";
 import { LambdaExpression } from "lambda-expression";
@@ -17,8 +16,13 @@ import { JoinQueryBuilder } from "./join-query-builder";
 import { DatabaseBuilderError } from "../../core/errors";
 import { ProjectionsHelper } from "../../core/projections-helper";
 import { ColumnRef } from "../../core/column-ref";
+import { SqlCompilable } from "../sql-compilable";
+import { SqlBase } from "../sql-base";
+import { ModelUtils } from "../../core/model-utils";
+import { DependencyListSimpleModel } from "../../definitions/dependency-definition";
+import { KeyUtils } from "../../core/key-utils";
 
-export class Query<T> implements QueryCompilable {
+export class Query<T> extends SqlBase<T> {
 
     private _queryBuilder: QueryBuilder<T>;
     private _queryReadableBuilder: QueryReadableBuilder<T>;
@@ -26,18 +30,25 @@ export class Query<T> implements QueryCompilable {
     constructor(
         typeT: new () => T,
         alias: string = void 0,
-        private _metadata: MetadataTable<T> = void 0,
-        private _database: DatabaseBase = void 0,
+        private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
+        mapperTable: MapperTable = _getMapper(typeT).mapperTable,
+        database?: DatabaseBase,
         enableLog: boolean = true,
     ) {
-        this._queryBuilder = new QueryBuilder(typeT, alias, enableLog);
+        super(mapperTable, database, enableLog);
+        this._queryBuilder = new QueryBuilder(typeT, mapperTable, alias);
         this._queryReadableBuilder = new QueryReadableBuilder(typeT, enableLog);
+    }
+
+    public compile(): QueryCompiled[] {
+        const compiled = this.builderCompiled();
+        const script = [compiled];
+        return script;
     }
 
     /**
      * @link QueryBuilder
      */
-
     public alias(): string {
         return this._queryBuilder.alias;
     }
@@ -46,17 +57,17 @@ export class Query<T> implements QueryCompilable {
         return this._queryBuilder.ref(expression);
     }
 
-    public from(query: QueryCompiled[] | QueryCompilable): Query<T> {
+    public from(query: QueryCompiled[] | SqlCompilable): Query<T> {
         this._queryBuilder.from(query);
         return this;
     }
 
-    public union(query: QueryCompiled[] | QueryCompilable): Query<T> {
+    public union(query: QueryCompiled[] | SqlCompilable): Query<T> {
         this._queryBuilder.union(query);
         return this;
     }
 
-    public unionAll(query: QueryCompiled[] | QueryCompilable): Query<T> {
+    public unionAll(query: QueryCompiled[] | SqlCompilable): Query<T> {
         this._queryBuilder.unionAll(query);
         return this;
     }
@@ -68,7 +79,7 @@ export class Query<T> implements QueryCompilable {
         type: JoinType = JoinType.LEFT,
         alias: string = void 0
     ): Query<T> {
-        this._queryBuilder.join(typeTJoin, onWhere, join, type, alias);
+        this._queryBuilder.join(typeTJoin, onWhere, join, this._getMapper(typeTJoin).mapperTable, type, alias);
         return this;
     }
 
@@ -127,14 +138,6 @@ export class Query<T> implements QueryCompilable {
         return this;
     }
 
-    public execute(database: DatabaseBase = void 0): Promise<DatabaseResult[]> {
-        return this._queryBuilder.execute(this.getDatabase(database));
-    }
-
-    public compile(): QueryCompiled[] {
-        return this._queryBuilder.compile();
-    }
-
     public toString() {
         return this.compile().map(x => x.query).join("\n");
     }
@@ -144,17 +147,29 @@ export class Query<T> implements QueryCompilable {
      */
 
     public executeAndRead(
-        metadata: MetadataTable<T> = void 0,
+        cascade: boolean = true,
+        mapperTable: MapperTable = this.getMapper(void 0),
         database: DatabaseBase = void 0,
     ): Promise<T[]> {
-        return this._queryReadableBuilder.executeAndRead(
-            this._queryBuilder,
-            this.getMetadata(metadata),
-            this.getDatabase(database));
+        return new Promise<T[]>((resolve, reject) => {
+            this._queryReadableBuilder.executeAndRead(
+                cascade,
+                this,
+                mapperTable,
+                this.getDatabase(database))
+                .then(result => {
+                    this.fetchModels(cascade, result, mapperTable)
+                        .then(result => {
+                            resolve(result);
+                        })
+                        .catch(err => reject(err));
+                })
+                .catch(err => reject(err));
+        });
     }
 
-    public toList(): Promise<T[]> {
-        return this.executeAndRead();
+    public toList(cascade: boolean = true): Promise<T[]> {
+        return this.executeAndRead(cascade);
     }
 
     public toListParse<TParse>(metadataParse: MetadataTable<TParse>): Promise<TParse[]> {
@@ -204,8 +219,7 @@ export class Query<T> implements QueryCompilable {
     }
 
     public mapper(mapper: (row: RowResult<any>) => any): Promise<any[]> {
-        const metadata = this.getMetadata(void 0, false);
-        const mapperTable = metadata ? metadata.mapperTable : void 0;
+        const mapperTable = this.getMapper(void 0, false);
         return new Promise((resolve, reject) => {
             this.execute()
                 .then((cursors) => {
@@ -218,10 +232,10 @@ export class Query<T> implements QueryCompilable {
         });
     }
 
-    public firstOrDefault(_default?: any): Promise<T> {
+    public firstOrDefault(cascade: boolean = true, _default?: any): Promise<T> {
         return new Promise((resolve, reject) => {
             this.limit(1)
-                .toList()
+                .toList(cascade)
                 .then((result) => {
                     resolve((result && result.length) ? result[0] : _default);
                 })
@@ -235,19 +249,85 @@ export class Query<T> implements QueryCompilable {
         return this._queryReadableBuilder.read(cursor, newable, mapperTable);
     }
 
-    private getDatabase(database: DatabaseBase): DatabaseBase {
-        const result = (database ? database : this._database);
-        if (!result) {
-            throw new DatabaseBuilderError("Database not specified in query. Call 'executeAndRead'.");
+    protected model(): T {
+        return void 0;
+    }
+
+    protected builderCompiled(): QueryCompiled {
+        return this._queryBuilder.compile();
+    }
+
+    protected resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled {
+        const insert = new QueryBuilder(void 0, dependency, void 0);
+        return insert.compile();
+    }
+
+    protected resolveDependency(dependency: MapperTable): QueryCompiled {
+        return void 0;
+    }
+
+    protected checkDatabaseResult(promise: Promise<DatabaseResult[]>): Promise<DatabaseResult[]> {
+        return promise;
+    }
+
+    private getMapper(mapperTable: MapperTable, throwNotFound: boolean = true): MapperTable {
+        const result = (mapperTable ? mapperTable : this.mapperTable);
+        if (!result && throwNotFound) {
+            throw new DatabaseBuilderError("MapperTable not specified in query. Call 'executeAndRead'.");
         }
         return result;
     }
 
-    private getMetadata(metadata: MetadataTable<T>, throwNotFound: boolean = true): MetadataTable<T> {
-        const result = (metadata ? metadata : this._metadata);
-        if (!result && throwNotFound) {
-            throw new DatabaseBuilderError("MetadataTable not specified in query. Call 'executeAndRead'.");
-        }
-        return result;
+    private fetchModels(cascade: boolean = true, models: T[], mapperTable: MapperTable): Promise<T[]> {
+        // if (cascade) {
+        const promises: Array<Promise<T>> = [];
+        models.forEach(model => {
+            promises.push(this.fetchModel(cascade, model, mapperTable));
+        });
+        return Promise.all(promises);
+        // }
+        // return new Promise<T[]>((resolve) => {
+        //     resolve(models);
+        // });
+    }
+
+    private fetchModel(cascade: boolean = true, model: T, mapperTable: MapperTable): Promise<T> {
+        return new Promise<T>((resolve, reject) => {
+            const promises: Array<Promise<{ field: string, value: any }>> = [];
+            mapperTable.dependencies.forEach(dependency => {
+                if (cascade) {
+                    const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
+                    queryDependency.where(where => {
+                        const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
+                        where.equal(new ColumnRef(columnReference), KeyUtils.getKey(mapperTable, model));
+                    });
+                    promises.push(new Promise<{ field: string, value: any }>((r, rej) => {
+                        queryDependency.toList()
+                            .then(result => {
+                                const fieldDependency = mapperTable.columns.find(x => x.tableReference === dependency.tableName).fieldReference;
+                                r({ field: fieldDependency, value: result.map(x => x.value) });
+                            })
+                            .catch(err => {
+                                reject(err);
+                            });
+                    }));
+                } else {
+                    promises.push(new Promise<{ field: string, value: any }>((r, rej) => {
+                        const fieldDependency = mapperTable.columns.find(x => x.tableReference === dependency.tableName).fieldReference;
+                        r({ field: fieldDependency, value: [] });
+                    }));
+                }
+            });
+            Promise.all(promises)
+                .then(result => {
+                    result.forEach(r => {
+                        ModelUtils.set(model, r.field, r.value);
+                    });
+                    resolve(model);
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
     }
 }
