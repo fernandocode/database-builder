@@ -6,6 +6,7 @@ import { Utils } from "../core/utils";
 import { SqlCompilable } from "./sql-compilable";
 import { QueryCompiled } from "../core/query-compiled";
 import { SqlExecutable } from "./sql-executable";
+import { ModelUtils } from "../core/model-utils";
 
 export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
 
@@ -45,9 +46,11 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
     protected compileDependencyByValue(dependency: MapperTable): QueryCompiled[] {
         const script: QueryCompiled[] = [];
         const columnDependency = this.mapperTable.columns.find(x => x.tableReference === dependency.tableName);
-        const valuesDependency: any[] = Utils.getValue(this.model(), columnDependency.fieldReference);
+        const fieldArraySplit = columnDependency.fieldReference.split("[?].");
+        const valuesDependency: any[] = Utils.getValue(this.model(), fieldArraySplit[0]);
         valuesDependency.forEach((value, index) => {
-            this.checkAndPush(script, this.resolveDependencyByValue(dependency, value, index));
+            const valueItem = fieldArraySplit.length > 1 ? ModelUtils.get(value, fieldArraySplit[1]) : value;
+            this.checkAndPush(script, this.resolveDependencyByValue(dependency, valueItem, index));
         });
         return script;
     }

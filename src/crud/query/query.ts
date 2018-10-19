@@ -321,7 +321,17 @@ export class Query<T> extends SqlBase<T> {
             Promise.all(promises)
                 .then(result => {
                     result.forEach(r => {
-                        ModelUtils.set(model, r.field, r.value);
+                        const fieldArraySplit = r.field.split("[?].");
+                        if (fieldArraySplit.length === 1) {
+                            ModelUtils.set(model, fieldArraySplit[0], r.value);
+                        } else {
+                            const values = (r.value as any[]).map(value => {
+                                const item = {};
+                                ModelUtils.set(item, fieldArraySplit[1], value);
+                                return item;
+                            });
+                            ModelUtils.set(model, fieldArraySplit[0], values);
+                        }
                     });
                     resolve(model);
                 })

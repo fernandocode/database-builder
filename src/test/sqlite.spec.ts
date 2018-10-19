@@ -9,6 +9,8 @@ import { Crud } from "../crud";
 import { GuidClazz } from "./models/guid-clazz";
 import { Uf } from "./models/uf";
 import { HeaderSimple } from "./models/header-simple";
+import { Referencia } from "./models/referencia";
+import { Imagem } from "./models/imagem";
 
 describe("SQLite", async () => {
     const mapper = getMapper();
@@ -312,5 +314,177 @@ describe("SQLite", async () => {
 
         const dropResult = await ddl.drop(HeaderSimple).execute(false);
         expect(dropResult.length).to.equal(1);
+    });
+
+    it("Referencia cascade (property compost)", async () => {
+
+        ddl.enableLog = true;
+        const createResult = await ddl.create(Referencia).execute();
+        expect(createResult.length).to.equal(2);
+
+        crud.enableLog = true;
+        const insertResult1 = await crud.insert(Referencia, ObjectToTest.referencia).execute();
+        expect(insertResult1.length).to.equal(ObjectToTest.referencia.referenciasRelacionadas.length + 1);
+        expect(insertResult1[0].rowsAffected).to.equal(1);
+        ObjectToTest.referencia.referenciasRelacionadas.forEach((value, index) => {
+            expect(insertResult1[index + 1].rowsAffected).to.equal(1);
+        });
+
+        const referencia2 = {
+            codeImport: 200,
+            codigo: "fffff",
+            descricao: "Referencia 2",
+            restricaoGrade: ["41", "42", "43", "44", "45"],
+            referenciasRelacionadas: [
+                {
+                    codeImport: 201
+                } as Referencia,
+                {
+                    codeImport: 203
+                } as Referencia,
+                {
+                    codeImport: 205
+                } as Referencia,
+                {
+                    codeImport: 207
+                } as Referencia,
+            ],
+            imagem: {
+                internalKey: 40
+            } as Imagem,
+            deleted: false
+        } as Referencia;
+
+        const insertResult2 = await crud.insert(Referencia, referencia2).execute();
+        expect(insertResult2.length).to.equal(referencia2.referenciasRelacionadas.length + 1);
+        expect(insertResult2[0].rowsAffected).to.equal(1);
+        referencia2.referenciasRelacionadas.forEach((value, index) => {
+            expect(insertResult2[index + 1].rowsAffected).to.equal(1);
+        });
+
+        const referencia3 = {
+            codeImport: 300,
+            codigo: "aaaaaa",
+            descricao: "Referencia 3",
+            restricaoGrade: ["21", "22", "23", "24", "25"],
+            referenciasRelacionadas: [
+                {
+                    codeImport: 301
+                } as Referencia,
+                {
+                    codeImport: 303
+                } as Referencia,
+                {
+                    codeImport: 305
+                } as Referencia,
+                {
+                    codeImport: 307
+                } as Referencia,
+            ],
+            imagem: {
+                internalKey: 50
+            } as Imagem,
+            deleted: false
+        } as Referencia;
+
+        const insertResult3 = await crud.insert(Referencia, referencia3).execute();
+        expect(insertResult3.length).to.equal(referencia3.referenciasRelacionadas.length + 1);
+        expect(insertResult3[0].rowsAffected).to.equal(1);
+        referencia3.referenciasRelacionadas.forEach((value, index) => {
+            expect(insertResult3[index + 1].rowsAffected).to.equal(1);
+        });
+
+        const selectResult = await crud.query(Referencia).toList();
+        expect(selectResult.length).to.equal(3);
+
+        expect(selectResult[0].referenciasRelacionadas.length).to.equal(ObjectToTest.referencia.referenciasRelacionadas.length);
+        expect(selectResult[0].codeImport).to.equal(ObjectToTest.referencia.codeImport);
+        expect(selectResult[0].descricao).to.equal(ObjectToTest.referencia.descricao);
+        ObjectToTest.referencia.referenciasRelacionadas.forEach((value, index) => {
+            expect(selectResult[0].referenciasRelacionadas[index].codeImport).to.equal(value.codeImport);
+        });
+
+        expect(selectResult[1].referenciasRelacionadas.length).to.equal(referencia2.referenciasRelacionadas.length);
+        expect(selectResult[1].codeImport).to.equal(referencia2.codeImport);
+        expect(selectResult[1].descricao).to.equal(referencia2.descricao);
+        referencia2.referenciasRelacionadas.forEach((value, index) => {
+            expect(selectResult[1].referenciasRelacionadas[index].codeImport).to.equal(value.codeImport);
+        });
+
+        expect(selectResult[2].referenciasRelacionadas.length).to.equal(referencia3.referenciasRelacionadas.length);
+        expect(selectResult[2].codeImport).to.equal(referencia3.codeImport);
+        expect(selectResult[2].descricao).to.equal(referencia3.descricao);
+        referencia3.referenciasRelacionadas.forEach((value, index) => {
+            expect(selectResult[2].referenciasRelacionadas[index].codeImport).to.equal(value.codeImport);
+        });
+
+        referencia2.descricao = "Editado";
+        const oldCountItems = referencia2.referenciasRelacionadas.length;
+        referencia2.referenciasRelacionadas.splice(referencia2.referenciasRelacionadas.length - 1, 1);
+        referencia2.referenciasRelacionadas = [...referencia2.referenciasRelacionadas, {
+            codeImport: 222
+        } as Referencia];
+
+        const updateResult = await crud.update(Referencia, referencia2)
+            .where(where => {
+                where.equal(x => x.codeImport, referencia2.codeImport);
+            })
+            .execute();
+        const countUpdateResultExtraItems = 2; /* Update (Main) e Delete (Items) */
+        expect(updateResult.length).to.equal(referencia2.referenciasRelacionadas.length + countUpdateResultExtraItems);
+        /* Update (Main) */
+        expect(updateResult[0].rowsAffected).to.equal(1);
+        /* Delete (Items) */
+        expect(updateResult[1].rowsAffected).to.equal(oldCountItems);
+        referencia2.referenciasRelacionadas.forEach((value, index) => {
+            expect(updateResult[index + countUpdateResultExtraItems].rowsAffected).to.equal(1);
+        });
+
+        const selectUpdateResult = await crud.query(Referencia)
+            .where(where => {
+                where.equal(x => x.codeImport, referencia2.codeImport);
+            })
+            .firstOrDefault();
+        expect(selectUpdateResult.referenciasRelacionadas.length).to.equal(referencia2.referenciasRelacionadas.length);
+        expect(selectUpdateResult.codeImport).to.equal(referencia2.codeImport);
+        expect(selectUpdateResult.descricao).to.equal(referencia2.descricao);
+        referencia2.referenciasRelacionadas.forEach((value, index) => {
+            expect(selectUpdateResult.referenciasRelacionadas[index].codeImport).to.equal(value.codeImport);
+        });
+
+        const deleteResult1 = await crud.delete(Referencia, referencia2)
+            .execute();
+        expect(deleteResult1.length).to.equal(2);
+        /* Main deleted */
+        expect(deleteResult1[0].rowsAffected).to.equal(1);
+        /* Itens deleted */
+        expect(deleteResult1[1].rowsAffected).to.equal(referencia2.referenciasRelacionadas.length);
+
+        const deleteResult2 = await crud.deleteByKey(Referencia, ObjectToTest.referencia.codeImport)
+            .execute();
+        expect(deleteResult2.length).to.equal(2);
+        /* Main deleted */
+        expect(deleteResult2[0].rowsAffected).to.equal(1);
+        /* Itens deleted */
+        expect(deleteResult2[1].rowsAffected).to.equal(ObjectToTest.referencia.referenciasRelacionadas.length);
+
+        const selectResult2 = await crud.query(Referencia).toList();
+        expect(selectResult2.length).to.equal(1);
+        expect(selectResult2[0].referenciasRelacionadas.length).to.equal(referencia3.referenciasRelacionadas.length);
+        expect(selectResult2[0].codeImport).to.equal(referencia3.codeImport);
+        expect(selectResult2[0].descricao).to.equal(referencia3.descricao);
+        referencia3.referenciasRelacionadas.forEach((value, index) => {
+            expect(selectResult2[0].referenciasRelacionadas[index].codeImport).to.equal(value.codeImport);
+        });
+
+        /* Test select not cascade with data in itens */
+        const selectResultNotCascade = await crud.query(Referencia).toList(false);
+        expect(selectResultNotCascade.length).to.equal(1);
+        expect(selectResultNotCascade[0].referenciasRelacionadas.length).to.equal(0);
+        expect(selectResultNotCascade[0].codeImport).to.equal(referencia3.codeImport);
+        expect(selectResultNotCascade[0].descricao).to.equal(referencia3.descricao);
+
+        const dropResult = await ddl.drop(Referencia).execute();
+        expect(dropResult.length).to.equal(2);
     });
 });

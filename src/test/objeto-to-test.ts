@@ -14,6 +14,8 @@ import { Cliente } from "./models/cliente";
 import * as moment from "moment";
 import { ContasReceber } from "./models/contas-receber";
 import { HeaderSimple } from "./models/header-simple";
+import { Referencia } from "./models/referencia";
+import { Imagem } from "./models/imagem";
 
 export class ObjectToTest {
 
@@ -116,4 +118,29 @@ export class ObjectToTest {
         descricao: "Header Test",
         items: ["abc", "def", "ghi"]
     } as HeaderSimple;
+
+    public static referencia = {
+        codeImport: 20,
+        codigo: "abcCode",
+        descricao: "Referencia Test",
+        restricaoGrade: ["31", "32", "33", "34", "35"],
+        referenciasRelacionadas: [
+            {
+                codeImport: 21
+            } as Referencia,
+            {
+                codeImport: 23
+            } as Referencia,
+            {
+                codeImport: 25
+            } as Referencia,
+            {
+                codeImport: 27
+            } as Referencia,
+        ],
+        imagem: {
+            internalKey: 30
+        } as Imagem,
+        deleted: false
+    } as Referencia;
 }

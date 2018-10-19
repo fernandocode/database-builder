@@ -50,10 +50,18 @@ export class MetadataTable<T> {
         type: new () => TArray,
         tableName: string,
     ): MetadataTable<T> {
-        const column = this.columnName(expression);
+        let mapperColumn: MapperColumn = {
+            column: this.columnName(expression),
+            fieldType: this._databaseHelper.getFieldType(type)
+        } as MapperColumn;
+        const instanceMapper = this.validInstanceMapper(type ? new type() : expression(this.instance), mapperColumn.column);
+        if (!this._databaseHelper.isTypeSimpleByType(mapperColumn.fieldType)) {
+            // if (!this._databaseHelper.isTypeSimple(instanceMapper as any)) {
+            mapperColumn = this.getMapperColumnReference(instanceMapper, `${mapperColumn.column}[?]`);
+        }
         this.addDependency(
-            column,
-            FieldType.ARRAY | this._databaseHelper.getFieldType(type),
+            mapperColumn.column,
+            FieldType.ARRAY | mapperColumn.fieldType,
             tableName
         );
         return this;
@@ -132,6 +140,7 @@ export class MetadataTable<T> {
     }
 
     private validInstanceMapper<TType>(instance: TType, propertyMapperForMessage: string): TType {
+        console.log(instance);
         if (instance === void 0) {
             throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped property ('${propertyMapperForMessage}')`);
         }
