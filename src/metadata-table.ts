@@ -56,10 +56,9 @@ export class MetadataTable<T> {
         } as MapperColumn;
         const instanceMapper = this.validInstanceMapper(type ? new type() : expression(this.instance), mapperColumn.column);
         if (!this._databaseHelper.isTypeSimpleByType(mapperColumn.fieldType)) {
-            // if (!this._databaseHelper.isTypeSimple(instanceMapper as any)) {
             mapperColumn = this.getMapperColumnReference(instanceMapper, `${mapperColumn.column}[?]`);
         }
-        this.addDependency(
+        this.addDependencyArray(
             mapperColumn.column,
             FieldType.ARRAY | mapperColumn.fieldType,
             tableName
@@ -140,7 +139,6 @@ export class MetadataTable<T> {
     }
 
     private validInstanceMapper<TType>(instance: TType, propertyMapperForMessage: string): TType {
-        console.log(instance);
         if (instance === void 0) {
             throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped property ('${propertyMapperForMessage}')`);
         }
@@ -278,59 +276,7 @@ export class MetadataTable<T> {
         }
     }
 
-    // private hasColumn(columnName: string): boolean {
-    //     return this.getColumn(columnName) !== void 0;
-    // }
-
-    // private getColumn(columnName: string): MapperColumn {
-    //     return this.mapperTable.columns.find(x => x.column === columnName);
-    // }
-
-    // private removeColumn(columnName: string) {
-    //     if (this.hasColumn(columnName)) {
-    //         const index = this.mapperTable.columns.findIndex(x => x.column === columnName);
-    //         if (index > -1) {
-    //             this.mapperTable.columns.splice(index, 1);
-    //         }
-    //     }
-    // }
-
-    // private isDependencyTable(type: FieldType) {
-    //     if (
-    //         Utils.isFlag(type, FieldType.ARRAY) &&
-    //         type !== FieldType.ARRAY
-    //     ) {
-    //         return true;
-    //     }
-    //     return false;
-    // }
-
-    // private add(
-    //     mapperColumn: MapperColumn
-    // ) {
-    //     if (Utils.isFlag(mapperColumn.fieldType, FieldType.NULL)) {
-    //         throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped column ('${mapperColumn.column}')`);
-    //     }
-    //     if (this.hasColumn(mapperColumn.column)) {
-    //         throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, duplicate column: '${mapperColumn.column}'`);
-    //     }
-    //     this.mapperTable.columns.push(mapperColumn);
-    // }
-
-    // private addColumn(
-    //     name: string,
-    //     fieldType: FieldType,
-    //     primaryKeyType?: PrimaryKeyType
-    // ) {
-    //     this.add(
-    //         new MapperColumn(
-    //             name, fieldType, void 0,
-    //             primaryKeyType
-    //         )
-    //     );
-    // }
-
-    private addDependency(
+    private addDependencyArray(
         name: string,
         fieldType: FieldType,
         tablename: string
@@ -353,7 +299,6 @@ export class MetadataTable<T> {
             DEPENDENCY_LIST_SIMPLE_COLUMNS.REFERENCE(this.mapperTable.tableName, keyColumns[0].column),
             keyColumns[0].fieldType, PrimaryKeyType.Assigned,
             Utils.getFieldExpression<DependencyListSimpleModel>(x => x.reference));
-        // dependency.addColumn(`${this.mapperTable.tableName}_${keyColumns[0].column}`, keyColumns[0].fieldType, PrimaryKeyType.Assigned);
         this.mapperTable.dependencies.push(dependency);
     }
 }

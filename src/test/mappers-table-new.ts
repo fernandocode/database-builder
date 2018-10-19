@@ -90,7 +90,6 @@ export class MappersTableNew extends MapperBase {
         this.autoMapper(Linha, x => x.codeImport, PrimaryKeyType.Assigned);
         this.autoMapper(Referencia, x => x.codeImport, PrimaryKeyType.Assigned)
             .hasMany(x => x.referenciasRelacionadas, Referencia, "ReferenciasRelacionadas")
-            // .hasOne()
             ;
         this.autoMapper(Estrutura, x => x.codeImport, PrimaryKeyType.Assigned);
     }

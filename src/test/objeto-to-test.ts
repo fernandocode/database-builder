@@ -139,7 +139,8 @@ export class ObjectToTest {
             } as Referencia,
         ],
         imagem: {
-            internalKey: 30
+            internalKey: 30,
+            data: "isso é uma imagem"
         } as Imagem,
         deleted: false
     } as Referencia;

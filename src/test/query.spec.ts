@@ -301,9 +301,7 @@ describe("Query", () => {
             join.projection(projection => {
                 projection
                     .add(x => x.internalKey)
-                    .add(x => x.tipoImagem)
-                    .add(x => x.urlBase64)
-                    .add(x => x.etiquetaBase64);
+                    .add(x => x.data);
             });
         }, JoinType.LEFT, "img");
         query.orderBy(x => x.codeImport);
@@ -312,7 +310,7 @@ describe("Query", () => {
         expect(result[0].params[0]).to.equal(false);
         expect(result[0].params[1]).to.equal(false);
         expect(result[0].params[2]).to.equal("%LIKEVALOR%");
-        expect(result[0].query).to.equal("SELECT est.*, ref.codeImport AS ref_codeImport, ref.codigo AS ref_codigo, ref.deleted AS ref_deleted, ref.descricao AS ref_descricao, img.internalKey AS img_internalKey, img.tipoImagem AS img_tipoImagem, img.urlBase64 AS img_urlBase64, img.etiquetaBase64 AS img_etiquetaBase64 FROM Estrutura AS est LEFT JOIN Referencia AS ref ON (ref.codeImport = est.referencia_codeImport) LEFT JOIN Imagem AS img ON (img.internalKey = est.imagem_internalKey AND img.deleted = ?) WHERE est.deleted = ? AND ref.codigo || \'|\' || ref.descricao LIKE ? ORDER BY est.codeImport ASC");
+        expect(result[0].query).to.equal("SELECT est.*, ref.codeImport AS ref_codeImport, ref.codigo AS ref_codigo, ref.deleted AS ref_deleted, ref.descricao AS ref_descricao, img.internalKey AS img_internalKey, img.data AS img_data FROM Estrutura AS est LEFT JOIN Referencia AS ref ON (ref.codeImport = est.referencia_codeImport) LEFT JOIN Imagem AS img ON (img.internalKey = est.imagem_internalKey AND img.deleted = ?) WHERE est.deleted = ? AND ref.codigo || \'|\' || ref.descricao LIKE ? ORDER BY est.codeImport ASC");
 
     });
 
