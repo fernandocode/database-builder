@@ -90,7 +90,7 @@ describe("Create", () => {
         const create = new Create(ContasReceber, mapper.get(ContasReceber).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, valor INTEGER, dataRecebimento INTEGER, dataVencimento INTEGER, cliente_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, valor INTEGER, dataVencimento INTEGER, dataRecebimento INTEGER, cliente_codeImport INTEGER );`);
     });
 
     it("Test create", () => {

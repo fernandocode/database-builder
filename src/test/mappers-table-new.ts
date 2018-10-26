@@ -25,6 +25,7 @@ import { Linha } from "./models/linha";
 import { Referencia } from "./models/referencia";
 import { Estrutura } from "./models/estrutura";
 import { Imagem } from "./models/imagem";
+import { DatabaseTypes } from "../definitions";
 
 export class MappersTableNew extends MapperBase {
 
@@ -52,6 +53,7 @@ export class MappersTableNew extends MapperBase {
         this.autoMapper(CondicaoPagamento, x => x.codeImport, PrimaryKeyType.Assigned);
         this.autoMapper(Pedido, x => x.internalKey, PrimaryKeyType.AutoIncrement);
         this.autoMapper(ContasReceber, x => x.internalKey, PrimaryKeyType.AutoIncrement)
+            .column(x => x.dataRecebimento, DatabaseTypes.Moment)
             .ignore(x => x.cliente)
             .referenceKey(x => x.cliente, x => x.codeImport);
 

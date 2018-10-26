@@ -132,10 +132,10 @@ describe("Insert", () => {
         const result = new Insert(ContasReceber, ObjectToTest.contasReceber, mapper.get(ContasReceber).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.contasReceber.codeImport, ObjectToTest.contasReceber.valor,
-            void 0, (ObjectToTest.contasReceber.dataVencimento as moment.Moment).unix(),
+            (ObjectToTest.contasReceber.dataVencimento as moment.Moment).unix(), void 0,
             ObjectToTest.contasReceber.cliente.codeImport
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataRecebimento, dataVencimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataVencimento, dataRecebimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
     });
 
     it("ContasReceber date string", () => {
@@ -149,9 +149,9 @@ describe("Insert", () => {
         const result = new Insert(ContasReceber, contasReceber, mapper.get(ContasReceber).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
             contasReceber.codeImport, contasReceber.valor,
-            void 0, DatetimeUtils.dateToDatabase(contasReceber.dataVencimento),
+            DatetimeUtils.dateToDatabase(contasReceber.dataVencimento), void 0,
             contasReceber.cliente.codeImport
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataRecebimento, dataVencimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO ContasReceber (codeImport, valor, dataVencimento, dataRecebimento, cliente_codeImport) VALUES (?, ?, ?, ?, ?)");
     });
 });

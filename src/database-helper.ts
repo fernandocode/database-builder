@@ -56,6 +56,9 @@ export class DatabaseHelper {
                 }
                 // serializar todos os objetos
                 return FieldType.OBJECT;
+            case "date":
+            case "moment":
+                return FieldType.DATE;
             case "function":
                 return FieldType.FUNCTION;
             case "undefined":
