@@ -33,7 +33,7 @@ export class ExecutableBuilder {
                     reject(error);
                 },
             ) as any;
-            if ((resultPromise as Promise<DatabaseResult>).then) {
+            if (resultPromise && (resultPromise as Promise<DatabaseResult>).then) {
                 (resultPromise as Promise<DatabaseResult>)
                     .then(r => resolve(r))
                     .catch(err => reject(err));
