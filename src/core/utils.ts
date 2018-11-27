@@ -138,11 +138,6 @@ export class Utils {
         return instance instanceof PlanRef;
     }
 
-    public static isReadonly(obj: any, property: string) {
-        const descriptor = Object.getOwnPropertyDescriptor(obj, property);
-        return !descriptor.writable;
-    }
-
     public static expressionOrColumn<TReturn, T>(
         value: ExpressionOrColumn<TReturn, T>
     ): ExpressionOrColumnEnum {

@@ -41,8 +41,11 @@ export abstract class CrudBase<
                     if (KeyUtils.primaryKeyType(this._builder.getMapper()) === PrimaryKeyType.AutoIncrement) {
                         KeyUtils.setKey(this._builder.getMapper(), this._builder.getModel(), result.insertId);
                     } else {
-                        if (!Utils.isReadonly(result, "insertId")) {
-                            result.insertId = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
+                        const keyValue = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
+                        try {
+                            result.insertId = keyValue;
+                        } catch (error) {
+                            // ignore error readonly property
                         }
                     }
                     resolve(results);
