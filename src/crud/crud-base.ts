@@ -7,6 +7,7 @@ import { PrimaryKeyType } from "../core/enums/primary-key-type";
 import { MapperTable } from "../mapper-table";
 import { QueryCompiled } from "../core/query-compiled";
 import { SqlBase } from "./sql-base";
+import { Utils } from "../core/utils";
 
 export abstract class CrudBase<
     T,
@@ -40,7 +41,9 @@ export abstract class CrudBase<
                     if (KeyUtils.primaryKeyType(this._builder.getMapper()) === PrimaryKeyType.AutoIncrement) {
                         KeyUtils.setKey(this._builder.getMapper(), this._builder.getModel(), result.insertId);
                     } else {
-                        result.insertId = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
+                        if (!Utils.isReadonly(result, "insertId")) {
+                            result.insertId = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
+                        }
                     }
                     resolve(results);
                 }).catch(reject);
