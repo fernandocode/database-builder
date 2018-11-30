@@ -6,12 +6,6 @@ export interface DatabaseBaseTransaction {
         sql: string,
         values: any
     ): Promise<DatabaseResult>;
-    // executeSql: (
-    //     sql: string,
-    //     values: any,
-    //     success: (tx: DatabaseBaseTransaction, result: DatabaseResult) => void,
-    //     error: (tx: DatabaseBaseTransaction, error: any) => void,
-    // ) => void;
 }
 
 // tslint:disable-next-line:no-empty-interface
