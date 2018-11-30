@@ -22,23 +22,27 @@ export class ExecutableBuilder {
         database: DatabaseBase, compiled: QueryCompiled,
     ): Promise<DatabaseResult> {
         this.log(compiled);
-        return new Promise<DatabaseResult>((resolve, reject) => {
-            const resultPromise = (database as DatabaseBaseTransaction).executeSql(
-                compiled.query,
-                compiled.params,
-                (tx: DatabaseBaseTransaction, result: DatabaseResult) => {
-                    resolve(result);
-                },
-                (tx: DatabaseBaseTransaction, error: any) => {
-                    reject(error);
-                },
-            ) as any;
-            if (resultPromise && (resultPromise as Promise<DatabaseResult>).then) {
-                (resultPromise as Promise<DatabaseResult>)
-                    .then(r => resolve(r))
-                    .catch(err => reject(err));
-            }
-        });
+        return database.executeSql(
+            compiled.query,
+            compiled.params,
+        );
+        // return new Promise<DatabaseResult>((resolve, reject) => {
+        //     const resultPromise = (database as DatabaseBaseTransaction).executeSql(
+        //         compiled.query,
+        //         compiled.params,
+        //         (tx: DatabaseBaseTransaction, result: DatabaseResult) => {
+        //             resolve(result || (tx as any) as DatabaseResult);
+        //         },
+        //         (tx: DatabaseBaseTransaction, error: any) => {
+        //             reject(error || tx);
+        //         },
+        //     ) as any;
+        //     if (resultPromise && (resultPromise as Promise<DatabaseResult>).then) {
+        //         (resultPromise as Promise<DatabaseResult>)
+        //             .then(r => resolve(r))
+        //             .catch(err => reject(err));
+        //     }
+        // });
         // if ((database as DatabaseObject).addTransaction) {
         //     return (database as DatabaseObject).executeSql(
         //         compiled.query,

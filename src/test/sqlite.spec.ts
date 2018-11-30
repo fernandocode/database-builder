@@ -1,6 +1,5 @@
 import { ContasReceber } from "./models/contas-receber";
 import { Ddl } from "./../ddl/ddl";
-import { SQLiteDatabase } from "./database/sqlite-database";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { ObjectToTest } from "./objeto-to-test";
@@ -11,11 +10,13 @@ import { Uf } from "./models/uf";
 import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
 import { Imagem } from "./models/imagem";
+import { SQLiteDatabase } from "./database/sqlite-database";
 
 describe("SQLite", async () => {
     const mapper = getMapper();
 
-    const database = new SQLiteDatabase();
+    const database = await new SQLiteDatabase().init();
+    // const database = new SQLiteDatabase();
     const crud = new Crud(database, mapper, false);
     const ddl = new Ddl(database, mapper, false);
 

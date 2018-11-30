@@ -37,7 +37,8 @@
         "object-literal-sort-keys": false,
         "eofline": false,
         "space-before-function-paren": false,
-        "no-bitwise": false
+        "no-bitwise": false,
+        "ban-types": false
     },
     "linterOptions": {
         "exclude": [
