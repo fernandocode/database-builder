@@ -38,7 +38,7 @@ export abstract class ColumnsValuesBuilder<
                 }
                 break;
             case PrimaryKeyType.Guid:
-                if (value === void 0 && this.allowGenerateKey()) {
+                if ((value === void 0 || (value as string).length === 0) && this.allowGenerateKey()) {
                     // gerar GUID
                     value = Utils.GUID();
                     // set value GUID in model

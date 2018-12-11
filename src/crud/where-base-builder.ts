@@ -517,7 +517,6 @@ export abstract class WhereBaseBuilder<
         }
     }
 
-
     private buildConditions(
         conditions: Condition[],
         column1: string,
