@@ -8,7 +8,6 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
 
     constructor(
         typeT: new () => T,
-        // metadata: MetadataTable<T>,
         mapperTable: MapperTable,
         alias: string = void 0,
         protected readonly _modelToSave: T = void 0,

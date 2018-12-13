@@ -86,6 +86,29 @@ describe("SQLite", async () => {
             expect(itemResult.uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
         }
         expect(queryResult[0].codeImport).to.equal(ObjectToTest.cidade.codeImport);
+
+        const model4 = {
+            codeImport: 99,
+            nome: undefined,
+            uf: ObjectToTest.uf,
+            subRegiao: ObjectToTest.subRegiao,
+        } as Cidade;
+        const insert = crud.insert(Cidade, model4);
+        // const insertCompile = insert.compile()[0];
+        // console.log(insertCompile.query);
+        // console.log(insertCompile.params);
+        const insertResult4 = await insert.execute();
+        expect(insertResult4[0].rowsAffected).to.equal(1);
+
+        const queryResult4 = await crud.query(Cidade)
+            .where(where => where.equal(x => x.codeImport, model4.codeImport))
+            .firstOrDefault();
+        const queryResultNull = await crud.query(Cidade)
+            .where(where => where.isNull(x => x.nome))
+            .toList();
+
+        expect(queryResult4.nome).to.equal(null);
+        expect(queryResultNull.length).to.equal(1);
     });
 
     it("ContasAReceber", async () => {

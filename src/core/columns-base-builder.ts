@@ -94,9 +94,10 @@ export abstract class ColumnsBaseBuilder<
         for (const key in mapper.columns) {
             if (mapper.columns.hasOwnProperty(key)) {
                 const column = mapper.columns[key];
+                const value = Utils.getValue(modelWithValue, column.fieldReference);
                 this.setColumnValue(
                     column.column,
-                    Utils.getValue(modelWithValue, column.fieldReference),
+                    value,
                     column.fieldType,
                     column.primaryKeyType
                 );

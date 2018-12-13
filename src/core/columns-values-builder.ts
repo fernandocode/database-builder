@@ -95,11 +95,15 @@ export abstract class ColumnsValuesBuilder<
                 const columnName = this.columnFormat(column);
                 if (columnName !== void 0) {
                     result.columns.push(columnName);
-                    result.params.push(column.value);
+                    result.params.push(this.isValueNull(column.value) ? null : column.value);
                 }
             }
         });
         return result;
+    }
+
+    protected isValueNull(value: any): boolean {
+        return value === void 0;
     }
 
     protected allowGenerateKey(): boolean {
