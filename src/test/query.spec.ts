@@ -23,7 +23,7 @@ describe("Query", () => {
         const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
     });
 
     it("join default (LEFT)", () => {
@@ -123,7 +123,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal("AbC");
         expect(result[0].params[1]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT p.* FROM (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?) AS p WHERE p.id > ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?) AS p WHERE p.id > ?");
     });
 
     it("union", () => {
@@ -138,7 +138,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("AbC");
-        expect(result[0].query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS p WHERE p.id > ? UNION SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
     });
 
     it("union all", () => {
@@ -153,7 +153,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("AbC");
-        expect(result[0].query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
     });
 
     it("union all and union", () => {
@@ -174,7 +174,7 @@ describe("Query", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("AbC");
         expect(result[0].params[2]).to.equal(10);
-        expect(result[0].query).to.equal("SELECT p.* FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ? UNION SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.id = ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ? UNION SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.id = ?");
     });
 
     it("join where concat columns", () => {
@@ -275,7 +275,7 @@ describe("Query", () => {
     it("join with where internal and external", () => {
         const query = crud.query(Estrutura);
         query.projection(projection => {
-            projection.all();
+            projection.wildcard();
         });
         query.where(where => {
             where.equalValue(x => x.deleted, false);

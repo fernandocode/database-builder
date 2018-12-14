@@ -12,11 +12,15 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     alias: string;
 
+    tablename: string;
+
     clone(): TQuery;
 
     ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef;
 
     hasAlias(alias: string): boolean;
+
+    getAlias(tKey: (new () => any) | string): string;
 
     from(query: QueryCompiled[] | SqlCompilable): TQuery;
 

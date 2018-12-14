@@ -36,7 +36,7 @@ export class Query<T> extends SqlBase<T> {
         enableLog: boolean = true,
     ) {
         super(mapperTable, database, enableLog);
-        this._queryBuilder = new QueryBuilder(typeT, mapperTable, alias);
+        this._queryBuilder = new QueryBuilder(typeT, mapperTable, alias, _getMapper);
         this._queryReadableBuilder = new QueryReadableBuilder(typeT, enableLog);
     }
 
@@ -218,7 +218,7 @@ export class Query<T> extends SqlBase<T> {
         });
     }
 
-    public mapper(mapper: (row: RowResult<any>) => any): Promise<any[]> {
+    public mapper<T extends any>(mapper: (row: RowResult<T>) => T): Promise<T[]> {
         const mapperTable = this.getMapper(void 0, false);
         return new Promise((resolve, reject) => {
             this.execute()
@@ -226,7 +226,7 @@ export class Query<T> extends SqlBase<T> {
                     if (cursors.length !== 1) {
                         throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
                     }
-                    resolve(this._queryReadableBuilder.mapper(cursors[0], mapperTable, mapper));
+                    resolve(this._queryReadableBuilder.mapper(cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder));
                 })
                 .catch(reject);
         });
@@ -279,16 +279,11 @@ export class Query<T> extends SqlBase<T> {
     }
 
     private fetchModels(cascade: boolean = true, models: T[], mapperTable: MapperTable): Promise<T[]> {
-        // if (cascade) {
         const promises: Array<Promise<T>> = [];
         models.forEach(model => {
             promises.push(this.fetchModel(cascade, model, mapperTable));
         });
         return Promise.all(promises);
-        // }
-        // return new Promise<T[]>((resolve) => {
-        //     resolve(models);
-        // });
     }
 
     private fetchModel(cascade: boolean = true, model: T, mapperTable: MapperTable): Promise<T> {

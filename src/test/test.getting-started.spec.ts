@@ -12,7 +12,7 @@ describe("Getting Started", () => {
         const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
     });
 
     it("where", () => {
@@ -25,7 +25,7 @@ describe("Getting Started", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal("%abc%");
         expect(result[0].params[1]).to.equal(1);
-        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes WHERE tes.description LIKE ? AND tes.id > ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.description LIKE ? AND tes.id > ?");
     });
 
     it("select (projections)", () => {
@@ -46,7 +46,7 @@ describe("Getting Started", () => {
         query.orderBy(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes ORDER BY tes.id ASC");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes ORDER BY tes.id ASC");
     });
 
     it("group by", () => {
@@ -57,7 +57,7 @@ describe("Getting Started", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(10);
-        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes GROUP BY tes.id HAVING COUNT(tes.id) > ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id HAVING COUNT(tes.id) > ?");
     });
 
     it("limit and offset", () => {
@@ -67,7 +67,7 @@ describe("Getting Started", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(10);
         expect(result[0].params[1]).to.equal(5);
-        expect(result[0].query).to.equal("SELECT tes.* FROM TestClazz AS tes LIMIT ? OFFSET ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes LIMIT ? OFFSET ?");
     });
 
 });

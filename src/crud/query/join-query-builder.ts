@@ -7,6 +7,7 @@ import { ProjectionCompiled } from "../projection-compiled";
 import { JoinType } from "../enums/join-type";
 import { ValueType } from "../../core/utils";
 import { MapperTable } from "../../mapper-table";
+import { MetadataTable } from "../../metadata-table";
 
 export class JoinQueryBuilder<T>
     extends QueryBuilderBase<T, JoinQueryBuilder<T>>
@@ -57,8 +58,9 @@ export class JoinQueryBuilder<T>
         mapperTable: MapperTable,
         private _typeJoin: JoinType = JoinType.LEFT,
         alias: string = void 0,
+        getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>
     ) {
-        super(typeT, mapperTable, alias);
+        super(typeT, mapperTable, alias, getMapper);
 
         this._on = new WhereBuilder(typeT, this.alias);
         onWhereCallback(this._on);
@@ -66,7 +68,8 @@ export class JoinQueryBuilder<T>
 
     // Para adicionar alias da tabela no apelido da projeção padrão
     protected createProjectionBuilder(): ProjectionBuilder<T> {
-        return new ProjectionBuilder(this._typeT, this.alias, true);
+        // return new ProjectionBuilder(this._typeT, this.alias, true);
+        return super.createProjectionBuilder(true, void 0);
     }
 
     // default false para não adicionar comandos em expressões em join,

@@ -22,7 +22,7 @@ export class QueryBuilder<T>
         alias: string = void 0
     ): QueryBuilder<T> {
         const instanceJoin: JoinQueryBuilder<TJoin> = new JoinQueryBuilder(
-            typeTJoin, onWhereCallback, mapperTable, type, alias);
+            typeTJoin, onWhereCallback, mapperTable, type, alias, this._getMapper);
         joinCallback(instanceJoin);
         this.addJoin(instanceJoin);
         return this._getInstance();

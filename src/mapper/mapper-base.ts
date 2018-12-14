@@ -6,6 +6,7 @@ import { GetMapper } from "./interface-get-mapper";
 import { MetadataTable } from "../metadata-table";
 import { DatabaseHelper } from "../database-helper";
 import { DatabaseBuilderError } from "../core/errors";
+import { MapperUtils } from "./mapper-utils";
 
 export class MapperBase implements GetMapper {
 
@@ -64,18 +65,18 @@ export class MapperBase implements GetMapper {
     }
 
     public has<T>(tKey: (new () => T) | string): boolean {
-        return this._mappers.has(this.resolveKey(tKey));
+        return this._mappers.has(MapperUtils.resolveKey(tKey));
     }
 
     public get<T>(tKey: (new () => T) | string): MetadataTable<T> {
         return this._mappers.get(
-            this.resolveKey(tKey)
+            MapperUtils.resolveKey(tKey)
         );
     }
 
     public getThrowErrorNotFound<T>(tKey: (new () => T) | string): MetadataTable<T> {
         if (!this.has(tKey)) {
-            throw new DatabaseBuilderError(`Mapper not found for '${this.resolveKey(tKey)}'`);
+            throw new DatabaseBuilderError(`Mapper not found for '${MapperUtils.resolveKey(tKey)}'`);
         }
         return this.get(tKey);
     }
@@ -92,11 +93,5 @@ export class MapperBase implements GetMapper {
             throw new DatabaseBuilderError(`Duplicate mapper: '${metadataTable.newable.name}'`);
         }
         this._mappers.set(metadataTable.newable.name, metadataTable);
-    }
-
-    private resolveKey<T>(tKey: (new () => T) | string): string {
-        return Utils.isString(tKey)
-            ? tKey as string
-            : (tKey as (new () => T)).name;
     }
 }

@@ -22,7 +22,8 @@ export class ProjectionBuilder<T> {
         private _typeT: new () => T,
         private _aliasTable: string,
         private _addAliasTableToAlias: boolean = false,
-        addAliasDefault?: boolean
+        addAliasDefault?: boolean,
+        private _getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>
     ) {
         this._projectionsUtils = new ProjectionsUtils(
             _aliasTable, _addAliasTableToAlias, addAliasDefault,
@@ -31,6 +32,14 @@ export class ProjectionBuilder<T> {
     }
 
     public all() {
+        if (this._getMapper && this._typeT) {
+            this.allByMap(this._getMapper(this._typeT));
+        } else {
+            this.wildcard();
+        }
+    }
+
+    public wildcard() {
         this.apply(ProjectionsUtils.WILDCARD);
     }
 
@@ -255,7 +264,7 @@ export class ProjectionBuilder<T> {
         defaultValue: any,
         alias: string,
     ): ProjectionBuilder<T> {
-        const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this._aliasTable, void 0, false);
+        const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this._aliasTable, void 0, false, this._getMapper);
         projectionCallback(instanceProjection);
         const projectionInner = instanceProjection.compile();
         this.buildProjectionWithExpression(Projection.Coalesce,
@@ -316,9 +325,10 @@ export class ProjectionBuilder<T> {
     }
 
     private selectAllColumns(mapper: MapperTable): void {
-        for (const key in mapper.columns) {
-            if (mapper.columns.hasOwnProperty(key)) {
-                const column = mapper.columns[key];
+        const columns = mapper.columns.filter(x => x.tableReference === void 0);
+        for (const key in columns) {
+            if (columns.hasOwnProperty(key)) {
+                const column = columns[key];
                 this.add(column.column);
             }
         }

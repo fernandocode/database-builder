@@ -75,7 +75,8 @@ describe("Test", () => {
                 params: [5]
             } as Script,
         ], []).then(result => {
-            console.log(result);
+            // // tslint:disable-next-line:no-console
+            // console.log(result);
         });
     });
 

@@ -11,6 +11,9 @@ import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
 import { Imagem } from "./models/imagem";
 import { SQLiteDatabase } from "./database/sqlite-database";
+import { Regiao } from "./models/regiao";
+import { SubRegiao } from "./models/sub-regiao";
+import { JoinQueryBuilder } from "../crud/query/join-query-builder";
 
 describe("SQLite", async () => {
     const mapper = getMapper();
@@ -94,9 +97,6 @@ describe("SQLite", async () => {
             subRegiao: ObjectToTest.subRegiao,
         } as Cidade;
         const insert = crud.insert(Cidade, model4);
-        // const insertCompile = insert.compile()[0];
-        // console.log(insertCompile.query);
-        // console.log(insertCompile.params);
         const insertResult4 = await insert.execute();
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
@@ -109,6 +109,79 @@ describe("SQLite", async () => {
 
         expect(queryResult4.nome).to.equal(null);
         expect(queryResultNull.length).to.equal(1);
+    });
+
+    it("Cidade join to mappper", async () => {
+
+        await ddl.create(Uf).execute();
+        const insertUf = crud.insert(Uf, ObjectToTest.uf);
+        const insertResultUf = await insertUf.execute();
+        expect(insertResultUf[0].rowsAffected).to.equal(1);
+
+        await ddl.create(SubRegiao).execute();
+        const insertResulSubRegiao = await crud.insert(SubRegiao, ObjectToTest.subRegiao).execute();
+        expect(insertResulSubRegiao[0].rowsAffected).to.equal(1);
+
+        await ddl.create(Regiao).execute();
+        const insertResultRegiao = await crud.insert(Regiao, ObjectToTest.regiao).execute();
+        expect(insertResultRegiao[0].rowsAffected).to.equal(1);
+
+        const model = {
+            codeImport: 101,
+            nome: "Teste 101",
+            uf: ObjectToTest.uf,
+            subRegiao: ObjectToTest.subRegiao,
+        } as Cidade;
+
+        const insert = crud.insert(Cidade, model);
+        const insertResult4 = await insert.execute();
+        expect(insertResult4[0].rowsAffected).to.equal(1);
+
+        const query = await crud.query(Cidade)
+            .projection(p => p.all())
+            .where(where => where.equal(x => x.codeImport, model.codeImport));
+        query.join(
+            Uf,
+            on => on.equal(x => x.codeImport, query.ref(x => x.uf.codeImport)),
+            join => {
+                join.projection(projection => {
+                    projection.all();
+                });
+            }
+        );
+        let joinSubRegiao: JoinQueryBuilder<SubRegiao>;
+        query.join(
+            SubRegiao,
+            on => on.equal(x => x.codeImport, query.ref(x => x.subRegiao.codeImport)),
+            join => {
+                join.projection(projection => {
+                    projection.all();
+                });
+                joinSubRegiao = join;
+            }
+        );
+        query.join(
+            Regiao,
+            on => on.equal(x => x.codeImport, joinSubRegiao.ref(x => x.regiao.codeImport)),
+            join => {
+                join.projection(projection => {
+                    projection.all();
+                });
+            }
+        );
+
+        const queryResult = await query.mapper<Cidade>(row => {
+            const result = row.read(Cidade);
+            result.uf = row.read(Uf);
+            result.subRegiao = row.read(SubRegiao, joinSubRegiao.alias);
+            result.subRegiao.regiao = row.read(Regiao);
+            return result;
+        });
+        expect(queryResult.length).to.equal(1);
+        expect(queryResult[0].nome).to.equal(model.nome);
+        expect(queryResult[0].uf.nome).to.equal(model.uf.nome);
+        expect(queryResult[0].subRegiao.nome).to.equal(model.subRegiao.nome);
+        expect(queryResult[0].subRegiao.regiao.nome).to.equal(model.subRegiao.regiao.nome);
     });
 
     it("ContasAReceber", async () => {
@@ -342,11 +415,9 @@ describe("SQLite", async () => {
 
     it("Referencia cascade (property compost)", async () => {
 
-        ddl.enableLog = true;
         const createResult = await ddl.create(Referencia).execute();
         expect(createResult.length).to.equal(2);
 
-        crud.enableLog = true;
         const insertResult1 = await crud.insert(Referencia, ObjectToTest.referencia).execute();
         expect(insertResult1.length).to.equal(ObjectToTest.referencia.referenciasRelacionadas.length + 1);
         expect(insertResult1[0].rowsAffected).to.equal(1);

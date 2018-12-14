@@ -42,9 +42,13 @@ describe("Row Result", () => {
         model.dateDate = void 0;
         model.date = 1;
         model.referenceTest = new TestClazzRef();
+        model.referenceTest.description = "abc";
 
-        const rowResult = new RowResult(model, mapper.get(TestClazz).mapperTable);
-        // const rowResult = new RowResult(model, mapper.getThrowErrorNotFound(TestClazz).mapperTable);
+        const rowResult = new RowResult(model, mapper.get(TestClazz).mapperTable,
+            (tKey: (new () => any) | string) => {
+                return mapper.get(tKey);
+            });
+        // expect(rowResult.parseMapper(TestClazzRef).description).to.equal(model.referenceTest.description);
         expect(rowResult.get(x => x.description)).to.equal(model.description);
         expect(rowResult.get(x => x.id)).to.equal(model.id);
         expect(rowResult.get(x => x.disabled)).to.equal(model.disabled);
