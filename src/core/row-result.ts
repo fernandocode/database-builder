@@ -11,6 +11,8 @@ import { MapperUtils } from "../mapper/mapper-utils";
 export class RowResult<T> {
     private _databaseHelper: DatabaseHelper;
 
+    private _valueResultMap: T;
+
     constructor(
         private _valueT: T,
         private _mapper?: MapperTable,
@@ -68,6 +70,28 @@ export class RowResult<T> {
             result[column.column] = value;
         });
         return result;
+    }
+
+    public map<TReader extends any>(
+        typeT: new () => TReader,
+        expression: ExpressionOrColumn<TReader, T>,
+        alias: string = void 0
+    ): RowResult<T> {
+        const expressionField = Utils.getColumn(expression, ".");
+        const value: TReader = this.read(typeT, alias);
+        if (this._valueResultMap === void 0) {
+            this._valueResultMap = {} as T;
+        }
+        if (expressionField && expressionField.length > 0) {
+            ModelUtils.update(this._valueResultMap, expressionField, (v) => ModelUtils.mergeOverrideEmpty(v, value));
+        } else {
+            this._valueResultMap = value as any;
+        }
+        return this;
+    }
+
+    public result(): T {
+        return this._valueResultMap || this._valueT;
     }
 
     private getMapper(typeT: new () => any): MapperTable {

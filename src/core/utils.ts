@@ -166,11 +166,11 @@ export class Utils {
         return this.isString(param) ? param as string : (param as (new () => T)).name;
     }
 
-    public static getColumn<TReturn, T>(expression: ExpressionOrColumn<TReturn, T>): string {
+    public static getColumn<TReturn, T>(expression: ExpressionOrColumn<TReturn, T>, separator?: string): string {
         const type = this.expressionOrColumn(expression);
         switch (type) {
             case (ExpressionOrColumnEnum.Expression):
-                return this.getExpressionUtils().getColumnByExpression(expression as Expression<T>);
+                return this.getExpressionUtils().getColumnByExpression(expression as Expression<T>, separator);
             case (ExpressionOrColumnEnum.Column):
                 return expression as string;
         }

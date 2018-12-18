@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { ObjectToTest } from "./objeto-to-test";
 import { getMapper } from "./mappers-table-new";
-import { Crud } from "../crud";
+import { Crud, JoinType } from "../crud";
 import { GuidClazz } from "./models/guid-clazz";
 import { Uf } from "./models/uf";
 import { HeaderSimple } from "./models/header-simple";
@@ -144,10 +144,10 @@ describe("SQLite", async () => {
             Uf,
             on => on.equal(x => x.codeImport, query.ref(x => x.uf.codeImport)),
             join => {
-                join.projection(projection => {
-                    projection.all();
-                });
-            }
+                join.select(x => x.nome);
+            },
+            JoinType.LEFT,
+            "unidade_federativa"
         );
         let joinSubRegiao: JoinQueryBuilder<SubRegiao>;
         query.join(
@@ -169,18 +169,23 @@ describe("SQLite", async () => {
                 });
             }
         );
-
         const queryResult = await query.mapper<Cidade>(row => {
-            const result = row.read(Cidade);
-            result.uf = row.read(Uf);
-            result.subRegiao = row.read(SubRegiao, joinSubRegiao.alias);
-            result.subRegiao.regiao = row.read(Regiao);
+            const result = row
+                .map(Cidade, x => x)
+                .map(Uf, x => x.uf)
+                .map(SubRegiao, x => x.subRegiao)
+                .map(Regiao, x => x.subRegiao.regiao)
+                .result();
             return result;
         });
         expect(queryResult.length).to.equal(1);
+        expect(queryResult[0].codeImport).to.equal(model.codeImport);
         expect(queryResult[0].nome).to.equal(model.nome);
+        expect(queryResult[0].uf.codeImport).to.equal(model.uf.codeImport);
         expect(queryResult[0].uf.nome).to.equal(model.uf.nome);
+        expect(queryResult[0].subRegiao.codeImport).to.equal(model.subRegiao.codeImport);
         expect(queryResult[0].subRegiao.nome).to.equal(model.subRegiao.nome);
+        expect(queryResult[0].subRegiao.regiao.codeImport).to.equal(model.subRegiao.regiao.codeImport);
         expect(queryResult[0].subRegiao.regiao.nome).to.equal(model.subRegiao.regiao.nome);
     });
 

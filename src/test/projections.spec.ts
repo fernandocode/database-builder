@@ -4,6 +4,8 @@ import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { getMapper } from "./mappers-table-new";
 import { Crud } from "../crud/crud";
+import { ReferencesModelTest } from "./models/reference-model-test";
+import { Z_ASCII } from "zlib";
 
 describe("Projections", () => {
 
@@ -325,6 +327,27 @@ describe("Projections", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes");
+    });
+
+    it("join", () => {
+        const query = crud.query(TestClazz);
+        query.select(
+            x => x.id,
+            x => x.description,
+            x => x.disabled);
+        query.join(ReferencesModelTest,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                join.projection(projection => {
+                    projection.add(x => x.name);
+                    projection.add(x => x.id);
+                });
+                // join.select(x => x.name, x => x.id);
+                join.desc(x => x.id);
+            });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) ORDER BY ref.id DESC");
     });
 
 });
