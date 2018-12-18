@@ -44,7 +44,7 @@ describe("Row Result", () => {
         model.referenceTest = new TestClazzRef();
         model.referenceTest.description = "abc";
 
-        const rowResult = new RowResult(model, mapper.get(TestClazz).mapperTable,
+        const rowResult = new RowResult(model, void 0, mapper.get(TestClazz).mapperTable,
             (tKey: (new () => any) | string) => {
                 return mapper.get(tKey);
             });

@@ -37,11 +37,12 @@ export class QueryReadableBuilderBase {
         mapperTable: MapperTable,
         mapper: (row: RowResult<any>) => any,
         getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
-        query: QueryBuilderBaseContract<any, any>
+        query: QueryBuilderBaseContract<any, any>,
+        newable: new () => any,
     ): any {
         const items: any[] = [];
         this.forCursor(cursor, (item) => {
-            items.push(mapper(new RowResult(item, mapperTable, getMapper, query)));
+            items.push(mapper(new RowResult(item, newable, mapperTable, getMapper, query)));
         });
         return items;
     }
@@ -61,7 +62,7 @@ export class QueryReadableBuilderBase {
     ): TReader[] {
         const items: TReader[] = [];
         this.forCursor(cursor, (row) => {
-            const item = new RowResult(row, mapperTable).read(newable);
+            const item = new RowResult(row, newable, mapperTable).read(newable);
             // const item = this.parseToObject(row, newable, mapperTable);
             items.push(item);
         });

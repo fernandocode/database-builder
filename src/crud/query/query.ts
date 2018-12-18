@@ -28,16 +28,16 @@ export class Query<T> extends SqlBase<T> {
     private _queryReadableBuilder: QueryReadableBuilder<T>;
 
     constructor(
-        typeT: new () => T,
+        private _typeT: new () => T,
         alias: string = void 0,
         private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
-        mapperTable: MapperTable = _getMapper(typeT).mapperTable,
+        mapperTable: MapperTable = _getMapper(_typeT).mapperTable,
         database?: DatabaseBase,
         enableLog: boolean = true,
     ) {
         super(mapperTable, database, enableLog);
-        this._queryBuilder = new QueryBuilder(typeT, mapperTable, alias, _getMapper);
-        this._queryReadableBuilder = new QueryReadableBuilder(typeT, enableLog);
+        this._queryBuilder = new QueryBuilder(_typeT, mapperTable, alias, _getMapper);
+        this._queryReadableBuilder = new QueryReadableBuilder(_typeT, enableLog);
     }
 
     public compile(): QueryCompiled[] {
@@ -226,7 +226,9 @@ export class Query<T> extends SqlBase<T> {
                     if (cursors.length !== 1) {
                         throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
                     }
-                    resolve(this._queryReadableBuilder.mapper(cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder));
+                    resolve(this._queryReadableBuilder.mapper(
+                        cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder, this._typeT
+                    ));
                 })
                 .catch(reject);
         });

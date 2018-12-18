@@ -7,14 +7,16 @@ import { DatabaseBuilderError } from "./errors";
 import { ModelUtils } from "./model-utils";
 import { QueryBuilderBaseContract } from "../crud/query/query-builder-base-contract";
 import { MapperUtils } from "../mapper/mapper-utils";
+import { RowMapper } from "./row-mapper";
 
 export class RowResult<T> {
     private _databaseHelper: DatabaseHelper;
 
-    private _valueResultMap: T;
+    // private _valueResultMap: T;
 
     constructor(
         private _valueT: T,
+        private _newable?: new () => T,
         private _mapper?: MapperTable,
         private _getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>,
         private _query?: QueryBuilderBaseContract<any, any>
@@ -61,7 +63,7 @@ export class RowResult<T> {
         mapperTable.columns.forEach((column) => {
             // TODO: refatorar para recuperar valores de forma correta para objetos complexos
             // Exemplo: column: "cliente_cidade_uf_id", recuperar o valor para: "cliente.cidade.uf.id"
-            const value = new DatabaseHelper().databaseToValue(
+            const value = this._databaseHelper.databaseToValue(
                 (this._valueT as any)[alias ? `${alias}_${column.column}` : column.column],
                 column.fieldType);
             ModelUtils.set(result, column.fieldReference, value);
@@ -72,26 +74,11 @@ export class RowResult<T> {
         return result;
     }
 
-    public map<TReader extends any>(
-        typeT: new () => TReader,
-        expression: ExpressionOrColumn<TReader, T>,
-        alias: string = void 0
-    ): RowResult<T> {
-        const expressionField = Utils.getColumn(expression, ".");
-        const value: TReader = this.read(typeT, alias);
-        if (this._valueResultMap === void 0) {
-            this._valueResultMap = {} as T;
+    public map(): RowMapper<T> {
+        if (this._newable) {
+            return new RowMapper<T>(this).map(this._newable, "");
         }
-        if (expressionField && expressionField.length > 0) {
-            ModelUtils.update(this._valueResultMap, expressionField, (v) => ModelUtils.mergeOverrideEmpty(v, value));
-        } else {
-            this._valueResultMap = value as any;
-        }
-        return this;
-    }
-
-    public result(): T {
-        return this._valueResultMap || this._valueT;
+        throw new DatabaseBuilderError(`Not allowed map entity not unknown entity`);
     }
 
     private getMapper(typeT: new () => any): MapperTable {

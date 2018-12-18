@@ -171,7 +171,8 @@ describe("SQLite", async () => {
         );
         const queryResult = await query.mapper<Cidade>(row => {
             const result = row
-                .map(Cidade, x => x)
+                .map()
+                // .map(Cidade, x => x)
                 .map(Uf, x => x.uf)
                 .map(SubRegiao, x => x.subRegiao)
                 .map(Regiao, x => x.subRegiao.regiao)
