@@ -16,7 +16,7 @@ export class ModelUtils {
 
     public static mergeOverrideEmpty(obj: any, sources: any): any {
         const result = lodash.assignWith(obj, sources, (objValue: any, srcValue: any) => {
-            return lodash.isUndefined(objValue) || lodash.isEmpty(objValue) ? srcValue : objValue;
+            return !lodash.isUndefined(objValue) || !lodash.isEmpty(objValue) ? objValue : srcValue;
         });
         return result;
     }
