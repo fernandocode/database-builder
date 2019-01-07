@@ -7,6 +7,6 @@ export class SubRegiao extends BaseImport<number> {
     public regiao: Regiao = new Regiao();
 
     constructor() {
-        super(0);
+        super(-1);
     }
 }

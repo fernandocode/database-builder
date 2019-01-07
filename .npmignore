@@ -5,6 +5,7 @@ node_modules
 *.ignorenpm
 tsconfig.json
 showcase
+src/test
 
 # ignore the .ts files
 *.ts

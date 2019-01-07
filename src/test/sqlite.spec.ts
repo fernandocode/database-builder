@@ -155,7 +155,7 @@ describe("SQLite", async () => {
             on => on.equal(x => x.codeImport, query.ref(x => x.subRegiao.codeImport)),
             join => {
                 join.projection(projection => {
-                    projection.all();
+                    projection.add(x => x.nome);
                 });
                 joinSubRegiao = join;
             }

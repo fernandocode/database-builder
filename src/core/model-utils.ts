@@ -19,9 +19,9 @@ export class ModelUtils {
         const result = lodash.assignWith(obj, sources, (objValue: any, srcValue: any) => {
             const isUndefined = lodash.isUndefined(objValue);
             const isEmpty = lodash.isEmpty(objValue);
-            // const greatZero = Utils.isValueNumber(objValue as number > 0);
+            const greatZero = Utils.isValueNumber(objValue) ? objValue as number > 0 : false;
             // const lessZeroAndSrcGreatZero = (objValue as number <= 0 && srcValue as number > 0);
-            const result = isUndefined || isEmpty
+            const result = isUndefined || (isEmpty && !greatZero)
                 ? srcValue
                 : objValue;
             // const result = (!isUndefined || !isEmpty) && greatZero
