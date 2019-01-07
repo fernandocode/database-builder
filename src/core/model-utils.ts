@@ -1,4 +1,5 @@
 import * as lodash from "lodash";
+import { Utils } from "./utils";
 
 export class ModelUtils {
 
@@ -16,7 +17,20 @@ export class ModelUtils {
 
     public static mergeOverrideEmpty(obj: any, sources: any): any {
         const result = lodash.assignWith(obj, sources, (objValue: any, srcValue: any) => {
-            return !lodash.isUndefined(objValue) || !lodash.isEmpty(objValue) ? objValue : srcValue;
+            const isUndefined = lodash.isUndefined(objValue);
+            const isEmpty = lodash.isEmpty(objValue);
+            // const greatZero = Utils.isValueNumber(objValue as number > 0);
+            // const lessZeroAndSrcGreatZero = (objValue as number <= 0 && srcValue as number > 0);
+            const result = isUndefined || isEmpty
+                ? srcValue
+                : objValue;
+            // const result = (!isUndefined || !isEmpty) && greatZero
+            // const result = !isUndefined || !isEmpty || greatZero
+            // ? objValue
+            // : lessZeroAndSrcGreatZero
+            //     ? srcValue
+            //     : objValue;
+            return result;
         });
         return result;
     }
