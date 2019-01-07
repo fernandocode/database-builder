@@ -48,14 +48,14 @@ describe("Create", () => {
         const create = new Create(Uf, mapper.get(Uf).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Uf( codeImport TEXT NOT NULL PRIMARY KEY, nome TEXT );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Uf( codeImport TEXT NOT NULL PRIMARY KEY, nome TEXT, population INTEGER );`);
     });
 
     it("Cidade", () => {
         const create = new Create(Cidade, mapper.get(Cidade).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Cidade( codeImport INTEGER NOT NULL PRIMARY KEY, nome TEXT, uf_codeImport TEXT, subRegiao_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Cidade( codeImport INTEGER NOT NULL PRIMARY KEY, nome TEXT, population INTEGER, uf_codeImport TEXT, subRegiao_codeImport INTEGER );`);
     });
 
     it("Cliente", () => {

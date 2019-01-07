@@ -129,6 +129,7 @@ describe("SQLite", async () => {
         const model = {
             codeImport: 101,
             nome: "Teste 101",
+            population: 10,
             uf: ObjectToTest.uf,
             subRegiao: ObjectToTest.subRegiao,
         } as Cidade;
@@ -145,6 +146,7 @@ describe("SQLite", async () => {
             on => on.equal(x => x.codeImport, query.ref(x => x.uf.codeImport)),
             join => {
                 join.select(x => x.nome);
+                join.select(x => x.population);
             },
             JoinType.LEFT,
             "unidade_federativa"
@@ -172,7 +174,6 @@ describe("SQLite", async () => {
         const queryResult = await query.mapper<Cidade>(row => {
             const result = row
                 .map()
-                // .map(Cidade, x => x)
                 .map(Uf, x => x.uf)
                 .map(SubRegiao, x => x.subRegiao)
                 .map(Regiao, x => x.subRegiao.regiao)
@@ -184,8 +185,10 @@ describe("SQLite", async () => {
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].codeImport).to.equal(model.codeImport);
         expect(queryResult[0].nome).to.equal(model.nome);
+        expect(queryResult[0].population).to.equal(model.population);
         expect(queryResult[0].uf.codeImport).to.equal(model.uf.codeImport);
         expect(queryResult[0].uf.nome).to.equal(model.uf.nome);
+        expect(queryResult[0].uf.population).to.equal(model.uf.population);
         expect(queryResult[0].subRegiao.codeImport).to.equal(model.subRegiao.codeImport);
         expect(queryResult[0].subRegiao.nome).to.equal(model.subRegiao.nome);
         expect(queryResult[0].subRegiao.regiao.codeImport).to.equal(model.subRegiao.regiao.codeImport);

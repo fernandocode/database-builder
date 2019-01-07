@@ -53,9 +53,9 @@ describe("Update", () => {
             .where(where => where.equal(x => x.codeImport, ObjectToTest.uf.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
-            ObjectToTest.uf.nome, ObjectToTest.uf.codeImport
+            ObjectToTest.uf.nome, ObjectToTest.uf.population, ObjectToTest.uf.codeImport
         ].toString());
-        expect(result[0].query).to.equal("UPDATE Uf SET nome = ? WHERE codeImport = ?");
+        expect(result[0].query).to.equal("UPDATE Uf SET nome = ?, population = ? WHERE codeImport = ?");
     });
 
     it("Cidade", () => {
@@ -63,10 +63,13 @@ describe("Update", () => {
             .where(where => where.equal(x => x.codeImport, ObjectToTest.cidade.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
-            ObjectToTest.cidade.nome, ObjectToTest.cidade.uf.codeImport,
-            ObjectToTest.cidade.subRegiao.codeImport, ObjectToTest.cidade.codeImport
+            ObjectToTest.cidade.nome,
+            ObjectToTest.cidade.population,
+            ObjectToTest.cidade.uf.codeImport,
+            ObjectToTest.cidade.subRegiao.codeImport,
+            ObjectToTest.cidade.codeImport
         ].toString());
-        expect(result[0].query).to.equal("UPDATE Cidade SET nome = ?, uf_codeImport = ?, subRegiao_codeImport = ? WHERE codeImport = ?");
+        expect(result[0].query).to.equal("UPDATE Cidade SET nome = ?, population = ?, uf_codeImport = ?, subRegiao_codeImport = ? WHERE codeImport = ?");
     });
 
     it("Cliente", () => {

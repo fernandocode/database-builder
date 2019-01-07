@@ -7,6 +7,7 @@ export class Cidade extends BaseImport<number> {
     public nome: string = "";
     public uf: Uf = new Uf();
     public subRegiao: SubRegiao = new SubRegiao();
+    public population: number = 0;
 
     constructor(instance?: Cidade) {
         super(instance ? instance.codeImport : -1);

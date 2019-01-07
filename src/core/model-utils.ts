@@ -16,14 +16,18 @@ export class ModelUtils {
     }
 
     public static mergeOverrideEmpty(obj: any, sources: any): any {
-        const result = lodash.assignWith(obj, sources, (objValue: any, srcValue: any) => {
-            const isUndefined = lodash.isUndefined(objValue);
-            const isEmpty = lodash.isEmpty(objValue);
-            const greatZero = Utils.isValueNumber(objValue) ? objValue as number > 0 : false;
+        const result = lodash.assignWith(obj, sources, (oldValue: any, newValue: any) => {
+            const oldIsUndefined = lodash.isUndefined(oldValue);
+            const oldIsNumber = Utils.isValueNumber(oldValue);
+            const oldIsEmpty = oldIsNumber ? false : lodash.isEmpty(oldValue);
+            const oldIsGreatZero = oldIsNumber ? oldValue as number > 0 : false;
+            const newIsGreatZero = Utils.isValueNumber(newValue) ? newValue as number > 0 : false;
+            const oldIsNumberDefaultAndNewIsNumberValid = !oldIsGreatZero && newIsGreatZero;
             // const lessZeroAndSrcGreatZero = (objValue as number <= 0 && srcValue as number > 0);
-            const result = isUndefined || (isEmpty && !greatZero)
-                ? srcValue
-                : objValue;
+            const useNewValue: boolean = (oldIsUndefined || oldIsEmpty) || (oldIsNumberDefaultAndNewIsNumberValid);
+            const result = useNewValue
+                ? newValue
+                : oldValue;
             // const result = (!isUndefined || !isEmpty) && greatZero
             // const result = !isUndefined || !isEmpty || greatZero
             // ? objValue

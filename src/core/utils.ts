@@ -75,7 +75,7 @@ export class Utils {
     }
 
     public static isOnlyNumber(value: any): boolean {
-        return /^[0-9]*$/.test(value);
+        return value && value.length && /^[0-9]*$/.test(value);
     }
 
     public static isStartWithNumber(value: any): boolean {

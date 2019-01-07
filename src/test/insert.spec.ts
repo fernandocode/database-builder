@@ -14,7 +14,6 @@ import { GuidClazz } from "./models/guid-clazz";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { Insert } from "../crud/insert/insert";
 import { ContasReceber } from "./models/contas-receber";
-import { HeaderSimple } from "./models/header-simple";
 import * as moment from "moment";
 import { DatetimeUtils } from "../datetime-utils";
 
@@ -56,18 +55,21 @@ describe("Insert", () => {
     it("Uf", () => {
         const result = new Insert(Uf, ObjectToTest.uf, mapper.get(Uf).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
-            ObjectToTest.uf.codeImport, ObjectToTest.uf.nome
+            ObjectToTest.uf.codeImport, ObjectToTest.uf.nome, ObjectToTest.uf.population
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO Uf (codeImport, nome) VALUES (?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO Uf (codeImport, nome, population) VALUES (?, ?, ?)");
     });
 
     it("Cidade", () => {
         const result = new Insert(Cidade, ObjectToTest.cidade, mapper.get(Cidade).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
-            ObjectToTest.cidade.codeImport, ObjectToTest.cidade.nome, ObjectToTest.cidade.uf.codeImport,
+            ObjectToTest.cidade.codeImport,
+            ObjectToTest.cidade.nome,
+            ObjectToTest.cidade.population,
+            ObjectToTest.cidade.uf.codeImport,
             ObjectToTest.cidade.subRegiao.codeImport
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO Cidade (codeImport, nome, uf_codeImport, subRegiao_codeImport) VALUES (?, ?, ?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO Cidade (codeImport, nome, population, uf_codeImport, subRegiao_codeImport) VALUES (?, ?, ?, ?, ?)");
     });
 
     it("Cliente", () => {
