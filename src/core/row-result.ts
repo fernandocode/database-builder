@@ -61,15 +61,15 @@ export class RowResult<T> {
 
         const result: TReader = typeT ? new typeT() : {} as TReader;
         mapperTable.columns.forEach((column) => {
-            // TODO: refatorar para recuperar valores de forma correta para objetos complexos
-            // Exemplo: column: "cliente_cidade_uf_id", recuperar o valor para: "cliente.cidade.uf.id"
-            const value = this._databaseHelper.databaseToValue(
-                (this._valueT as any)[alias ? `${alias}_${column.column}` : column.column],
-                column.fieldType);
-            ModelUtils.set(result, column.fieldReference, value);
-            // TODO: essa associação será redundante para itens de primeiro nivel, mas será mantida para compatibilidade com itens de segundo nivel ou mais, pois há mapper que buscam a propriedade de sub nivel pelo nome da coluna por exemplo: 'cliente_cidade_uf_id'
-            // BREAKING-CHANGE: Na proxima versão da aplicação essa compatibilidade deve ser removida, o que era causar quebra de versão, onde terá que ser alterada implementações que o "mapper" para obter valores de propriedades de sub nivel.
             if (Utils.isNameColumn(column.column)) {
+                // TODO: refatorar para recuperar valores de forma correta para objetos complexos
+                // Exemplo: column: "cliente_cidade_uf_id", recuperar o valor para: "cliente.cidade.uf.id"
+                const value = this._databaseHelper.databaseToValue(
+                    (this._valueT as any)[alias ? `${alias}_${column.column}` : column.column],
+                    column.fieldType);
+                ModelUtils.set(result, column.fieldReference, value);
+                // TODO: essa associação será redundante para itens de primeiro nivel, mas será mantida para compatibilidade com itens de segundo nivel ou mais, pois há mapper que buscam a propriedade de sub nivel pelo nome da coluna por exemplo: 'cliente_cidade_uf_id'
+                // BREAKING-CHANGE: Na proxima versão da aplicação essa compatibilidade deve ser removida, o que era causar quebra de versão, onde terá que ser alterada implementações que o "mapper" para obter valores de propriedades de sub nivel.
                 result[column.column] = value;
             }
         });
