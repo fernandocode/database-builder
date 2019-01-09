@@ -14,7 +14,7 @@ export class QueryReadableBuilder<T> extends QueryReadableBuilderBase {
     }
 
     public executeAndRead(
-        cascade: boolean = true,
+        cascade: boolean,
         queryBuilder: SqlExecutable,
         mapperTable: MapperTable,
         database: DatabaseBase,

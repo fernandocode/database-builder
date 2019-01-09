@@ -20,7 +20,7 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(cascade: boolean = true, database?: DatabaseBase): Promise<DatabaseResult[]> {
+    public execute(cascade?: boolean, database?: DatabaseBase): Promise<DatabaseResult[]> {
         return this.checkDatabaseResult(
             this._executableBuilder.execute(this.compile(cascade), this.getDatabase(database))
         );

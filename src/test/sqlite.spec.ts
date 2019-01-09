@@ -180,8 +180,6 @@ describe("SQLite", async () => {
                 .result();
             return result;
         });
-        console.log(queryResult[0]);
-        console.log(model);
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].codeImport).to.equal(model.codeImport);
         expect(queryResult[0].nome).to.equal(model.nome);

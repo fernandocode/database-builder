@@ -168,7 +168,7 @@ export class Query<T> extends SqlBase<T> {
         });
     }
 
-    public toList(cascade: boolean = true): Promise<T[]> {
+    public toList(cascade?: boolean): Promise<T[]> {
         return this.executeAndRead(cascade);
     }
 
@@ -234,7 +234,7 @@ export class Query<T> extends SqlBase<T> {
         });
     }
 
-    public firstOrDefault(cascade: boolean = true, _default?: any): Promise<T> {
+    public firstOrDefault(cascade?: boolean, _default?: any): Promise<T> {
         return new Promise((resolve, reject) => {
             this.limit(1)
                 .toList(cascade)
@@ -280,7 +280,7 @@ export class Query<T> extends SqlBase<T> {
         return result;
     }
 
-    private fetchModels(cascade: boolean = true, models: T[], mapperTable: MapperTable): Promise<T[]> {
+    private fetchModels(cascade: boolean, models: T[], mapperTable: MapperTable): Promise<T[]> {
         const promises: Array<Promise<T>> = [];
         models.forEach(model => {
             promises.push(this.fetchModel(cascade, model, mapperTable));
@@ -288,7 +288,7 @@ export class Query<T> extends SqlBase<T> {
         return Promise.all(promises);
     }
 
-    private fetchModel(cascade: boolean = true, model: T, mapperTable: MapperTable): Promise<T> {
+    private fetchModel(cascade: boolean, model: T, mapperTable: MapperTable): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             const promises: Array<Promise<{ field: string, value: any }>> = [];
             mapperTable.dependencies.forEach(dependency => {
