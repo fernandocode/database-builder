@@ -1,6 +1,6 @@
 {
   "name": "database-builder",
-  "version": "0.1.0-rc.21",
+  "version": "0.1.0-rc.22",
   "description": "Library to assist in creating and maintaining SQL commands.",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",

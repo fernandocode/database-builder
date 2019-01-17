@@ -19,10 +19,22 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
         protected mapperTable: MapperTable,
         protected readonly _alias: string = void 0,
     ) {
-        this._tablename = _typeT ? _typeT.name : mapperTable.tableName;
-        if (!this._alias) {
-            this._alias = this.createUniqueAlias(this.defaultAlias(this._tablename));
-        }
+        this._tablename = this.createTablename(_typeT, mapperTable);
+        // this._tablename = _typeT ? _typeT.name : mapperTable.tableName;
+        // if (!this._alias) {
+        // this._alias = this.createUniqueAlias(this.defaultAlias(this._tablename));
+        // }
+        this._alias = this.createAlias(this._alias, this._tablename);
+    }
+
+    protected createTablename<TTable>(currentTypeT: new () => TTable, currentMapper: MapperTable): string {
+        return currentTypeT ? currentTypeT.name : currentMapper.tableName;
+    }
+
+    protected createAlias(currentAlias: string, currentTablename: string): string {
+        return currentAlias
+            ? currentAlias
+            : this.createUniqueAlias(this.defaultAlias(currentTablename));
     }
 
     public getMapper(): MapperTable {

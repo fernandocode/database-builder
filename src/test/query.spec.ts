@@ -14,6 +14,8 @@ import { getMapper } from "./mappers-table-new";
 import { Estrutura } from "./models/estrutura";
 import { Referencia } from "./models/referencia";
 import { Imagem } from "./models/imagem";
+import { TestClazzRef } from "./models/test-clazz-ref";
+import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 
 describe("Query", () => {
 
@@ -41,6 +43,28 @@ describe("Query", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) ORDER BY ref.id DESC");
+    });
+
+    it("join alias default", () => {
+        const query = crud.query(TestClazz);
+        query.select(
+            x => x.id,
+            x => x.description
+        );
+        query.join(TestClazzRef,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                join.select(x => x.description);
+            });
+        query.join(TestClazzRefCode,
+            on => on.equal(x => x.code, query.ref(x => x.referenceTestCode.code)),
+            join => {
+                join.select(x => x.description);
+                join.desc(x => x.code);
+            });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes0.description AS tes0_description, tes1.description AS tes1_description FROM TestClazz AS tes LEFT JOIN TestClazzRef AS tes0 ON (tes0.id = tes.referenceTest_id) LEFT JOIN TestClazzRefCode AS tes1 ON (tes1.code = tes.referenceTestCode_code) ORDER BY tes1.code DESC");
     });
 
     it("join (LEFT)", () => {
