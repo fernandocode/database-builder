@@ -338,4 +338,16 @@ describe("Query", () => {
 
     });
 
+    it("projection static value", () => {
+        const query = crud.query(TestClazz);
+        query.projection(projection => {
+            projection.add(x => x.id);
+            projection.add("1", "estatico");
+            projection.add(x => x.description);
+        })
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, 1 AS estatico, tes.description AS description FROM TestClazz AS tes");
+    });
+
 });

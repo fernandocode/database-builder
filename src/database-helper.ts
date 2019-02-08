@@ -151,20 +151,11 @@ export class DatabaseHelper {
         if (
             this.isFlag(fieldType, FieldType.BOOLEAN)
         ) {
-            return typeof columnValue === "string" ? columnValue === "true" : columnValue;
+            return typeof columnValue === "string"
+                ? columnValue === "true"
+                : columnValue;
         }
         return columnValue;
-        // switch (fieldType) {
-        //     case FieldType.OBJECT:
-        //     case FieldType.ARRAY:
-        //         return JSON.parse(columnValue);
-        //     case FieldType.DATE:
-        //         return DatetimeUtils.databaseToDatetime(columnValue);
-        //     case FieldType.BOOLEAN:
-        //         return typeof columnValue === "string" ? columnValue === "true" : columnValue;
-        //     default:
-        //         return columnValue;
-        // }
     }
 
     public valueToDatabase(value: ValueTypeToParse, fieldType: FieldType): ValueType {
@@ -181,15 +172,6 @@ export class DatabaseHelper {
             return DatetimeUtils.datetimeToDatabase(value as moment.Moment);
         }
         return value as ValueType;
-        // switch (type) {
-        //     case FieldType.OBJECT:
-        //     case FieldType.ARRAY:
-        //         return JSON.stringify(value);
-        //     case FieldType.DATE:
-        //         return DatetimeUtils.datetimeToDatabase(value as moment.Moment);
-        //     default:
-        //         return value as ValueType;
-        // }
     }
 
     public getValue(instance: any, fieldReference: string): ValueTypeToParse {

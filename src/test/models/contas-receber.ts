@@ -8,7 +8,7 @@ export class ContasReceber extends BaseModel<number>  {
     public cliente: Cliente = new Cliente();
     // Deixar esse valor nulo para teste
     public dataRecebimento: moment.Moment;
-    public dataVencimento: moment.Moment | string = moment();
+    public dataVencimento: moment.Moment = moment();
 
     constructor() {
         super(0);
