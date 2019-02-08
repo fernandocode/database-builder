@@ -345,15 +345,33 @@ describe("Query", () => {
             x => x.id,
             x => x.description,
             x => x.disabled);
-        query.join(queryJoin.builder(),
+        query.join(queryJoin,
             on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
             join => {
                 join.select(x => x.name, x => x.id);
                 join.desc(x => x.id);
-            }, void 0, "sander");
+            }, void 0, "alias_test");
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, sander.name AS sander_name, sander.id AS sander_id FROM TestClazz AS tes LEFT JOIN (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref) AS sander ON (sander.id = tes.referenceTest_id) ORDER BY sander.id DESC");
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, alias_test.name AS alias_test_name, alias_test.id AS alias_test_id FROM TestClazz AS tes LEFT JOIN (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref) AS alias_test ON (alias_test.id = tes.referenceTest_id) ORDER BY alias_test.id DESC");
+    });
+
+    it("join in query auto unique alias", () => {
+        const queryJoin = crud.query(ReferencesModelTest);
+        const query = crud.query(TestClazz);
+        query.select(
+            x => x.id,
+            x => x.description,
+            x => x.disabled);
+        query.join(queryJoin,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                join.select(x => x.name, x => x.id);
+                join.desc(x => x.id);
+            });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref0.name AS ref0_name, ref0.id AS ref0_id FROM TestClazz AS tes LEFT JOIN (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref) AS ref0 ON (ref0.id = tes.referenceTest_id) ORDER BY ref0.id DESC");
     });
 
     it("projection static value", () => {

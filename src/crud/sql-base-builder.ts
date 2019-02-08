@@ -3,15 +3,19 @@ import { WhereCompiled } from "./where-compiled";
 import { MapperTable } from "../mapper-table";
 import { QueryCompilable } from "../core/query-compilable";
 
-let NEXT_VALUE_ALIAS: number = 0;
+// let NEXT_VALUE_ALIAS: number = 0;
 
 export abstract class SqlBaseBuilder<T> implements QueryCompilable {
+    
+    private NEXT_VALUE_ALIAS: number = 0;
 
     protected _tablename: string;
 
     protected whereCompiled: WhereCompiled = { where: "", params: [] };
 
     private readonly WHERE = " WHERE ";
+
+    protected innerUsedAliasTest: { hasAlias: (alias: string) => boolean }[] = [];
 
     constructor(
         protected readonly _typeT: new () => T,
@@ -40,7 +44,8 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
         if (this._alias === alias) {
             return true;
         }
-        return false;
+        return !!this.innerUsedAliasTest.find(x => x.hasAlias(alias));
+        // return false;
     }
 
     public abstract compile(): QueryCompiled;
@@ -66,7 +71,7 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
     private createUniqueAlias(aliasProposed: string): string {
         aliasProposed = aliasProposed ? aliasProposed.toLowerCase() : aliasProposed;
         if (this.hasAlias(aliasProposed)) {
-            return this.createUniqueAlias(`${aliasProposed}${NEXT_VALUE_ALIAS++}`);
+            return this.createUniqueAlias(`${aliasProposed}${this.NEXT_VALUE_ALIAS++}`);
         }
         return aliasProposed;
     }

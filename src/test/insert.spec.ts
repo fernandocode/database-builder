@@ -149,7 +149,6 @@ describe("Insert", () => {
             dataVencimento: DatetimeUtils.datetimeToDate("2010-01-28T00:00:00-02:00")
         } as ContasReceber;
         const result = new Insert(ContasReceber, contasReceber, mapper.get(ContasReceber).mapperTable).compile();
-        console.log(result);
         expect(result[0].params.toString()).to.equal([
             contasReceber.codeImport, contasReceber.valor,
             DatetimeUtils.dateToDatabase(contasReceber.dataVencimento), void 0,

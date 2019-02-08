@@ -46,10 +46,6 @@ export class Query<T> extends SqlBase<T> {
         return script;
     }
 
-    public builder(): QueryBuilder<T> {
-        return this._queryBuilder;
-    }
-
     /**
      * @link QueryBuilder
      */
@@ -77,16 +73,21 @@ export class Query<T> extends SqlBase<T> {
     }
 
     public join<TJoin>(
-        typeTJoin: (new () => TJoin) | QueryBuilder<TJoin>,
+        typeTJoin: (new () => TJoin) | QueryBuilder<TJoin> | { _builder: () => QueryBuilder<TJoin> },
         onWhere: (where: WhereBuilder<TJoin>) => void,
         join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         type: JoinType = JoinType.LEFT,
         alias: string = void 0
     ): Query<T> {
+        if (typeTJoin && (typeTJoin as { _builder: () => QueryBuilder<TJoin> })._builder) {
+            typeTJoin = (typeTJoin as { _builder: () => QueryBuilder<TJoin> })._builder();
+        }
         const mapperTable = Utils.isQueryBuilder(typeTJoin)
             ? (typeTJoin as QueryBuilder<TJoin>).mapperTable
             : this._getMapper(typeTJoin as (new () => TJoin)).mapperTable;
-        this._queryBuilder.join(typeTJoin, onWhere, join, mapperTable, type, alias);
+        this._queryBuilder.join(
+            typeTJoin as (new () => TJoin) | QueryBuilder<TJoin>,
+            onWhere, join, mapperTable, type, alias);
         return this;
     }
 
@@ -258,6 +259,12 @@ export class Query<T> extends SqlBase<T> {
         return this._queryReadableBuilder.read(cursor, newable, mapperTable);
     }
 
+    /**
+     * @hidden
+     */
+    public _builder(): QueryBuilder<T> {
+        return this._queryBuilder;
+    }
     protected model(): T {
         return void 0;
     }

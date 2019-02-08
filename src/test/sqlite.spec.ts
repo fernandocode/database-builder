@@ -208,7 +208,6 @@ describe("SQLite", async () => {
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].codeImport).to.equal(ObjectToTest.contasReceber.codeImport);
         expect(queryResult[0].dataRecebimento).to.equal(void 0);
-        // console.log((queryResult[0].dataVencimento as moment.Moment).format("DD/MM/YYYY"));
         expect(queryResult[0].dataVencimento.unix()).to.equal(ObjectToTest.contasReceber.dataVencimento.unix());
     });
 
