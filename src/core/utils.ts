@@ -18,6 +18,7 @@ import { ColumnRef } from "./column-ref";
 import { PlanRef } from "./plan-ref";
 import * as uuidv4 from "uuid/v4";
 import { ReplacementParam } from "./replacement-param";
+import { Query, QueryBuilder } from "../crud";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -104,6 +105,14 @@ export class Utils {
 
     public static isMoment(value: any): boolean {
         return moment.isMoment(value);
+    }
+
+    public static isQuery(instance: any): boolean {
+        return instance instanceof Query;
+    }
+
+    public static isQueryBuilder(instance: any): boolean {
+        return instance instanceof QueryBuilder;
     }
 
     public static isProjectionBuilder(projectionCandidate: any): boolean {

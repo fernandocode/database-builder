@@ -338,6 +338,24 @@ describe("Query", () => {
 
     });
 
+    it("join in query", () => {
+        const queryJoin = crud.query(ReferencesModelTest);
+        const query = crud.query(TestClazz);
+        query.select(
+            x => x.id,
+            x => x.description,
+            x => x.disabled);
+        query.join(queryJoin.builder(),
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                join.select(x => x.name, x => x.id);
+                join.desc(x => x.id);
+            }, void 0, "sander");
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, sander.name AS sander_name, sander.id AS sander_id FROM TestClazz AS tes LEFT JOIN (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref) AS sander ON (sander.id = tes.referenceTest_id) ORDER BY sander.id DESC");
+    });
+
     it("projection static value", () => {
         const query = crud.query(TestClazz);
         query.projection(projection => {

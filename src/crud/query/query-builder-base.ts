@@ -19,6 +19,7 @@ import { SqlBaseBuilder } from "../sql-base-builder";
 import { MetadataTable } from "../../metadata-table";
 import { MapperUtils } from "../../mapper/mapper-utils";
 import { DatabaseBuilderError } from "../../core";
+import { QueryBuilder } from "./query-builder";
 
 export abstract class QueryBuilderBase<T,
     TQuery extends QueryBuilderBase<T, TQuery>>
@@ -52,12 +53,17 @@ export abstract class QueryBuilderBase<T,
     private _fromParams: ParamType[] = [];
 
     constructor(
-        typeT: new () => T,
+        typeT: (new () => T) | QueryBuilder<T>,
         mapperTable: MapperTable,
         alias: string = void 0,
         protected _getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>
     ) {
-        super(typeT, mapperTable, alias);
+        super(Utils.isQueryBuilder(typeT) ? void 0 : typeT as (new () => T), mapperTable, alias);
+        if (Utils.isQueryBuilder(typeT)) {
+            const compiled = (typeT as QueryBuilder<T>).compile();
+            this._tablename = `(${compiled.query})`;
+            this._fromParams = compiled.params;
+        }
     }
 
     public get alias(): string {

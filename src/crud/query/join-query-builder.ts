@@ -8,6 +8,7 @@ import { JoinType } from "../enums/join-type";
 import { ValueType } from "../../core/utils";
 import { MapperTable } from "../../mapper-table";
 import { MetadataTable } from "../../metadata-table";
+import { QueryBuilder } from "./query-builder";
 
 export class JoinQueryBuilder<T>
     extends QueryBuilderBase<T, JoinQueryBuilder<T>>
@@ -53,7 +54,7 @@ export class JoinQueryBuilder<T>
     }
 
     constructor(
-        typeT: new () => T,
+        typeT: (new () => T) | QueryBuilder<T>,
         onWhereCallback: (where: WhereBuilder<T>) => void,
         mapperTable: MapperTable,
         private _typeJoin: JoinType = JoinType.LEFT,
@@ -62,7 +63,8 @@ export class JoinQueryBuilder<T>
     ) {
         super(typeT, mapperTable, alias, getMapper);
 
-        this._on = new WhereBuilder(typeT, this.alias);
+        this._on = new WhereBuilder<T>(void 0, this.alias);
+        // this._on = new WhereBuilder(typeT, this.alias);
         onWhereCallback(this._on);
     }
 

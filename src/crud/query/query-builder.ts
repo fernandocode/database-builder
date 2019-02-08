@@ -4,6 +4,7 @@ import { JoinQueryBuilder } from "./join-query-builder";
 import { QueryBuilderBase } from "./query-builder-base";
 import { QueryBuilderContract } from "./query-builder-contract";
 import { MapperTable } from "../../mapper-table";
+import { Utils } from "../../core/utils";
 
 export class QueryBuilder<T>
     extends QueryBuilderBase<T, QueryBuilder<T>>
@@ -14,7 +15,7 @@ export class QueryBuilder<T>
     }
 
     public join<TJoin>(
-        typeTJoin: new () => TJoin,
+        typeTJoin: (new () => TJoin) | QueryBuilder<TJoin>,
         onWhereCallback: (where: WhereBuilder<TJoin>) => void,
         joinCallback: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         mapperTable: MapperTable,
@@ -22,9 +23,12 @@ export class QueryBuilder<T>
         alias: string = void 0
     ): QueryBuilder<T> {
         const instanceJoin: JoinQueryBuilder<TJoin> = new JoinQueryBuilder(
-            typeTJoin, onWhereCallback, mapperTable, type, this.createAlias(alias, this.createTablename(typeTJoin, mapperTable)), this._getMapper);
-        // const instanceJoin: JoinQueryBuilder<TJoin> = new JoinQueryBuilder(
-        //     typeTJoin, onWhereCallback, mapperTable, type, alias, this._getMapper);
+            typeTJoin, onWhereCallback, mapperTable, type,
+            this.createAlias(alias, this.createTablename(
+                Utils.isQueryBuilder(typeTJoin)
+                    ? void 0
+                    : typeTJoin as (new () => TJoin), mapperTable)
+            ), this._getMapper);
         joinCallback(instanceJoin);
         this.addJoin(instanceJoin);
         return this._getInstance();

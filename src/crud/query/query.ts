@@ -46,6 +46,10 @@ export class Query<T> extends SqlBase<T> {
         return script;
     }
 
+    public builder(): QueryBuilder<T> {
+        return this._queryBuilder;
+    }
+
     /**
      * @link QueryBuilder
      */
@@ -73,13 +77,16 @@ export class Query<T> extends SqlBase<T> {
     }
 
     public join<TJoin>(
-        typeTJoin: new () => TJoin,
+        typeTJoin: (new () => TJoin) | QueryBuilder<TJoin>,
         onWhere: (where: WhereBuilder<TJoin>) => void,
         join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         type: JoinType = JoinType.LEFT,
         alias: string = void 0
     ): Query<T> {
-        this._queryBuilder.join(typeTJoin, onWhere, join, this._getMapper(typeTJoin).mapperTable, type, alias);
+        const mapperTable = Utils.isQueryBuilder(typeTJoin)
+            ? (typeTJoin as QueryBuilder<TJoin>).mapperTable
+            : this._getMapper(typeTJoin as (new () => TJoin)).mapperTable;
+        this._queryBuilder.join(typeTJoin, onWhere, join, mapperTable, type, alias);
         return this;
     }
 
