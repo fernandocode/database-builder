@@ -3,7 +3,6 @@ import { ReferencesModelTest } from "./models/reference-model-test";
 import { expect } from "chai";
 import { TestClazz } from "./models/test-clazz";
 import { ColumnRef } from "../core/column-ref";
-import { Query } from "../crud/query/query";
 import { JoinType } from "../crud/enums/join-type";
 import { Cliente } from "./models/cliente";
 import { Cidade } from "./models/cidade";
@@ -23,6 +22,14 @@ describe("Query", () => {
 
     it("none", () => {
         const query = crud.query(TestClazz);
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+    });
+
+    it("query in query", () => {
+        const query = crud.query(TestClazz);
+        const queryTest = crud.query(ReferencesModelTest);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
@@ -329,7 +336,7 @@ describe("Query", () => {
             });
         }, JoinType.LEFT, "img");
         query.orderBy(x => x.codeImport);
-        const result = query.compile();
+        const result = query.compile(); 
         expect(result[0].params.length).to.equal(3);
         expect(result[0].params[0]).to.equal(false);
         expect(result[0].params[1]).to.equal(false);
@@ -358,6 +365,7 @@ describe("Query", () => {
 
     it("join in query auto unique alias", () => {
         const queryJoin = crud.query(ReferencesModelTest);
+        queryJoin.where(where => where.equal(x => x.id, 1));
         const query = crud.query(TestClazz);
         query.select(
             x => x.id,
@@ -369,9 +377,12 @@ describe("Query", () => {
                 join.select(x => x.name, x => x.id);
                 join.desc(x => x.id);
             });
+        query.where(where => where.equal(x => x.numero, 20));
         const result = query.compile();
-        expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref0.name AS ref0_name, ref0.id AS ref0_id FROM TestClazz AS tes LEFT JOIN (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref) AS ref0 ON (ref0.id = tes.referenceTest_id) ORDER BY ref0.id DESC");
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal(1);
+        expect(result[0].params[1]).to.equal(20);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref0.name AS ref0_name, ref0.id AS ref0_id FROM TestClazz AS tes LEFT JOIN (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.id = ?) AS ref0 ON (ref0.id = tes.referenceTest_id) WHERE tes.numero = ? ORDER BY ref0.id DESC");
     });
 
     it("projection static value", () => {

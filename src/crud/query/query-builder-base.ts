@@ -47,7 +47,7 @@ export abstract class QueryBuilderBase<T,
 
     private _joinsQuery: Array<JoinQueryBuilderContract<any, any>> = [];
     // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
-    private _joinParams: ParamType[] = [];
+    protected _joinParams: ParamType[] = [];
 
     private _unionsQuery: Array<{ query: QueryCompiled, type: UnionType }> = [];
     private _fromParams: ParamType[] = [];
@@ -62,7 +62,7 @@ export abstract class QueryBuilderBase<T,
         if (Utils.isQueryBuilder(typeT)) {
             const compiled = (typeT as QueryBuilder<T>).compile();
             this._tablename = `(${compiled.query})`;
-            this._fromParams = compiled.params;
+            this._joinParams = this._joinParams.concat(compiled.params);
         }
     }
 
@@ -266,6 +266,7 @@ export abstract class QueryBuilderBase<T,
         joinQuery: JoinQueryBuilderContract<TJoin, TQueryJoin>
     ) {
         this._joinsQuery.push(joinQuery);
+        this._joinParams = this._joinParams.concat(joinQuery._getParams())
         this.compileWhere(joinQuery._getWhere());
         this.compileProjection(joinQuery._getSelect());
         this.compileGroupBy(joinQuery._getGroupBy());
@@ -295,7 +296,7 @@ export abstract class QueryBuilderBase<T,
             }
         }
 
-        this._joinParams = tablenameAndJoins.params;
+        this._joinParams = this._joinParams.concat(tablenameAndJoins.params);
 
         return {
             params: columnsCompiled.params,
@@ -352,6 +353,7 @@ export abstract class QueryBuilderBase<T,
         const onWhereCompiled = join._getOn();
         return {
             params: tablesBase.params.concat(onWhereCompiled.params),
+            // params: join._getParams().concat(tablesBase.params.concat(onWhereCompiled.params)),
             query: `${tablesBase.query} ${join._getTypeJoin()} JOIN ${join.compileTable()} ON (${onWhereCompiled.where})`,
         };
     }

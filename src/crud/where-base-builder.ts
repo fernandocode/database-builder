@@ -29,7 +29,8 @@ export abstract class WhereBaseBuilder<
     private readonly _databaseHelper: DatabaseHelper;
 
     constructor(
-        // TODO: verificar e se é possivel remover declaração de tipo de instancia, é usar apenas o generics, pois o join está passando "void 0" e declarando apenas o generics
+        // TODO: verificar e se é possivel remover declaração de tipo de instancia, é usar apenas o generics,
+        // pois o join está passando "void 0" e declarando apenas o generics
         private _typeT: new () => T,
         private _alias: string
     ) {

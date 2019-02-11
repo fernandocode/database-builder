@@ -5,7 +5,7 @@ import { WhereCompiled } from "../where-compiled";
 import { WhereBuilder } from "../where-builder";
 import { ProjectionCompiled } from "../projection-compiled";
 import { JoinType } from "../enums/join-type";
-import { ValueType } from "../../core/utils";
+import { ValueType, ParamType } from "../../core/utils";
 import { MapperTable } from "../../mapper-table";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
@@ -46,6 +46,16 @@ export class JoinQueryBuilder<T>
 
     public _getOrderBy(): string {
         return this._orderBy;
+    }
+
+    public _getParams(): ParamType[] {
+        return this._joinParams;
+        // const compiled: QueryCompiled = this.buildBase();
+        // return compiled.params
+        //     .concat(this._joinParams)
+        //     .concat(this.whereCompiled.params)
+        //     .concat(this._having.params)
+        //     .concat(this._limit.params);
     }
 
     public addParamsOn(params: ValueType[]): JoinQueryBuilder<T> {
