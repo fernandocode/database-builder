@@ -53,14 +53,18 @@ export abstract class QueryBuilderBase<T,
     private _fromParams: ParamType[] = [];
 
     constructor(
-        typeT: (new () => T) | QueryBuilder<T>,
+        queryT: (new () => T) | QueryBuilder<T>,
         mapperTable: MapperTable,
         alias: string = void 0,
         protected _getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>
     ) {
-        super(Utils.isQueryBuilder(typeT) ? void 0 : typeT as (new () => T), mapperTable, alias);
-        if (Utils.isQueryBuilder(typeT)) {
-            const compiled = (typeT as QueryBuilder<T>).compile();
+        super(queryT, Utils.getMapperTable(queryT, _getMapper).newable, mapperTable, alias);
+        // if (Utils.isQueryBuilder(typeT)) {
+        //     this.innerUsedAliasTest.push((typeT as QueryBuilder<T>))
+        // }
+        // super(Utils.isQueryBuilder(typeT) ? void 0 : typeT as (new () => T), mapperTable, alias);
+        if (Utils.isQueryBuilder(queryT)) {
+            const compiled = (queryT as QueryBuilder<T>).compile();
             this._tablename = `(${compiled.query})`;
             this._joinParams = this._joinParams.concat(compiled.params);
         }
@@ -152,7 +156,7 @@ export abstract class QueryBuilderBase<T,
     }
 
     public createWhere(): WhereBuilder<T> {
-        return new WhereBuilder(this._typeT, this.alias);
+        return new WhereBuilder(this._newable, this.alias);
     }
 
     public where(
@@ -221,8 +225,8 @@ export abstract class QueryBuilderBase<T,
     ): TQuery {
         this.compileGroupBy(Utils.addAlias(Utils.getColumn(expression), this._alias));
         if (havingCallback) {
-            const whereHaving = new HavingBuilder(this._typeT, "");
-            havingCallback(whereHaving, new ProjectionsHelper(this._typeT, this._alias, false));
+            const whereHaving = new HavingBuilder(this._newable, "");
+            havingCallback(whereHaving, new ProjectionsHelper(this._newable, this._alias, false));
             this.compileHaving(whereHaving.compile());
         }
         return this._getInstance();
@@ -259,7 +263,7 @@ export abstract class QueryBuilderBase<T,
         addAliasTableToAlias?: boolean,
         addAliasDefault?: boolean
     ): ProjectionBuilder<T> {
-        return new ProjectionBuilder(this._typeT, this.alias, addAliasTableToAlias, addAliasDefault, this._getMapper);
+        return new ProjectionBuilder(this._newable, this.alias, addAliasTableToAlias, addAliasDefault, this._getMapper);
     }
 
     protected addJoin<TJoin, TQueryJoin extends JoinQueryBuilderContract<TJoin, TQueryJoin>>(

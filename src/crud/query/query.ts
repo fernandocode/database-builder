@@ -28,16 +28,17 @@ export class Query<T> extends SqlBase<T> {
     private _queryReadableBuilder: QueryReadableBuilder<T>;
 
     constructor(
-        private _typeT: new () => T,
+        private _queryT: (new () => T) | QueryBuilder<T>,
         alias: string = void 0,
         private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
-        mapperTable: MapperTable = _getMapper(_typeT).mapperTable,
+        mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
+        // mapperTable: MapperTable = _getMapper(_typeT).mapperTable,
         database?: DatabaseBase,
         enableLog: boolean = true,
     ) {
         super(mapperTable, database, enableLog);
-        this._queryBuilder = new QueryBuilder(_typeT, mapperTable, alias, _getMapper);
-        this._queryReadableBuilder = new QueryReadableBuilder(_typeT, enableLog);
+        this._queryBuilder = new QueryBuilder(_queryT, mapperTable, alias, _getMapper);
+        this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, _getMapper).newable, enableLog);
     }
 
     public compile(): QueryCompiled[] {
@@ -73,21 +74,18 @@ export class Query<T> extends SqlBase<T> {
     }
 
     public join<TJoin>(
-        typeTJoin: (new () => TJoin) | QueryBuilder<TJoin> | { _builder: () => QueryBuilder<TJoin> },
+        queryTJoin: (new () => TJoin) | QueryBuilder<TJoin> | { _builder: () => QueryBuilder<TJoin> },
         onWhere: (where: WhereBuilder<TJoin>) => void,
         join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         type: JoinType = JoinType.LEFT,
         alias: string = void 0
     ): Query<T> {
-        if (typeTJoin && (typeTJoin as { _builder: () => QueryBuilder<TJoin> })._builder) {
-            typeTJoin = (typeTJoin as { _builder: () => QueryBuilder<TJoin> })._builder();
+        if (queryTJoin && (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder) {
+            queryTJoin = (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder();
         }
-        const mapperTable = Utils.isQueryBuilder(typeTJoin)
-            ? (typeTJoin as QueryBuilder<TJoin>).mapperTable
-            : this._getMapper(typeTJoin as (new () => TJoin)).mapperTable;
         this._queryBuilder.join(
-            typeTJoin as (new () => TJoin) | QueryBuilder<TJoin>,
-            onWhere, join, mapperTable, type, alias);
+            queryTJoin as (new () => TJoin) | QueryBuilder<TJoin>,
+            onWhere, join, Utils.getMapperTable(queryTJoin, this._getMapper).mapperTable, type, alias);
         return this;
     }
 
@@ -235,7 +233,7 @@ export class Query<T> extends SqlBase<T> {
                         throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
                     }
                     resolve(this._queryReadableBuilder.mapper(
-                        cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder, this._typeT
+                        cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder, Utils.getMapperTable(this._queryT, this._getMapper).newable
                     ));
                 })
                 .catch(reject);

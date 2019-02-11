@@ -14,23 +14,27 @@ export class QueryBuilder<T>
         return this;
     }
 
+    public get newable(): (new () => T) {
+        return this._newable;
+    }
+
     public join<TJoin>(
-        typeTJoin: (new () => TJoin) | QueryBuilder<TJoin>,
+        queryTJoin: (new () => TJoin) | QueryBuilder<TJoin>,
         onWhereCallback: (where: WhereBuilder<TJoin>) => void,
         joinCallback: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         mapperTable: MapperTable,
         type: JoinType = JoinType.LEFT,
         alias: string = void 0
     ): QueryBuilder<T> {
-        if(Utils.isQueryBuilder(typeTJoin)){
-            this.innerUsedAliasTest.push((typeTJoin as QueryBuilder<TJoin>))
+        if (Utils.isQueryBuilder(queryTJoin)) {
+            this.innerUsedAliasTest.push((queryTJoin as QueryBuilder<TJoin>))
         }
         const instanceJoin: JoinQueryBuilder<TJoin> = new JoinQueryBuilder(
-            typeTJoin, onWhereCallback, mapperTable, type,
+            queryTJoin, onWhereCallback, mapperTable, type,
             this.createAlias(alias, this.createTablename(
-                Utils.isQueryBuilder(typeTJoin)
+                Utils.isQueryBuilder(queryTJoin)
                     ? void 0
-                    : typeTJoin as (new () => TJoin), mapperTable)
+                    : queryTJoin as (new () => TJoin), mapperTable)
             ), this._getMapper);
         joinCallback(instanceJoin);
         this.addJoin(instanceJoin);

@@ -64,17 +64,16 @@ export class JoinQueryBuilder<T>
     }
 
     constructor(
-        typeT: (new () => T) | QueryBuilder<T>,
+        queryT: (new () => T) | QueryBuilder<T>,
         onWhereCallback: (where: WhereBuilder<T>) => void,
         mapperTable: MapperTable,
         private _typeJoin: JoinType = JoinType.LEFT,
         alias: string = void 0,
         getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>
     ) {
-        super(typeT, mapperTable, alias, getMapper);
+        super(queryT, mapperTable, alias, getMapper);
 
         this._on = new WhereBuilder<T>(void 0, this.alias);
-        // this._on = new WhereBuilder(typeT, this.alias);
         onWhereCallback(this._on);
     }
 

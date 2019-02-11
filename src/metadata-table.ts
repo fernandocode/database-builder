@@ -8,25 +8,25 @@ import { PrimaryKeyType } from "./core/enums/primary-key-type";
 import { GetMapper } from "./mapper/interface-get-mapper";
 import { DatabaseBuilderError } from "./core/errors";
 import { DEPENDENCY_LIST_SIMPLE_COLUMNS, DependencyListSimpleModel } from "./definitions/dependency-definition";
+import { MetadataTableBase } from "./metadata-table-base";
 
-export class MetadataTable<T> {
+export class MetadataTable<T> extends MetadataTableBase<T> {
 
     public instance: T;
-
-    public mapperTable: MapperTable;
 
     private _autoMapperCalled = false;
 
     private _expressionUtils: ExpressionUtils = new ExpressionUtils();
 
     constructor(
-        public newable: new () => T,
+        _newable: new () => T,
         private _databaseHelper: DatabaseHelper,
         private _getMapper: GetMapper,
         public readOnly: boolean = false
     ) {
-        this.instance = new newable();
-        this.mapperTable = new MapperTable(newable.name);
+        super(_newable);
+        this.instance = new _newable();
+        this.mapperTable = new MapperTable(_newable.name);
     }
 
     public column<TReturn>(

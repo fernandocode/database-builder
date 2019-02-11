@@ -12,8 +12,6 @@ import { RowMapper } from "./row-mapper";
 export class RowResult<T> {
     private _databaseHelper: DatabaseHelper;
 
-    // private _valueResultMap: T;
-
     constructor(
         private _valueT: T,
         private _newable?: new () => T,

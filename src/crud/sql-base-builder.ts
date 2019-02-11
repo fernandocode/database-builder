@@ -2,11 +2,11 @@ import { QueryCompiled } from "../core/query-compiled";
 import { WhereCompiled } from "./where-compiled";
 import { MapperTable } from "../mapper-table";
 import { QueryCompilable } from "../core/query-compilable";
-
-// let NEXT_VALUE_ALIAS: number = 0;
+import { QueryBuilder } from "./query/query-builder";
+import { Utils } from "../core/utils";
 
 export abstract class SqlBaseBuilder<T> implements QueryCompilable {
-    
+
     private NEXT_VALUE_ALIAS: number = 0;
 
     protected _tablename: string;
@@ -18,11 +18,15 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
     protected innerUsedAliasTest: { hasAlias: (alias: string) => boolean }[] = [];
 
     constructor(
-        protected readonly _typeT: new () => T,
+        queryT: (new () => T) | QueryBuilder<T>,
+        protected _newable: new () => T,
         public mapperTable: MapperTable,
         protected readonly _alias: string = void 0,
     ) {
-        this._tablename = this.createTablename(_typeT, mapperTable);
+        if (Utils.isQueryBuilder(queryT)) {
+            this.innerUsedAliasTest.push((queryT as QueryBuilder<T>))
+        }
+        this._tablename = this.createTablename(_newable, mapperTable);
         this._alias = this.createAlias(this._alias, this._tablename);
     }
 
@@ -45,7 +49,6 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
             return true;
         }
         return !!this.innerUsedAliasTest.find(x => x.hasAlias(alias));
-        // return false;
     }
 
     public abstract compile(): QueryCompiled;

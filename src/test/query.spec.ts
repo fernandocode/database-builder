@@ -28,11 +28,11 @@ describe("Query", () => {
     });
 
     it("query in query", () => {
-        const query = crud.query(TestClazz);
-        const queryTest = crud.query(ReferencesModelTest);
+        const queryTest = crud.query(TestClazz);
+        const query = crud.query(queryTest);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes0.internalKey AS internalKey, tes0.id AS id, tes0.description AS description, tes0.date AS date, tes0.dateMoment AS dateMoment, tes0.dateDate AS dateDate, tes0.numero AS numero, tes0.referenceTest_id AS referenceTest_id, tes0.referenceTestCode_code AS referenceTestCode_code FROM (SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes) AS tes0");
     });
 
     it("join default (LEFT)", () => {

@@ -8,6 +8,8 @@ import { DatabaseBuilderError } from "../core/errors";
 import { GetMapper } from "../mapper/interface-get-mapper";
 import { Utils } from "../core/utils";
 import { KeyUtils } from "../core/key-utils";
+import { QueryBuilder } from "./query/query-builder";
+import { MetadataTableBase } from "../metadata-table-base";
 
 export class Crud {
 
@@ -54,12 +56,20 @@ export class Crud {
     }
 
     public query<T>(
-        typeT: new () => T, alias: string = void 0,
-        metadata: MetadataTable<T> = this.getMapper(typeT),
+        typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> }, alias: string = void 0,
+        metadata?: MetadataTableBase<T>,
         database: DatabaseBase = this.getDatabase(),
     ): Query<T> {
+        if (typeT && (typeT as { _builder: () => QueryBuilder<T> })._builder) {
+            typeT = (typeT as { _builder: () => QueryBuilder<T> })._builder();
+        }
+        if (metadata === void 0) {
+            metadata = Utils.getMapperTable(typeT, (tKey: (new () => any) | string) => {
+                return this._getMapper.get(tKey);
+            })
+        }
         const that = this;
-        return new Query(typeT, alias,
+        return new Query(typeT as (new () => T) | QueryBuilder<T>, alias,
             (tKey: (new () => any) | string) => {
                 return that.getMapper(tKey);
             }, metadata.mapperTable, database, this.enableLog);

@@ -19,6 +19,8 @@ import { PlanRef } from "./plan-ref";
 import * as uuidv4 from "uuid/v4";
 import { ReplacementParam } from "./replacement-param";
 import { Query, QueryBuilder } from "../crud";
+import { MetadataTable } from "../metadata-table";
+import { MetadataTableBase } from "../metadata-table-base";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -145,6 +147,17 @@ export class Utils {
 
     public static isPlanRef(instance: any): boolean {
         return instance instanceof PlanRef;
+    }
+
+    public static getMapperTable<T>(
+        typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> },
+        getMapper: (tKey: (new () => any) | string) => MetadataTable<any>
+    ): MetadataTableBase<T> {
+        return typeT === void 0
+            ? new MetadataTableBase(void 0)
+            : Utils.isQueryBuilder(typeT)
+                ? (typeT as QueryBuilder<T>)
+                : getMapper(typeT as (new () => T));
     }
 
     public static expressionOrColumn<TReturn, T>(
