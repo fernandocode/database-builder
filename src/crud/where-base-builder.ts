@@ -278,7 +278,7 @@ export abstract class WhereBaseBuilder<
 
     public lessAndEqual(
         expression1: TExpression,
-        expression2: TExpression,
+        expression2: TExpression
     ): TWhere {
         this.buildWhereColumn(
             [Condition.LessAndEqual],
@@ -294,19 +294,22 @@ export abstract class WhereBaseBuilder<
     public betweenValue(
         expression: TExpression,
         value1: ValueTypeToParse,
-        value2: ValueTypeToParse,
+        value2: ValueTypeToParse
     ): TWhere {
-        return this.between(expression, value1, value2);
+        return this.between(expression, value1 as any, value2 as any);
     }
 
     public between(
         expression: TExpression,
+        // startExpression: TExpression,
+        // endExpression: TExpression
         value1: ValueTypeToParse,
         value2: ValueTypeToParse,
     ): TWhere {
         this.buildWhereColumn(
             [Condition.Between],
             this.getColumnParams(expression),
+            // [this.getColumnParams(startExpression), this.getColumnParams(endExpression)]);
             [value1, value2]);
         return this._getInstance();
     }
@@ -390,6 +393,20 @@ export abstract class WhereBaseBuilder<
         this.buildWhereColumn(condition, column1, column2);
     }
 
+    // protected buildWhereColumn(
+    //     condition: Condition[],
+    //     ...values: (ColumnParams | string | ValueTypeToParse[])[],
+    //     // left: ColumnParams | string | ValueTypeToParse[],
+    // ) {
+    //     const columnRight = this.processParam(right);
+    //     const columnLeft = this.processParam(left);
+    //     this.buildWhereParams(
+    //         condition,
+    //         Utils.addAlias(columnRight.column, this._alias),
+    //         Utils.addAlias(columnLeft.column, this._alias),
+    //         columnRight.params.concat(columnLeft.params)
+    //     );
+    // }
     protected buildWhereColumn(
         condition: Condition[],
         right: ColumnParams | string | ValueTypeToParse[],
@@ -533,6 +550,7 @@ export abstract class WhereBaseBuilder<
             case [Condition.Not, Condition.Between].toString():
                 // ${column} BETWEEN ? AND ?
                 if (!Utils.isArray(column2) || column2.length === 2) {
+                    console.log(column2);
                     return `${column1} ${this.builderConditions(conditions)} ? ${WhereBaseBuilder.AND} ?`;
                     // return `${column1} ${this.builderConditions(conditions)} ${column2[0]} ${WhereBaseBuilder.AND} ${column2[1]}`;
                 }

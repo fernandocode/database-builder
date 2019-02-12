@@ -1,7 +1,7 @@
-import { DatabaseBaseTransaction } from "./../definitions/database-definition";
-import { DatabaseBase, DatabaseObject, DatabaseResult, DatabaseTransaction } from "../definitions/database-definition";
+import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
 import { QueryCompiled } from "./query-compiled";
 import { ReplacementParam } from "./replacement-param";
+import { Observable, Observer } from "rxjs";
 
 export class ExecutableBuilder {
 
@@ -9,13 +9,28 @@ export class ExecutableBuilder {
 
     }
 
+    public executeObserver(
+        compiled: QueryCompiled[],
+        database: DatabaseBase,
+    ): Observable<DatabaseResult[]> {
+        return Observable.create((observer: Observer<DatabaseResult[]>) => {
+            this.executorLinked(compiled, [], database)
+                .then(result => {
+                    observer.next(result);
+                    observer.complete();
+                })
+                .catch(err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
     public execute(
         compiled: QueryCompiled[],
         database: DatabaseBase,
     ): Promise<DatabaseResult[]> {
-        // this.log(compiled);
         return this.executorLinked(compiled, [], database);
-        // return this.executeSql(database, compiled);
     }
 
     private executeSql(
@@ -26,41 +41,6 @@ export class ExecutableBuilder {
             compiled.query,
             compiled.params,
         );
-        // return new Promise<DatabaseResult>((resolve, reject) => {
-        //     const resultPromise = (database as DatabaseBaseTransaction).executeSql(
-        //         compiled.query,
-        //         compiled.params,
-        //         (tx: DatabaseBaseTransaction, result: DatabaseResult) => {
-        //             resolve(result || (tx as any) as DatabaseResult);
-        //         },
-        //         (tx: DatabaseBaseTransaction, error: any) => {
-        //             reject(error || tx);
-        //         },
-        //     ) as any;
-        //     if (resultPromise && (resultPromise as Promise<DatabaseResult>).then) {
-        //         (resultPromise as Promise<DatabaseResult>)
-        //             .then(r => resolve(r))
-        //             .catch(err => reject(err));
-        //     }
-        // });
-        // if ((database as DatabaseObject).addTransaction) {
-        //     return (database as DatabaseObject).executeSql(
-        //         compiled.query,
-        //         compiled.params,
-        //     );
-        // }
-        // return new Promise<DatabaseResult>((resolve, reject) => {
-        //     (database as DatabaseBaseTransaction).executeSql(
-        //         compiled.query,
-        //         compiled.params,
-        //         (tx: DatabaseBaseTransaction, result: DatabaseResult) => {
-        //             resolve(result);
-        //         },
-        //         (tx: DatabaseBaseTransaction, error: any) => {
-        //             reject(error);
-        //         },
-        //     );
-        // });
     }
 
     private checkParams(

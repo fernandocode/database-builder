@@ -416,6 +416,23 @@ describe("Where", () => {
         expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?) AND tes.dateMoment BETWEEN ? AND ?");
     });
 
+    // it("between columns", () => {
+    //     const query = crud.query(TestClazz);
+    //     query.select(x => x.id);
+    //     query.where(where => {
+    //         where.between(0.5, query.ref(x => x.date).result(), query.ref(x => x.numero).result())
+    //         where.between(0.2, x => x.date, x => x.numero)
+    //     });
+    //     const result = query.compile();
+    //     console.log(result);
+    //     expect(result[0].params.length).to.equal(4);
+    //     expect(result[0].params[0]).to.equal(0.5);
+    //     expect(result[0].params[1]).to.equal("tes.date");
+    //     expect(result[0].params[2]).to.equal("tes.numero");
+    //     expect(result[0].params[3]).to.equal(0.2);
+    //     expect(result[0].query).to.equal("SELECT tes.id AS id FROM TestClazz AS tes WHERE ? BETWEEN ? AND ? AND ? BETWEEN tes.date AND tes.numero");
+    // });
+
     it("between (deprecated)", () => {
         const query = crud.query(TestClazz);
         query.where(where => {
