@@ -136,8 +136,10 @@ export interface WhereBaseBuilderContract<T, TExpression, TWhere extends WhereBa
 
     between(
         expression: TExpression,
-        value1: ValueTypeToParse,
-        value2: ValueTypeToParse,
+        startExpression: TExpression,
+        endExpression: TExpression
+        // value1: ValueTypeToParse,
+        // value2: ValueTypeToParse,
     ): TWhere;
 
     /**
