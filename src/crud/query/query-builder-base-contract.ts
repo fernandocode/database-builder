@@ -47,7 +47,5 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
 
     unionAll(query: QueryCompiled[] | SqlCompilable): TQuery;
 
-    // execute(database: DatabaseBase): Promise<DatabaseResult[]>;
-
     compileTable(): string;
 }

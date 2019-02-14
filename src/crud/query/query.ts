@@ -21,6 +21,8 @@ import { SqlBase } from "../sql-base";
 import { ModelUtils } from "../../core/model-utils";
 import { DependencyListSimpleModel } from "../../definitions/dependency-definition";
 import { KeyUtils } from "../../core/key-utils";
+import { Observable, Observer } from "rxjs";
+import { forkJoinSafe } from "../../safe-utils";
 
 export class Query<T> extends SqlBase<T> {
 
@@ -32,7 +34,6 @@ export class Query<T> extends SqlBase<T> {
         alias: string = void 0,
         private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
         mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
-        // mapperTable: MapperTable = _getMapper(_typeT).mapperTable,
         database?: DatabaseBase,
         enableLog: boolean = true,
     ) {
@@ -156,99 +157,120 @@ export class Query<T> extends SqlBase<T> {
         cascade: boolean = true,
         mapperTable: MapperTable = this.getMapper(void 0),
         database: DatabaseBase = void 0,
-    ): Promise<T[]> {
-        return new Promise<T[]>((resolve, reject) => {
+    ): Observable<T[]> {
+        return Observable.create((observer: Observer<T[]>) => {
             this._queryReadableBuilder.executeAndRead(
                 cascade,
                 this,
                 mapperTable,
                 this.getDatabase(database))
-                .then(result => {
+                .subscribe(result => {
                     this.fetchModels(cascade, result, mapperTable)
-                        .then(result => {
-                            resolve(result);
-                        })
-                        .catch(err => reject(err));
-                })
-                .catch(err => reject(err));
+                        .subscribe(result => {
+                            observer.next(result);
+                            observer.complete();
+                        }, err => {
+                            observer.error(err);
+                            observer.complete();
+                        });
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 
-    public toList(cascade?: boolean): Promise<T[]> {
+    public toList(cascade?: boolean): Observable<T[]> {
         return this.executeAndRead(cascade);
     }
 
-    public toListParse<TParse>(metadataParse: MetadataTable<TParse>): Promise<TParse[]> {
-        return new Promise((resolve, reject) => {
+    public toListParse<TParse>(metadataParse: MetadataTable<TParse>): Observable<TParse[]> {
+        return Observable.create((observer: Observer<TParse[]>) => {
             this.execute()
-                .then((cursor) => {
-                    resolve(this.read(cursor, metadataParse.newable, metadataParse.mapperTable));
-                })
-                .catch(reject);
+                .subscribe((cursor) => {
+                    observer.next(this.read(cursor, metadataParse.newable, metadataParse.mapperTable));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 
-    public toListTo<TReader>(newable: new () => TReader, mapperTable: MapperTable): Promise<TReader[]> {
-        return new Promise((resolve, reject) => {
+    public toListTo<TReader>(newable: new () => TReader, mapperTable: MapperTable): Observable<TReader[]> {
+        return Observable.create((observer: Observer<TReader[]>) => {
             this.execute()
-                .then((cursor) => {
-                    resolve(this.read(cursor, newable, mapperTable));
-                })
-                .catch(reject);
+                .subscribe((cursor) => {
+                    observer.next(this.read(cursor, newable, mapperTable));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 
-    public toCast(): Promise<any[]> {
-        return new Promise((resolve, reject) => {
+    public toCast(): Observable<any[]> {
+        return Observable.create((observer: Observer<any[]>) => {
             this.execute()
-                .then((cursors) => {
+                .subscribe(cursors => {
                     if (cursors.length !== 1) {
                         throw new DatabaseBuilderError(`"toCast" is not ready to solve multiple queries in one batch!`);
                     }
-                    resolve(this._queryReadableBuilder.toCast(cursors[0]));
-                })
-                .catch(reject);
+                    observer.next(this._queryReadableBuilder.toCast(cursors[0]));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 
-    public map(mapper: (row: any) => any): Promise<any[]> {
-        return new Promise((resolve, reject) => {
+    public map(mapper: (row: any) => any): Observable<any[]> {
+        return Observable.create((observer: Observer<any[]>) => {
             this.execute()
-                .then((cursors) => {
+                .subscribe((cursors) => {
                     if (cursors.length !== 1) {
                         throw new DatabaseBuilderError(`"map" is not ready to solve multiple queries in one batch!`);
                     }
-                    resolve(this._queryReadableBuilder.map(cursors[0], mapper));
-                })
-                .catch(reject);
+                    observer.next(this._queryReadableBuilder.map(cursors[0], mapper));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 
-    public mapper<T extends any>(mapper: (row: RowResult<T>) => T): Promise<T[]> {
-        const mapperTable = this.getMapper(void 0, false);
-        return new Promise((resolve, reject) => {
+    public mapper<T extends any>(mapper: (row: RowResult<T>) => T): Observable<T[]> {
+        return Observable.create((observer: Observer<T[]>) => {
             this.execute()
-                .then((cursors) => {
+                .subscribe((cursors) => {
+                    const mapperTable = this.getMapper(void 0, false);
                     if (cursors.length !== 1) {
                         throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
                     }
-                    resolve(this._queryReadableBuilder.mapper(
+                    observer.next(this._queryReadableBuilder.mapper(
                         cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder, Utils.getMapperTable(this._queryT, this._getMapper).newable
                     ));
-                })
-                .catch(reject);
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 
-    public firstOrDefault(cascade?: boolean, _default?: any): Promise<T> {
-        return new Promise((resolve, reject) => {
+    public firstOrDefault(cascade?: boolean, _default?: any): Observable<T> {
+        return Observable.create((observer: Observer<T[]>) => {
             this.limit(1)
                 .toList(cascade)
-                .then((result) => {
-                    resolve((result && result.length) ? result[0] : _default);
-                })
-                .catch((err) => {
-                    reject(err);
+                .subscribe((result) => {
+                    observer.next((result && result.length) ? result[0] : _default);
+                    observer.complete();
+                }, (err) => {
+                    observer.error(err);
+                    observer.complete();
                 });
         });
     }
@@ -280,7 +302,7 @@ export class Query<T> extends SqlBase<T> {
         return void 0;
     }
 
-    protected checkDatabaseResult(promise: Promise<DatabaseResult[]>): Promise<DatabaseResult[]> {
+    protected checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]> {
         return promise;
     }
 
@@ -292,17 +314,17 @@ export class Query<T> extends SqlBase<T> {
         return result;
     }
 
-    private fetchModels(cascade: boolean, models: T[], mapperTable: MapperTable): Promise<T[]> {
-        const promises: Array<Promise<T>> = [];
+    private fetchModels(cascade: boolean, models: T[], mapperTable: MapperTable): Observable<T[]> {
+        const promises: Array<Observable<T>> = [];
         models.forEach(model => {
             promises.push(this.fetchModel(cascade, model, mapperTable));
         });
-        return Promise.all(promises);
+        return forkJoinSafe(promises);
     }
 
-    private fetchModel(cascade: boolean, model: T, mapperTable: MapperTable): Promise<T> {
-        return new Promise<T>((resolve, reject) => {
-            const promises: Array<Promise<{ field: string, value: any }>> = [];
+    private fetchModel(cascade: boolean, model: T, mapperTable: MapperTable): Observable<T> {
+        return Observable.create((observer: Observer<T>) => {
+            const promises: Array<Observable<{ field: string, value: any }>> = [];
             mapperTable.dependencies.forEach(dependency => {
                 if (cascade) {
                     const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
@@ -310,25 +332,27 @@ export class Query<T> extends SqlBase<T> {
                         const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                         where.equal(new ColumnRef(columnReference), KeyUtils.getKey(mapperTable, model));
                     });
-                    promises.push(new Promise<{ field: string, value: any }>((r, rej) => {
+                    promises.push(Observable.create((observerInner: Observer<{ field: string, value: any }>) => {
                         queryDependency.toList()
-                            .then(result => {
+                            .subscribe(result => {
                                 const fieldDependency = mapperTable.columns.find(x => x.tableReference === dependency.tableName).fieldReference;
-                                r({ field: fieldDependency, value: result.map(x => x.value) });
-                            })
-                            .catch(err => {
-                                reject(err);
+                                observerInner.next({ field: fieldDependency, value: result.map(x => x.value) });
+                                observerInner.complete();
+                            }, err => {
+                                observerInner.error(err);
+                                observerInner.complete();
                             });
                     }));
                 } else {
-                    promises.push(new Promise<{ field: string, value: any }>((r, rej) => {
+                    promises.push(Observable.create((observerInner: Observer<{ field: string, value: any }>) => {
                         const fieldDependency = mapperTable.columns.find(x => x.tableReference === dependency.tableName).fieldReference;
-                        r({ field: fieldDependency, value: [] });
+                        observerInner.next({ field: fieldDependency, value: [] });
+                        observerInner.complete();
                     }));
                 }
             });
-            Promise.all(promises)
-                .then(result => {
+            forkJoinSafe(promises)
+                .subscribe(result => {
                     result.forEach(r => {
                         const fieldArraySplit = r.field.split("[?].");
                         if (fieldArraySplit.length === 1) {
@@ -342,10 +366,11 @@ export class Query<T> extends SqlBase<T> {
                             ModelUtils.set(model, fieldArraySplit[0], values);
                         }
                     });
-                    resolve(model);
-                })
-                .catch(err => {
-                    reject(err);
+                    observer.next(model);
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
                 });
         });
     }

@@ -3,6 +3,7 @@ import { QueryReadableBuilderBase } from "./query-readable-builder-base";
 import { DatabaseBuilderError } from "../../core/errors";
 import { MapperTable } from "../../mapper-table";
 import { SqlExecutable } from "../sql-executable";
+import { Observable, Observer } from "rxjs";
 
 export class QueryReadableBuilder<T> extends QueryReadableBuilderBase {
 
@@ -18,21 +19,25 @@ export class QueryReadableBuilder<T> extends QueryReadableBuilderBase {
         queryBuilder: SqlExecutable,
         mapperTable: MapperTable,
         database: DatabaseBase,
-    ): Promise<T[]> {
-        return new Promise((resolve, reject) => {
+    ): Observable<T[]> {
+        return Observable.create((observer: Observer<T[]>) => {
             queryBuilder.execute(cascade, database)
-                .then((cursors) => {
+                .subscribe((cursors) => {
                     this.log(cursors);
                     try {
                         if (cursors.length !== 1) {
                             throw new DatabaseBuilderError(`"toCast" is not ready to solve multiple queries in one batch!`);
                         }
-                        resolve(this.read(cursors[0], this._typeT, mapperTable));
+                        observer.next(this.read(cursors[0], this._typeT, mapperTable));
+                        observer.complete();
                     } catch (error) {
-                        reject(error);
+                        observer.error(error);
+                        observer.complete();
                     }
-                })
-                .catch(reject);
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
         });
     }
 }

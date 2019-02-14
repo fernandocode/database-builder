@@ -7,6 +7,7 @@ import { SqlCompilable } from "./sql-compilable";
 import { QueryCompiled } from "../core/query-compiled";
 import { SqlExecutable } from "./sql-executable";
 import { ModelUtils } from "../core/model-utils";
+import { Observable } from "rxjs";
 
 export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
 
@@ -20,7 +21,7 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(cascade?: boolean, database?: DatabaseBase): Promise<DatabaseResult[]> {
+    public execute(cascade?: boolean, database?: DatabaseBase): Observable<DatabaseResult[]> {
         return this.checkDatabaseResult(
             this._executableBuilder.execute(this.compile(cascade), this.getDatabase(database))
         );
@@ -68,7 +69,7 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
     protected abstract resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled;
     protected abstract resolveDependency(dependency: MapperTable): QueryCompiled;
 
-    protected abstract checkDatabaseResult(promise: Promise<DatabaseResult[]>): Promise<DatabaseResult[]>;
+    protected abstract checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]>;
 
     protected getDatabase(database: DatabaseBase): DatabaseBase {
         const result = (database ? database : this.database);

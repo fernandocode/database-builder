@@ -4,7 +4,7 @@ import { DatabaseBase, DatabaseResult } from "../definitions/database-definition
 import { DdlBaseBuilder } from "./ddl-base-builder";
 import { DatabaseBuilderError } from "../core/errors";
 import { QueryCompiled } from "../core/query-compiled";
-import { Observable, Observer } from "rxjs";
+import { Observable } from "rxjs";
 
 export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
 
@@ -18,30 +18,7 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public executeObserver(cascade: boolean = true, database: DatabaseBase = void 0): Observable<DatabaseResult[]> {        
-        const compiled = this.compile(cascade);
-        return this._executableBuilder.executeObserver(
-            compiled.map(query => {
-                return {
-                    query,
-                    params: []
-                } as QueryCompiled;
-            }),
-            this.getDatabase(database));
-        // return Observable.create((observer: Observer<DatabaseResult[]>) => {
-        //     this.execute(cascade, database)
-        //         .then(result => {
-        //             observer.next(result);
-        //             observer.complete();
-        //         })
-        //         .catch(err => {
-        //             observer.error(err);
-        //             observer.complete();
-        //         })
-        // });
-    }
-
-    public execute(cascade: boolean = true, database: DatabaseBase = void 0): Promise<DatabaseResult[]> {
+    public execute(cascade: boolean = true, database: DatabaseBase = void 0): Observable<DatabaseResult[]> {
         const compiled = this.compile(cascade);
         return this._executableBuilder.execute(
             compiled.map(query => {
@@ -50,7 +27,8 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
                     params: []
                 } as QueryCompiled;
             }),
-            this.getDatabase(database));
+            this.getDatabase(database)
+        );
     }
 
     public compile(cascade: boolean = true): string[] {

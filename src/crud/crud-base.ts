@@ -7,7 +7,7 @@ import { PrimaryKeyType } from "../core/enums/primary-key-type";
 import { MapperTable } from "../mapper-table";
 import { QueryCompiled } from "../core/query-compiled";
 import { SqlBase } from "./sql-base";
-import { Utils } from "../core/utils";
+import { Observable, Observer } from "rxjs";
 
 export abstract class CrudBase<
     T,
@@ -33,23 +33,28 @@ export abstract class CrudBase<
         return this._builder.compile();
     }
 
-    protected checkDatabaseResult(promise: Promise<DatabaseResult[]>): Promise<DatabaseResult[]> {
+    protected checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]> {
         if (this._typeCrud === TypeCrud.CREATE) {
-            return new Promise<DatabaseResult[]>((resolve, reject) => {
-                promise.then(results => {
-                    const result = results[0];
-                    if (KeyUtils.primaryKeyType(this._builder.getMapper()) === PrimaryKeyType.AutoIncrement) {
-                        KeyUtils.setKey(this._builder.getMapper(), this._builder.getModel(), result.insertId);
-                    } else {
-                        const keyValue = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
-                        try {
-                            result.insertId = keyValue;
-                        } catch (error) {
-                            // ignore error readonly property
+            return Observable.create((observer: Observer<DatabaseResult[]>) => {
+                promise
+                    .subscribe(results => {
+                        const result = results[0];
+                        if (KeyUtils.primaryKeyType(this._builder.getMapper()) === PrimaryKeyType.AutoIncrement) {
+                            KeyUtils.setKey(this._builder.getMapper(), this._builder.getModel(), result.insertId);
+                        } else {
+                            const keyValue = KeyUtils.getKey(this._builder.getMapper(), this._builder.getModel());
+                            try {
+                                result.insertId = keyValue;
+                            } catch (error) {
+                                // ignore error readonly property
+                            }
                         }
-                    }
-                    resolve(results);
-                }).catch(reject);
+                        observer.next(results);
+                        observer.complete();
+                    }, err => {
+                        observer.error(err);
+                        observer.complete();
+                    });
             });
         }
         return promise;

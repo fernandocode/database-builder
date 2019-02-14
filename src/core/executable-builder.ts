@@ -9,12 +9,31 @@ export class ExecutableBuilder {
 
     }
 
-    public executeObserver(
+    public execute(
         compiled: QueryCompiled[],
         database: DatabaseBase,
     ): Observable<DatabaseResult[]> {
         return Observable.create((observer: Observer<DatabaseResult[]>) => {
             this.executorLinked(compiled, [], database)
+                .subscribe(result => {
+                    observer.next(result);
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
+    private executeSql(
+        database: DatabaseBase, compiled: QueryCompiled,
+    ): Observable<DatabaseResult> {
+        return Observable.create((observer: Observer<DatabaseResult>) => {
+            this.log(compiled);
+            database.executeSql(
+                compiled.query,
+                compiled.params,
+            )
                 .then(result => {
                     observer.next(result);
                     observer.complete();
@@ -26,25 +45,9 @@ export class ExecutableBuilder {
         });
     }
 
-    public execute(
-        compiled: QueryCompiled[],
-        database: DatabaseBase,
-    ): Promise<DatabaseResult[]> {
-        return this.executorLinked(compiled, [], database);
-    }
-
-    private executeSql(
-        database: DatabaseBase, compiled: QueryCompiled,
-    ): Promise<DatabaseResult> {
-        this.log(compiled);
-        return database.executeSql(
-            compiled.query,
-            compiled.params,
-        );
-    }
-
     private checkParams(
-        script: QueryCompiled, resultadosAnteriores: DatabaseResult[]
+        script: QueryCompiled,
+        resultadosAnteriores: DatabaseResult[]
     ): QueryCompiled {
         const paramsResult: any[] = [];
         script.params.forEach(param => {
@@ -66,22 +69,28 @@ export class ExecutableBuilder {
         compiled: QueryCompiled[],
         dataResultsApplied: DatabaseResult[],
         database: DatabaseBase
-    ): Promise<DatabaseResult[]> {
-        return new Promise((resolve, reject) => {
+    ): Observable<DatabaseResult[]> {
+        return Observable.create((observer: Observer<DatabaseResult[]>) => {
             if (compiled && compiled.length > 0) {
                 this.executeSql(database, this.checkParams(compiled[0], dataResultsApplied))
-                    .then(result => {
+                    .subscribe(result => {
                         // remove o item executado
                         compiled.shift();
                         this.executorLinked(compiled, dataResultsApplied.concat([result]), database)
-                            .then(res => {
-                                resolve([result].concat(res));
-                            })
-                            .catch((err: any) => reject(err));
-                    })
-                    .catch((err: any) => reject(err));
+                            .subscribe(res => {
+                                observer.next([result].concat(res));
+                                observer.complete();
+                            }, (err: any) => {
+                                observer.error(err);
+                                observer.complete();
+                            });
+                    }, (err: any) => {
+                        observer.error(err);
+                        observer.complete();
+                    });
             } else {
-                resolve([]);
+                observer.next([]);
+                observer.complete();
             }
         });
     }
