@@ -310,14 +310,21 @@ export class Utils {
 
     public static clearParam(param: ValueTypeToParse): ValueTypeToParse {
         if (Utils.isString(param)) {
+            // remove possiveis " ou ' (aspas duplas ou simples) no inicio ou fim de uma string de valor de parametro
+            return (param as string).replace(/(^["']|["']$)/mg, "");
+        }
+        return param;
+    }
+
+    public static clearParamLambda(param: ValueTypeToParse): ValueTypeToParse {
+        // Somente quando for uma expressão lambda que deve ser convertido os tipos numericos e booleans que estejam no formato string
+        if (Utils.isString(param)) {
             if (Utils.isOnlyNumber(param)) {
                 return +param;
             }
             if (Utils.isReservedBoolean(param)) {
                 return param === "true";
             }
-            // remove possiveis " ou ' (aspas duplas ou simples) no inicio ou fim de uma string de valor de parametro
-            return (param as string).replace(/(^["']|["']$)/mg, "");
         }
         return param;
     }

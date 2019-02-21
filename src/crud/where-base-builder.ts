@@ -398,65 +398,36 @@ export abstract class WhereBaseBuilder<
     protected buildWhereColumn(
         condition: Condition[],
         ...valuesOrColumns: (ColumnParams | string | ValueTypeToParse[])[]
-        // left: ColumnParams | string | ValueTypeToParse[],
     ) {
         const columnsParams = valuesOrColumns.map(x => this.processParam(x));
-        // const columnRight = this.processParam(right);
-        // const columnLeft = this.processParam(left);
         this.buildWhereParams(
             condition,
             columnsParams.map(x => Utils.addAlias(x.column, this._alias)),
             columnsParams.map((value) => value.params)
                 // alternative Array.flat()
                 // https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array/flat#Alternativa
-                .reduce((acc, val) => acc.concat(val), []),
-            // Utils.addAlias(columnRight.column, this._alias),
-            // Utils.addAlias(columnLeft.column, this._alias),
-            // columnRight.params.concat(columnLeft.params)
+                .reduce((acc, val) => acc.concat(val), [])
         );
     }
-    // protected buildWhereColumn(
-    //     condition: Condition[],
-    //     right: ColumnParams | string | ValueTypeToParse[],
-    //     left: ColumnParams | string | ValueTypeToParse[],
-    // ) {
-    //     const columnRight = this.processParam(right);
-    //     const columnLeft = this.processParam(left);
-    //     this.buildWhereParams(
-    //         condition,
-    //         Utils.addAlias(columnRight.column, this._alias),
-    //         Utils.addAlias(columnLeft.column, this._alias),
-    //         columnRight.params.concat(columnLeft.params)
-    //     );
-    // }
 
     protected buildWhereParams(
         condition: Condition[],
         columns: string[],
-        // column1: string,
-        // column2: string,
         params: ValueTypeToParse[],
     ) {
         this.buildWhere(
             condition,
             columns
         );
-        // this.buildWhere(condition,
-        //     column1,
-        //     column2
-        // );
         this.addParam(params);
     }
 
     protected buildWhere(
         conditions: Condition[],
-        columns: string[],
-        // column1: string,
-        // column2: string | string[],
+        columns: string[]
     ) {
         this.checkWhere();
         this._where += this.createWhere(conditions, columns);
-        // this._where += this.createWhere(conditions, column1, column2);
     }
 
     protected addParam(
@@ -500,15 +471,14 @@ export abstract class WhereBaseBuilder<
 
     private buildWhereMetadata(metadata: LambdaMetadata) {
         if (!Utils.isNameColumn(metadata.left) && Utils.isValue(metadata.left)) {
-            this.addParam(metadata.left);
+            this.addParam(Utils.clearParamLambda(metadata.left));
             metadata.left = "?";
         }
         if (!Utils.isNameColumn(metadata.right) && Utils.isValue(metadata.right)) {
-            this.addParam(metadata.right);
+            this.addParam(Utils.clearParamLambda(metadata.right));
             metadata.right = "?";
         }
         this.buildWhere(metadata.condition, [Utils.addAlias(metadata.left, this._alias), Utils.addAlias(metadata.right, this._alias)]);
-        // this.buildWhere(metadata.condition, Utils.addAlias(metadata.left, this._alias), Utils.addAlias(metadata.right, this._alias));
     }
 
     private addValueParam(
@@ -521,9 +491,7 @@ export abstract class WhereBaseBuilder<
 
     private createWhere(
         conditions: Condition[],
-        columns: string[],
-        // column1: string,
-        // column2: string | string[],
+        columns: string[]
     ) {
         // TODO: verificar se colunas não são condition, para remover a condition
         let conditionsArray = this._pendingConditions.concat(conditions);
@@ -539,11 +507,6 @@ export abstract class WhereBaseBuilder<
             conditionsArray,
             columns
         );
-        // return this.buildConditions(
-        //     conditionsArray,
-        //     column1,
-        //     isConditionIsNullInColumn2 ? void 0 : column2
-        // );
     }
 
     private conditionIsNull(currentConditions: Condition[]): Condition[] {
@@ -563,14 +526,11 @@ export abstract class WhereBaseBuilder<
 
     private buildConditions(
         conditions: Condition[],
-        columns: string[],
-        // column1: string,
-        // column2: string | string[],
+        columns: string[]
     ): string {
         // new scope
         if (!conditions || (conditions.length === 1 && conditions[0] === void 0)) {
             return `(${columns[0]})`;
-            // return `(${column1})`;
         }
         switch (conditions.toString()) {
             case [Condition.Between].toString():
@@ -580,11 +540,6 @@ export abstract class WhereBaseBuilder<
                     return `${columns[0]} ${this.builderConditions(conditions)} ${columns[1]} ${WhereBaseBuilder.AND} ${columns[2]}`;
                 }
                 throw new DatabaseBuilderError(`Length (${columns.length}) (values: ${columns}) parameter to '${conditions}' condition incorrect!`);
-            // // ${column} BETWEEN ? AND ?
-            // if (!Utils.isArray(column2) || column2.length === 2) {
-            //     return `${column1} ${this.builderConditions(conditions)} ? ${WhereBaseBuilder.AND} ?`;
-            // }
-            // throw new DatabaseBuilderError(`Length (${column2.length}) (values: ${column2}) parameter to '${conditions}' condition incorrect!`);
             case [Condition.In].toString():
             case [Condition.Not, Condition.In].toString():
                 // ${column} IN (?, ?, ...)
@@ -606,26 +561,6 @@ export abstract class WhereBaseBuilder<
                     return `${columns[0]} ${this.builderConditions(conditions)} ${columns[1]}`.trim();
                 }
                 return `${columns[0]} ${this.builderConditions(conditions)}`.trim();
-            // case [Condition.Not, Condition.In].toString():
-            //     // ${column} IN (?, ?, ...)
-            //     return `${column1} ${this.builderConditions(conditions)} (${column2})`.trim();
-            // case [Condition.Not, Condition.IsNull].toString():
-            //     return `${column1} IS NOT NULL`.trim();
-            // case [Condition.Not, Condition.Equal].toString():
-            //     return `${column1} <> ${column2}`.trim();
-            // case [Condition.Not, Condition.Great].toString():
-            //     return this.buildConditions([Condition.LessAndEqual], column1, column2);
-            // case [Condition.Not, Condition.GreatAndEqual].toString():
-            //     return this.buildConditions([Condition.Less], column1, column2);
-            // case [Condition.Not, Condition.Less].toString():
-            //     return this.buildConditions([Condition.GreatAndEqual], column1, column2);
-            // case [Condition.Not, Condition.LessAndEqual].toString():
-            //     return this.buildConditions([Condition.Great], column1, column2);
-            // default:
-            //     if (column2) {
-            //         return `${column1} ${this.builderConditions(conditions)} ${column2}`.trim();
-            //     }
-            //     return `${column1} ${this.builderConditions(conditions)}`.trim();
         }
     }
 

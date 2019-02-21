@@ -28,6 +28,22 @@ describe("Where", () => {
         expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
+    it("value type string", () => {
+        const query = crud.query(TestClazz);
+        const param1: string = "abc";
+        const param2: string = "102";
+        query.where(where => {
+            where.equal(x => x.description, param1);
+            where.equal(x => x.description, param2);
+        });
+        const result = query.compile();
+        console.log(result);
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal(param1);
+        expect(result[0].params[1]).to.equal(param2);
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.description = ? AND tes.description = ?");
+    });
+
     it("value is null", () => {
         const query = crud.query(TestClazz);
         const idParam: number = void 0;
