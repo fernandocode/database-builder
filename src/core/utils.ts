@@ -265,6 +265,9 @@ export class Utils {
     public static getType(instance: ValueTypeToParse): FieldType;
     public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): FieldType;
     public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression?: ExpressionOrColumn<TReturn, T>): FieldType {
+        if (instance === void 0) {
+            return void 0;
+        }
         if (expression) {
             return this.getTypeByValue(this.getValue(instance, expression));
         }

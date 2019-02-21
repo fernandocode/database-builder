@@ -106,20 +106,10 @@ export class DatabaseHelper {
         ) {
             return ColumnType.BOOLEAN;
         }
+        if (type === void 0) {
+            return void 0;
+        }
         throw new DatabaseBuilderError(`type '${type}' não configurado!`);
-        // switch (type) {
-        //     case FieldType.STRING:
-        //     case FieldType.ARRAY:
-        //     case FieldType.OBJECT:
-        //         return ColumnType.TEXT;
-        //     case FieldType.DATE:
-        //     case FieldType.NUMBER:
-        //         return ColumnType.INTEGER;
-        //     case FieldType.BOOLEAN:
-        //         return ColumnType.BOOLEAN;
-        //     default:
-        //         throw new DatabaseBuilderError(`type '${type}' não configurado!`);
-        // }
     }
 
     public parseToValueType(value: ValueTypeToParse, type: FieldType = this.getType(value)): ValueType {

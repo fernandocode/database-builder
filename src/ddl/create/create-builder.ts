@@ -17,11 +17,13 @@ export class CreateBuilder<T> extends DdlBaseBuilder<T> {
     }
 
     public columns(columnsCallback: (columns: DdlColumnsBuilder<T>) => void): CreateBuilder<T> {
-        return super.columnsBase(columnsCallback,
-            new DdlColumnsBuilder<T>(this._mapperTable,
+        return super.columnsBase(
+            columnsCallback,
+            new DdlColumnsBuilder<T>(
+                this._mapperTable,
                 void 0
-            )
-            , this);
+            ),
+            this);
     }
 
     protected resolveDependency(dependency: MapperTable): DdlCompiled {

@@ -4,6 +4,7 @@ import { Column } from "./column";
 import { FieldType } from "./enums/field-type";
 import { ColumnsCompiled } from "./columns-compiled";
 import { PrimaryKeyType } from "./enums/primary-key-type";
+import { DatabaseHelper } from "../database-helper";
 
 export abstract class ColumnsBaseBuilder<
     TThis extends ColumnsBaseBuilder<TThis, T, TColumn>,
@@ -11,13 +12,13 @@ export abstract class ColumnsBaseBuilder<
     TColumn extends Column
     > {
 
+    private _databaseHelper: DatabaseHelper = new DatabaseHelper();
+
     protected columns: TColumn[] = [];
 
     constructor(
-        // protected readonly metadata: MetadataTable<T>,
         protected readonly mapperTable: MapperTable,
-        protected readonly modelToSave: T,
-        // protected readonly modelToSave: T = metadata.instance,
+        protected readonly modelToSave: T
     ) {
     }
 
@@ -25,7 +26,6 @@ export abstract class ColumnsBaseBuilder<
         // clear columns
         this.columns = [];
         this.setAllColumns(this.mapperTable, this.modelToSave);
-        // this.setAllColumns(this.metadata.mapperTable, this.modelToSave);
     }
 
     public setColumn(
@@ -42,13 +42,15 @@ export abstract class ColumnsBaseBuilder<
     }
 
     public set<TReturn extends ValueTypeToParse>(
-        expression: ExpressionOrColumn<TReturn, T>,
-        primaryKeyType: PrimaryKeyType
+        columnExpression: ExpressionOrColumn<TReturn, T>,
+        primaryKeyType: PrimaryKeyType,
+        type?: new () => TReturn
     ): TThis {
         return this.setColumn(
-            Utils.getColumn(expression),
-            Utils.getType(this.modelToSave, expression),
-            // Utils.getType(this.metadata.instance, expression),
+            Utils.getColumn(columnExpression),
+            type
+                ? this._databaseHelper.getFieldType(type)
+                : Utils.getType(this.modelToSave, columnExpression),
             primaryKeyType
         );
     }
@@ -75,8 +77,7 @@ export abstract class ColumnsBaseBuilder<
     }
 
     protected isCompositeKey(): boolean {
-        return this.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
-        // return this.metadata.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
+        return this.mapperTable && this.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1
     }
 
     protected abstract columnFormat(column: TColumn): string;

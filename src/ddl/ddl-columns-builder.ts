@@ -34,14 +34,13 @@ export class DdlColumnsBuilder<T> extends ColumnsBaseBuilder<DdlColumnsBuilder<T
             return `${column.name} ${Utils.parseColumnType(column.type)}`;
         }
         if (Utils.isFlag(column.type, FieldType.NULL)) {
-            throw new DatabaseBuilderError(`Mapper '${this.mapperTable.tableName}', column '${column.name}' of type 'NULL' not supported!`);
+            throw new DatabaseBuilderError(`Mapper '${this.mapperTable ? this.mapperTable.tableName : "?"}', column '${column.name}' of type 'NULL' not supported!`);
         }
         // is table reference/list
         const columnType = Utils.parseColumnType(column.type);
         if (columnType === ColumnType.TABLE_REFERENCE) {
             return void 0;
         }
-        return `${column.name} ${columnType}${!!column.primaryKeyType ? ` NOT NULL PRIMARY KEY` : ""}${column.primaryKeyType === PrimaryKeyType.AutoIncrement ? ` AUTOINCREMENT` : ""}`;
-        // return `${column.name} ${Utils.parseColumnType(column.type)}${!!column.primaryKeyType ? ` NOT NULL PRIMARY KEY` : ""}${column.primaryKeyType === PrimaryKeyType.AutoIncrement ? ` AUTOINCREMENT` : ""}`;
+        return `${column.name} ${columnType ? columnType : ""}${!!column.primaryKeyType ? ` NOT NULL PRIMARY KEY` : ""}${column.primaryKeyType === PrimaryKeyType.AutoIncrement ? ` AUTOINCREMENT` : ""}`.trim();
     }
 }

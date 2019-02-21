@@ -42,8 +42,8 @@ export abstract class DdlBaseBuilder<T> {
     protected columnsBase<TBuilder extends DdlBaseBuilder<T>>(
         columnsCallback: (columns: DdlColumnsBuilder<T>) => void,
         instanceSetColumnsBuilder: DdlColumnsBuilder<T>,
-        instanceReturn: TBuilder)
-        : TBuilder {
+        instanceReturn: TBuilder
+    ): TBuilder {
         columnsCallback(instanceSetColumnsBuilder);
         this.compileColumns(instanceSetColumnsBuilder.compile());
         return instanceReturn;
