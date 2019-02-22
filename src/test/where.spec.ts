@@ -5,6 +5,7 @@ import { TestClazz } from "./models/test-clazz";
 import * as moment from "moment";
 import { Crud } from "../crud/crud";
 import { getMapper } from "./mappers-table-new";
+import { TestClazzRef } from "./models/test-clazz-ref";
 
 describe("Where", () => {
 
@@ -116,6 +117,26 @@ describe("Where", () => {
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ? OR tes.id = tes.referenceTest_id");
+    });
+
+    it("diferent context or", () => {
+        const query = crud.query(TestClazz);
+        let joinT: JoinQueryBuilder<TestClazzRef>;
+        query.join(TestClazzRef,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                joinT = join;
+            });
+        query.select(x => x.id);
+        query.where(where => {
+            where.equal(x => x.id, 2);
+            where.or().equal(joinT.ref(x => x.description), "abc");
+        });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(2);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal("abc");
+        expect(result[0].query).to.equal("SELECT tes.id AS id FROM TestClazz AS tes LEFT JOIN TestClazzRef AS tes0 ON (tes0.id = tes.referenceTest_id) WHERE tes.id = ? OR tes0.description = ?");
     });
 
     it("compare to value", () => {
