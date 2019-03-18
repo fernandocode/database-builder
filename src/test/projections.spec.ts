@@ -5,7 +5,6 @@ import { TestClazz } from "./models/test-clazz";
 import { getMapper } from "./mappers-table-new";
 import { Crud } from "../crud/crud";
 import { ReferencesModelTest } from "./models/reference-model-test";
-import { Z_ASCII } from "zlib";
 
 describe("Projections", () => {
 
@@ -30,10 +29,12 @@ describe("Projections", () => {
         const query = crud.query(TestClazz);
         query.projection(select => {
             select.all();
+            select.remove(x => x.numero);
+            select.remove(x => x.referenceTest.id);
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
     });
 
     it("default explicit columns", () => {

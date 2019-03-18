@@ -12,9 +12,11 @@ import { MetadataTable } from "../metadata-table";
 import { ProjectionsHelper } from "../core/projections-helper";
 import { DatabaseBuilderError } from "../core/errors";
 import { SqlCompilable } from "./sql-compilable";
+import { ProjectionModel } from "./projection-model";
+import { ProjectionCompile } from "./projection-compile";
 
 export class ProjectionBuilder<T> {
-    private _projection: ProjectionCompiled = new ProjectionCompiled();
+    private _projections: ProjectionModel[] = [];
 
     private readonly _projectionsUtils: ProjectionsUtils<T>;
 
@@ -27,7 +29,7 @@ export class ProjectionBuilder<T> {
     ) {
         this._projectionsUtils = new ProjectionsUtils(
             _aliasTable, _addAliasTableToAlias, addAliasDefault,
-            (projection: ProjectionCompiled) => this.applyProjection(projection)
+            (projection: ProjectionModel) => this.applyProjection(projection)
         );
     }
 
@@ -70,7 +72,8 @@ export class ProjectionBuilder<T> {
         ...projections: Array<ExpressionProjection<any, T>>
         // ...projections: Array<TypeProjection<T>>
     ): ProjectionBuilder<T> {
-        const groupCompiled = this.proj().group(alias, ...projections)._compiled();
+        const groupProjection = this.proj().group(alias, ...projections)._result();
+        const groupCompiled = ProjectionCompile.compile(groupProjection);
         this.apply(
             groupCompiled.projection,
             [],
@@ -113,6 +116,17 @@ export class ProjectionBuilder<T> {
             expression,
             alias,
         );
+        return this;
+    }
+
+    public remove<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>
+    ): ProjectionBuilder<T> {
+        const column = this._projectionsUtils.create(Utils.getColumn(expression)).projection;
+        const indexRemove = this._projections.findIndex(x => x.projection === column);
+        if (indexRemove > -1) {
+            this._projections.splice(indexRemove, 1);
+        }
         return this;
     }
 
@@ -314,14 +328,21 @@ export class ProjectionBuilder<T> {
         }
         (subQuery as QueryCompiled[])
             .forEach(compiled => {
-                this.apply(compiled.query, [Projection.BetweenParenthesis], alias);
-                this._projection.params = this._projection.params.concat(compiled.params);
+                this.apply(compiled.query, [Projection.BetweenParenthesis], alias, compiled.params);
+                // this._projections.params = this._projections.params.concat(compiled.params);
             });
         return this;
     }
 
     public compile(): ProjectionCompiled {
-        return this._projection;
+        return ProjectionCompile.compile(this._projections);
+        // const projectionCompiled: ProjectionCompiled = new ProjectionCompiled();
+        // this._projections.forEach(projection => {
+        //     projectionCompiled.projection += projectionCompiled.projection.length > 0 ? ", " : ""
+        //     projectionCompiled.projection += projection.projectionn;
+        //     projectionCompiled.params = projectionCompiled.params.concat(projection.params);
+        // });
+        // return projectionCompiled;
     }
 
     private selectAllColumns(mapper: MapperTable): void {
@@ -334,15 +355,11 @@ export class ProjectionBuilder<T> {
         }
     }
 
-    private checkProjection() {
-        this._projection.projection += this._projection.projection.length ? ", " : "";
-    }
-
     private compileCase(
         compiled: BuilderCompiled,
     ) {
         if (compiled.builder.length) {
-            this.applyProjection(new ProjectionCompiled(compiled.builder, compiled.params));
+            this.applyProjection(new ProjectionModel(compiled.builder, compiled.params));
         }
     }
 
@@ -365,11 +382,9 @@ export class ProjectionBuilder<T> {
     }
 
     private applyProjection(
-        projection: ProjectionCompiled
+        projection: ProjectionModel
     ) {
-        this.checkProjection();
-        this._projection.projection += projection.projection;
-        this._projection.params = this._projection.params.concat(projection.params);
+        this._projections.push(projection);
     }
 
     private addAliasTable(

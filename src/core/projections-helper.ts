@@ -1,3 +1,4 @@
+import { ProjectionModel } from './../crud/projection-model';
 import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, ExpressionProjection, Utils } from "./utils";
 import { ProjectionsUtils } from "./projections-utils";
@@ -11,14 +12,14 @@ export class ProjectionsHelper<T> {
         private _typeT: new () => T,
         private _aliasTable: string,
         private _addAliasTableToAlias: boolean = false,
-        private _registerProjetionCallback?: (projection: ProjectionCompiled) => void,
-        private _result?: ProjectionCompiled
+        private _registerProjetionCallback?: (projection: ProjectionModel) => void,
+        private __result?: ProjectionModel[]
     ) {
         this._projectionsUtils = new ProjectionsUtils<T>(_aliasTable, _addAliasTableToAlias, void 0, _registerProjetionCallback);
     }
 
-    public _compiled(): ProjectionCompiled {
-        return this._result;
+    public _result(): ProjectionModel[] {
+        return this.__result;
     }
 
     public exp<TReturn>(
@@ -127,13 +128,13 @@ export class ProjectionsHelper<T> {
         return this.getResult(this._projectionsUtils.apply(expression, [Projection.Coalesce], alias, args));
     }
 
-    private getResult(result: ProjectionCompiled): ProjectionsHelper<T> {
+    private getResult(result: ProjectionModel): ProjectionsHelper<T> {
         if (result) {
             return new ProjectionsHelper(
                 this._typeT, this._aliasTable,
                 this._addAliasTableToAlias,
                 this._registerProjetionCallback,
-                result
+                [result]
             );
         }
         return this;

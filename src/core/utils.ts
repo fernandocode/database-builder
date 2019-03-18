@@ -21,6 +21,7 @@ import { ReplacementParam } from "./replacement-param";
 import { Query, QueryBuilder } from "../crud";
 import { MetadataTable } from "../metadata-table";
 import { MetadataTableBase } from "../metadata-table-base";
+import { ProjectionCompile } from "../crud/projection-compile";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -237,7 +238,7 @@ export class Utils {
 
     public static resolveExpressionProjection<TReturn, T>(projection: ExpressionProjection<TReturn, T>): ProjectionCompiled {
         if (this.isProjectionsHelper(projection)) {
-            return (projection as ProjectionsHelper<T>)._compiled();
+            return ProjectionCompile.compile((projection as ProjectionsHelper<T>)._result());
         }
         if (this.isColumnRef(projection)) {
             return new ProjectionCompiled((projection as ColumnRef).result());

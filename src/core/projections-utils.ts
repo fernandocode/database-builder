@@ -1,6 +1,6 @@
+import { ProjectionModel } from './../crud/projection-model';
 import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, Utils } from "./utils";
-import { ProjectionCompiled } from "../crud/projection-compiled";
 export class ProjectionsUtils<T> {
 
     public static readonly WILDCARD = "*";
@@ -11,7 +11,7 @@ export class ProjectionsUtils<T> {
         private _aliasTable: string,
         private _addAliasTableToAlias: boolean = false,
         private _addAliasDefault: boolean = true,
-        private _registerProjetionCallback?: (projection: ProjectionCompiled) => void
+        private _registerProjetionCallback?: (projection: ProjectionModel) => void
     ) {
     }
 
@@ -20,16 +20,16 @@ export class ProjectionsUtils<T> {
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
-    ): ProjectionCompiled {
+    ): ProjectionModel {
         return this.checkApply(expression, projections, alias, args);
     }
 
-    private create(
+    public create(
         column: string,
         projections: Projection[] = [],
         alias: string = this.defaultAliasAs(column),
         args: any[] = []
-    ): ProjectionCompiled {
+    ): ProjectionModel {
         return this.createProjection(projections,
             this.addAliasTable(column), alias, args);
     }
@@ -39,7 +39,7 @@ export class ProjectionsUtils<T> {
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
-    ): ProjectionCompiled {
+    ): ProjectionModel {
         return this.register(
             this.create(Utils.getColumn(expression),
                 projections, alias, args)
@@ -51,7 +51,7 @@ export class ProjectionsUtils<T> {
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
-    ): ProjectionCompiled {
+    ): ProjectionModel {
         if (expression === void 0) {
             projections.forEach(projection => {
                 this._pendingProjections.unshift(projection);
@@ -66,7 +66,7 @@ export class ProjectionsUtils<T> {
         }
     }
 
-    private register(projection: ProjectionCompiled): ProjectionCompiled {
+    private register(projection: ProjectionModel): ProjectionModel {
         if (this._registerProjetionCallback) {
             this._registerProjetionCallback(projection);
         }
@@ -78,7 +78,7 @@ export class ProjectionsUtils<T> {
         column: string,
         alias: string = this.defaultAliasAs(column),
         args: any[],
-    ): ProjectionCompiled {
+    ): ProjectionModel {
         if (projection !== void 0) {
             return this.buildColumn(this.builderProjections(projection, column, args), alias);
         }
@@ -133,10 +133,10 @@ export class ProjectionsUtils<T> {
     private buildColumn(
         column: string,
         alias: string = this.defaultAliasAs(column),
-    ): ProjectionCompiled {
+    ): ProjectionModel {
         if (alias && alias.length) {
-            return new ProjectionCompiled(`${column} AS ${alias}`, []);
+            return new ProjectionModel(`${column} AS ${alias}`, []);
         }
-        return new ProjectionCompiled(column, []);
+        return new ProjectionModel(column, []);
     }
 }

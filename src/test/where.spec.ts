@@ -40,7 +40,6 @@ describe("Where", () => {
             where.equal(x => x.description, param3);
         });
         const result = query.compile();
-        console.log(result);
         expect(result[0].params.length).to.equal(3);
         expect(result[0].params[0]).to.equal(param1);
         expect(result[0].params[1]).to.equal(param2);

@@ -5,6 +5,7 @@ import { BuilderCompiled } from "../core/builder-compiled";
 import { ProjectionBuilder } from "./projection-builder";
 import { WhereCompiled } from "./where-compiled";
 import { WhereBuilder } from "./where-builder";
+import { ProjectionCompile } from "./projection-compile";
 
 export class ProjectionCaseWhen<T> {
 
@@ -40,7 +41,7 @@ export class ProjectionCaseWhen<T> {
 
     private projection(type: CaseWhen, projection: ProjectionOrValue<T>): ProjectionCaseWhen<T> {
         if (Utils.isProjectionsHelper(projection)) {
-            const projectionCompiled = (projection as ProjectionsHelper<T>)._compiled();
+            const projectionCompiled = ProjectionCompile.compile((projection as ProjectionsHelper<T>)._result());
             this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
             this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);
         } else if (Utils.isProjectionBuilder(projection)) {
