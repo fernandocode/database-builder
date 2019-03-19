@@ -1,5 +1,4 @@
 import { PrimaryKeyType } from "./../core/enums/primary-key-type";
-import { Utils } from "./../core/utils";
 import { MapperSettingsModel } from "./mapper-settings-model";
 import { Expression } from "lambda-expression";
 import { GetMapper } from "./interface-get-mapper";
