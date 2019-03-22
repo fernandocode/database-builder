@@ -150,6 +150,10 @@ export class Utils {
         return instance instanceof PlanRef;
     }
 
+    public static databaseName<T>(tablename: TypeOrString<T>): string {
+        return this.getValueByTypeOrString(tablename);
+    }
+
     public static getMapperTable<T>(
         typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> },
         getMapper: (tKey: (new () => any) | string) => MetadataTable<any>

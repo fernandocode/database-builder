@@ -1,3 +1,4 @@
+import { Utils, ExpressionOrColumn } from './../core/utils';
 import { Drop } from "./drop/drop";
 import { Create } from "./create/create";
 import { Alter } from "./alter/alter";
@@ -35,6 +36,46 @@ export class Ddl {
         database: DatabaseBase = this.getDatabase()
     ): Drop<T> {
         return new Drop(typeT, mapperTable, database, this.enableLog);
+    }
+
+    /**
+     * hasTable
+     */
+    public hasTable<T>(
+        tablename: (new () => T) | string
+    ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this._database.executeSql(`
+                SELECT name
+                    FROM sqlite_master
+                WHERE type = 'table' AND 
+                        name = ?;
+                `, [Utils.databaseName(tablename)])
+                .then(result => {
+                    resolve(result.rows.length > 0);
+                })
+                .catch(err => reject(err));
+        });
+    }
+
+    /**
+     * hasTable
+     */
+    public hasColumn<T>(
+        tablename: (new () => T) | string,
+        column: ExpressionOrColumn<any, T>
+    ): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            this._database.executeSql(`
+                SELECT name
+                    FROM pragma_table_info(?)
+                WHERE name = ?;          
+                `, [Utils.databaseName(tablename), Utils.getColumn(column)])
+                .then(result => {
+                    resolve(result.rows.length > 0);
+                })
+                .catch(err => reject(err));
+        });
     }
 
     private getDatabase() {
