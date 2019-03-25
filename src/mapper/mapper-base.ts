@@ -32,19 +32,20 @@ export class MapperBase implements GetMapper {
      */
     public autoMapper<T>(
         newable: new () => T,
-        keyColumn: Expression<T>,
+        keyColumn?: Expression<T>,
         primaryKeyType?: PrimaryKeyType,
-        // isAutoIncrement?: boolean,
         readOnly?: boolean,
         settings: MapperSettingsModel = this._defaultSettings
     ): MetadataTable<T> {
         const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly)
-            .key(keyColumn, primaryKeyType)
             .autoMapper(
                 settings.references,
                 settings.referencesId,
                 settings.referencesIdRecursive
             );
+        if (keyColumn) {
+            metadata.key(keyColumn, primaryKeyType);
+        }
         this.push(metadata);
         return metadata;
     }
