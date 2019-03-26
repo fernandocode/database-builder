@@ -7,10 +7,10 @@ export class Linha extends BaseModel<number> {
     public imagem: Imagem = new Imagem();
     public deleted: boolean = false;
 
-    constructor(instance?: Linha) {
-        super(instance ? instance.codeImport : -1);
-        if (instance) {
-            Object.assign(this, instance);
-        }
-    }
+    // constructor(instance?: Linha) {
+    //     super(instance ? instance.codeImport : -1);
+    //     if (instance) {
+    //         Object.assign(this, instance);
+    //     }
+    // }
 }

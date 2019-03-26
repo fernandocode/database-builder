@@ -69,6 +69,17 @@ describe("Where", () => {
         expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
     });
 
+    it("value is not null (null)", () => {
+        const query = crud.query(TestClazz);
+        const idParam: number = null;
+        query.where(where => {
+            where.not().equal(x => x.id, idParam);
+        });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
+    });
+
     it("column string", () => {
         const query = crud.query(TestClazz);
         query.where(where => {

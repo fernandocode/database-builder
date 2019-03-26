@@ -10,10 +10,10 @@ export class Estrutura extends BaseModel<number> {
     public observacao: string = "";
     public deleted: boolean = false;
 
-    constructor(instance?: Estrutura) {
-        super(instance ? instance.codeImport : -1);
-        if (instance) {
-            Object.assign(this, instance);
-        }
-    }
+    // constructor(instance?: Estrutura) {
+    //     super(instance ? instance.codeImport : -1);
+    //     if (instance) {
+    //         Object.assign(this, instance);
+    //     }
+    // }
 }

@@ -26,33 +26,27 @@ import { Referencia } from "./models/referencia";
 import { Estrutura } from "./models/estrutura";
 import { Imagem } from "./models/imagem";
 import { DatabaseTypes } from "../definitions";
+import { MapperTest } from "./mapper-test";
 
-export class MappersTableNew extends MapperBase {
+export class MappersTableNew extends MapperTest {
 
     constructor() {
-        super(
-            new DatabaseHelper(),
-            {
-                references: false,
-                referencesId: true,
-                referencesIdRecursive: false
-            }
-        );
+        super();
 
         this.mapper(GuidClazz)
             .key(x => x.guid, PrimaryKeyType.Guid, String)
             .column(x => x.description, String);
 
-        this.autoMapper(Regiao, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(SubRegiao, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(Uf, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(Cidade, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(Classificacao, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(Cliente, x => x.internalKey, PrimaryKeyType.AutoIncrement);
-        this.autoMapper(Marca, x => x.internalKey, PrimaryKeyType.AutoIncrement);
-        this.autoMapper(CondicaoPagamento, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(Pedido, x => x.internalKey, PrimaryKeyType.AutoIncrement);
-        this.autoMapper(ContasReceber, x => x.internalKey, PrimaryKeyType.AutoIncrement)
+        this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Classificacao, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdErp(Cliente, Number, PrimaryKeyType.AutoIncrement);
+        this.autoMapperIdErp(Marca, Number, PrimaryKeyType.AutoIncrement);
+        this.autoMapperIdImport(CondicaoPagamento, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdErp(Pedido, Number, PrimaryKeyType.AutoIncrement);
+        this.autoMapperIdErp(ContasReceber, Number, PrimaryKeyType.AutoIncrement)
             .column(x => x.dataRecebimento, DatabaseTypes.Moment)
             .ignore(x => x.cliente)
             .referenceKey(x => x.cliente, x => x.codeImport);
@@ -80,7 +74,7 @@ export class MappersTableNew extends MapperBase {
             referencesId: false,
             referencesIdRecursive: false
         };
-        this.autoMapper(LoginOffline, x => x.internalKey, PrimaryKeyType.AutoIncrement, false, settingsReference);
+        this.autoMapper(LoginOffline, x => x.internalKey, PrimaryKeyType.AutoIncrement, void 0, false, settingsReference);
 
         this.mapper(HeaderSimple)
             .key(x => x.id, PrimaryKeyType.AutoIncrement, Number)
@@ -89,11 +83,11 @@ export class MappersTableNew extends MapperBase {
             ;
 
         this.autoMapper(Imagem, x => x.internalKey, PrimaryKeyType.Assigned);
-        this.autoMapper(Linha, x => x.codeImport, PrimaryKeyType.Assigned);
-        this.autoMapper(Referencia, x => x.codeImport, PrimaryKeyType.Assigned)
+        this.autoMapper(Linha, x => x.codeImport, PrimaryKeyType.Assigned, Number);
+        this.autoMapper(Referencia, x => x.codeImport, PrimaryKeyType.Assigned, Number)
             .hasMany(x => x.referenciasRelacionadas, Referencia, "ReferenciasRelacionadas")
             ;
-        this.autoMapper(Estrutura, x => x.codeImport, PrimaryKeyType.Assigned);
+        this.autoMapper(Estrutura, x => x.codeImport, PrimaryKeyType.Assigned, Number);
     }
 }
 

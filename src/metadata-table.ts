@@ -76,11 +76,16 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
         const column = `${columnReference}_${columnKey}`;
         const instance = this.validInstanceMapper(this.instance, column);
         const referenceInstance = this.validExpressionMapper(instance, expression)(instance);
+        const mapperReference = this.getMapper(referenceInstance.constructor.name);
+        const mapperColumnReference = mapperReference.mapperTable.getColumnByField(expressionKey);
         this.addReference(
             column,
             type
                 ? this._databaseHelper.getFieldType(type)
-                : this.getTypeByExpression(referenceInstance, this.validExpressionMapper(referenceInstance, expressionKey)));
+                : mapperColumnReference
+                    ? mapperColumnReference.fieldType
+                    : this.getTypeByExpression(referenceInstance, this.validExpressionMapper(referenceInstance, expressionKey))
+        );
         return this;
     }
 
@@ -169,7 +174,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
     private getMapper(keyMapper: string) {
         return this._getMapper.get(keyMapper);
     }
-
+    
     private keyColumns(): MapperColumn[] {
         return this.mapperTable.columns.filter(x => !!x.primaryKeyType);
     }

@@ -9,8 +9,4 @@ export class Cliente extends BaseModel<number> {
     public cidade: Cidade = new Cidade();
     public classificacao: Classificacao = new Classificacao();
     public desativo: boolean = false;
-
-    constructor() {
-        super(0);
-    }
 }

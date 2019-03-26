@@ -9,7 +9,4 @@ export class Pedido extends BaseModel<number> {
     public marca: Marca = new Marca();
     public condicaoPagamento: CondicaoPagamento = new CondicaoPagamento();
 
-    constructor() {
-        super(0);
-    }
 }

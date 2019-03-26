@@ -62,14 +62,14 @@ describe("Create", () => {
         const create = new Create(Cliente, mapper.get(Cliente).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Cliente( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, razaoSocial TEXT, apelido TEXT, desativo BOOLEAN, cidade_codeImport INTEGER, classificacao_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Cliente( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, razaoSocial TEXT, apelido TEXT, desativo BOOLEAN, cidade_codeImport INTEGER, classificacao_codeImport INTEGER );`);
     });
 
     it("Marca", () => {
         const create = new Create(Marca, mapper.get(Marca).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Marca( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, descricao TEXT );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Marca( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, descricao TEXT );`);
     });
 
     it("CondicaoPagamento", () => {
@@ -83,14 +83,14 @@ describe("Create", () => {
         const create = new Create(Pedido, mapper.get(Pedido).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Pedido( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, cliente_internalKey INTEGER, marca_internalKey INTEGER, condicaoPagamento_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Pedido( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, cliente_internalKey INTEGER, marca_internalKey INTEGER, condicaoPagamento_codeImport INTEGER );`);
     });
 
     it("ContasReceber", () => {
         const create = new Create(ContasReceber, mapper.get(ContasReceber).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, codeImport INTEGER, valor INTEGER, dataVencimento INTEGER, dataRecebimento INTEGER, cliente_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, valor INTEGER, dataVencimento INTEGER, dataRecebimento INTEGER, cliente_codeImport INTEGER );`);
     });
 
     it("Test create", () => {

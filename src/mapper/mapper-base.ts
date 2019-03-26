@@ -1,6 +1,6 @@
 import { PrimaryKeyType } from "./../core/enums/primary-key-type";
 import { MapperSettingsModel } from "./mapper-settings-model";
-import { Expression } from "lambda-expression";
+import { Expression, ReturnExpression } from "lambda-expression";
 import { GetMapper } from "./interface-get-mapper";
 import { MetadataTable } from "../metadata-table";
 import { DatabaseHelper } from "../database-helper";
@@ -30,22 +30,21 @@ export class MapperBase implements GetMapper {
      * @param readOnly if column is readonly, default 'false'
      * @param settings settings mapper, default settings construtor
      */
-    public autoMapper<T>(
+    public autoMapper<TReturn, T>(
         newable: new () => T,
-        keyColumn?: Expression<T>,
+        keyColumn: ReturnExpression<TReturn, T>,
         primaryKeyType?: PrimaryKeyType,
+        keyType?: new () => TReturn,
         readOnly?: boolean,
         settings: MapperSettingsModel = this._defaultSettings
     ): MetadataTable<T> {
         const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly)
+            .key(keyColumn, primaryKeyType, keyType)
             .autoMapper(
                 settings.references,
                 settings.referencesId,
                 settings.referencesIdRecursive
             );
-        if (keyColumn) {
-            metadata.key(keyColumn, primaryKeyType);
-        }
         this.push(metadata);
         return metadata;
     }

@@ -10,8 +10,4 @@ export class ContasReceber extends BaseModel<number>  {
     public dataRecebimento: moment.Moment;
     public dataVencimento: moment.Moment = moment();
 
-    constructor() {
-        super(0);
-
-    }
 }

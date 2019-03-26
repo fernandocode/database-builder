@@ -176,7 +176,7 @@ export class Utils {
     public static expressionOrValue<T>(
         value: TypeWhere<T>
     ): ExpressionOrValueEnum {
-        return value === void 0
+        return value === void 0 || value === null
             ? ExpressionOrValueEnum.Null
             : this.isProjectionsHelper(value)
                 ? ExpressionOrValueEnum.Projection
