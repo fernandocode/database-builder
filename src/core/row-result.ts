@@ -54,6 +54,9 @@ export class RowResult<T> {
     ): TReader {
         if (alias === void 0 && this._query && MapperUtils.resolveKey(typeT) !== this._query.tablename) {
             alias = this._query.getAlias(typeT);
+            if (alias === void 0) {
+                throw new DatabaseBuilderError(`alias not found for the reference of "${MapperUtils.resolveKey(typeT)}", you can enter an alias explicitly in the last parameter`);
+            }
         }
         const mapperTable: MapperTable = this.getMapper(typeT);
 

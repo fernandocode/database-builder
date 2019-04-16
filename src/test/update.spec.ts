@@ -93,6 +93,28 @@ describe("Update", () => {
         expect(result[0].query).to.equal("UPDATE Marca SET codeImport = ?, descricao = ?");
     });
 
+    it("Marca (parcial update)", () => {
+        const marcaCodeImport = 2;
+        const result = new Update(Marca, void 0, mapper.get(Marca).mapperTable)
+            .columns(c => c.setValue(x => x.codeImport, marcaCodeImport))
+            .compile();
+        expect(result[0].params.toString()).to.equal([
+            marcaCodeImport
+        ].toString());
+        expect(result[0].query).to.equal("UPDATE Marca SET codeImport = ?");
+    });
+
+    it("Marca (parcial update by model)", () => {
+        const marcaParcial: Marca = { codeImport: 2 } as any;
+        const result = new Update(Marca, marcaParcial, mapper.get(Marca).mapperTable)
+            .columns(c => c.set(x => x.codeImport))
+            .compile();
+        expect(result[0].params.toString()).to.equal([
+            marcaParcial.codeImport
+        ].toString());
+        expect(result[0].query).to.equal("UPDATE Marca SET codeImport = ?");
+    });
+
     it("CondicaoPagamento", () => {
         const result = new Update(CondicaoPagamento, ObjectToTest.condicaoPagamento, mapper.get(CondicaoPagamento).mapperTable)
             .where(where => where.equal(x => x.codeImport, ObjectToTest.condicaoPagamento.codeImport))
