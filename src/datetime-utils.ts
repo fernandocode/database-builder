@@ -12,9 +12,23 @@ export class DatetimeUtils {
             if (!(date as moment.Moment).unix) {
                 throw new DatabaseBuilderError("Date format incorrect");
             }
+            if ((date as moment.Moment).utcOffset) {
+                if ((date as moment.Moment).utcOffset() !== 0) {
+                    throw new DatabaseBuilderError("Date with utc offset not supported create date using DatetimeUtils.now() for date current or DatetimeUtils.datetimeIgnoreTimeZone({date}) for especific date");
+                }
+                return this.datetimeIgnoreTimeZone(date as moment.Moment).unix();
+            }
             return (date as moment.Moment).unix();
         }
         return void 0;
+    }
+
+    public static datetimeIgnoreTimeZone(date: moment.Moment): moment.Moment {
+        return moment(date).utc().add(date.utcOffset(), "m");
+    }
+
+    public static now(): moment.Moment {
+        return this.datetimeIgnoreTimeZone(moment());
     }
 
     public static dateToDatabase(date: any): number {

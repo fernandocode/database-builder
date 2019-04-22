@@ -16,6 +16,7 @@ import { ContasReceber } from "./models/contas-receber";
 import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
 import { Imagem } from "./models/imagem";
+import { DatetimeUtils } from "../datetime-utils";
 
 export class ObjectToTest {
 
@@ -112,7 +113,7 @@ export class ObjectToTest {
         valor: 1023.45,
         cliente: ObjectToTest.cliente,
         dataRecebimento: void 0,
-        dataVencimento: moment()
+        dataVencimento: DatetimeUtils.now()
     } as ContasReceber;
 
     public static headerSimple = {
