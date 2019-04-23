@@ -27,6 +27,7 @@ import { Estrutura } from "./models/estrutura";
 import { Imagem } from "./models/imagem";
 import { DatabaseTypes } from "../definitions";
 import { MapperTest } from "./mapper-test";
+import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 
 export class MappersTableNew extends MapperTest {
 
@@ -88,6 +89,13 @@ export class MappersTableNew extends MapperTest {
             .hasMany(x => x.referenciasRelacionadas, Referencia, "ReferenciasRelacionadas")
             ;
         this.autoMapper(Estrutura, x => x.codeImport, PrimaryKeyType.Assigned, Number);
+
+        this.mapper(ModeloDetalheProduto, true)
+            .key(x => x.codeImport, void 0, Number)
+            //   .reference(x => x.caracteristica, Caracteristica)
+            //   .reference(x => x.material, Material)
+            .column(x => x.observacao, String)
+            .column(x => x.variacao, Boolean);
     }
 }
 

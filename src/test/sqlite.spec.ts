@@ -1,3 +1,4 @@
+import { Marca } from "./models/marca";
 import { ContasReceber } from "./models/contas-receber";
 import { Ddl } from "./../ddl/ddl";
 import { expect } from "chai";
@@ -14,6 +15,7 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { Regiao } from "./models/regiao";
 import { SubRegiao } from "./models/sub-regiao";
 import { JoinQueryBuilder } from "../crud/query/join-query-builder";
+import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 
 describe("SQLite", async () => {
     const mapper = getMapper();
@@ -40,10 +42,8 @@ describe("SQLite", async () => {
             .where(w => w.equal(x => x.codeImport, ObjectToTest.subRegiao.codeImport))
             .firstOrDefault().toPromise();
         if (!itemExist) {
-            console.log(`insert subregião: ${ObjectToTest.subRegiao}`);
             const insert = crud.insert(SubRegiao, ObjectToTest.subRegiao);
             const insertedResult = await insert.execute().toPromise();
-            console.log(insertedResult);
             expect(insertedResult[0].rowsAffected).to.equal(1);
         }
     };
@@ -210,6 +210,41 @@ describe("SQLite", async () => {
         expect(queryResult[0].subRegiao.nome).to.equal(model.subRegiao.nome);
         expect(queryResult[0].subRegiao.regiao.codeImport).to.equal(model.subRegiao.regiao.codeImport);
         expect(queryResult[0].subRegiao.regiao.nome).to.equal(model.subRegiao.regiao.nome);
+    });
+
+    it("mapper model readonly with from in other query", async () => {
+
+        const model = {
+            codeImport: 343,
+            descricao: "testsnfsf"
+        } as Marca;
+
+        await ddl.create(Marca).execute().toPromise();
+        const insert = crud.insert(Marca, model);
+        const insertResult4 = await insert.execute().toPromise();
+        expect(insertResult4[0].rowsAffected).to.equal(1);
+
+        const queryItemEscolhaReferencia = crud
+            .query(Marca)
+            .projection(projection => {
+                projection.add(x => x.codeImport);
+            });
+        const query = await crud.query(ModeloDetalheProduto, "mdtest")
+            .from(
+                queryItemEscolhaReferencia
+            )
+            .projection(projection => {
+                projection.add(x => x.codeImport);
+            })
+            .where(where => where.equal(x => x.codeImport, model.codeImport));
+        const queryResult = await query.mapper<ModeloDetalheProduto>(row => {
+            const result = row
+                .map()
+                .result();
+            return result;
+        }).toPromise();
+        expect(queryResult.length).to.equal(1);
+        expect(queryResult[0].codeImport).to.equal(model.codeImport);
     });
 
     it("Cidade join to mappper", async () => {

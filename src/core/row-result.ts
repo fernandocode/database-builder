@@ -79,7 +79,7 @@ export class RowResult<T> {
 
     public map(): RowMapper<T> {
         if (this._newable) {
-            return new RowMapper<T>(this).map(this._newable, "");
+            return new RowMapper<T>(this).map(this._newable, "", "");
         }
         throw new DatabaseBuilderError(`Not allowed map entity not unknown entity`);
     }
