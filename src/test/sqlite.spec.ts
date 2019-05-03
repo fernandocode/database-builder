@@ -1,5 +1,5 @@
 import { Marca } from "./models/marca";
-import { ContasReceber } from "./models/contas-receber";
+import { ContasAReceber } from "./models/contas-a-receber";
 import { Ddl } from "./../ddl/ddl";
 import { expect } from "chai";
 import { Cidade } from "./models/cidade";
@@ -324,17 +324,17 @@ describe("SQLite", async () => {
 
     it("ContasAReceber", async () => {
 
-        await ddl.create(ContasReceber).execute().toPromise();
+        await ddl.create(ContasAReceber).execute().toPromise();
 
-        const insertResult1 = await crud.insert(ContasReceber, ObjectToTest.contasReceber).execute().toPromise();
+        const insertResult1 = await crud.insert(ContasAReceber, ObjectToTest.contasReceber).execute().toPromise();
         expect(insertResult1[0].rowsAffected).to.equal(1);
 
-        const queryResult = await crud.query(ContasReceber)
-            .where(where => where.equal(x => x.cliente.codeImport, ObjectToTest.contasReceber.cliente.codeImport))
+        const queryResult = await crud.query(ContasAReceber)
+            .where(where => where.equal(x => x.cliente.idErp, ObjectToTest.contasReceber.cliente.idErp))
             .toList().toPromise();
 
         expect(queryResult.length).to.equal(1);
-        expect(queryResult[0].codeImport).to.equal(ObjectToTest.contasReceber.codeImport);
+        expect(queryResult[0].idErp).to.equal(ObjectToTest.contasReceber.idErp);
         expect(queryResult[0].dataRecebimento).to.equal(void 0);
         expect(queryResult[0].dataVencimento.unix()).to.equal(ObjectToTest.contasReceber.dataVencimento.unix());
     });

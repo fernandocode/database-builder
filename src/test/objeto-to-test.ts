@@ -12,7 +12,7 @@ import { Uf } from "./models/uf";
 import { Cidade } from "./models/cidade";
 import { Cliente } from "./models/cliente";
 import * as moment from "moment";
-import { ContasReceber } from "./models/contas-receber";
+import { ContasAReceber } from "./models/contas-a-receber";
 import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
 import { Imagem } from "./models/imagem";
@@ -50,12 +50,12 @@ export class ObjectToTest {
     } as Cidade;
 
     public static cliente = {
-        codeImport: 1,
+        idErp: 1,
         razaoSocial: "Razão",
-        apelido: "Apelido",
+        nomeFantasia: "Apelido",
         cidade: ObjectToTest.cidade,
-        classificacao: ObjectToTest.classificacao,
-        desativo: false
+        // classificacao: ObjectToTest.classificacao,
+        deleted: false
     } as Cliente;
 
     public static marca = {
@@ -109,12 +109,12 @@ export class ObjectToTest {
     } as TestClazz;
 
     public static contasReceber = {
-        codeImport: 10,
+        idErp: 10,
         valor: 1023.45,
         cliente: ObjectToTest.cliente,
         dataRecebimento: void 0,
         dataVencimento: DatetimeUtils.now()
-    } as ContasReceber;
+    } as ContasAReceber;
 
     public static headerSimple = {
         descricao: "Header Test",

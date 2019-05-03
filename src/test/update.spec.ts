@@ -76,12 +76,16 @@ describe("Update", () => {
         const result = new Update(Cliente, ObjectToTest.cliente, mapper.get(Cliente).mapperTable)
             .compile();
         expect(result[0].params.toString()).to.equal([
-            ObjectToTest.cliente.codeImport,
-            ObjectToTest.cliente.razaoSocial, ObjectToTest.cliente.apelido,
-            ObjectToTest.cliente.desativo, ObjectToTest.cliente.cidade.codeImport,
-            ObjectToTest.cliente.classificacao.codeImport
+            ObjectToTest.cliente.idErp,
+            ObjectToTest.cliente.versao,
+            ObjectToTest.cliente.deleted,
+            ObjectToTest.cliente.razaoSocial,
+            ObjectToTest.cliente.nomeFantasia,
+            ObjectToTest.cliente.cidade.codeImport,
+            ObjectToTest.cliente.change,
+            // ObjectToTest.cliente.classificacao.codeImport
         ].toString());
-        expect(result[0].query).to.equal("UPDATE Cliente SET codeImport = ?, razaoSocial = ?, apelido = ?, desativo = ?, cidade_codeImport = ?, classificacao_codeImport = ?");
+        expect(result[0].query).to.equal("UPDATE Cliente SET idErp = ?, versao = ?, deleted = ?, razaoSocial = ?, nomeFantasia = ?, cidade_codeImport = ?, change = ?");
     });
 
     it("Marca", () => {
@@ -131,11 +135,11 @@ describe("Update", () => {
             .compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.pedido.codeImport,
-            ObjectToTest.pedido.cliente.internalKey,
+            ObjectToTest.pedido.cliente.id,
             ObjectToTest.pedido.marca.internalKey,
             ObjectToTest.pedido.condicaoPagamento.codeImport
         ].toString());
-        expect(result[0].query).to.equal("UPDATE Pedido SET codeImport = ?, cliente_internalKey = ?, marca_internalKey = ?, condicaoPagamento_codeImport = ?");
+        expect(result[0].query).to.equal("UPDATE Pedido SET codeImport = ?, cliente_id = ?, marca_internalKey = ?, condicaoPagamento_codeImport = ?");
     });
 
     it("TestClazz", () => {

@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { DatabaseResult } from "../definitions/database-definition";
 
 describe("Test", () => {

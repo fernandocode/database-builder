@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ContasReceber } from "./models/contas-receber";
+import { ContasAReceber } from "./models/contas-a-receber";
 import { PrimaryKeyType } from "../core/enums/primary-key-type";
 import { Cliente } from "./models/cliente";
 import { Regiao } from "./models/regiao";
@@ -16,20 +16,20 @@ describe("Mapper", () => {
     const mapperBase = new MapperTest();
 
     it("testeContasReceber", () => {
-        mapperBase.autoMapper(Regiao, x => x.codeImport, PrimaryKeyType.Assigned);
-        mapperBase.autoMapper(SubRegiao, x => x.codeImport, PrimaryKeyType.Assigned);
-        mapperBase.autoMapper(Uf, x => x.codeImport, PrimaryKeyType.Assigned);
-        mapperBase.autoMapper(Cidade, x => x.codeImport, PrimaryKeyType.Assigned);
-        mapperBase.autoMapper(Classificacao, x => x.codeImport, PrimaryKeyType.Assigned);
-        mapperBase.autoMapper(Cliente, x => x.internalKey, PrimaryKeyType.AutoIncrement)
-            .column(x => x.codeImport, Number);
-        let m = mapperBase.autoMapperIdErp(ContasReceber, Number, PrimaryKeyType.AutoIncrement);        
-        const expressionClienteKey: Expression<ContasReceber> = (x => x.cliente.internalKey);
+        mapperBase.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
+        mapperBase.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
+        mapperBase.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
+        mapperBase.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned);
+        mapperBase.autoMapperIdImport(Classificacao, Number, PrimaryKeyType.Assigned);
+        const mCliente = mapperBase.autoMapperId(Cliente, PrimaryKeyType.Guid);
+        // .column(x => x.codeImport, Number);
+        let m = mapperBase.autoMapperIdErp(ContasAReceber, PrimaryKeyType.Assigned);
+        const expressionClienteKey: Expression<ContasAReceber> = (x => x.cliente.id);
         expect(m.mapperTable.getColumnByField(expressionClienteKey).column).to.equal(Utils.getColumn(expressionClienteKey));
         m = m.ignore(x => x.cliente);
         expect(m.mapperTable.getColumnByField(expressionClienteKey)).to.equal(void 0);
-        m = m.referenceKey(x => x.cliente, x => x.codeImport);
-        const expressionClienteCodeImport: Expression<ContasReceber> = (x => x.cliente.codeImport);
+        m = m.referenceKey(x => x.cliente, x => x.idErp);
+        const expressionClienteCodeImport: Expression<ContasAReceber> = (x => x.cliente.idErp);
         expect(m.mapperTable.getColumnByField(expressionClienteCodeImport).column).to.equal(Utils.getColumn(expressionClienteCodeImport));
     });
 

@@ -14,12 +14,12 @@ describe("Query method", () => {
         const query = crud.query(Cliente);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT cli.codeImport AS codeImport, cli.internalKey AS internalKey, cli.razaoSocial AS razaoSocial, cli.apelido AS apelido, cli.desativo AS desativo, cli.cidade_codeImport AS cidade_codeImport, cli.classificacao_codeImport AS classificacao_codeImport FROM Cliente AS cli");
+        expect(result[0].query).to.equal("SELECT cli.idErp AS idErp, cli.versao AS versao, cli.id AS id, cli.deleted AS deleted, cli.razaoSocial AS razaoSocial, cli.nomeFantasia AS nomeFantasia, cli.cidade_codeImport AS cidade_codeImport, cli.change AS change FROM Cliente AS cli");
     });
 
     it("test simple select with custom alias", () => {
         const result = crud.query(Cliente, "abc").compile()[0].query;
-        expect(result).to.equal("SELECT abc.codeImport AS codeImport, abc.internalKey AS internalKey, abc.razaoSocial AS razaoSocial, abc.apelido AS apelido, abc.desativo AS desativo, abc.cidade_codeImport AS cidade_codeImport, abc.classificacao_codeImport AS classificacao_codeImport FROM Cliente AS abc");
+        expect(result).to.equal("SELECT abc.idErp AS idErp, abc.versao AS versao, abc.id AS id, abc.deleted AS deleted, abc.razaoSocial AS razaoSocial, abc.nomeFantasia AS nomeFantasia, abc.cidade_codeImport AS cidade_codeImport, abc.change AS change FROM Cliente AS abc");
     });
 
     it("test simple select with custom alias and where equal", () => {
@@ -31,7 +31,7 @@ describe("Query method", () => {
                 .compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal("ABC");
-        expect(result[0].query).to.equal(`SELECT abc.codeImport AS codeImport, abc.internalKey AS internalKey, abc.razaoSocial AS razaoSocial, abc.apelido AS apelido, abc.desativo AS desativo, abc.cidade_codeImport AS cidade_codeImport, abc.classificacao_codeImport AS classificacao_codeImport FROM Cliente AS abc WHERE abc.razaoSocial = ?`);
+        expect(result[0].query).to.equal(`SELECT abc.idErp AS idErp, abc.versao AS versao, abc.id AS id, abc.deleted AS deleted, abc.razaoSocial AS razaoSocial, abc.nomeFantasia AS nomeFantasia, abc.cidade_codeImport AS cidade_codeImport, abc.change AS change FROM Cliente AS abc WHERE abc.razaoSocial = ?`);
     });
 
     it("test select with scope", () => {
@@ -40,7 +40,7 @@ describe("Query method", () => {
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
                     where.scope(scope => {
-                        scope.greatValue(x => x.classificacao.codeImport, 10)
+                        scope.greatValue(x => x.cidade.population, 10)
                             .or()
                             .lessAndEqualValue(x => x.cidade.codeImport, 100);
                     });
@@ -50,7 +50,7 @@ describe("Query method", () => {
         expect(result[0].params[0]).to.equal("ABC");
         expect(result[0].params[1]).to.equal(10);
         expect(result[0].params[2]).to.equal(100);
-        expect(result[0].query).to.equal(`SELECT abc.codeImport AS codeImport, abc.internalKey AS internalKey, abc.razaoSocial AS razaoSocial, abc.apelido AS apelido, abc.desativo AS desativo, abc.cidade_codeImport AS cidade_codeImport, abc.classificacao_codeImport AS classificacao_codeImport FROM Cliente AS abc WHERE abc.razaoSocial = ? AND (abc.classificacao_codeImport > ? OR abc.cidade_codeImport <= ?)`);
+        expect(result[0].query).to.equal(`SELECT abc.idErp AS idErp, abc.versao AS versao, abc.id AS id, abc.deleted AS deleted, abc.razaoSocial AS razaoSocial, abc.nomeFantasia AS nomeFantasia, abc.cidade_codeImport AS cidade_codeImport, abc.change AS change FROM Cliente AS abc WHERE abc.razaoSocial = ? AND (abc.cidade_population > ? OR abc.cidade_codeImport <= ?)`)
     });
 
     it("test simple select with where and select projections", () => {
@@ -58,18 +58,18 @@ describe("Query method", () => {
             crud.query(Cliente)
                 .select(
                     x => x.cidade.codeImport,
-                    x => x.apelido,
+                    x => x.nomeFantasia,
                     x => x.razaoSocial,
-                    x => x.codeImport)
+                    x => x.idErp)
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
-                    where.greatAndEqualValue(x => x.codeImport, 10);
+                    where.greatAndEqualValue(x => x.idErp, 10);
                 });
         const result = query.compile();
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal("ABC");
         expect(result[0].params[1]).to.equal(10);
-        expect(result[0].query).to.equal(`SELECT cli.cidade_codeImport AS cidade_codeImport, cli.apelido AS apelido, cli.razaoSocial AS razaoSocial, cli.codeImport AS codeImport FROM Cliente AS cli WHERE cli.razaoSocial = ? AND cli.codeImport >= ?`);
+        expect(result[0].query).to.equal(`SELECT cli.cidade_codeImport AS cidade_codeImport, cli.nomeFantasia AS nomeFantasia, cli.razaoSocial AS razaoSocial, cli.idErp AS idErp FROM Cliente AS cli WHERE cli.razaoSocial = ? AND cli.idErp >= ?`);
     });
 
     it("test select with join", () => {
@@ -77,16 +77,16 @@ describe("Query method", () => {
         query
             .select(
                 x => x.cidade.codeImport,
-                x => x.apelido,
+                x => x.nomeFantasia,
                 x => x.razaoSocial,
-                x => x.codeImport
+                x => x.idErp
             )
             .projection(projection => {
-                projection.add(x => x.desativo, "inativo");
+                projection.add(x => x.deleted, "inativo");
             })
             .where(where => {
                 where.not().equalValue(x => x.razaoSocial, "ABC");
-                where.greatAndEqualValue(x => x.codeImport, 10);
+                where.greatAndEqualValue(x => x.idErp, 10);
             })
             .join(
                 Cidade,
@@ -104,34 +104,34 @@ describe("Query method", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal("ABC");
         expect(result[0].params[1]).to.equal(10);
-        expect(result[0].query).to.equal(`SELECT cli.cidade_codeImport AS cidade_codeImport, cli.apelido AS apelido, cli.razaoSocial AS razaoSocial, cli.codeImport AS codeImport, cli.desativo AS inativo, cid.nome AS cidade_nome, cid.codeImport AS cid_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) WHERE cli.razaoSocial <> ? AND cli.codeImport >= ?`);
+        expect(result[0].query).to.equal(`SELECT cli.cidade_codeImport AS cidade_codeImport, cli.nomeFantasia AS nomeFantasia, cli.razaoSocial AS razaoSocial, cli.idErp AS idErp, cli.deleted AS inativo, cid.nome AS cidade_nome, cid.codeImport AS cid_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) WHERE cli.razaoSocial <> ? AND cli.idErp >= ?`);
     });
 
     it("test select with projection case", () => {
         const query = crud.query(Cliente);
         query
             .projection(projection => {
-                projection.add(x => x.desativo, "inativo");
+                projection.add(x => x.deleted, "inativo");
                 projection.case((caseInstance) => {
                     caseInstance.when(
                         query.createWhere()
-                            .great(projection.proj().sum(x => x.classificacao.codeImport), 1),
+                            .great(projection.proj().sum(x => x.cidade.codeImport), 1),
                         (when) => {
                             when.then(
                                 projection.proj().group(
                                     "",
-                                    projection.proj().sum(x => x.classificacao.codeImport),
+                                    projection.proj().sum(x => x.cidade.codeImport),
                                     projection.plan(Operator.Multiply),
                                     projection.plan(2)
                                 )
                             ).else(0);
                         }
                     );
-                }, void 0, "classificacaoTest");
+                }, void 0, "cidadeTest");
             })
             .where(where => {
                 where.equalValue(x => x.razaoSocial, "ABC");
-                where.greatAndEqualValue(x => x.codeImport, 10);
+                where.greatAndEqualValue(x => x.idErp, 10);
             })
             .join(
                 Cidade,
@@ -150,7 +150,7 @@ describe("Query method", () => {
         expect(result[0].params[0]).to.equal(1);
         expect(result[0].params[1]).to.equal("ABC");
         expect(result[0].params[2]).to.equal(10);
-        expect(result[0].query).to.equal(`SELECT cli.desativo AS inativo, CASE WHEN SUM(cli.classificacao_codeImport) > ? THEN (SUM(cli.classificacao_codeImport) * 2) ELSE 0 END AS classificacaoTest, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) WHERE cli.razaoSocial = ? AND cli.codeImport >= ?`);
+        expect(result[0].query).to.equal(`SELECT cli.deleted AS inativo, CASE WHEN SUM(cli.cidade_codeImport) > ? THEN (SUM(cli.cidade_codeImport) * 2) ELSE 0 END AS cidadeTest, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) WHERE cli.razaoSocial = ? AND cli.idErp >= ?`);
     });
 
     it("test select all by mapper", () => {
@@ -171,7 +171,7 @@ describe("Query method", () => {
         const result = query.compile();
 
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal(`SELECT cli.codeImport AS codeImport, cli.internalKey AS internalKey, cli.razaoSocial AS razaoSocial, cli.apelido AS apelido, cli.desativo AS desativo, cli.cidade_codeImport AS cidade_codeImport, cli.classificacao_codeImport AS classificacao_codeImport, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport)`);
+        expect(result[0].query).to.equal(`SELECT cli.idErp AS idErp, cli.versao AS versao, cli.id AS id, cli.deleted AS deleted, cli.razaoSocial AS razaoSocial, cli.nomeFantasia AS nomeFantasia, cli.cidade_codeImport AS cidade_codeImport, cli.change AS change, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport)`);
     });
 
     // TODO: query from query

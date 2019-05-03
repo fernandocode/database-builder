@@ -1,5 +1,5 @@
 import { Cliente } from "./models/cliente";
-import { ContasReceber } from "./models/contas-receber";
+import { ContasAReceber } from "./models/contas-a-receber";
 import { Create } from "./../ddl/create/create";
 import { CondicaoPagamento } from "./models/condicao-pagamento";
 import { Marca } from "./models/marca";
@@ -62,7 +62,7 @@ describe("Create", () => {
         const create = new Create(Cliente, mapper.get(Cliente).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Cliente( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, razaoSocial TEXT, apelido TEXT, desativo BOOLEAN, cidade_codeImport INTEGER, classificacao_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Cliente( idErp INTEGER, versao INTEGER, id TEXT NOT NULL PRIMARY KEY, deleted BOOLEAN, razaoSocial TEXT, nomeFantasia TEXT, cidade_codeImport INTEGER, change BOOLEAN );`);
     });
 
     it("Marca", () => {
@@ -83,14 +83,14 @@ describe("Create", () => {
         const create = new Create(Pedido, mapper.get(Pedido).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Pedido( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, cliente_internalKey INTEGER, marca_internalKey INTEGER, condicaoPagamento_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS Pedido( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, cliente_id TEXT, marca_internalKey INTEGER, condicaoPagamento_codeImport INTEGER );`);
     });
 
-    it("ContasReceber", () => {
-        const create = new Create(ContasReceber, mapper.get(ContasReceber).mapperTable);
+    it("ContasAReceber", () => {
+        const create = new Create(ContasAReceber, mapper.get(ContasAReceber).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasReceber( codeImport INTEGER, internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, valor INTEGER, dataVencimento INTEGER, dataRecebimento INTEGER, cliente_codeImport INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasAReceber( versao INTEGER, idErp INTEGER NOT NULL PRIMARY KEY, deleted BOOLEAN, dataVencimento INTEGER, dataRecebimento INTEGER, valor INTEGER, cliente_idErp INTEGER );`);
     });
 
     it("Test create", () => {

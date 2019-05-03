@@ -15,6 +15,7 @@ import { Referencia } from "./models/referencia";
 import { Imagem } from "./models/imagem";
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
+import { ContasAReceber } from "./models/contas-a-receber";
 
 describe("Query", () => {
 
@@ -234,16 +235,16 @@ describe("Query", () => {
         query
             .select(
                 x => x.cidade.codeImport,
-                x => x.apelido,
+                x => x.nomeFantasia,
                 x => x.razaoSocial,
-                x => x.codeImport
+                x => x.idErp
             )
             .projection(projection => {
-                projection.add(x => x.desativo, "inativo");
+                projection.add(x => x.deleted, "inativo");
             })
             .where(where => {
                 where.not().equalValue(x => x.razaoSocial, "ABC");
-                where.greatAndEqualValue(x => x.codeImport, 10);
+                where.greatAndEqualValue(x => x.idErp, 10);
             })
             .join(
                 Cidade,
@@ -270,7 +271,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal("ABC");
         expect(result[0].params[1]).to.equal(10);
-        expect(result[0].query).to.equal(`SELECT cli.cidade_codeImport AS cidade_codeImport, cli.apelido AS apelido, cli.razaoSocial AS razaoSocial, cli.codeImport AS codeImport, cli.desativo AS inativo, cid.nome AS cidade_nome, cid.codeImport AS cid_codeImport, uf.nome AS uf_nome FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) LEFT JOIN Uf AS uf ON (uf.codeImport = cid.uf_codeImport) WHERE cli.razaoSocial <> ? AND cli.codeImport >= ?`);
+        expect(result[0].query).to.equal(`SELECT cli.cidade_codeImport AS cidade_codeImport, cli.nomeFantasia AS nomeFantasia, cli.razaoSocial AS razaoSocial, cli.idErp AS idErp, cli.deleted AS inativo, cid.nome AS cidade_nome, cid.codeImport AS cid_codeImport, uf.nome AS uf_nome FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) LEFT JOIN Uf AS uf ON (uf.codeImport = cid.uf_codeImport) WHERE cli.razaoSocial <> ? AND cli.idErp >= ?`);
     });
 
     it("join with on subquery", () => {
@@ -336,7 +337,7 @@ describe("Query", () => {
             });
         }, JoinType.LEFT, "img");
         query.orderBy(x => x.codeImport);
-        const result = query.compile(); 
+        const result = query.compile();
         expect(result[0].params.length).to.equal(3);
         expect(result[0].params[0]).to.equal(false);
         expect(result[0].params[1]).to.equal(false);
@@ -395,6 +396,13 @@ describe("Query", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.id AS id, 1 AS estatico, tes.description AS description FROM TestClazz AS tes");
+    });
+
+    it("query change key reference", () => {
+        const query = crud.query(ContasAReceber);
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT con.versao AS versao, con.idErp AS idErp, con.deleted AS deleted, con.dataVencimento AS dataVencimento, con.dataRecebimento AS dataRecebimento, con.valor AS valor, con.cliente_idErp AS cliente_idErp FROM ContasAReceber AS con");
     });
 
 });

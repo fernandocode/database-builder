@@ -118,7 +118,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
         const instanceExpression = this.validExpressionMapper(this.instance, expression)(this.instance);
         const mapperColumn =
             instanceExpression && (!this._databaseHelper.isTypeSimple(instanceExpression as any))
-                ? this.getMapperColumnReference(this.instance, this.columnName(expression))
+                ? this.getMapperColumnReference(instanceExpression, this.columnName(expression))
                 : new MapperColumn(this.columnName(expression));
         if (mapperColumn) {
             this.mapperTable.removeColumn(mapperColumn.column);

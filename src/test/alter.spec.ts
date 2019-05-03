@@ -15,7 +15,7 @@ describe("Alter", () => {
 
     it("Add column string name column", () => {
         const alter = new Alter(Cliente);
-        alter.addColumn('novaColuna', Number);
+        alter.addColumn("novaColuna", Number);
         const result = alter.compile();
         expect(result[0].length > 0).to.equal(true);
         expect(result[0]).to.equal(`ALTER TABLE Cliente ADD COLUMN novaColuna INTEGER;`);
@@ -23,18 +23,18 @@ describe("Alter", () => {
 
     it("Rename column", () => {
         const alter = new Alter(Cliente);
-        alter.renameColumn(x => x.razaoSocial, x => x.apelido);
+        alter.renameColumn(x => x.razaoSocial, x => x.nomeFantasia);
         const result = alter.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`ALTER TABLE Cliente RENAME COLUMN razaoSocial TO apelido;`);
+        expect(result[0]).to.equal(`ALTER TABLE Cliente RENAME COLUMN razaoSocial TO nomeFantasia;`);
     });
 
     it("Rename column string name column", () => {
         const alter = new Alter(Cliente);
-        alter.renameColumn('novaColuna', x => x.apelido);
+        alter.renameColumn("novaColuna", x => x.nomeFantasia);
         const result = alter.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`ALTER TABLE Cliente RENAME COLUMN novaColuna TO apelido;`);
+        expect(result[0]).to.equal(`ALTER TABLE Cliente RENAME COLUMN novaColuna TO nomeFantasia;`);
     });
 
     it("Rename table", () => {

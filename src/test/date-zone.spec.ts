@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { getMapper } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
-import { ContasReceber } from "./models/contas-receber";
+import { ContasAReceber } from "./models/contas-a-receber";
 import * as moment from "moment";
 import { Crud } from "../crud";
 import { SQLiteDatabase } from "./database/sqlite-database";
@@ -26,57 +26,57 @@ describe("Date", () => {
     it("Datetime insert time zone utc", async () => {
         const database = await databaseInstance();
         const dataExample = {
-            codeImport: 11,
+            idErp: 11,
             valor: 1023.45,
             cliente: ObjectToTest.cliente,
             dataRecebimento: void 0,
             dataVencimento: moment.utc()
-        } as ContasReceber;
+        } as ContasAReceber;
 
-        await database.ddl.create(ContasReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasReceber, dataExample);
+        await database.ddl.create(ContasAReceber).execute().toPromise();
+        const insert = database.crud.insert(ContasAReceber, dataExample);
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
-        const dataResult = await database.crud.query(ContasReceber).where(w => w.equal(x => x.codeImport, dataExample.codeImport)).firstOrDefault().toPromise();
+        const dataResult = await database.crud.query(ContasAReceber).where(w => w.equal(x => x.idErp, dataExample.idErp)).firstOrDefault().toPromise();
         expect(dataResult.dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
     });
 
     it("Datetime insert time zone default", async () => {
         const database = await databaseInstance();
         const dataExample = {
-            codeImport: 12,
+            idErp: 12,
             valor: 1023.45,
             cliente: ObjectToTest.cliente,
             dataRecebimento: void 0,
             dataVencimento: DatetimeUtils.datetimeIgnoreTimeZone(moment())
-        } as ContasReceber;
+        } as ContasAReceber;
 
-        await database.ddl.create(ContasReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasReceber, dataExample);
+        await database.ddl.create(ContasAReceber).execute().toPromise();
+        const insert = database.crud.insert(ContasAReceber, dataExample);
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
-        const dataResult = await database.crud.query(ContasReceber).where(w => w.equal(x => x.codeImport, dataExample.codeImport)).firstOrDefault().toPromise();
+        const dataResult = await database.crud.query(ContasAReceber).where(w => w.equal(x => x.idErp, dataExample.idErp)).firstOrDefault().toPromise();
         expect(dataResult.dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
     });
 
     it("Date insert time zone default", async () => {
         const database = await databaseInstance();
         const dataExample = {
-            codeImport: 13,
+            idErp: 13,
             valor: 1023.45,
             cliente: ObjectToTest.cliente,
             dataRecebimento: void 0,
             dataVencimento: DatetimeUtils.datetimeToDate("2010-01-28T00:00:00-02:00")
-        } as ContasReceber;
+        } as ContasAReceber;
 
-        await database.ddl.create(ContasReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasReceber, dataExample);
+        await database.ddl.create(ContasAReceber).execute().toPromise();
+        const insert = database.crud.insert(ContasAReceber, dataExample);
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
-        const dataResult = await database.crud.query(ContasReceber).where(w => w.equal(x => x.codeImport, dataExample.codeImport)).firstOrDefault().toPromise();
+        const dataResult = await database.crud.query(ContasAReceber).where(w => w.equal(x => x.idErp, dataExample.idErp)).firstOrDefault().toPromise();
         expect(dataResult.dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
     });
 
@@ -84,19 +84,19 @@ describe("Date", () => {
         const database = await databaseInstance();
         const dataAgora = DatetimeUtils.now();
         const dataExample = {
-            codeImport: 14,
+            idErp: 14,
             valor: 1023.45,
             cliente: ObjectToTest.cliente,
             dataRecebimento: void 0,
             dataVencimento: dataAgora
-        } as ContasReceber;
+        } as ContasAReceber;
 
-        await database.ddl.create(ContasReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasReceber, dataExample);
+        await database.ddl.create(ContasAReceber).execute().toPromise();
+        const insert = database.crud.insert(ContasAReceber, dataExample);
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
-        const dataResult = await database.crud.query(ContasReceber).where(w => w.equal(x => x.codeImport, dataExample.codeImport)).firstOrDefault().toPromise();
+        const dataResult = await database.crud.query(ContasAReceber).where(w => w.equal(x => x.idErp, dataExample.idErp)).firstOrDefault().toPromise();
         expect(dataResult.dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
     });
 

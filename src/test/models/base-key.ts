@@ -1,5 +1,5 @@
 export class BaseKey implements IBaseKey {
-    public internalKey: number = 0;
+    public internalKey: number;
 }
 
 // tslint:disable-next-line:interface-name
