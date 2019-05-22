@@ -44,13 +44,17 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                             ||
                             sql.toUpperCase().indexOf("ROLLBACK") > -1
                         ) {
-                            this.ignoreExecuteSql(sql, values);
+                            this.ignoreExecuteSql(sql, values)
+                                .then(result => executeSqlResolve(result))
+                                .catch(err => executeSqlReject(err));
                             // // tslint:disable-next-line:no-console
                             // console.warn(`command sql ignored: '${sql}'`);
                             // executeSqlResolve({} as DatabaseResult);
                         } else {
                             database.transaction(transaction => {
-                                return this.executeSql(transaction, sql, values);
+                                return this.executeSql(transaction, sql, values)
+                                    .then(result => executeSqlResolve(result))
+                                    .catch(err => executeSqlReject(err));;
                                 // transaction.executeSql(
                                 //     sql,
                                 //     Array.isArray(values) ? values : [],
