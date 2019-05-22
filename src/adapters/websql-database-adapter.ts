@@ -36,7 +36,7 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
             }
             resolve({
                 executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
-                    return new Promise<DatabaseResult>((resolve, reject) => {
+                    return new Promise<DatabaseResult>((executeSqlResolve, executeSqlReject) => {
                         if (
                             sql.toUpperCase().indexOf("TRANSACTION") > -1
                             ||
@@ -44,17 +44,19 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                             ||
                             sql.toUpperCase().indexOf("ROLLBACK") > -1
                         ) {
-                            // tslint:disable-next-line:no-console
-                            console.warn(`command sql ignored: '${sql}'`);
-                            resolve({} as DatabaseResult);
+                            this.ignoreExecuteSql(sql, values);
+                            // // tslint:disable-next-line:no-console
+                            // console.warn(`command sql ignored: '${sql}'`);
+                            // executeSqlResolve({} as DatabaseResult);
                         } else {
                             database.transaction(transaction => {
-                                transaction.executeSql(
-                                    sql,
-                                    Array.isArray(values) ? values : [],
-                                    (t: WebSqlTransactionInterface, r: any) => resolve(r),
-                                    (t: WebSqlTransactionInterface, err: any) => reject(err)
-                                );
+                                return this.executeSql(transaction, sql, values);
+                                // transaction.executeSql(
+                                //     sql,
+                                //     Array.isArray(values) ? values : [],
+                                //     (t: WebSqlTransactionInterface, r: any) => executeSqlResolve(r),
+                                //     (t: WebSqlTransactionInterface, err: any) => executeSqlReject(err)
+                                // );
                             });
                         }
                     });
@@ -64,19 +66,39 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                         return database.transaction(transaction => {
                             fn({
                                 executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
-                                    return new Promise<DatabaseResult>((resolve, reject) => {
-                                        transaction.executeSql(
-                                            sql,
-                                            Array.isArray(values) ? values : [],
-                                            (t: WebSqlTransactionInterface, r: any) => resolve(r),
-                                            (t: WebSqlTransactionInterface, err: any) => reject(err)
-                                        );
-                                    });
+                                    return this.executeSql(transaction, sql, values);
+                                    // return new Promise<DatabaseResult>((resolve, reject) => {
+                                    //     transaction.executeSql(
+                                    //         sql,
+                                    //         Array.isArray(values) ? values : [],
+                                    //         (t: WebSqlTransactionInterface, r: any) => resolve(r),
+                                    //         (t: WebSqlTransactionInterface, err: any) => reject(err)
+                                    //     );
+                                    // });
                                 }
                             });
                         });
                     }
             } as DatabaseObject);
+        });
+    }
+
+    protected executeSql(transaction: WebSqlTransactionInterface, sql: string, values: any): Promise<DatabaseResult> {
+        return new Promise<DatabaseResult>((resolve, reject) => {
+            transaction.executeSql(
+                sql,
+                Array.isArray(values) ? values : [],
+                (_t: WebSqlTransactionInterface, r: any) => resolve(r),
+                (_t: WebSqlTransactionInterface, err: any) => reject(err)
+            );
+        });
+    }
+
+    protected ignoreExecuteSql(sql: string, values: any): Promise<DatabaseResult> {
+        return new Promise<DatabaseResult>((resolve, _reject) => {
+            // tslint:disable-next-line: no-console
+            console.warn(`command sql ignored: '${sql}', values: ${values}`);
+            resolve({} as DatabaseResult);
         });
     }
 }
