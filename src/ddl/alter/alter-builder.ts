@@ -71,7 +71,7 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
         if (column.columns.length > 1) {
             throw new DatabaseBuilderError(`Not allowed ALTER TABLE in multi columns (number columns: ${column.columns.length})!`);
         }
-        if (column.columns.length === 0 && this._patternOperation === void 0) {
+        if (column.columns.length === 0 && Utils.isNull(this._patternOperation)) {
             throw new DatabaseBuilderError(`Not column for ALTER TABLE, use 'addColumn'!`);
         }
         return `ALTER TABLE ${this._tablename}

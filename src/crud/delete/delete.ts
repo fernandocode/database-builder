@@ -10,6 +10,7 @@ import { DependencyListSimpleModel } from "../../definitions/dependency-definiti
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { DatabaseBuilderError } from "../../core";
+import { Utils } from "../../core/utils";
 
 export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilder<T>> {
 
@@ -37,7 +38,7 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
         const deleteBuilder = new DeleteBuilder<DependencyListSimpleModel>(void 0, void 0, dependency)
             .where(where => {
                 const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
-                if (this.model() === void 0) {
+                if (Utils.isNull(this.model())) {
                     throw new DatabaseBuilderError(`Without the entity data to be deleted it is not possible to delete dependent items by cascade.`);
                 }
                 where.equal(new ColumnRef(columnReference), KeyUtils.getKey(this.mapperTable, this.model()));

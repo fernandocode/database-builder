@@ -33,12 +33,12 @@ export abstract class ColumnsValuesBuilder<
     ): TThis {
         switch (primaryKeyType) {
             case PrimaryKeyType.Assigned:
-                if (value === void 0) {
+                if (Utils.isNull(value)) {
                     throw new DatabaseBuilderError("Primary key to be informed when generation strategy is 'Assigned'!");
                 }
                 break;
             case PrimaryKeyType.Guid:
-                if ((value === void 0 || (value as string).length === 0) && this.allowGenerateKey()) {
+                if ((Utils.isNull(value) || (value as string).length === 0) && this.allowGenerateKey()) {
                     // gerar GUID
                     value = Utils.GUID();
                     // set value GUID in model
@@ -93,18 +93,19 @@ export abstract class ColumnsValuesBuilder<
         this.columns.forEach((column) => {
             if (this.isAddColumn(column)) {
                 const columnName = this.columnFormat(column);
-                if (columnName !== void 0) {
+                if (!Utils.isNull(columnName)) {
                     result.columns.push(columnName);
-                    result.params.push(this.isValueNull(column.value) ? null : column.value);
+                    result.params.push(Utils.isNull(column.value) ? null : column.value);
                 }
             }
         });
         return result;
     }
 
-    protected isValueNull(value: any): boolean {
-        return value === void 0;
-    }
+    // Use: Utils.isNull(value)
+    // protected isValueNull(value: any): boolean {
+    //     return value === void 0;
+    // }
 
     protected allowGenerateKey(): boolean {
         return false;

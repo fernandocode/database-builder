@@ -61,7 +61,7 @@ export class MapperTable {
     }
 
     private hasColumn(columnName: string): boolean {
-        return this.getColumn(columnName) !== void 0;
+        return !Utils.isNull(this.getColumn(columnName));
     }
 
     private add(

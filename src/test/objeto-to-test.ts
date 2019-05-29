@@ -39,7 +39,7 @@ export class ObjectToTest {
     public static uf = {
         codeImport: "SC",
         nome: "Santa Catarina",
-        population: 100
+        population: null
     } as Uf;
 
     public static cidade = {

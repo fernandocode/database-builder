@@ -443,7 +443,7 @@ export abstract class WhereBaseBuilder<
     }
 
     private processParam(param: ColumnParams | string | ValueTypeToParse[]): ColumnParams {
-        if (param === void 0) {
+        if (Utils.isNull(param)) {
             return {
                 column: void 0,
                 params: []
@@ -511,7 +511,7 @@ export abstract class WhereBaseBuilder<
 
     private conditionIsNull(currentConditions: Condition[]): Condition[] {
         // new scope
-        if (!currentConditions || (currentConditions.length === 1 && currentConditions[0] === void 0)) {
+        if (!currentConditions || (currentConditions.length === 1 && Utils.isNull(currentConditions[0]))) {
             return [Condition.IsNull];
         }
         switch (currentConditions.toString()) {
@@ -529,7 +529,7 @@ export abstract class WhereBaseBuilder<
         columns: string[]
     ): string {
         // new scope
-        if (!conditions || (conditions.length === 1 && conditions[0] === void 0)) {
+        if (!conditions || (conditions.length === 1 && Utils.isNull(conditions[0]))) {
             return `(${columns[0]})`;
         }
         switch (conditions.toString()) {

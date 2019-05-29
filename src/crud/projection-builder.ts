@@ -46,7 +46,7 @@ export class ProjectionBuilder<T> {
     }
 
     public allByMap(metadata: MetadataTable<T>) {
-        if (metadata === void 0) {
+        if (Utils.isNull(metadata)) {
             throw new DatabaseBuilderError(`Mapper not found for '${this._typeT.name}'`);
         }
         this.selectAllColumns(metadata.mapperTable);
@@ -70,7 +70,6 @@ export class ProjectionBuilder<T> {
     public group(
         alias: string,
         ...projections: Array<ExpressionProjection<any, T>>
-        // ...projections: Array<TypeProjection<T>>
     ): ProjectionBuilder<T> {
         const groupProjection = this.proj().group(alias, ...projections)._result();
         const groupCompiled = ProjectionCompile.compile(groupProjection);
@@ -329,24 +328,16 @@ export class ProjectionBuilder<T> {
         (subQuery as QueryCompiled[])
             .forEach(compiled => {
                 this.apply(compiled.query, [Projection.BetweenParenthesis], alias, compiled.params);
-                // this._projections.params = this._projections.params.concat(compiled.params);
             });
         return this;
     }
 
     public compile(): ProjectionCompiled {
         return ProjectionCompile.compile(this._projections);
-        // const projectionCompiled: ProjectionCompiled = new ProjectionCompiled();
-        // this._projections.forEach(projection => {
-        //     projectionCompiled.projection += projectionCompiled.projection.length > 0 ? ", " : ""
-        //     projectionCompiled.projection += projection.projectionn;
-        //     projectionCompiled.params = projectionCompiled.params.concat(projection.params);
-        // });
-        // return projectionCompiled;
     }
 
     private selectAllColumns(mapper: MapperTable): void {
-        const columns = mapper.columns.filter(x => x.tableReference === void 0);
+        const columns = mapper.columns.filter(x => Utils.isNull(x.tableReference));
         for (const key in columns) {
             if (columns.hasOwnProperty(key)) {
                 const column = columns[key];
@@ -425,7 +416,7 @@ export class ProjectionBuilder<T> {
         alias: string = this.defaultAliasAs(column),
         args: any[],
     ): ProjectionCompiled {
-        if (projection !== void 0) {
+        if (!Utils.isNull(projection)) {
             return this.buildColumn(this.builderProjection(projection, column, args), alias);
         }
         return this.buildColumn(column, alias);

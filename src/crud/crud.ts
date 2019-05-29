@@ -63,10 +63,10 @@ export class Crud {
         if (typeT && (typeT as { _builder: () => QueryBuilder<T> })._builder) {
             typeT = (typeT as { _builder: () => QueryBuilder<T> })._builder();
         }
-        if (metadata === void 0) {
+        if (Utils.isNull(metadata)) {
             metadata = Utils.getMapperTable(typeT, (tKey: (new () => any) | string) => {
                 return this._getMapper.get(tKey);
-            })
+            });
         }
         const that = this;
         return new Query(typeT as (new () => T) | QueryBuilder<T>, alias,
@@ -84,7 +84,7 @@ export class Crud {
 
     private getMapper<T>(tKey: (new () => T) | string): MetadataTable<T> {
         const metadata = this._getMapper.get(tKey);
-        if (metadata === void 0) {
+        if (Utils.isNull(metadata)) {
             throw new DatabaseBuilderError(`Mapper for "${Utils.isString(tKey) ? tKey : (tKey as new () => T).name}" not found!"`);
         }
         return metadata;

@@ -5,6 +5,7 @@ import { MapperTable } from "../../mapper-table";
 import { QueryCompiled } from "../../core";
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
+import { Utils } from "../../core/utils";
 
 export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>> {
 
@@ -15,7 +16,7 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
         alias: string = void 0
     ) {
         super(typeT, mapperTable, alias);
-        if (_modelToSave !== void 0) {
+        if (!Utils.isNull(_modelToSave)) {
             this.where(where => {
                 where.equal(new ColumnRef(KeyUtils.primaryKeyMapper(mapperTable).column), KeyUtils.getKey(mapperTable, _modelToSave));
             });

@@ -97,6 +97,10 @@ describe("SQLite", async () => {
     it("Cidade", async () => {
 
         await ddl.create(Cidade).execute().toPromise();
+        await ddl.create(Uf).execute().toPromise();
+
+        const insertUf = await crud.insert(Uf, ObjectToTest.uf).execute().toPromise();
+        expect(insertUf[0].rowsAffected).to.equal(1);
 
         const insertResult1 = await crud.insert(Cidade, ObjectToTest.cidade).execute().toPromise();
         expect(insertResult1[0].rowsAffected).to.equal(1);
@@ -107,22 +111,52 @@ describe("SQLite", async () => {
             subRegiao: ObjectToTest.subRegiao,
         } as Cidade).execute().toPromise();
         expect(insertResult2[0].rowsAffected).to.equal(1);
-        const insertResult3 = await crud.insert(Cidade, {
+
+        // Caso de referencia nula test1
+        const insertSaoPaulo = await crud.insert(Cidade, {
             codeImport: 4,
             nome: "São Paulo",
-            uf: {
-                codeImport: "SP",
-                nome: "São Paulo"
-            } as Uf,
-            subRegiao: ObjectToTest.subRegiao,
+            uf: null,
+            subRegiao: void 0,
         } as Cidade)
             .execute().toPromise();
-        expect(insertResult3[0].rowsAffected).to.equal(1);
+        expect(insertSaoPaulo[0].rowsAffected).to.equal(1);
+
+        const querySaoPaulo = await crud.query(Cidade)
+            .where(where => where.equal(x => x.codeImport, insertSaoPaulo[0].insertId))
+            .mapper<Cidade>(map => map.map().result()).toPromise();
+        expect(querySaoPaulo.length).to.equal(1);
+        expect(querySaoPaulo[0].subRegiao).to.equal(null);
+        expect(querySaoPaulo[0].uf).to.equal(null);
+
+        // Caso de referencia nula test2
+        const insertNovaTrento = await crud.insert(Cidade, {
+            codeImport: 5,
+            nome: "Nova Trento",
+            uf: ObjectToTest.uf,
+            subRegiao: void 0,
+        } as Cidade)
+            .execute().toPromise();
+        expect(insertNovaTrento[0].rowsAffected).to.equal(1);
+
+        const queryNovaTrento = crud.query(Cidade);
+        queryNovaTrento
+            .join(Uf, where => where.equal(x => x.codeImport, queryNovaTrento.ref(x => x.uf.codeImport)), join => { join.projection(p => p.all()) })
+            .where(where => where.equal(x => x.codeImport, insertNovaTrento[0].insertId))
+            .projection(p => p.all());
+        const resultNovaTrento = await queryNovaTrento.mapper<Cidade>(map => map.map()
+        .map(Uf, x => x.uf)
+        .result()).toPromise();
+        expect(resultNovaTrento.length).to.equal(1);
+        expect(resultNovaTrento[0].subRegiao).to.equal(null);
+        expect(resultNovaTrento[0].uf.codeImport).to.equal("SC");
+        expect(resultNovaTrento[0].uf.nome).to.equal(ObjectToTest.uf.nome);
+        expect(resultNovaTrento[0].uf.population).to.equal(ObjectToTest.uf.population);
 
         const queryResult = await crud.query(Cidade)
             .where(where => where.equal(x => x.uf.codeImport, ObjectToTest.uf.codeImport))
             .toList().toPromise();
-        expect(queryResult.length).to.equal(2);
+        expect(queryResult.length).to.equal(3);
         for (const itemResult of queryResult) {
             expect(itemResult.uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
         }

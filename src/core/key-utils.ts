@@ -6,14 +6,11 @@ import { ModelUtils } from "./model-utils";
 export class KeyUtils {
 
     public static setKey(mapperTable: MapperTable, model: any, keyValue: any): void {
-        // model[this.primaryKeyMapper(metadata).fieldReference] = keyValue;
         ModelUtils.set(model, this.primaryKeyMapper(mapperTable).fieldReference, keyValue);
-        // lodash.set(model, this.primaryKeyMapper(mapperTable).fieldReference, keyValue);
     }
 
     public static getKey(mapperTable: MapperTable, model: any): any {
         return ModelUtils.get(model, this.primaryKeyMapper(mapperTable).fieldReference);
-        // return Utils.getValue(model, this.primaryKeyMapper(mapperTable).fieldReference);
     }
 
     public static primaryKeyType(mapperTable: MapperTable): PrimaryKeyType {
@@ -31,7 +28,4 @@ export class KeyUtils {
     public static primaryKeysMapper(mapperTable: MapperTable): MapperColumn[] {
         return mapperTable.columns.filter(x => !!x.primaryKeyType);
     }
-    // public static primaryKeysMapper<T>(metadata: MetadataTable<T>): MapperColumn[] {
-    //     return metadata.mapperTable.columns.filter(x => !!x.primaryKeyType);
-    // }
 }

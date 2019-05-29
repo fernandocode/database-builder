@@ -106,7 +106,7 @@ export class DatabaseHelper {
         ) {
             return ColumnType.BOOLEAN;
         }
-        if (type === void 0) {
+        if (Utils.isNull(type)) {
             return void 0;
         }
         throw new DatabaseBuilderError(`type '${type}' não configurado!`);
@@ -149,7 +149,7 @@ export class DatabaseHelper {
     }
 
     public valueToDatabase(value: ValueTypeToParse, fieldType: FieldType): ValueType {
-        const type = value !== void 0 ? this.getType(value) : fieldType;
+        // const type = value !== void 0 ? this.getType(value) : fieldType;
         if (
             this.isFlag(fieldType, FieldType.ARRAY) ||
             this.isFlag(fieldType, FieldType.OBJECT)

@@ -2,6 +2,7 @@ import { DdlBaseBuilder } from "../ddl-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { DdlCompiled } from "../../core/ddl-compided";
 import { DatabaseBuilderError } from "../../core/errors";
+import { Utils } from "../../core/utils";
 
 export class DropBuilder<T> extends DdlBaseBuilder<T> {
 
@@ -10,7 +11,7 @@ export class DropBuilder<T> extends DdlBaseBuilder<T> {
         private _mapperTable: MapperTable
     ) {
         super(typeT && typeT.name ? typeT.name : _mapperTable.tableName);
-        if (_mapperTable === void 0) {
+        if (Utils.isNull(_mapperTable)) {
             throw new DatabaseBuilderError(`Mapper not found for '${this._tablename}'`);
         }
     }

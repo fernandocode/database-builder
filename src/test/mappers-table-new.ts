@@ -22,7 +22,6 @@ import { Linha } from "./models/linha";
 import { Referencia } from "./models/referencia";
 import { Estrutura } from "./models/estrutura";
 import { Imagem } from "./models/imagem";
-import { DatabaseTypes } from "../definitions";
 import { MapperTest } from "./mapper-test";
 import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 import { ContasAReceber } from "./models/contas-a-receber";
@@ -39,7 +38,8 @@ export class MappersTableNew extends MapperTest {
         this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
-        this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned)
+        .reference(x => x.subRegiao, SubRegiao);
         this.autoMapperIdImport(Classificacao, Number, PrimaryKeyType.Assigned);
         // this.autoMapperModelInternalKey(Cliente, Number, PrimaryKeyType.AutoIncrement);
         const mCliente = this.autoMapperId(Cliente, PrimaryKeyType.Guid);

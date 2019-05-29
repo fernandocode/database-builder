@@ -22,7 +22,7 @@ export class RowMapper<T> {
     ): RowMapper<T> {
         const expressionField = Utils.getColumn(expression, ".");
         const value: TReader = this._readable.read(typeT, alias);
-        if (this._valueResultMap === void 0) {
+        if (Utils.isNull(this._valueResultMap)) {
             this._valueResultMap = {} as T;
         }
         if (expressionField && expressionField.length > 0) {

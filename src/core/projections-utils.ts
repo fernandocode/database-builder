@@ -52,7 +52,7 @@ export class ProjectionsUtils<T> {
         alias?: string,
         args?: any[]
     ): ProjectionModel {
-        if (expression === void 0) {
+        if (Utils.isNull(expression)) {
             projections.forEach(projection => {
                 this._pendingProjections.unshift(projection);
             });
@@ -79,7 +79,7 @@ export class ProjectionsUtils<T> {
         alias: string = this.defaultAliasAs(column),
         args: any[],
     ): ProjectionModel {
-        if (projection !== void 0) {
+        if (!Utils.isNull(projection)) {
             return this.buildColumn(this.builderProjections(projection, column, args), alias);
         }
         return this.buildColumn(column, alias);

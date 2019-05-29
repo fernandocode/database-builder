@@ -144,7 +144,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
     }
 
     private validInstanceMapper<TType>(instance: TType, propertyMapperForMessage: string): TType {
-        if (instance === void 0) {
+        if (Utils.isNull(instance)) {
             throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped property ('${propertyMapperForMessage}')`);
         }
         return instance;
@@ -153,7 +153,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
     private validExpressionMapper<TReturn, TType>(
         instance: TType, expression: ReturnExpression<TReturn, TType>
     ): ReturnExpression<TReturn, TType> {
-        if (expression === void 0 || expression(instance) === void 0) {
+        if (Utils.isNull(expression) || Utils.isNull(expression(instance))) {
             throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped property ('${this.columnName(expression)}')`);
         }
         return expression;
@@ -174,7 +174,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
     private getMapper(keyMapper: string) {
         return this._getMapper.get(keyMapper);
     }
-    
+
     private keyColumns(): MapperColumn[] {
         return this.mapperTable.columns.filter(x => !!x.primaryKeyType);
     }
@@ -237,8 +237,8 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
             throw new DatabaseBuilderError(`Mapper '${this.newable.name}', it is not allowed to map property '${propertyName}' of type '${instanceMapper.constructor.name}' as a reference. For it is not of a composite type (Ex: object)`);
         }
         const mapperKey = this.getMapper(instanceMapper.constructor.name);
-        if (mapperKey !== void 0) {
-            if (mapperKey.keyColumns() === void 0 || mapperKey.keyColumns().length < 1) {
+        if (!Utils.isNull(mapperKey)) {
+            if (Utils.isNull(mapperKey.keyColumns()) || mapperKey.keyColumns().length < 1) {
                 throw new DatabaseBuilderError(`Mapper '${this.newable.name}', not key column for property '${propertyName}' of type '${instanceMapper.constructor.name}'`);
             }
             if (mapperKey.keyColumns().length > 1) {

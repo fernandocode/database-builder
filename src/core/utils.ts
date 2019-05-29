@@ -42,6 +42,14 @@ export type ProjectionOrValue<T> = ProjectionBuilder<T> | ProjectionsHelper<T> |
 
 export class Utils {
 
+    public static readonly DEFAULT_VALUES = {
+        BOOLEAN: true,
+        NUMBER: 0,
+        STRING: "",
+        MOMENT: moment(),
+        DATE: new Date()
+    };
+
     private static _expressionUtils: ExpressionUtils;
     private static _databaseHelper: DatabaseHelper;
 
@@ -80,6 +88,10 @@ export class Utils {
 
     public static isOnlyNumber(value: any): boolean {
         return value && value.length && /^[0-9]*$/.test(value);
+    }
+
+    public static isNull(value: any): boolean {
+        return value === void 0 || value === null;
     }
 
     public static isStartWithNumber(value: any): boolean {
@@ -158,7 +170,7 @@ export class Utils {
         typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> },
         getMapper: (tKey: (new () => any) | string) => MetadataTable<any>
     ): MetadataTableBase<T> {
-        return typeT === void 0
+        return Utils.isNull(typeT)
             ? new MetadataTableBase(void 0)
             : Utils.isQueryBuilder(typeT)
                 ? (typeT as QueryBuilder<T>)
@@ -176,7 +188,7 @@ export class Utils {
     public static expressionOrValue<T>(
         value: TypeWhere<T>
     ): ExpressionOrValueEnum {
-        return value === void 0 || value === null
+        return Utils.isNull(value)
             ? ExpressionOrValueEnum.Null
             : this.isProjectionsHelper(value)
                 ? ExpressionOrValueEnum.Projection
@@ -270,7 +282,7 @@ export class Utils {
     public static getType(instance: ValueTypeToParse): FieldType;
     public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): FieldType;
     public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression?: ExpressionOrColumn<TReturn, T>): FieldType {
-        if (instance === void 0) {
+        if (Utils.isNull(instance)) {
             return void 0;
         }
         if (expression) {
@@ -298,6 +310,17 @@ export class Utils {
             || this.isValueBoolean(value)
             || this.isDate(value)
             || this.isMoment(value);
+    }
+
+    public static isValueDefault(value: any): boolean {
+        // tslint:disable-next-line: forin
+        for (const key in this.DEFAULT_VALUES) {
+            const valueDefault = (this.DEFAULT_VALUES as any)[key];
+            if (valueDefault === value) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static normalizeSqlString(inputSql: string): string {

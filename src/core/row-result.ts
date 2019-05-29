@@ -52,9 +52,9 @@ export class RowResult<T> {
         typeT: new () => TReader,
         alias: string = void 0
     ): TReader {
-        if (alias === void 0 && this._query && MapperUtils.resolveKey(typeT) !== this._query.tablename) {
+        if (Utils.isNull(alias) && this._query && MapperUtils.resolveKey(typeT) !== this._query.tablename) {
             alias = this._query.getAlias(typeT);
-            if (alias === void 0) {
+            if (Utils.isNull(alias)) {
                 throw new DatabaseBuilderError(`alias not found for the reference of "${MapperUtils.resolveKey(typeT)}", you can enter an alias explicitly in the last parameter`);
             }
         }
@@ -63,8 +63,6 @@ export class RowResult<T> {
         const result: TReader = typeT ? new typeT() : {} as TReader;
         mapperTable.columns.forEach((column) => {
             if (Utils.isNameColumn(column.column)) {
-                // TODO: refatorar para recuperar valores de forma correta para objetos complexos
-                // Exemplo: column: "cliente_cidade_uf_id", recuperar o valor para: "cliente.cidade.uf.id"
                 const value = this._databaseHelper.databaseToValue(
                     (this._valueT as any)[alias ? `${alias}_${column.column}` : column.column],
                     column.fieldType);
