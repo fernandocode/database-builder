@@ -50,7 +50,7 @@ describe("Query method", () => {
         expect(result[0].params[0]).to.equal("ABC");
         expect(result[0].params[1]).to.equal(10);
         expect(result[0].params[2]).to.equal(100);
-        expect(result[0].query).to.equal(`SELECT abc.idErp AS idErp, abc.versao AS versao, abc.id AS id, abc.deleted AS deleted, abc.razaoSocial AS razaoSocial, abc.nomeFantasia AS nomeFantasia, abc.cidade_codeImport AS cidade_codeImport, abc.change AS change FROM Cliente AS abc WHERE abc.razaoSocial = ? AND (abc.cidade_population > ? OR abc.cidade_codeImport <= ?)`)
+        expect(result[0].query).to.equal(`SELECT abc.idErp AS idErp, abc.versao AS versao, abc.id AS id, abc.deleted AS deleted, abc.razaoSocial AS razaoSocial, abc.nomeFantasia AS nomeFantasia, abc.cidade_codeImport AS cidade_codeImport, abc.change AS change FROM Cliente AS abc WHERE abc.razaoSocial = ? AND (abc.cidade_population > ? OR abc.cidade_codeImport <= ?)`);
     });
 
     it("test simple select with where and select projections", () => {

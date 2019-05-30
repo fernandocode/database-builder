@@ -151,7 +151,7 @@ describe("SQLite", async () => {
 
         const queryNovaTrento = crud.query(Cidade);
         queryNovaTrento
-            .join(Uf, where => where.equal(x => x.codeImport, queryNovaTrento.ref(x => x.uf.codeImport)), join => { join.projection(p => p.all()) })
+            .join(Uf, where => where.equal(x => x.codeImport, queryNovaTrento.ref(x => x.uf.codeImport)), join => { join.projection(p => p.all()); })
             .where(where => where.equal(x => x.codeImport, insertNovaTrento[0].insertId))
             .projection(p => p.all());
         const resultNovaTrento = await queryNovaTrento.mapper<Cidade>(map => map.map()
@@ -175,7 +175,7 @@ describe("SQLite", async () => {
 
         const queryCanelinha = crud.query(Cidade);
         queryCanelinha
-            .join(SubRegiao, where => where.equal(x => x.codeImport, queryCanelinha.ref(x => x.subRegiao.codeImport)), join => { join.projection(p => p.all()) })
+            .join(SubRegiao, where => where.equal(x => x.codeImport, queryCanelinha.ref(x => x.subRegiao.codeImport)), join => { join.projection(p => p.all()); })
             .where(where => where.equal(x => x.codeImport, insertCanelinha[0].insertId))
             .projection(p => p.all());
         const resultCanelinha = await queryCanelinha.mapper<Cidade>(map => map.map()
