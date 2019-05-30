@@ -39,7 +39,7 @@ export class MappersTableNew extends MapperTest {
         this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned)
-        .reference(x => x.subRegiao, SubRegiao);
+            .reference(x => x.uf, Uf);
         this.autoMapperIdImport(Classificacao, Number, PrimaryKeyType.Assigned);
         // this.autoMapperModelInternalKey(Cliente, Number, PrimaryKeyType.AutoIncrement);
         const mCliente = this.autoMapperId(Cliente, PrimaryKeyType.Guid);

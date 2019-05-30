@@ -65,11 +65,11 @@ describe("Update", () => {
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.cidade.nome,
             ObjectToTest.cidade.population,
-            ObjectToTest.cidade.uf.codeImport,
             ObjectToTest.cidade.subRegiao.codeImport,
+            ObjectToTest.cidade.uf.codeImport,
             ObjectToTest.cidade.codeImport
         ].toString());
-        expect(result[0].query).to.equal("UPDATE Cidade SET nome = ?, population = ?, uf_codeImport = ?, subRegiao_codeImport = ? WHERE codeImport = ?");
+        expect(result[0].query).to.equal("UPDATE Cidade SET nome = ?, population = ?, subRegiao_codeImport = ?, uf_codeImport = ? WHERE codeImport = ?");
     });
 
     it("Cliente", () => {
@@ -83,7 +83,6 @@ describe("Update", () => {
             ObjectToTest.cliente.nomeFantasia,
             ObjectToTest.cliente.cidade.codeImport,
             ObjectToTest.cliente.change,
-            // ObjectToTest.cliente.classificacao.codeImport
         ].toString());
         expect(result[0].query).to.equal("UPDATE Cliente SET idErp = ?, versao = ?, deleted = ?, razaoSocial = ?, nomeFantasia = ?, cidade_codeImport = ?, change = ?");
     });

@@ -5,9 +5,9 @@ import { BaseImport } from "./base-import";
 export class Cidade extends BaseImport<number> {
 
     public nome: string = "";
-    public uf: Uf = new Uf();
-    public subRegiao: SubRegiao;
-    // public subRegiao: SubRegiao = new SubRegiao();
+    public uf: Uf;
+    // public subRegiao: SubRegiao;
+    public subRegiao: SubRegiao = new SubRegiao();
     public population: number = 0;
 
     constructor(instance?: Cidade) {

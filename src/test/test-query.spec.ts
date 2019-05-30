@@ -150,7 +150,7 @@ describe("Query method", () => {
         expect(result[0].params[0]).to.equal(1);
         expect(result[0].params[1]).to.equal("ABC");
         expect(result[0].params[2]).to.equal(10);
-        expect(result[0].query).to.equal(`SELECT cli.deleted AS inativo, CASE WHEN SUM(cli.cidade_codeImport) > ? THEN (SUM(cli.cidade_codeImport) * 2) ELSE 0 END AS cidadeTest, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) WHERE cli.razaoSocial = ? AND cli.idErp >= ?`);
+        expect(result[0].query).to.equal(`SELECT cli.deleted AS inativo, CASE WHEN SUM(cli.cidade_codeImport) > ? THEN (SUM(cli.cidade_codeImport) * 2) ELSE 0 END AS cidadeTest, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.subRegiao_codeImport AS cid_subRegiao_codeImport, cid.uf_codeImport AS cid_uf_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport) WHERE cli.razaoSocial = ? AND cli.idErp >= ?`);
     });
 
     it("test select all by mapper", () => {
@@ -171,7 +171,7 @@ describe("Query method", () => {
         const result = query.compile();
 
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal(`SELECT cli.idErp AS idErp, cli.versao AS versao, cli.id AS id, cli.deleted AS deleted, cli.razaoSocial AS razaoSocial, cli.nomeFantasia AS nomeFantasia, cli.cidade_codeImport AS cidade_codeImport, cli.change AS change, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.uf_codeImport AS cid_uf_codeImport, cid.subRegiao_codeImport AS cid_subRegiao_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport)`);
+        expect(result[0].query).to.equal(`SELECT cli.idErp AS idErp, cli.versao AS versao, cli.id AS id, cli.deleted AS deleted, cli.razaoSocial AS razaoSocial, cli.nomeFantasia AS nomeFantasia, cli.cidade_codeImport AS cidade_codeImport, cli.change AS change, cid.codeImport AS cid_codeImport, cid.nome AS cid_nome, cid.population AS cid_population, cid.subRegiao_codeImport AS cid_subRegiao_codeImport, cid.uf_codeImport AS cid_uf_codeImport FROM Cliente AS cli LEFT JOIN Cidade AS cid ON (cid.codeImport = cli.cidade_codeImport)`);
     });
 
     // TODO: query from query

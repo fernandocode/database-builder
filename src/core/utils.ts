@@ -43,7 +43,7 @@ export type ProjectionOrValue<T> = ProjectionBuilder<T> | ProjectionsHelper<T> |
 export class Utils {
 
     public static readonly DEFAULT_VALUES = {
-        BOOLEAN: true,
+        BOOLEAN: false,
         NUMBER: 0,
         STRING: "",
         MOMENT: moment(),
@@ -316,7 +316,7 @@ export class Utils {
         // tslint:disable-next-line: forin
         for (const key in this.DEFAULT_VALUES) {
             const valueDefault = (this.DEFAULT_VALUES as any)[key];
-            if (valueDefault === value) {
+            if (valueDefault === value || (this.isValueNumber(value) && this.isValueNumber(valueDefault) ? value < valueDefault : false)) {
                 return true;
             }
         }

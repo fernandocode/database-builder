@@ -98,9 +98,19 @@ describe("SQLite", async () => {
 
         await ddl.create(Cidade).execute().toPromise();
         await ddl.create(Uf).execute().toPromise();
+        await ddl.create(SubRegiao).execute().toPromise();
+
+        const subRegiaoKeyZero = {
+            codeImport: 0,
+            nome: "Leste Catarinense",
+            regiao: ObjectToTest.regiao
+        } as SubRegiao;
 
         const insertUf = await crud.insert(Uf, ObjectToTest.uf).execute().toPromise();
         expect(insertUf[0].rowsAffected).to.equal(1);
+
+        const insertSubRegiao = await crud.insert(SubRegiao, subRegiaoKeyZero).execute().toPromise();
+        expect(insertSubRegiao[0].rowsAffected).to.equal(1);
 
         const insertResult1 = await crud.insert(Cidade, ObjectToTest.cidade).execute().toPromise();
         expect(insertResult1[0].rowsAffected).to.equal(1);
@@ -145,18 +155,42 @@ describe("SQLite", async () => {
             .where(where => where.equal(x => x.codeImport, insertNovaTrento[0].insertId))
             .projection(p => p.all());
         const resultNovaTrento = await queryNovaTrento.mapper<Cidade>(map => map.map()
-        .map(Uf, x => x.uf)
-        .result()).toPromise();
+            .map(Uf, x => x.uf)
+            .result()).toPromise();
         expect(resultNovaTrento.length).to.equal(1);
         expect(resultNovaTrento[0].subRegiao).to.equal(null);
-        expect(resultNovaTrento[0].uf.codeImport).to.equal("SC");
+        expect(resultNovaTrento[0].uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
         expect(resultNovaTrento[0].uf.nome).to.equal(ObjectToTest.uf.nome);
         expect(resultNovaTrento[0].uf.population).to.equal(ObjectToTest.uf.population);
+
+        // Caso de referencia nula test3 - key referencia 0
+        const insertCanelinha = await crud.insert(Cidade, {
+            codeImport: 6,
+            nome: "Canelinha",
+            uf: ObjectToTest.uf,
+            subRegiao: subRegiaoKeyZero,
+        } as Cidade)
+            .execute().toPromise();
+        expect(insertCanelinha[0].rowsAffected).to.equal(1);
+
+        const queryCanelinha = crud.query(Cidade);
+        queryCanelinha
+            .join(SubRegiao, where => where.equal(x => x.codeImport, queryCanelinha.ref(x => x.subRegiao.codeImport)), join => { join.projection(p => p.all()) })
+            .where(where => where.equal(x => x.codeImport, insertCanelinha[0].insertId))
+            .projection(p => p.all());
+        const resultCanelinha = await queryCanelinha.mapper<Cidade>(map => map.map()
+            .map(SubRegiao, x => x.subRegiao)
+            .result()).toPromise();
+        console.log("Canelinha: ", resultCanelinha[0]);
+        expect(resultCanelinha.length).to.equal(1);
+        expect(resultCanelinha[0].uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
+        expect(resultCanelinha[0].subRegiao.codeImport).to.equal(subRegiaoKeyZero.codeImport);
+        expect(resultCanelinha[0].subRegiao.nome).to.equal(subRegiaoKeyZero.nome);
 
         const queryResult = await crud.query(Cidade)
             .where(where => where.equal(x => x.uf.codeImport, ObjectToTest.uf.codeImport))
             .toList().toPromise();
-        expect(queryResult.length).to.equal(3);
+        expect(queryResult.length).to.equal(4);
         for (const itemResult of queryResult) {
             expect(itemResult.uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
         }
@@ -227,6 +261,7 @@ describe("SQLite", async () => {
             }
         );
         const queryResult = await query.mapper<Cidade>(row => {
+            console.log((row as any)._valueT);
             const result = row
                 .map()
                 .map(Uf, x => x.uf, "uf")
@@ -235,6 +270,7 @@ describe("SQLite", async () => {
                 .result();
             return result;
         }).toPromise();
+        console.log("teste erro: ", queryResult[0]);
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].codeImport).to.equal(model.codeImport);
         expect(queryResult[0].nome).to.equal(model.nome);

@@ -66,10 +66,10 @@ describe("Insert", () => {
             ObjectToTest.cidade.codeImport,
             ObjectToTest.cidade.nome,
             ObjectToTest.cidade.population,
+            ObjectToTest.cidade.subRegiao.codeImport,
             ObjectToTest.cidade.uf.codeImport,
-            ObjectToTest.cidade.subRegiao.codeImport
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO Cidade (codeImport, nome, population, uf_codeImport, subRegiao_codeImport) VALUES (?, ?, ?, ?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO Cidade (codeImport, nome, population, subRegiao_codeImport, uf_codeImport) VALUES (?, ?, ?, ?, ?)");
     });
 
     it("Cliente", () => {
