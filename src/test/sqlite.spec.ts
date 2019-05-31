@@ -181,7 +181,6 @@ describe("SQLite", async () => {
         const resultCanelinha = await queryCanelinha.mapper<Cidade>(map => map.map()
             .map(SubRegiao, x => x.subRegiao)
             .result()).toPromise();
-        console.log("Canelinha: ", resultCanelinha[0]);
         expect(resultCanelinha.length).to.equal(1);
         expect(resultCanelinha[0].uf.codeImport).to.equal(ObjectToTest.uf.codeImport);
         expect(resultCanelinha[0].subRegiao.codeImport).to.equal(subRegiaoKeyZero.codeImport);
@@ -261,7 +260,6 @@ describe("SQLite", async () => {
             }
         );
         const queryResult = await query.mapper<Cidade>(row => {
-            console.log((row as any)._valueT);
             const result = row
                 .map()
                 .map(Uf, x => x.uf, "uf")
@@ -270,7 +268,6 @@ describe("SQLite", async () => {
                 .result();
             return result;
         }).toPromise();
-        console.log("teste erro: ", queryResult[0]);
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].codeImport).to.equal(model.codeImport);
         expect(queryResult[0].nome).to.equal(model.nome);

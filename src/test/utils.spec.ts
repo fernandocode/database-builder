@@ -1,6 +1,6 @@
-import { Utils } from './../core/utils';
+import { Utils } from "./../core/utils";
 import { expect } from "chai";
-import { ExpressionOrValueEnum } from '../core/enums/expression-or-value-enum';
+import { ExpressionOrValueEnum } from "../core/enums/expression-or-value-enum";
 
 describe("Utils", () => {
 

@@ -87,7 +87,7 @@ export class Utils {
     }
 
     public static isOnlyNumber(value: any): boolean {
-        return value && value.length && /^[0-9]*$/.test(value);
+        return !this.isNull(value) && value.length && /^[0-9]*$/.test(value);
     }
 
     public static isNull(value: any): boolean {
