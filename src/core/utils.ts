@@ -22,6 +22,7 @@ import { Query, QueryBuilder } from "../crud";
 import { MetadataTable } from "../metadata-table";
 import { MetadataTableBase } from "../metadata-table-base";
 import { ProjectionCompile } from "../crud/projection-compile";
+import * as lodash from "lodash";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -87,11 +88,12 @@ export class Utils {
     }
 
     public static isOnlyNumber(value: any): boolean {
-        return !this.isNull(value) && value.length && /^[0-9]*$/.test(value);
+        return !this.isNull(value) && value.length > 0 && /^(?:-?\d+)?$/.test(value);
+        // return !this.isNull(value) && value.length > 0 && /^[0-9]*$/.test(value);
     }
 
     public static isNull(value: any): boolean {
-        return value === void 0 || value === null;
+        return value === void 0 || value === null || (this.isNumber(value) && isNaN(value));
     }
 
     public static isStartWithNumber(value: any): boolean {
@@ -160,6 +162,13 @@ export class Utils {
 
     public static isPlanRef(instance: any): boolean {
         return instance instanceof PlanRef;
+    }
+
+    public static isEmpty(value: any) {
+        if (this.isBoolean(value) || this.isDate(value)) {
+            return this.isNull(value);
+        }
+        return lodash.isEmpty(value);
     }
 
     public static databaseName<T>(tablename: TypeOrString<T>): string {
