@@ -22,9 +22,18 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
     }
 
     public execute(cascade?: boolean, database?: DatabaseBase): Observable<DatabaseResult[]> {
-        return this.checkDatabaseResult(
-            this._executableBuilder.execute(this.compile(cascade), this.getDatabase(database))
-        );
+        // return this.checkDatabaseResult(
+        //     this._executableBuilder.execute(this.compile(cascade), this.getDatabase(database))
+        // );
+        return new Observable<DatabaseResult[]>(observer => {
+            try {
+                this.checkDatabaseResult(
+                    this._executableBuilder.execute(this.compile(cascade), this.getDatabase(database))
+                ).subscribe(observer);
+            } catch (error) {
+                observer.error(error);
+            }
+        });
     }
 
     public compile(cascade: boolean = true): QueryCompiled[] {

@@ -99,8 +99,9 @@ export class ObjectToTest {
         } as TestClazzRef,
         disabled: false,
         date: 23245456,
-        dateMoment: moment(),
-        dateDate: new Date(),
+        dateStr: "2018-06-08T00:00:00Z",
+        dateMoment: DatetimeUtils.now(),
+        dateDate: DatetimeUtils.nowDate(),
         numero: 134,
         referenceTestCode: {
             code: "3455ds",

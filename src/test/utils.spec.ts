@@ -2,6 +2,7 @@ import { Utils } from "./../core/utils";
 import { expect } from "chai";
 import { ExpressionOrValueEnum } from "../core/enums/expression-or-value-enum";
 import moment = require("moment");
+import { FieldType } from "../core/enums/field-type";
 
 describe("Utils", () => {
 
@@ -98,4 +99,18 @@ describe("Utils", () => {
         expect(objectIsArray).equal(false);
     });
 
+    it("getValueType Datetime", () => {
+        const valueZ = Utils.getValueType("2018-06-08T00:00:00Z", FieldType.DATE);
+        const valueTimeZoneNegative = Utils.getValueType("2018-06-08T00:00:00-03:00", FieldType.DATE);
+        const valueTimeZonePositive = Utils.getValueType("2018-06-08T00:00:00-03:00", FieldType.DATE);
+        const valueZWithoutSeparators = Utils.getValueType("20180608T000000Z", FieldType.DATE);
+        const valueWithoutTimeZone = Utils.getValueType("2018-06-08T00:00:00", FieldType.DATE);
+        const valueWithoutTime = Utils.getValueType("2018-06-08", FieldType.DATE);
+        expect(valueZ).equal(1528416000);
+        expect(valueTimeZoneNegative).equal(1528416000);
+        expect(valueTimeZonePositive).equal(1528416000);
+        expect(valueZWithoutSeparators).equal(1528416000);
+        expect(valueWithoutTimeZone).equal(1528416000);
+        expect(valueWithoutTime).equal(1528416000);
+    });
 });

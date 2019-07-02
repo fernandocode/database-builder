@@ -7,15 +7,14 @@ import { Utils } from "../core/utils";
 
 export abstract class SqlBaseBuilder<T> implements QueryCompilable {
 
-    private NEXT_VALUE_ALIAS: number = 0;
-
     protected _tablename: string;
 
     protected whereCompiled: WhereCompiled = { where: "", params: [] };
 
-    private readonly WHERE = " WHERE ";
+    protected innerUsedAliasTest: Array<{ hasAlias: (alias: string) => boolean }> = [];
 
-    protected innerUsedAliasTest: { hasAlias: (alias: string) => boolean }[] = [];
+    private readonly WHERE = " WHERE ";
+    private NEXT_VALUE_ALIAS: number = 0;
 
     constructor(
         queryT: (new () => T) | QueryBuilder<T>,

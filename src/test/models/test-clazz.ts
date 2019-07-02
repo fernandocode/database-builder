@@ -9,6 +9,7 @@ export class TestClazz extends BaseKey {
     public referenceTest: TestClazzRef = new TestClazzRef();
     public disabled: boolean = false;
     public date: number = 0;
+    public dateStr: string;
     public dateMoment: moment.Moment = moment();
     public dateDate: Date = new Date();
     public numero = 0;

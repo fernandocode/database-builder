@@ -118,7 +118,7 @@ export class DatabaseHelper {
     }
 
     public preFormatValue(value: ValueTypeToParse): ValueTypeToParse {
-        const regexISODatetime = /(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})[+-](\d{2})\:(\d{2})/gm;
+        const regexISODatetime = /^(\d{4})-?(\d{2})-?(\d{2})(T(\d{2})\:?(\d{2})\:?(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
         if (typeof value === "string" && regexISODatetime.test(value)) {
             return DatetimeUtils.dateToDatabase(value);
         }
@@ -149,7 +149,6 @@ export class DatabaseHelper {
     }
 
     public valueToDatabase(value: ValueTypeToParse, fieldType: FieldType): ValueType {
-        // const type = value !== void 0 ? this.getType(value) : fieldType;
         if (
             this.isFlag(fieldType, FieldType.ARRAY) ||
             this.isFlag(fieldType, FieldType.OBJECT)

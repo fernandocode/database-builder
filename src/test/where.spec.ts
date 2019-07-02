@@ -15,7 +15,7 @@ describe("Where", () => {
         const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes");
     });
 
     it("simple", () => {
@@ -26,7 +26,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("value type string", () => {
@@ -44,7 +44,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(param1);
         expect(result[0].params[1]).to.equal(param2);
         expect(result[0].params[2]).to.equal(param3);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.description = ? AND tes.description = ? AND tes.description = ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.description = ? AND tes.description = ? AND tes.description = ?");
     });
 
     it("value is null", () => {
@@ -55,7 +55,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id IS NULL");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id IS NULL");
     });
 
     it("value is not null", () => {
@@ -66,7 +66,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
     });
 
     it("value is not null (null)", () => {
@@ -77,7 +77,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id IS NOT NULL");
     });
 
     it("column string", () => {
@@ -88,7 +88,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("multi", () => {
@@ -100,7 +100,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
     });
 
     it("multi and", () => {
@@ -113,7 +113,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id");
     });
 
     it("multi or", () => {
@@ -126,7 +126,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ? OR tes.id = tes.referenceTest_id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ? OR tes.id = tes.referenceTest_id");
     });
 
     it("diferent context or", () => {
@@ -157,7 +157,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("compare to value (deprecated)", () => {
@@ -168,7 +168,7 @@ describe("Where", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ?");
     });
 
     it("compare to column", () => {
@@ -178,7 +178,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
     });
 
     it("compare to column (deprecated)", () => {
@@ -188,7 +188,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = tes.referenceTest_id");
     });
 
     it("compare to column (ref secundary ref)", () => {
@@ -198,7 +198,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = abc.referenceTest_id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = abc.referenceTest_id");
     });
 
     it("simple cross", () => {
@@ -238,7 +238,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("this value");
         expect(result[0].params[2]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id OR (tes.description = ? OR ? = tes.disabled)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id OR (tes.description = ? OR ? = tes.disabled)");
     });
 
     it("equal", () => {
@@ -259,7 +259,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("this value");
         expect(result[0].params[2]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id AND tes.description <> tes.disabled OR (tes.description = ? OR ? = tes.disabled)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ? AND tes.id = tes.referenceTest_id AND tes.description <> tes.disabled OR (tes.description = ? OR ? = tes.disabled)");
     });
 
     it("great", () => {
@@ -280,7 +280,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("this value");
         expect(result[0].params[2]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id > ? AND tes.id > tes.referenceTest_id AND tes.description <= tes.disabled OR (tes.description > ? OR ? > tes.disabled)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id > ? AND tes.id > tes.referenceTest_id AND tes.description <= tes.disabled OR (tes.description > ? OR ? > tes.disabled)");
     });
 
     it("less", () => {
@@ -301,7 +301,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("this value");
         expect(result[0].params[2]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id < ? AND tes.id < tes.referenceTest_id AND tes.description >= tes.disabled OR (tes.description < ? OR ? < tes.disabled)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id < ? AND tes.id < tes.referenceTest_id AND tes.description >= tes.disabled OR (tes.description < ? OR ? < tes.disabled)");
     });
 
     it("lessAndEqual", () => {
@@ -322,7 +322,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("this value");
         expect(result[0].params[2]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id <= ? AND tes.id <= tes.referenceTest_id AND tes.description > tes.disabled OR (tes.description <= ? OR ? <= tes.disabled)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id <= ? AND tes.id <= tes.referenceTest_id AND tes.description > tes.disabled OR (tes.description <= ? OR ? <= tes.disabled)");
     });
 
     it("greatAndEqual", () => {
@@ -343,7 +343,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("this value");
         expect(result[0].params[2]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id >= ? AND tes.id >= tes.referenceTest_id AND tes.description < tes.disabled OR (tes.description >= ? OR ? >= tes.disabled)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id >= ? AND tes.id >= tes.referenceTest_id AND tes.description < tes.disabled OR (tes.description >= ? OR ? >= tes.disabled)");
     });
 
     it("contains", () => {
@@ -362,7 +362,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal("%2%");
         expect(result[0].params[1]).to.equal("%this value%");
         expect(result[0].params[2]).to.equal("%false%");
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("startsWith", () => {
@@ -381,7 +381,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal("2%");
         expect(result[0].params[1]).to.equal("this value%");
         expect(result[0].params[2]).to.equal("false%");
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("endsWith", () => {
@@ -400,7 +400,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal("%2");
         expect(result[0].params[1]).to.equal("%this value");
         expect(result[0].params[2]).to.equal("%false");
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("like", () => {
@@ -419,7 +419,7 @@ describe("Where", () => {
         expect(result[0].params[0]).to.equal("%2%");
         expect(result[0].params[1]).to.equal("%this value");
         expect(result[0].params[2]).to.equal("false%");
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT LIKE ? OR (tes.description LIKE ? OR tes.disabled LIKE ?)");
     });
 
     it("is (not) null", () => {
@@ -430,7 +430,7 @@ describe("Where", () => {
         });
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id IS NULL AND tes.description IS NOT NULL");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id IS NULL AND tes.description IS NOT NULL");
     });
 
     it("between", () => {
@@ -463,7 +463,7 @@ describe("Where", () => {
         expect(result[0].params[5]).to.equal(true);
         expect(result[0].params[6]).to.equal(979948800);
         expect(result[0].params[7]).to.equal(994982400);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?) AND tes.dateMoment BETWEEN ? AND ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?) AND tes.dateMoment BETWEEN ? AND ?");
     });
 
     it("between columns", () => {
@@ -504,7 +504,7 @@ describe("Where", () => {
         expect(result[0].params[3]).to.equal("b");
         expect(result[0].params[4]).to.equal(false);
         expect(result[0].params[5]).to.equal(true);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?)");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT BETWEEN ? AND ? OR (tes.description BETWEEN ? AND ? OR tes.disabled BETWEEN ? AND ?)");
     });
 
     it("in", () => {
@@ -533,7 +533,7 @@ describe("Where", () => {
         expect(result[0].params[5]).to.equal("this value");
         expect(result[0].params[6]).to.equal("b");
         expect(result[0].params[7]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
     });
 
     it("in (deprecated)", () => {
@@ -562,7 +562,7 @@ describe("Where", () => {
         expect(result[0].params[5]).to.equal("this value");
         expect(result[0].params[6]).to.equal("b");
         expect(result[0].params[7]).to.equal(false);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id NOT IN (?, ?, ?, ?) AND tes.referenceTest_id IN (SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.name = ?) OR (tes.description IN (?, ?) OR tes.disabled IN (?))");
     });
 
     it("projection concat 1", () => {

@@ -25,7 +25,7 @@ describe("Query", () => {
         const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes");
     });
 
     it("query in query", () => {
@@ -33,7 +33,7 @@ describe("Query", () => {
         const query = crud.query(queryTest);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes0.internalKey AS internalKey, tes0.id AS id, tes0.description AS description, tes0.date AS date, tes0.dateMoment AS dateMoment, tes0.dateDate AS dateDate, tes0.numero AS numero, tes0.referenceTest_id AS referenceTest_id, tes0.referenceTestCode_code AS referenceTestCode_code FROM (SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes) AS tes0");
+        expect(result[0].query).to.equal("SELECT tes0.internalKey AS internalKey, tes0.id AS id, tes0.description AS description, tes0.date AS date, tes0.dateMoment AS dateMoment, tes0.dateDate AS dateDate, tes0.numero AS numero, tes0.referenceTest_id AS referenceTest_id, tes0.referenceTestCode_code AS referenceTestCode_code, tes0.dateStr AS dateStr FROM (SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes) AS tes0");
     });
 
     it("join default (LEFT)", () => {
@@ -155,7 +155,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal("AbC");
         expect(result[0].params[1]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?) AS p WHERE p.id > ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code, p.dateStr AS dateStr FROM (SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?) AS p WHERE p.id > ?");
     });
 
     it("union", () => {
@@ -170,7 +170,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("AbC");
-        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS p WHERE p.id > ? UNION SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code, p.dateStr AS dateStr FROM TestClazz AS p WHERE p.id > ? UNION SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
     });
 
     it("union all", () => {
@@ -185,7 +185,7 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("AbC");
-        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code, p.dateStr AS dateStr FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ?");
     });
 
     it("union all and union", () => {
@@ -206,7 +206,7 @@ describe("Query", () => {
         expect(result[0].params[0]).to.equal(2);
         expect(result[0].params[1]).to.equal("AbC");
         expect(result[0].params[2]).to.equal(10);
-        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ? UNION SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.id = ?");
+        expect(result[0].query).to.equal("SELECT p.internalKey AS internalKey, p.id AS id, p.description AS description, p.date AS date, p.dateMoment AS dateMoment, p.dateDate AS dateDate, p.numero AS numero, p.referenceTest_id AS referenceTest_id, p.referenceTestCode_code AS referenceTestCode_code, p.dateStr AS dateStr FROM TestClazz AS p WHERE p.id > ? UNION ALL SELECT ref.id AS id, ref.name AS name FROM ReferencesModelTest AS ref WHERE ref.name = ? UNION SELECT ref.id AS id FROM ReferencesModelTest AS ref WHERE ref.id = ?");
     });
 
     it("join where concat columns", () => {
@@ -402,7 +402,7 @@ describe("Query", () => {
         const query = crud.query(ContasAReceber);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT con.versao AS versao, con.idErp AS idErp, con.deleted AS deleted, con.dataVencimento AS dataVencimento, con.dataRecebimento AS dataRecebimento, con.valor AS valor, con.cliente_idErp AS cliente_idErp FROM ContasAReceber AS con");
+        expect(result[0].query).to.equal("SELECT con.versao AS versao, con.idErp AS idErp, con.deleted AS deleted, con.dataVencimento AS dataVencimento, con.valor AS valor, con.dataRecebimento AS dataRecebimento, con.cliente_idErp AS cliente_idErp FROM ContasAReceber AS con");
     });
 
 });

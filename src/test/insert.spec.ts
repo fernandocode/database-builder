@@ -16,6 +16,9 @@ import { Insert } from "../crud/insert/insert";
 import { ContasAReceber } from "./models/contas-a-receber";
 import * as moment from "moment";
 import { DatetimeUtils } from "../datetime-utils";
+import { TestClazz } from "./models/test-clazz";
+import { Utils } from "../core/utils";
+import { FieldType } from "../core/enums/field-type";
 
 describe("Insert", () => {
     const mapper = getMapper();
@@ -120,6 +123,20 @@ describe("Insert", () => {
         expect(result[0].query).to.equal("INSERT INTO GuidClazz (guid, description) VALUES (?, ?)");
     });
 
+    it("TestClazz", () => {
+        const result = new Insert(TestClazz, ObjectToTest.testClazz, mapper.get(TestClazz).mapperTable).compile();
+        expect(result[0].params[0]).to.equal(ObjectToTest.testClazz.id);
+        expect(result[0].params[1]).to.equal(ObjectToTest.testClazz.description);
+        expect(result[0].params[2]).to.equal(Utils.getValueType(ObjectToTest.testClazz.date, FieldType.DATE));
+        expect(result[0].params[3]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateMoment, FieldType.DATE));
+        expect(result[0].params[4]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateDate, FieldType.DATE));
+        expect(result[0].params[5]).to.equal(ObjectToTest.testClazz.numero);
+        expect(result[0].params[6]).to.equal(ObjectToTest.testClazz.referenceTest.id);
+        expect(result[0].params[7]).to.equal(ObjectToTest.testClazz.referenceTestCode.code);
+        expect(result[0].params[8]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateStr, FieldType.DATE));
+        expect(result[0].query).to.equal("INSERT INTO TestClazz (id, description, date, dateMoment, dateDate, numero, referenceTest_id, referenceTestCode_code, dateStr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    });
+
     it("TestClazzRefCode", () => {
         const result = new Insert(TestClazzRefCode, ObjectToTest.testClazzRefCode, mapper.get(TestClazzRefCode).mapperTable).compile();
         expect(result[0].params.toString()).to.equal([
@@ -143,11 +160,11 @@ describe("Insert", () => {
             ObjectToTest.contasReceber.idErp,
             ObjectToTest.contasReceber.deleted,
             (ObjectToTest.contasReceber.dataVencimento as moment.Moment).unix(),
-            void 0,
             ObjectToTest.contasReceber.valor,
-            ObjectToTest.contasReceber.cliente.idErp
+            void 0,
+            ObjectToTest.contasReceber.cliente.idErp,
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO ContasAReceber (versao, idErp, deleted, dataVencimento, dataRecebimento, valor, cliente_idErp) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO ContasAReceber (versao, idErp, deleted, dataVencimento, valor, dataRecebimento, cliente_idErp) VALUES (?, ?, ?, ?, ?, ?, ?)");
     });
 
     it("ContasAReceber date string", () => {
@@ -164,10 +181,10 @@ describe("Insert", () => {
             contasReceber.idErp,
             contasReceber.deleted,
             DatetimeUtils.dateToDatabase(contasReceber.dataVencimento),
-            void 0,
             contasReceber.valor,
-            contasReceber.cliente.idErp
+            void 0,
+            contasReceber.cliente.idErp,
         ].toString());
-        expect(result[0].query).to.equal("INSERT INTO ContasAReceber (versao, idErp, deleted, dataVencimento, dataRecebimento, valor, cliente_idErp) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        expect(result[0].query).to.equal("INSERT INTO ContasAReceber (versao, idErp, deleted, dataVencimento, valor, dataRecebimento, cliente_idErp) VALUES (?, ?, ?, ?, ?, ?, ?)");
     });
 });

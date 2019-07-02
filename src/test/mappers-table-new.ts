@@ -25,6 +25,7 @@ import { Imagem } from "./models/imagem";
 import { MapperTest } from "./mapper-test";
 import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 import { ContasAReceber } from "./models/contas-a-receber";
+import { DatabaseTypes } from "../definitions/database-types";
 
 export class MappersTableNew extends MapperTest {
 
@@ -53,10 +54,10 @@ export class MappersTableNew extends MapperTest {
         //     .column(x => x.dataRecebimento, DatabaseTypes.Moment)
         //     .ignore(x => x.cliente)
         //     .referenceKey(x => x.cliente, x => x.codeImport);
-        const contasAReceberMapper = this.autoMapperIdErp(ContasAReceber, PrimaryKeyType.Assigned)
+        this.autoMapperIdErp(ContasAReceber, PrimaryKeyType.Assigned)
+            .column(x => x.dataRecebimento, DatabaseTypes.DateString)
             .ignore(x => x.cliente)
             .referenceKey(x => x.cliente, x => x.idErp);
-        // console.log("mapper contas a receber", contasAReceberMapper.mapperTable.columns.map(x => JSON.stringify(x)));
 
         this.autoMapper(TestClazzRef, x => x.id, PrimaryKeyType.AutoIncrement)
             .reference(x => x.autoReference, TestClazzRef)
@@ -68,6 +69,7 @@ export class MappersTableNew extends MapperTest {
             .referenceKey(x => x.reference, x => x.description)
             ;
         this.autoMapperKey(TestClazz, PrimaryKeyType.AutoIncrement)
+            .column(x => x.dateStr, DatabaseTypes.DateString)
             .ignore(x => x.disabled);
 
         this.autoMapperKey(TestClazzList, PrimaryKeyType.AutoIncrement);

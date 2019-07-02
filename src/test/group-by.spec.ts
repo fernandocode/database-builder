@@ -11,7 +11,7 @@ describe("Group By", () => {
         const query = crud.query(TestClazz);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes");
     });
 
     it("simple", () => {
@@ -19,7 +19,7 @@ describe("Group By", () => {
         query.groupBy(x => x.id);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes GROUP BY tes.id");
     });
 
     it("multi", () => {
@@ -29,7 +29,7 @@ describe("Group By", () => {
         query.groupBy(x => x.description);
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id, tes.description");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id, tes.description");
     });
 
     it("with having", () => {
@@ -42,7 +42,7 @@ describe("Group By", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(10);
         expect(result[0].params[1]).to.equal(3);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes GROUP BY tes.id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
     });
 
     it("with multi having", () => {
@@ -59,7 +59,7 @@ describe("Group By", () => {
         expect(result[0].params[0]).to.equal(10);
         expect(result[0].params[1]).to.equal(3);
         expect(result[0].params[2]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ? AND MAX(tes.id) > ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ? AND MAX(tes.id) > ?");
     });
 
     it("multi with having", () => {
@@ -73,7 +73,7 @@ describe("Group By", () => {
         expect(result[0].params.length).to.equal(2);
         expect(result[0].params[0]).to.equal(10);
         expect(result[0].params[1]).to.equal(3);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes GROUP BY tes.id, tes.referenceTest_id HAVING COUNT(tes.id) > ? AND SUM(tes.referenceTest_id) > ?");
     });
 
     it("with having (stacked)", () => {
@@ -85,7 +85,7 @@ describe("Group By", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal(10);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code FROM TestClazz AS tes GROUP BY tes.id HAVING SUM(COUNT(tes.id)) > ? AND SUM(tes.referenceTest_id) <= MAX(COUNT(tes.id))");
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes GROUP BY tes.id HAVING SUM(COUNT(tes.id)) > ? AND SUM(tes.referenceTest_id) <= MAX(COUNT(tes.id))");
     });
 
     it("with string", () => {

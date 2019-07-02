@@ -16,6 +16,8 @@ import { Regiao } from "./models/regiao";
 import { SubRegiao } from "./models/sub-regiao";
 import { JoinQueryBuilder } from "../crud/query/join-query-builder";
 import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
+import { Utils } from "../core/utils";
+import { FieldType } from "../core/enums/field-type";
 
 describe("SQLite", async () => {
     const mapper = getMapper();
@@ -390,24 +392,61 @@ describe("SQLite", async () => {
     });
 
     it("ContasAReceber", async () => {
-
         await ddl.create(ContasAReceber).execute().toPromise();
 
-        const insertResult1 = await crud.insert(ContasAReceber, ObjectToTest.contasReceber).execute().toPromise();
+        const dados = Object.assign({}, ObjectToTest.contasReceber);
+        dados.dataRecebimento = "2018-06-08T00:00:00Z";
+
+        // try {
+        //     const  a = crud.insert(ContasAReceber, dados).execute();
+        //     a.subscribe(result => {
+        //         try {
+        //             console.log("result", result);
+        //         } catch (error) {
+        //             console.warn("gggggg", error);
+        //         }
+        //     }, error => {
+        //         console.warn("ddddd", error);
+        //     });
+        // } catch (error) {
+        //     console.warn("hhhhhh", error);
+        // }
+
+        // try {
+        //     crud.insert(ContasAReceber, dados).execute().toPromise().then(result => {
+        //         try {
+        //             console.log("result p", result);
+        //         } catch (error) {
+        //             console.warn("aaaaaa", error);
+        //         }
+        //     }).catch(error => {
+        //         console.warn("rrrrrrr", error);
+        //     });
+        // } catch (error) {
+        //     console.warn("qqqqqqqq", error);
+        // }
+
+        // try {
+        //     const insertResult1 = await crud.insert(ContasAReceber, dados).execute().toPromise();
+        //     expect(insertResult1[0].rowsAffected).to.equal(1);
+        // } catch (error) {
+        //     console.warn("eeeeee", error);
+        // }
+
+        const insertResult1 = await crud.insert(ContasAReceber, dados).execute().toPromise();
         expect(insertResult1[0].rowsAffected).to.equal(1);
 
         const queryResult = await crud.query(ContasAReceber)
-            .where(where => where.equal(x => x.cliente.idErp, ObjectToTest.contasReceber.cliente.idErp))
+            .where(where => where.equal(x => x.cliente.idErp, dados.cliente.idErp))
             .toList().toPromise();
 
         expect(queryResult.length).to.equal(1);
-        expect(queryResult[0].idErp).to.equal(ObjectToTest.contasReceber.idErp);
-        expect(queryResult[0].dataRecebimento).to.equal(void 0);
-        expect(queryResult[0].dataVencimento.unix()).to.equal(ObjectToTest.contasReceber.dataVencimento.unix());
+        expect(queryResult[0].idErp).to.equal(dados.idErp);
+        expect(Utils.getValueType(queryResult[0].dataRecebimento, FieldType.DATE)).to.equal(Utils.getValueType(dados.dataRecebimento, FieldType.DATE));
+        expect(queryResult[0].dataVencimento.unix()).to.equal(dados.dataVencimento.unix());
     });
 
     it("HeaderSimple cascade", async () => {
-
         const createResult = await ddl.create(HeaderSimple).execute().toPromise();
         expect(createResult.length).to.equal(2);
 

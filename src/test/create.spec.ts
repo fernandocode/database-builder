@@ -90,7 +90,7 @@ describe("Create", () => {
         const create = new Create(ContasAReceber, mapper.get(ContasAReceber).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasAReceber( versao INTEGER, idErp INTEGER NOT NULL PRIMARY KEY, deleted BOOLEAN, dataVencimento INTEGER, dataRecebimento INTEGER, valor INTEGER, cliente_idErp INTEGER );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS ContasAReceber( versao INTEGER, idErp INTEGER NOT NULL PRIMARY KEY, deleted BOOLEAN, dataVencimento INTEGER, valor INTEGER, dataRecebimento INTEGER, cliente_idErp INTEGER );`);
     });
 
     it("Test create", () => {
@@ -111,7 +111,7 @@ describe("Create", () => {
         const create = new Create(TestClazz, mapper.get(TestClazz).mapperTable);
         const result = create.compile();
         expect(result[0].length > 0).to.equal(true);
-        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS TestClazz( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, description TEXT, date INTEGER, dateMoment INTEGER, dateDate INTEGER, numero INTEGER, referenceTest_id INTEGER, referenceTestCode_code TEXT );`);
+        expect(result[0]).to.equal(`CREATE TABLE IF NOT EXISTS TestClazz( internalKey INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, id INTEGER, description TEXT, date INTEGER, dateMoment INTEGER, dateDate INTEGER, numero INTEGER, referenceTest_id INTEGER, referenceTestCode_code TEXT, dateStr INTEGER );`);
     });
 
     it("LoginOffline", () => {
