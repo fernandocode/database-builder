@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { ExpressionOrValueEnum } from "../core/enums/expression-or-value-enum";
 import moment = require("moment");
 import { FieldType } from "../core/enums/field-type";
+import { DatabaseBuilderError } from "../core/errors";
 
 describe("Utils", () => {
 
@@ -103,14 +104,17 @@ describe("Utils", () => {
         const valueZ = Utils.getValueType("2018-06-08T00:00:00Z", FieldType.DATE);
         const valueTimeZoneNegative = Utils.getValueType("2018-06-08T00:00:00-03:00", FieldType.DATE);
         const valueTimeZonePositive = Utils.getValueType("2018-06-08T00:00:00-03:00", FieldType.DATE);
-        const valueZWithoutSeparators = Utils.getValueType("20180608T000000Z", FieldType.DATE);
         const valueWithoutTimeZone = Utils.getValueType("2018-06-08T00:00:00", FieldType.DATE);
         const valueWithoutTime = Utils.getValueType("2018-06-08", FieldType.DATE);
+        // teste com string numerica
+        const valueStringNumericaString = Utils.getValueType("12345678", FieldType.STRING);
+        expect(Utils.getValueType.bind(Utils, "12345678", FieldType.DATE)).to.throw("Date format incorrect, value: 12345678");
         expect(valueZ).equal(1528416000);
         expect(valueTimeZoneNegative).equal(1528416000);
         expect(valueTimeZonePositive).equal(1528416000);
-        expect(valueZWithoutSeparators).equal(1528416000);
         expect(valueWithoutTimeZone).equal(1528416000);
         expect(valueWithoutTime).equal(1528416000);
+        expect(valueStringNumericaString).equal("12345678");
+        // expect(valueStringNumericaDate).equal(void 0);
     });
 });

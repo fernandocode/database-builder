@@ -113,13 +113,14 @@ export class DatabaseHelper {
     }
 
     public parseToValueType(value: ValueTypeToParse, type: FieldType = this.getType(value)): ValueType {
-        const valueFormatted = this.preFormatValue(value);
+        const valueFormatted = this.preFormatValue(value, type);
         return this.valueToDatabase(valueFormatted, type);
     }
 
-    public preFormatValue(value: ValueTypeToParse): ValueTypeToParse {
-        const regexISODatetime = /^(\d{4})-?(\d{2})-?(\d{2})(T(\d{2})\:?(\d{2})\:?(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
-        if (typeof value === "string" && regexISODatetime.test(value)) {
+    public preFormatValue(value: ValueTypeToParse, type?: FieldType): ValueTypeToParse {
+        const regexISODatetime = /^(\d{4})-(\d{2})-(\d{2})(T(\d{2})\:(\d{2})\:(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
+        // const regexISODatetime = /^(\d{4})-?(\d{2})-?(\d{2})(T(\d{2})\:?(\d{2})\:?(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
+        if (typeof value === "string" && (type === void 0 || type === FieldType.DATE) && regexISODatetime.test(value)) {
             return DatetimeUtils.dateToDatabase(value);
         }
         return value;
