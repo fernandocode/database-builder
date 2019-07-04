@@ -10,6 +10,8 @@ import { Classificacao } from "./models/classificacao";
 import { Expression } from "lambda-expression";
 import { Utils } from "../core/utils";
 import { MapperTest } from "./mapper-test";
+import { GuidClazz } from "./models/guid-clazz";
+import { Query } from "../crud";
 
 describe("Mapper", () => {
 
@@ -31,6 +33,20 @@ describe("Mapper", () => {
         m = m.referenceKey(x => x.cliente, x => x.idErp);
         const expressionClienteCodeImport: Expression<ContasAReceber> = (x => x.cliente.idErp);
         expect(m.mapperTable.getColumnByField(expressionClienteCodeImport).column).to.equal(Utils.getColumn(expressionClienteCodeImport));
+    });
+
+    it("hasQueryFilter", () => {
+        const mapperGuidClass = mapperBase.mapper(GuidClazz)
+            .key(x => x.guid, PrimaryKeyType.Guid, String)
+            .column(x => x.description, String)
+            .hasQueryFilter(where => where.equal(x => x.guid, ":a"));
+        expect(mapperGuidClass.mapperTable.queryFilter.where).to.equal("{<replacableAlias>}.guid = ?");
+        expect(mapperGuidClass.mapperTable.queryFilter.params[0]).to.equal(":a");
+
+        const query = new Query(GuidClazz, void 0, (tKey: (new () => any) | string) => {
+            return mapperBase.get(tKey);
+        }, mapperGuidClass.mapperTable);
+        console.log(query.compile());
     });
 
 });

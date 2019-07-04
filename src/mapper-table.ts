@@ -5,11 +5,14 @@ import { DatabaseBuilderError } from "./core/errors";
 import { PrimaryKeyType } from "./core/enums/primary-key-type";
 import { ExpressionOrColumnEnum } from "./core/enums/expression-or-column-enum";
 import { Expression } from "lambda-expression";
+import { WhereCompiled } from "./crud/where-compiled";
 
 export class MapperTable {
 
     public columns: MapperColumn[] = [];
     public dependencies: MapperTable[] = [];
+
+    public queryFilter: WhereCompiled = void 0;
 
     constructor(
         public tableName: string = void 0,

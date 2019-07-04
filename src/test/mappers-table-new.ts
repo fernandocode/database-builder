@@ -35,6 +35,7 @@ export class MappersTableNew extends MapperTest {
         this.mapper(GuidClazz)
             .key(x => x.guid, PrimaryKeyType.Guid, String)
             .column(x => x.description, String);
+            // .hasQueryFilter(where => where.equal(x => x.guid, "a"));
 
         this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
