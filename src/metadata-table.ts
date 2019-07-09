@@ -49,7 +49,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
     public hasQueryFilter(
         whereCallback: (where: WhereBuilder<T>) => void
     ): MetadataTable<T> {
-        const instanceWhere: WhereBuilder<T> = new WhereBuilder(this.newable, "{<replacableAlias>}");
+        const instanceWhere: WhereBuilder<T> = new WhereBuilder(this.newable, Utils.REPLACEABLE_ALIAS);
         whereCallback(instanceWhere);
         this.mapperTable.queryFilter = instanceWhere.compile();
         // this.compileWhere(instanceWhere.compile());

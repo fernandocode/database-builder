@@ -27,7 +27,7 @@ export class QueryBuilder<T>
         alias: string = void 0
     ): QueryBuilder<T> {
         if (Utils.isQueryBuilder(queryTJoin)) {
-            this.innerUsedAliasTest.push((queryTJoin as QueryBuilder<TJoin>))
+            this.innerUsedAliasTest.push((queryTJoin as QueryBuilder<TJoin>));
         }
         const instanceJoin: JoinQueryBuilder<TJoin> = new JoinQueryBuilder(
             queryTJoin, onWhereCallback, mapperTable, type,

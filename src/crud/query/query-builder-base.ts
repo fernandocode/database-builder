@@ -20,11 +20,20 @@ import { MetadataTable } from "../../metadata-table";
 import { MapperUtils } from "../../mapper/mapper-utils";
 import { DatabaseBuilderError } from "../../core";
 import { QueryBuilder } from "./query-builder";
+import { ModelUtils } from "../../core/model-utils";
 
 export abstract class QueryBuilderBase<T,
     TQuery extends QueryBuilderBase<T, TQuery>>
     extends SqlBaseBuilder<T>
     implements QueryBuilderBaseContract<T, QueryBuilderBase<T, TQuery>> {
+
+    public get alias(): string {
+        return this._alias;
+    }
+
+    public get tablename(): string {
+        return this._tablename;
+    }
 
     protected _groupBy: string = "";
     protected _limit: BuilderCompiled = new BuilderCompiled();
@@ -38,6 +47,8 @@ export abstract class QueryBuilderBase<T,
         projection: "",
         params: []
     } as ProjectionCompiled;
+    // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
+    protected _joinParams: ParamType[] = [];
 
     private readonly GROUP_BY = " GROUP BY ";
     private readonly HAVING = " HAVING ";
@@ -45,9 +56,9 @@ export abstract class QueryBuilderBase<T,
     private readonly LIMIT = " LIMIT";
     private readonly OFFSET = "OFFSET";
 
+    private _ignoreQueryFilter: boolean = false;
+    private _paramsQueryFilter: { [s: string]: ParamType };
     private _joinsQuery: Array<JoinQueryBuilderContract<any, any>> = [];
-    // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
-    protected _joinParams: ParamType[] = [];
 
     private _unionsQuery: Array<{ query: QueryCompiled, type: UnionType }> = [];
     private _fromParams: ParamType[] = [];
@@ -70,14 +81,6 @@ export abstract class QueryBuilderBase<T,
         }
     }
 
-    public get alias(): string {
-        return this._alias;
-    }
-
-    public get tablename(): string {
-        return this._tablename;
-    }
-
     public getAlias(tKey: (new () => any) | string): string {
         const tablename = MapperUtils.resolveKey(tKey);
         const isThis = this.tablename === tablename;
@@ -95,7 +98,11 @@ export abstract class QueryBuilderBase<T,
     }
 
     public clone(): TQuery {
-        return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
+        return ModelUtils.cloneDeep(this._getInstance());
+        // return ModelUtils.assignWith(Object.create(Object.getPrototypeOf(this._getInstance())), this._getInstance());
+        // return Object.assign(Object.create(Object.getPrototypeOf(this._getInstance())), this._getInstance());
+        // return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
+        // return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
     }
 
     public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this.alias): ColumnRef {
@@ -164,7 +171,7 @@ export abstract class QueryBuilderBase<T,
     ): TQuery {
         const instanceWhere: WhereBuilder<T> = this.createWhere();
         whereCallback(instanceWhere);
-        this.compileWhere(instanceWhere.compile());
+        this.compileWhere(this.whereCompiled, instanceWhere.compile());
         return this._getInstance();
     }
 
@@ -180,7 +187,7 @@ export abstract class QueryBuilderBase<T,
     ): TQuery {
         const instanceWhere: WhereBuilder<T> = this.createWhere();
         instanceWhere.expression(expression);
-        this.compileWhere(instanceWhere.compile());
+        this.compileWhere(this.whereCompiled, instanceWhere.compile());
         return this._getInstance();
     }
 
@@ -242,20 +249,54 @@ export abstract class QueryBuilderBase<T,
         return this._getInstance();
     }
 
+    public ignoreQueryFilters(): TQuery {
+        this._ignoreQueryFilter = true;
+        return this._getInstance();
+    }
+
+    public setParamsQueryFilter(params: { [s: string]: ParamType }): TQuery {
+        this._paramsQueryFilter = params;
+        return this._getInstance();
+    }
+
     public compileTable(): string {
         return `${this._tablename} AS ${this._alias}`;
     }
 
     public compile(): QueryCompiled {
+        const whereCompiled: WhereCompiled = ModelUtils.cloneDeep(this.whereCompiled);
+
+        // apply query filter
+        const queryFilter: WhereCompiled = ModelUtils.cloneDeep(this.mapperTable.queryFilter);
+        if (!this._ignoreQueryFilter && queryFilter && queryFilter.where) {
+            queryFilter.where = queryFilter.where.replace(Utils.REPLACEABLE_ALIAS, this.alias);
+            if (queryFilter.params && this._paramsQueryFilter) {
+                queryFilter.params = queryFilter.params.map(param => {
+                    const keyParam = Object.keys(this._paramsQueryFilter).map(x => {
+                        return x;
+                    }).find(x => param === `:${x}`);
+                    return Utils.isString(param) && keyParam
+                        ? this._paramsQueryFilter[keyParam]
+                        : param;
+                    // return Utils.isString(param)
+                    //     ? this._paramsQueryFilter[Object.keys(this._paramsQueryFilter).map(x => {
+                    //         return x;
+                    //     }).find(x => param === `:${x}`)]
+                    //     : param;
+                });
+            }
+            this.compileWhere(whereCompiled, queryFilter);
+        }
+
         const compiled: QueryCompiled = this.buildBase();
         return this.buildUnions({
             params: compiled.params
                 .concat(this._joinParams)
-                .concat(this.whereCompiled.params)
+                .concat(whereCompiled.params)
                 .concat(this._having.params)
                 .concat(this._limit.params),
             // Template: https://sqlite.org/lang_select.html
-            query: `${compiled.query}${this.whereCompiled.where}${this._groupBy}${this._having.where}${this._orderBy}${this._limit.builder}`
+            query: `${compiled.query}${whereCompiled.where}${this._groupBy}${this._having.where}${this._orderBy}${this._limit.builder}`
         });
     }
 
@@ -270,8 +311,8 @@ export abstract class QueryBuilderBase<T,
         joinQuery: JoinQueryBuilderContract<TJoin, TQueryJoin>
     ) {
         this._joinsQuery.push(joinQuery);
-        this._joinParams = this._joinParams.concat(joinQuery._getParams())
-        this.compileWhere(joinQuery._getWhere());
+        this._joinParams = this._joinParams.concat(joinQuery._getParams());
+        this.compileWhere(this.whereCompiled, joinQuery._getWhere());
         this.compileProjection(joinQuery._getSelect());
         this.compileGroupBy(joinQuery._getGroupBy());
         this.compileHaving(joinQuery._getHaving());

@@ -43,6 +43,8 @@ export type ProjectionOrValue<T> = ProjectionBuilder<T> | ProjectionsHelper<T> |
 
 export class Utils {
 
+    public static REPLACEABLE_ALIAS = "{<replaceableAlias>}";
+
     public static readonly DEFAULT_VALUES = {
         BOOLEAN: false,
         NUMBER: 0,

@@ -35,13 +35,16 @@ export class MappersTableNew extends MapperTest {
         this.mapper(GuidClazz)
             .key(x => x.guid, PrimaryKeyType.Guid, String)
             .column(x => x.description, String);
-            // .hasQueryFilter(where => where.equal(x => x.guid, "a"));
+        // .hasQueryFilter(where => where.equal(x => x.guid, "a"));
 
-        this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
-        this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned)
+            .hasQueryFilter(where => where.startsWith(x => x.nome, "S"));
+        this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned)
+            .hasQueryFilter(where => where.lessAndEqual(x => x.codeImport, 100000));
         this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned)
-            .reference(x => x.uf, Uf);
+            .reference(x => x.uf, Uf)
+            .hasQueryFilter(where => where.great(x => x.population, 0));
         this.autoMapperIdImport(Classificacao, Number, PrimaryKeyType.Assigned);
         // this.autoMapperModelInternalKey(Cliente, Number, PrimaryKeyType.AutoIncrement);
         const mCliente = this.autoMapperId(Cliente, PrimaryKeyType.Guid);

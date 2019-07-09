@@ -16,6 +16,8 @@ import { Imagem } from "./models/imagem";
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { ContasAReceber } from "./models/contas-a-receber";
+import { QueryBuilder } from "../crud";
+import { MetadataTable } from "../metadata-table";
 
 describe("Query", () => {
 
@@ -26,6 +28,45 @@ describe("Query", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes");
+    });
+
+    it("query clone", () => {
+        const query = crud.query(TestClazz);
+        const queryClone1 = query.clone();
+        const queryClone2 = query.clone();
+        queryClone1.where(where => where.equal(x => x.id, 1));
+        queryClone2.where(where => where.great(x => x.numero, 4));
+        queryClone1.select(x => x.id);
+        queryClone2.select(x => x.numero);
+        const result1 = queryClone1.compile();
+        expect(result1[0].params.length).to.equal(1);
+        expect(result1[0].params[0]).to.equal(1);
+        expect(result1[0].query).to.equal("SELECT tes.id AS id FROM TestClazz AS tes WHERE tes.id = ?");
+        const result2 = queryClone2.compile();
+        expect(result2[0].params.length).to.equal(1);
+        expect(result2[0].params[0]).to.equal(4);
+        expect(result2[0].query).to.equal("SELECT tes.numero AS numero FROM TestClazz AS tes WHERE tes.numero > ?");
+    });
+
+    it("query-builder clone", () => {
+        const query = new QueryBuilder(TestClazz, getMapper().get(TestClazz).mapperTable, void 0,
+            (tKey: (new () => any) | string): MetadataTable<any> => {
+                return getMapper().get(tKey);
+            });
+        const queryClone1 = query.clone();
+        const queryClone2 = query.clone();
+        queryClone1.where(where => where.equal(x => x.id, 1));
+        queryClone2.where(where => where.great(x => x.numero, 4));
+        queryClone1.select(x => x.id);
+        queryClone2.select(x => x.numero);
+        const result1 = queryClone1.compile();
+        expect(result1.params.length).to.equal(1);
+        expect(result1.params[0]).to.equal(1);
+        expect(result1.query).to.equal("SELECT tes.id AS id FROM TestClazz AS tes WHERE tes.id = ?");
+        const result2 = queryClone2.compile();
+        expect(result2.params.length).to.equal(1);
+        expect(result2.params[0]).to.equal(4);
+        expect(result2.query).to.equal("SELECT tes.numero AS numero FROM TestClazz AS tes WHERE tes.numero > ?");
     });
 
     it("query in query", () => {

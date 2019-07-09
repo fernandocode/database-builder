@@ -1,11 +1,11 @@
+import { ProjectionCompiled } from "../projection-compiled";
 import { ProjectionBuilder } from "../projection-builder";
-import { QueryBuilderBase } from "./query-builder-base";
 import { JoinQueryBuilderContract } from "./join-query-builder-contract";
 import { WhereCompiled } from "../where-compiled";
 import { WhereBuilder } from "../where-builder";
-import { ProjectionCompiled } from "../projection-compiled";
+import { QueryBuilderBase } from "./query-builder-base";
 import { JoinType } from "../enums/join-type";
-import { ValueType, ParamType } from "../../core/utils";
+import { ParamType, ValueType } from "../../core/utils";
 import { MapperTable } from "../../mapper-table";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
@@ -85,8 +85,8 @@ export class JoinQueryBuilder<T>
 
     // default false para não adicionar comandos em expressões em join,
     // ao adicionar o join na consulta principal que será verificado se o commando deve ser adicionado
-    protected compileWhere(compiled: WhereCompiled, addCommand: boolean = false) {
-        super.compileWhere(compiled, addCommand);
+    protected compileWhere(current: WhereCompiled, compiled: WhereCompiled, addCommand: boolean = false) {
+        super.compileWhere(current, compiled, addCommand);
     }
 
     // default false para não adicionar comandos em expressões em join,

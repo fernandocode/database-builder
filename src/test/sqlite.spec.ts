@@ -136,6 +136,7 @@ describe("SQLite", async () => {
 
         const querySaoPaulo = await crud.query(Cidade)
             .where(where => where.equal(x => x.codeImport, insertSaoPaulo[0].insertId))
+            .ignoreQueryFilters()
             .mapper<Cidade>(map => map.map().result()).toPromise();
         expect(querySaoPaulo.length).to.equal(1);
         expect(querySaoPaulo[0].subRegiao).to.equal(null);
@@ -155,7 +156,8 @@ describe("SQLite", async () => {
         queryNovaTrento
             .join(Uf, where => where.equal(x => x.codeImport, queryNovaTrento.ref(x => x.uf.codeImport)), join => { join.projection(p => p.all()); })
             .where(where => where.equal(x => x.codeImport, insertNovaTrento[0].insertId))
-            .projection(p => p.all());
+            .projection(p => p.all())
+            .ignoreQueryFilters();
         const resultNovaTrento = await queryNovaTrento.mapper<Cidade>(map => map.map()
             .map(Uf, x => x.uf)
             .result()).toPromise();
@@ -179,7 +181,8 @@ describe("SQLite", async () => {
         queryCanelinha
             .join(SubRegiao, where => where.equal(x => x.codeImport, queryCanelinha.ref(x => x.subRegiao.codeImport)), join => { join.projection(p => p.all()); })
             .where(where => where.equal(x => x.codeImport, insertCanelinha[0].insertId))
-            .projection(p => p.all());
+            .projection(p => p.all())
+            .ignoreQueryFilters();
         const resultCanelinha = await queryCanelinha.mapper<Cidade>(map => map.map()
             .map(SubRegiao, x => x.subRegiao)
             .result()).toPromise();
@@ -190,6 +193,7 @@ describe("SQLite", async () => {
 
         const queryResult = await crud.query(Cidade)
             .where(where => where.equal(x => x.uf.codeImport, ObjectToTest.uf.codeImport))
+            .ignoreQueryFilters()
             .toList().toPromise();
         expect(queryResult.length).to.equal(4);
         for (const itemResult of queryResult) {
@@ -209,9 +213,11 @@ describe("SQLite", async () => {
 
         const queryResult4 = await crud.query(Cidade)
             .where(where => where.equal(x => x.codeImport, model4.codeImport))
+            .ignoreQueryFilters()
             .firstOrDefault().toPromise();
         const queryResultNull = await crud.query(Cidade)
             .where(where => where.isNull(x => x.nome))
+            .ignoreQueryFilters()
             .toList().toPromise();
 
         expect(queryResult4.nome).to.equal(null);
