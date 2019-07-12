@@ -18,16 +18,27 @@ import { JoinQueryBuilder } from "../crud/query/join-query-builder";
 import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 import { Utils } from "../core/utils";
 import { FieldType } from "../core/enums/field-type";
+import { Cliente } from "./models/cliente";
 
-describe("SQLite", async () => {
-    const mapper = getMapper();
+describe("SQLite", () => {
+    let crud: Crud;
+    let ddl: Ddl;
 
-    const database = await new SQLiteDatabase().init();
-    const crud = new Crud(database, mapper, false);
-    const ddl = new Ddl(database, mapper, false);
+    beforeEach(async () => {
+        const mapper = getMapper();
+
+        const database = await new SQLiteDatabase().init();
+        crud = new Crud(database, mapper, false);
+        ddl = new Ddl(database, mapper, false);
+
+        await ddl.create(Cliente).execute().toPromise();
+        await ddl.create(Cidade).execute().toPromise();
+        await ddl.create(Uf).execute().toPromise();
+        await ddl.create(SubRegiao).execute().toPromise();
+        await ddl.create(Regiao).execute().toPromise();
+    });
 
     const insertUf = async () => {
-        await ddl.create(Uf).execute().toPromise();
         const itemExist = await crud.query(Uf)
             .where(w => w.equal(x => x.codeImport, ObjectToTest.uf.codeImport))
             .firstOrDefault().toPromise();
@@ -39,7 +50,6 @@ describe("SQLite", async () => {
     };
 
     const insertSubRegiao = async () => {
-        await ddl.create(SubRegiao).execute().toPromise();
         const itemExist = await crud.query(SubRegiao)
             .where(w => w.equal(x => x.codeImport, ObjectToTest.subRegiao.codeImport))
             .firstOrDefault().toPromise();
@@ -51,8 +61,8 @@ describe("SQLite", async () => {
     };
 
     const insertRegiao = async () => {
-        await ddl.create(Regiao).execute().toPromise();
         const itemExist = await crud.query(Regiao)
+            .ignoreQueryFilters()
             .where(w => w.equal(x => x.codeImport, ObjectToTest.regiao.codeImport))
             .firstOrDefault().toPromise();
         if (!itemExist) {
@@ -98,9 +108,9 @@ describe("SQLite", async () => {
 
     it("Cidade", async () => {
 
-        await ddl.create(Cidade).execute().toPromise();
-        await ddl.create(Uf).execute().toPromise();
-        await ddl.create(SubRegiao).execute().toPromise();
+        // await ddl.create(Cidade).execute().toPromise();
+        // await ddl.create(Uf).execute().toPromise();
+        // await ddl.create(SubRegiao).execute().toPromise();
 
         const subRegiaoKeyZero = {
             codeImport: 0,
@@ -154,10 +164,10 @@ describe("SQLite", async () => {
 
         const queryNovaTrento = crud.query(Cidade);
         queryNovaTrento
+            .ignoreQueryFilters()
             .join(Uf, where => where.equal(x => x.codeImport, queryNovaTrento.ref(x => x.uf.codeImport)), join => { join.projection(p => p.all()); })
             .where(where => where.equal(x => x.codeImport, insertNovaTrento[0].insertId))
-            .projection(p => p.all())
-            .ignoreQueryFilters();
+            .projection(p => p.all());
         const resultNovaTrento = await queryNovaTrento.mapper<Cidade>(map => map.map()
             .map(Uf, x => x.uf)
             .result()).toPromise();
@@ -179,10 +189,10 @@ describe("SQLite", async () => {
 
         const queryCanelinha = crud.query(Cidade);
         queryCanelinha
+            .ignoreQueryFilters()
             .join(SubRegiao, where => where.equal(x => x.codeImport, queryCanelinha.ref(x => x.subRegiao.codeImport)), join => { join.projection(p => p.all()); })
             .where(where => where.equal(x => x.codeImport, insertCanelinha[0].insertId))
-            .projection(p => p.all())
-            .ignoreQueryFilters();
+            .projection(p => p.all());
         const resultCanelinha = await queryCanelinha.mapper<Cidade>(map => map.map()
             .map(SubRegiao, x => x.subRegiao)
             .result()).toPromise();
@@ -245,6 +255,7 @@ describe("SQLite", async () => {
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
         const query = await crud.query(Cidade)
+            .ignoreQueryFilters()
             .projection(p => p.all())
             .where(where => where.equal(x => x.codeImport, model.codeImport));
         let joinSubRegiao: JoinQueryBuilder<SubRegiao>;
@@ -343,6 +354,7 @@ describe("SQLite", async () => {
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
         const query = await crud.query(Cidade)
+            .ignoreQueryFilters()
             .projection(p => p.all())
             .where(where => where.equal(x => x.codeImport, model.codeImport));
         query.join(
@@ -832,5 +844,104 @@ describe("SQLite", async () => {
 
         const dropResult = await ddl.drop(Referencia).execute().toPromise();
         expect(dropResult.length).to.equal(2);
+    });
+
+    it("Where default in join", async () => {
+
+        await insertUf();
+
+        await insertSubRegiao();
+
+        await insertRegiao();
+
+        const cidade = {
+            codeImport: 150,
+            nome: "Teste 150",
+            population: 0,
+            uf: ObjectToTest.uf,
+            subRegiao: ObjectToTest.subRegiao,
+        } as Cidade;
+
+        const cliente = {
+            idErp: 1,
+            razaoSocial: "Razão",
+            nomeFantasia: "Apelido",
+            cidade,
+            deleted: false
+        } as Cliente;
+
+        const insertCidade = crud.insert(Cidade, cidade);
+        const insertResultCidade = await insertCidade.execute().toPromise();
+        expect(insertResultCidade[0].rowsAffected).to.equal(1);
+
+        const insertCliente = crud.insert(Cliente, cliente);
+        const insertResultCliente = await insertCliente.execute().toPromise();
+        expect(insertResultCliente[0].rowsAffected).to.equal(1);
+
+        const query = await crud.query(Cliente)
+            .projection(p => p.all())
+            .where(where => where.equal(x => x.idErp, cliente.idErp));
+        let joinCidade: JoinQueryBuilder<Cidade>;
+        let joinSubRegiao: JoinQueryBuilder<SubRegiao>;
+        query.join(
+            Cidade,
+            on => on.equal(x => x.codeImport, query.ref(x => x.cidade.codeImport)),
+            join => {
+                join.select(x => x.nome, x => x.uf.codeImport, x => x.subRegiao.codeImport);
+                joinCidade = join;
+            }
+        );
+        query.join(
+            Uf,
+            on => on.equal(x => x.codeImport, joinCidade.ref(x => x.uf.codeImport)),
+            join => {
+                join.projection(projection => {
+                    projection.add(x => x.nome);
+                });
+            }
+        );
+        query.join(
+            SubRegiao,
+            on => on.equal(x => x.codeImport, joinCidade.ref(x => x.subRegiao.codeImport)),
+            join => {
+                join.projection(projection => {
+                    projection.add(x => x.nome);
+                });
+                joinSubRegiao = join;
+            }
+        );
+        query.join(
+            Regiao,
+            on => on.equal(x => x.codeImport, joinSubRegiao.ref(x => x.regiao.codeImport)),
+            join => {
+                join.projection(projection => {
+                    projection.all();
+                }).enableQueryFilters().setParamsQueryFilter({startWith: "N"});
+            }
+        );
+        const queryResult = await query.mapper<Cliente>(row => {
+            const result = row
+                .map()
+                .map(Cidade, x => x.cidade)
+                .map(Uf, x => x.cidade.uf, "uf")
+                .map(SubRegiao, x => x.cidade.subRegiao)
+                .map(Regiao, x => x.cidade.subRegiao.regiao)
+                .result();
+            return result;
+        }).toPromise();
+
+        expect(queryResult.length).to.equal(1);
+        expect(queryResult[0].idErp).to.equal(cliente.idErp);
+        expect(queryResult[0].nomeFantasia).to.equal(cliente.nomeFantasia);
+        expect(queryResult[0].deleted).to.equal(cliente.deleted);
+        expect(queryResult[0].cidade.codeImport).to.equal(cliente.cidade.codeImport);
+        expect(queryResult[0].cidade.nome).to.equal(cliente.cidade.nome);
+        expect(queryResult[0].cidade.population).to.equal(cliente.cidade.population);
+        expect(queryResult[0].cidade.uf.codeImport).to.equal(cliente.cidade.uf.codeImport);
+        expect(queryResult[0].cidade.uf.nome).to.equal(cliente.cidade.uf.nome);
+        expect(queryResult[0].cidade.subRegiao.codeImport).to.equal(cliente.cidade.subRegiao.codeImport);
+        expect(queryResult[0].cidade.subRegiao.nome).to.equal(cliente.cidade.subRegiao.nome);
+        expect(queryResult[0].cidade.subRegiao.regiao.codeImport).to.equal(new Regiao().codeImport);
+        expect(queryResult[0].cidade.subRegiao.regiao.nome).to.equal(new Regiao().nome);
     });
 });

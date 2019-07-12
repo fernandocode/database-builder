@@ -141,11 +141,21 @@ export class DatabaseHelper {
         if (
             this.isFlag(fieldType, FieldType.BOOLEAN)
         ) {
-            return typeof columnValue === "string"
-                ? columnValue === "true"
+            return Utils.isValueBoolean(columnValue)
+                // return typeof columnValue === "string"
+                // ? columnValue === "true"
+                ? this.toBoolean(columnValue)
                 : columnValue;
         }
         return columnValue;
+    }
+
+    public toBoolean(value: string | number | boolean): boolean {
+        return Utils.isString(value)
+            ? (value as string) === "true"
+            : Utils.isNumber(value)
+                ? (value as number) === 1
+                : value as boolean;
     }
 
     public valueToDatabase(value: ValueTypeToParse, fieldType: FieldType): ValueType {

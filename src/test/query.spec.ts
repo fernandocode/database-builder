@@ -274,6 +274,7 @@ describe("Query", () => {
         const query = crud.query(Cliente);
         let joinCidade: JoinQueryBuilder<Cidade>;
         query
+            .ignoreQueryFilters()
             .select(
                 x => x.cidade.codeImport,
                 x => x.nomeFantasia,

@@ -13,5 +13,5 @@ export interface JoinQueryBuilderContract<T, TQuery extends JoinQueryBuilderCont
     _getGroupBy(): string;
     _getHaving(): WhereCompiled;
     _getOrderBy(): string;
-    _getParams(): ParamType[]
+    _getParams(): ParamType[];
 }

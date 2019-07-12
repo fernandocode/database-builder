@@ -24,7 +24,8 @@ export class QueryBuilder<T>
         joinCallback: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         mapperTable: MapperTable,
         type: JoinType = JoinType.LEFT,
-        alias: string = void 0
+        alias: string = void 0,
+        ignoreQueryFilters?: boolean
     ): QueryBuilder<T> {
         if (Utils.isQueryBuilder(queryTJoin)) {
             this.innerUsedAliasTest.push((queryTJoin as QueryBuilder<TJoin>));
@@ -35,7 +36,7 @@ export class QueryBuilder<T>
                 Utils.isQueryBuilder(queryTJoin)
                     ? void 0
                     : queryTJoin as (new () => TJoin), mapperTable)
-            ), this._getMapper);
+            ), this._getMapper, ignoreQueryFilters);
         joinCallback(instanceJoin);
         this.addJoin(instanceJoin);
         return this._getInstance();

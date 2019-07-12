@@ -16,12 +16,31 @@ export class JoinQueryBuilder<T>
 
     private readonly _on: WhereBuilder<T>;
 
+    constructor(
+        queryT: (new () => T) | QueryBuilder<T>,
+        onWhereCallback: (where: WhereBuilder<T>) => void,
+        mapperTable: MapperTable,
+        private _typeJoin: JoinType = JoinType.LEFT,
+        alias: string = void 0,
+        getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>,
+        ignoreQueryFilters: boolean = true
+    ) {
+        super(queryT, mapperTable, alias, getMapper);
+
+        this._ignoreQueryFilter = ignoreQueryFilters;
+        this._on = new WhereBuilder<T>(void 0, this.alias);
+        onWhereCallback(this._on);
+    }
+
     protected _getInstance(): JoinQueryBuilder<T> {
         return this;
     }
 
     public _getOn(): WhereCompiled {
-        return this._on.compile();
+        const t = this.whereCompile(this._on.compile());
+        // console.log(this.tablename, t);
+        return t;
+        // return this._on.compile();
     }
 
     public _getTypeJoin(): string {
@@ -29,6 +48,7 @@ export class JoinQueryBuilder<T>
     }
 
     public _getWhere(): WhereCompiled {
+        // return this.whereCompile();
         return this.whereCompiled;
     }
 
@@ -61,20 +81,6 @@ export class JoinQueryBuilder<T>
     public addParamsOn(params: ValueType[]): JoinQueryBuilder<T> {
         this._on._addParams(params);
         return this;
-    }
-
-    constructor(
-        queryT: (new () => T) | QueryBuilder<T>,
-        onWhereCallback: (where: WhereBuilder<T>) => void,
-        mapperTable: MapperTable,
-        private _typeJoin: JoinType = JoinType.LEFT,
-        alias: string = void 0,
-        getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>
-    ) {
-        super(queryT, mapperTable, alias, getMapper);
-
-        this._on = new WhereBuilder<T>(void 0, this.alias);
-        onWhereCallback(this._on);
     }
 
     // Para adicionar alias da tabela no apelido da projeção padrão

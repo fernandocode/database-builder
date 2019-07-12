@@ -93,14 +93,17 @@ export class Query<T> extends SqlBase<T> {
         onWhere: (where: WhereBuilder<TJoin>) => void,
         join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         type: JoinType = JoinType.LEFT,
-        alias: string = void 0
+        alias: string = void 0,
+        ignoreQueryFilters?: boolean
     ): Query<T> {
         if (queryTJoin && (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder) {
             queryTJoin = (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder();
         }
         this._queryBuilder.join(
             queryTJoin as (new () => TJoin) | QueryBuilder<TJoin>,
-            onWhere, join, Utils.getMapperTable(queryTJoin, this._getMapper).mapperTable, type, alias);
+            onWhere, join, Utils.getMapperTable(queryTJoin, this._getMapper).mapperTable,
+            type, alias, ignoreQueryFilters
+        );
         return this;
     }
 
