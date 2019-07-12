@@ -26,6 +26,7 @@ import { MapperTest } from "./mapper-test";
 import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 import { ContasAReceber } from "./models/contas-a-receber";
 import { DatabaseTypes } from "../definitions/database-types";
+import { ParamFilter } from "../core/param-filter";
 
 export class MappersTableNew extends MapperTest {
 
@@ -36,24 +37,20 @@ export class MappersTableNew extends MapperTest {
             .key(x => x.guid, PrimaryKeyType.Guid, String)
             .column(x => x.description, String);
 
-        this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
-        this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned)
+            .hasQueryFilter(where => where.startsWith(x => x.nome, ParamFilter.builder("startWith")));
+        this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned)
+            .hasQueryFilter(where => where.lessAndEqual(x => x.codeImport, 100000));
         this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
         this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned)
-            .reference(x => x.uf, Uf);
+            .reference(x => x.uf, Uf)
+            .hasQueryFilter(where => where.great(x => x.population, 0));
         this.autoMapperIdImport(Classificacao, Number, PrimaryKeyType.Assigned);
-        // this.autoMapperModelInternalKey(Cliente, Number, PrimaryKeyType.AutoIncrement);
-        const mCliente = this.autoMapperId(Cliente, PrimaryKeyType.Guid);
+        this.autoMapperId(Cliente, PrimaryKeyType.Guid);
 
-        // console.log('mapper cliente', mCliente.mapperTable.columns.map(x => JSON.stringify(x)));
-        // console.log(`cliente primary key:`, mCliente.mapperTable.columns.filter(x => !!x.primaryKeyType).map(x => JSON.stringify(x)));
         this.autoMapperModelInternalKey(Marca, Number, PrimaryKeyType.AutoIncrement);
         this.autoMapperIdImport(CondicaoPagamento, Number, PrimaryKeyType.Assigned);
         this.autoMapperModelInternalKey(Pedido, Number, PrimaryKeyType.AutoIncrement);
-        // this.autoMapperModelInternalKey(ContasReceber, Number, PrimaryKeyType.AutoIncrement)
-        //     .column(x => x.dataRecebimento, DatabaseTypes.Moment)
-        //     .ignore(x => x.cliente)
-        //     .referenceKey(x => x.cliente, x => x.codeImport);
         this.autoMapperIdErp(ContasAReceber, PrimaryKeyType.Assigned)
             .column(x => x.dataRecebimento, DatabaseTypes.DateString)
             .ignore(x => x.cliente)

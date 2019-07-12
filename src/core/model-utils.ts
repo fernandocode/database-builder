@@ -21,7 +21,7 @@ export class ModelUtils {
     }
 
     public static mergeOverrideEmpty(obj: any, sources: any): any {
-        const result = lodash.assignWith(obj, sources, this.mergeValues);
+        const result = this.assignWith(obj, sources, this.mergeValues);
         return result;
     }
 
@@ -63,6 +63,10 @@ export class ModelUtils {
     }
 
     public static assignWith(obj: any, ...sources: any[]): any {
-        return lodash.assignWith(obj, sources);
+        return lodash.assignWith(obj, ...sources);
+    }
+
+    public static cloneDeep<T>(obj: T): T {
+        return lodash.cloneDeep<T>(obj);
     }
 }

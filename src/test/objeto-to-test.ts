@@ -47,6 +47,7 @@ export class ObjectToTest {
         nome: "São Pedro",
         uf: ObjectToTest.uf,
         subRegiao: ObjectToTest.subRegiao,
+        population: 0
     } as Cidade;
 
     public static cliente = {

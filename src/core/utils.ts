@@ -43,6 +43,8 @@ export type ProjectionOrValue<T> = ProjectionBuilder<T> | ProjectionsHelper<T> |
 
 export class Utils {
 
+    public static REPLACEABLE_ALIAS = "{<replaceableAlias>}";
+
     public static readonly DEFAULT_VALUES = {
         BOOLEAN: false,
         NUMBER: 0,
@@ -109,7 +111,7 @@ export class Utils {
     }
 
     public static isReservedBoolean(value: any): boolean {
-        return value === "true" || value === "false";
+        return value === "true" || value === "false" || value === 0 || value === 1 ;
     }
 
     public static isFunction(value: any): boolean {

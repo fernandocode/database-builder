@@ -54,12 +54,12 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
 
     protected abstract buildBase(): QueryCompiled;
 
-    protected compileWhere(compiled: WhereCompiled, addCommand: boolean = true) {
+    protected compileWhere(current: WhereCompiled, compiled: WhereCompiled, addCommand: boolean = true) {
         if (compiled.where.length) {
-            this.whereCompiled.where +=
-                `${(this.whereCompiled.where.length ? " AND " : (addCommand ? this.WHERE : ""))}${compiled.where}`;
-            this.whereCompiled.params =
-                this.whereCompiled.params.concat(compiled.params);
+            current.where +=
+                `${(current.where.length ? " AND " : (addCommand ? this.WHERE : ""))}${compiled.where}`;
+            current.params =
+                current.params.concat(compiled.params);
         }
     }
 

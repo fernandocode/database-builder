@@ -55,7 +55,7 @@ export abstract class CrudBaseBuilder<
         : TBuilder {
         const instanceWhere: WhereBuilder<T> = new WhereBuilder(this._newable, withAlias ? this._alias : void 0);
         whereCallback(instanceWhere);
-        this.compileWhere(instanceWhere.compile());
+        this.compileWhere(this.whereCompiled, instanceWhere.compile());
         return instanceReturn;
     }
 

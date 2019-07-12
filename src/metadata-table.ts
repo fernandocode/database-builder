@@ -9,6 +9,7 @@ import { GetMapper } from "./mapper/interface-get-mapper";
 import { DatabaseBuilderError } from "./core/errors";
 import { DEPENDENCY_LIST_SIMPLE_COLUMNS, DependencyListSimpleModel } from "./definitions/dependency-definition";
 import { MetadataTableBase } from "./metadata-table-base";
+import { WhereBuilder } from "./crud/where-builder";
 
 export class MetadataTable<T> extends MetadataTableBase<T> {
 
@@ -42,6 +43,17 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
                 : this.getTypeByExpression(this.instance, this.validExpressionMapper(this.instance, expression)),
             primaryKeyType
         );
+        return this;
+    }
+
+    public hasQueryFilter(
+        whereCallback: (where: WhereBuilder<T>) => void
+    ): MetadataTable<T> {
+        const instanceWhere: WhereBuilder<T> = new WhereBuilder(this.newable, Utils.REPLACEABLE_ALIAS);
+        instanceWhere.scope(scope => {
+            whereCallback(scope);
+        });
+        this.mapperTable.queryFilter = instanceWhere.compile();
         return this;
     }
 

@@ -75,6 +75,7 @@ describe("Query method", () => {
     it("test select with join", () => {
         const query = crud.query(Cliente);
         query
+            .ignoreQueryFilters()
             .select(
                 x => x.cidade.codeImport,
                 x => x.nomeFantasia,
@@ -110,6 +111,7 @@ describe("Query method", () => {
     it("test select with projection case", () => {
         const query = crud.query(Cliente);
         query
+            .ignoreQueryFilters()
             .projection(projection => {
                 projection.add(x => x.deleted, "inativo");
                 projection.case((caseInstance) => {
@@ -156,6 +158,7 @@ describe("Query method", () => {
     it("test select all by mapper", () => {
         const query = crud.query(Cliente);
         query
+            .ignoreQueryFilters()
             .projection(projection => {
                 projection.allByMap(mapper.get(Cliente));
             })

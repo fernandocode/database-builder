@@ -1,5 +1,5 @@
 import { ColumnRef } from "../../core/column-ref";
-import { ExpressionOrColumn } from "../../core/utils";
+import { ExpressionOrColumn, ParamType } from "../../core/utils";
 import { LambdaExpression } from "lambda-expression";
 import { ProjectionBuilder } from "../projection-builder";
 import { OrderBy } from "../../core/enums/order-by";
@@ -46,6 +46,14 @@ export interface QueryBuilderBaseContract<T, TQuery extends QueryBuilderBaseCont
     union(query: QueryCompiled[] | SqlCompilable, type?: UnionType): TQuery;
 
     unionAll(query: QueryCompiled[] | SqlCompilable): TQuery;
+
+    /**
+     * ignore query filters in query
+     * use in the beginning of a query so that the posterior joins are applied
+     */
+    ignoreQueryFilters(): TQuery;
+
+    setParamsQueryFilter(params: { [s: string]: ParamType }): TQuery;
 
     compileTable(): string;
 }

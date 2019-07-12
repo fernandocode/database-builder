@@ -1,5 +1,5 @@
+import { JoinType } from "../enums/join-type";
 import { RowResult } from "../../core/row-result";
-import { HavingBuilder } from "../having-builder";
 import { QueryReadableBuilder } from "./query-readable-builder";
 import { QueryCompiled } from "../../core/query-compiled";
 import { MapperTable } from "../../mapper-table";
@@ -8,9 +8,9 @@ import { WhereBuilder } from "../where-builder";
 import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
-import { ExpressionOrColumn, Utils } from "../../core/utils";
+import { ExpressionOrColumn, ParamType, Utils } from "../../core/utils";
 import { OrderBy } from "../../core/enums/order-by";
-import { JoinType } from "../enums/join-type";
+import { HavingBuilder } from "../having-builder";
 import { LambdaExpression } from "lambda-expression";
 import { JoinQueryBuilder } from "./join-query-builder";
 import { DatabaseBuilderError } from "../../core/errors";
@@ -42,10 +42,24 @@ export class Query<T> extends SqlBase<T> {
         this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, _getMapper).newable, enableLog);
     }
 
+    public clone(): Query<T> {
+        return ModelUtils.cloneDeep(this);
+    }
+
     public compile(): QueryCompiled[] {
         const compiled = this.builderCompiled();
         const script = [compiled];
         return script;
+    }
+
+    public ignoreQueryFilters(): Query<T> {
+        this._queryBuilder.ignoreQueryFilters();
+        return this;
+    }
+
+    public setParamsQueryFilter(params: { [s: string]: ParamType }): Query<T> {
+        this._queryBuilder.setParamsQueryFilter(params);
+        return this;
     }
 
     /**
@@ -79,14 +93,17 @@ export class Query<T> extends SqlBase<T> {
         onWhere: (where: WhereBuilder<TJoin>) => void,
         join: (joinQuery: JoinQueryBuilder<TJoin>) => void,
         type: JoinType = JoinType.LEFT,
-        alias: string = void 0
+        alias: string = void 0,
+        ignoreQueryFilters?: boolean
     ): Query<T> {
         if (queryTJoin && (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder) {
             queryTJoin = (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder();
         }
         this._queryBuilder.join(
             queryTJoin as (new () => TJoin) | QueryBuilder<TJoin>,
-            onWhere, join, Utils.getMapperTable(queryTJoin, this._getMapper).mapperTable, type, alias);
+            onWhere, join, Utils.getMapperTable(queryTJoin, this._getMapper).mapperTable,
+            type, alias, ignoreQueryFilters
+        );
         return this;
     }
 
