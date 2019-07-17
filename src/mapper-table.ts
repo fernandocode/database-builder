@@ -55,6 +55,10 @@ export class MapperTable {
         return this.findColumn(x => x.fieldReference === expressionField);
     }
 
+    public keyColumns(): MapperColumn[] {
+        return this.columns.filter(x => !!x.primaryKeyType);
+    }
+
     private getColumn(columnName: string): MapperColumn {
         return this.findColumn(x => x.column === columnName);
     }

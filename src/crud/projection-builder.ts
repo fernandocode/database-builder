@@ -129,6 +129,11 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
+    public clean(): ProjectionBuilder<T> {
+        this._projections = [];
+        return this;
+    }
+
     public sum<TReturn>(
         expression?: ExpressionOrColumn<TReturn, T> | string,
         alias?: string,

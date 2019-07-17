@@ -6,7 +6,6 @@ export class Cidade extends BaseImport<number> {
 
     public nome: string = "";
     public uf: Uf;
-    // public subRegiao: SubRegiao;
     public subRegiao: SubRegiao = new SubRegiao();
     public population: number = 0;
 

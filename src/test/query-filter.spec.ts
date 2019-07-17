@@ -4,7 +4,6 @@ import { PrimaryKeyType } from "../core/enums/primary-key-type";
 import { Cliente } from "./models/cliente";
 import { Regiao } from "./models/regiao";
 import { SubRegiao } from "./models/sub-regiao";
-import { Utils } from "../core/utils";
 import { MapperTest } from "./mapper-test";
 import { GuidClazz } from "./models/guid-clazz";
 import { Crud } from "../crud";

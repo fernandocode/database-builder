@@ -143,7 +143,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
         referencesId: boolean = true,
         referencesIdRecursive: boolean = true
     ): MetadataTable<T> {
-        if (this.keyColumns().length === 0) {
+        if (this.mapperTable.keyColumns().length === 0) {
             throw new DatabaseBuilderError(`Mapper '${this.newable.name}', no column as key was informed to the Mapper`);
         }
         this.autoMapperColumns(references, referencesId, referencesIdRecursive);
@@ -187,12 +187,8 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
         return this._getMapper.get(keyMapper);
     }
 
-    private keyColumns(): MapperColumn[] {
-        return this.mapperTable.columns.filter(x => !!x.primaryKeyType);
-    }
-
     private isKeyColumn(key: string) {
-        return (this.keyColumns().filter(x => x.column === key).length > 0);
+        return (this.mapperTable.keyColumns().filter(x => x.column === key).length > 0);
     }
 
     private autoMapperColumns(
@@ -250,13 +246,13 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
         }
         const mapperKey = this.getMapper(instanceMapper.constructor.name);
         if (!Utils.isNull(mapperKey)) {
-            if (Utils.isNull(mapperKey.keyColumns()) || mapperKey.keyColumns().length < 1) {
+            if (Utils.isNull(mapperKey.mapperTable.keyColumns()) || mapperKey.mapperTable.keyColumns().length < 1) {
                 throw new DatabaseBuilderError(`Mapper '${this.newable.name}', not key column for property '${propertyName}' of type '${instanceMapper.constructor.name}'`);
             }
-            if (mapperKey.keyColumns().length > 1) {
+            if (mapperKey.mapperTable.keyColumns().length > 1) {
                 throw new DatabaseBuilderError(`Mapper '${this.newable.name}', composite Id not supported (property '${propertyName}' of type '${instanceMapper.constructor.name}')`);
             }
-            const keyMapped = mapperKey.keyColumns()[0];
+            const keyMapped = mapperKey.mapperTable.keyColumns()[0];
             return new MapperColumn(
                 `${propertyName}_${keyMapped.column}`,
                 keyMapped.fieldType
@@ -305,7 +301,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
             Utils.getFieldExpression<DependencyListSimpleModel>(x => x.index));
         dependency.addColumn(DEPENDENCY_LIST_SIMPLE_COLUMNS.VALUE, fieldType, void 0,
             Utils.getFieldExpression<DependencyListSimpleModel>(x => x.value));
-        const keyColumns = this.keyColumns();
+        const keyColumns = this.mapperTable.keyColumns();
         if (keyColumns.length < 1) {
             throw new DatabaseBuilderError(`It is not possible to create a dependency mapper ("${name}") if the primary key of the parent entity ("${this.mapperTable.tableName}") is not yet mapped.`);
         }

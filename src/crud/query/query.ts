@@ -23,6 +23,7 @@ import { DependencyListSimpleModel } from "../../definitions/dependency-definiti
 import { KeyUtils } from "../../core/key-utils";
 import { Observable, Observer } from "rxjs";
 import { forkJoinSafe } from "../../safe-utils";
+import { ProjectionsUtils } from "../../core/projections-utils";
 
 export class Query<T> extends SqlBase<T> {
 
@@ -194,6 +195,31 @@ export class Query<T> extends SqlBase<T> {
                     observer.error(err);
                     observer.complete();
                 });
+        });
+    }
+
+    public count(where?: (whereCallback: WhereBuilder<T>) => void): Observable<number> {
+        return new Observable<number>(observer => {
+            let keyColumn = ProjectionsUtils.WILDCARD;
+            if (this.mapperTable && this.mapperTable.keyColumns().length > 0) {
+                keyColumn = this.mapperTable.keyColumns()[0].column;
+            }
+            if (where) {
+                this.where(where);
+            }
+            this
+                .projection(p => p.clean().count(keyColumn, "count_id"))
+                .mapper<number>(r => r.get<number>("count_id"))
+                .subscribe(
+                    result => {
+                        observer.next(result[0]);
+                        observer.complete();
+                    },
+                    err => {
+                        observer.error(err);
+                        observer.complete();
+                    }
+                );
         });
     }
 
