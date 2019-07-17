@@ -2,9 +2,8 @@ import { DdlColumnsBuilder } from "../ddl-columns-builder";
 import { DdlBaseBuilder } from "../ddl-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { DdlCompiled } from "../../core/ddl-compided";
-import { ValueTypeToParse, ExpressionOrColumn, Utils } from "../../core/utils";
+import { ExpressionOrColumn, Utils, ValueTypeToParse } from "../../core/utils";
 import { DatabaseBuilderError } from "../../core";
-import { FieldType } from "../../core/enums/field-type";
 
 export class AlterBuilder<T> extends DdlBaseBuilder<T> {
 
@@ -47,15 +46,8 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
     public renameTable<TNewTable>(
         newTableName: string | (new () => TNewTable)
     ): AlterBuilder<T> {
-        this._patternOperation = (column: string) => `RENAME TO ${(Utils.isString(newTableName) ? newTableName as string : (newTableName as new () => void).name)}`;
+        this._patternOperation = () => `RENAME TO ${(Utils.isString(newTableName) ? newTableName as string : (newTableName as new () => void).name)}`;
         return this;
-        // return super.columnsBase(
-        //     column => column.set(columnExpression, void 0),
-        //     new DdlColumnsBuilder<T>(
-        //         void 0,
-        //         void 0
-        //     ),
-        //     this);
     }
 
     protected resolveDependency(dependency: MapperTable): DdlCompiled {

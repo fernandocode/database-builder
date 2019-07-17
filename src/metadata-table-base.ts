@@ -5,7 +5,7 @@ export class MetadataTableBase<T> {
 
     constructor(
         public newable: new () => T
-    ){
+    ) {
 
     }
 }

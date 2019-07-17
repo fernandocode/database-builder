@@ -36,7 +36,7 @@ describe("Count", () => {
         expect(resultCount).to.equal(countExpected);
     });
 
-    it("count where", async () => {
+    it("count with where inner", async () => {
         const countExpected = 20;
         for (let index = 1; index <= countExpected; index++) {
             const cidade = Object.assign({}, ObjectToTest.cidade);
@@ -49,7 +49,53 @@ describe("Count", () => {
         expect(resultCount).to.equal(countExpected / 2);
     });
 
-    it("count where with query filter", async () => {
+    it("count with where normal", async () => {
+        const countExpected = 20;
+        for (let index = 1; index <= countExpected; index++) {
+            const cidade = Object.assign({}, ObjectToTest.cidade);
+            cidade.codeImport = index;
+            await crud.insert(Cidade, cidade).execute().toPromise();
+        }
+        const query = crud.query(Cidade).ignoreQueryFilters();
+        const resultCount = await query
+            .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
+            .count().toPromise();
+        await crud.delete(Cidade).execute().toPromise();
+        expect(resultCount).to.equal(countExpected / 2);
+    });
+
+    it("count with two where (inner and normal)", async () => {
+        const countExpected = 20;
+        for (let index = 1; index <= countExpected; index++) {
+            const cidade = Object.assign({}, ObjectToTest.cidade);
+            cidade.codeImport = index;
+            await crud.insert(Cidade, cidade).execute().toPromise();
+        }
+        const query = crud.query(Cidade).ignoreQueryFilters();
+        const resultCount = await query
+            .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
+            .count(where => where.great(x => x.codeImport, countExpected / 4)).toPromise();
+        await crud.delete(Cidade).execute().toPromise();
+        expect(resultCount).to.equal(countExpected / 4);
+    });
+
+    it("count with two where (inner and normal) and with query filter", async () => {
+        const countExpected = 20;
+        for (let index = 1; index <= countExpected; index++) {
+            const cidade = Object.assign({}, ObjectToTest.cidade);
+            cidade.codeImport = index;
+            cidade.population = index === 7 ? 10 : 0;
+            await crud.insert(Cidade, cidade).execute().toPromise();
+        }
+        const query = crud.query(Cidade);
+        const resultCount = await query
+            .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
+            .count(where => where.great(x => x.codeImport, countExpected / 4)).toPromise();
+        await crud.delete(Cidade).execute().toPromise();
+        expect(resultCount).to.equal(1);
+    });
+
+    it("count with where and with query filter", async () => {
         const countExpected = 20;
         for (let index = 1; index <= countExpected; index++) {
             const cidade = Object.assign({}, ObjectToTest.cidade);

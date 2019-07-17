@@ -12,9 +12,9 @@ export abstract class ColumnsBaseBuilder<
     TColumn extends Column
     > {
 
-    private _databaseHelper: DatabaseHelper = new DatabaseHelper();
-
     protected columns: TColumn[] = [];
+
+    private _databaseHelper: DatabaseHelper = new DatabaseHelper();
 
     constructor(
         protected readonly mapperTable: MapperTable,
@@ -77,7 +77,7 @@ export abstract class ColumnsBaseBuilder<
     }
 
     protected isCompositeKey(): boolean {
-        return this.mapperTable && this.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1
+        return this.mapperTable && this.mapperTable.columns.filter(x => !!x.primaryKeyType).length > 1;
     }
 
     protected abstract columnFormat(column: TColumn): string;
@@ -95,7 +95,7 @@ export abstract class ColumnsBaseBuilder<
         for (const key in mapper.columns) {
             if (mapper.columns.hasOwnProperty(key)) {
                 const column = mapper.columns[key];
-                const value = Utils.getValue(modelWithValue, column.fieldReference);
+                const value = Utils.getValue<any, any>(modelWithValue, column.fieldReference);
                 this.setColumnValue(
                     column.column,
                     value,

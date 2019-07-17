@@ -1,4 +1,4 @@
-import { ProjectionModel } from './../crud/projection-model';
+import { ProjectionModel } from "./../crud/projection-model";
 import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, Utils } from "./utils";
 export class ProjectionsUtils<T> {

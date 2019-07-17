@@ -1,4 +1,4 @@
-import { ProjectionModel } from './../crud/projection-model';
+import { ProjectionModel } from "./../crud/projection-model";
 import { Projection } from "../crud/enums/projection";
 import { ExpressionOrColumn, ExpressionProjection, Utils } from "./utils";
 import { ProjectionsUtils } from "./projections-utils";
@@ -13,6 +13,7 @@ export class ProjectionsHelper<T> {
         private _aliasTable: string,
         private _addAliasTableToAlias: boolean = false,
         private _registerProjetionCallback?: (projection: ProjectionModel) => void,
+        // tslint:disable-next-line: variable-name
         private __result?: ProjectionModel[]
     ) {
         this._projectionsUtils = new ProjectionsUtils<T>(_aliasTable, _addAliasTableToAlias, void 0, _registerProjetionCallback);

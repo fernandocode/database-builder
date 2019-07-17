@@ -9,6 +9,7 @@
     "test-grep": "tsc & mocha src/test/**/*.spec.js --grep",
     "test-single": "tsc & mocha src/test/**/*.spec.js --grep Mapper --debug-brk",
     "test-debug": "mocha -r ts-node/register src/test/**/*.spec.ts --debug-brk",
+    "lint": "tslint -p tsconfig.json",
     "publish-npm": "tsc & npm publish"
   },
   "dependencies": {

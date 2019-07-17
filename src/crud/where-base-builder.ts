@@ -397,7 +397,7 @@ export abstract class WhereBaseBuilder<
 
     protected buildWhereColumn(
         condition: Condition[],
-        ...valuesOrColumns: (ColumnParams | string | ValueTypeToParse[])[]
+        ...valuesOrColumns: Array<ColumnParams | string | ValueTypeToParse[]>
     ) {
         const columnsParams = valuesOrColumns.map(x => this.processParam(x));
         this.buildWhereParams(
@@ -496,7 +496,7 @@ export abstract class WhereBaseBuilder<
         // TODO: verificar se colunas não são condition, para remover a condition
         let conditionsArray = this._pendingConditions.concat(conditions);
         this._pendingConditions = [];
-        if (columns.length == 2) {
+        if (columns.length === 2) {
             const isConditionIsNullInColumn2 = columns[1] === Condition.IsNull;
             if (isConditionIsNullInColumn2) {
                 conditionsArray = this.conditionIsNull(conditionsArray);

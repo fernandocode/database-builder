@@ -1,3 +1,3 @@
-export interface BaseIdInterface<TId>{
+export interface BaseIdInterface<TId> {
     id: TId;
 }

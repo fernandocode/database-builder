@@ -1,4 +1,4 @@
-import { Utils, ExpressionOrColumn } from './../core/utils';
+import { ExpressionOrColumn, Utils } from "./../core/utils";
 import { Drop } from "./drop/drop";
 import { Create } from "./create/create";
 import { Alter } from "./alter/alter";
@@ -48,7 +48,7 @@ export class Ddl {
             this._database.executeSql(`
                 SELECT name
                     FROM sqlite_master
-                WHERE type = 'table' AND 
+                WHERE type = 'table' AND
                         name = ?;
                 `, [Utils.databaseName(tablename)])
                 .then(result => {
@@ -69,7 +69,7 @@ export class Ddl {
             this._database.executeSql(`
                 SELECT name
                     FROM pragma_table_info(?)
-                WHERE name = ?;          
+                WHERE name = ?;
                 `, [Utils.databaseName(tablename), Utils.getColumn(column)])
                 .then(result => {
                     resolve(result.rows.length > 0);

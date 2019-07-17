@@ -1,4 +1,3 @@
-import { TypeOrString } from "../../core/utils";
 import { DatabaseBase } from "../../definitions/database-definition";
 import { DropBuilder } from "./drop-builder";
 import { DdlBase } from "../ddl-base";

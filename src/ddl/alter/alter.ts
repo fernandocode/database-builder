@@ -1,8 +1,7 @@
 import { DatabaseBase } from "../../definitions/database-definition";
 import { DdlBase } from "../ddl-base";
 import { AlterBuilder } from "./alter-builder";
-import { ValueTypeToParse, ExpressionOrColumn } from "../../core/utils";
-import { FieldType } from "../../core/enums/field-type";
+import { ExpressionOrColumn, ValueTypeToParse } from "../../core/utils";
 
 export class Alter<T> extends DdlBase<T, AlterBuilder<T>> {
 

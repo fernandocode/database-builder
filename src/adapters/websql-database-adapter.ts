@@ -47,20 +47,11 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                             this.ignoreExecuteSql(sql, values)
                                 .then(result => executeSqlResolve(result))
                                 .catch(err => executeSqlReject(err));
-                            // // tslint:disable-next-line:no-console
-                            // console.warn(`command sql ignored: '${sql}'`);
-                            // executeSqlResolve({} as DatabaseResult);
                         } else {
                             database.transaction(transaction => {
                                 return this.executeSql(transaction, sql, values)
                                     .then(result => executeSqlResolve(result))
-                                    .catch(err => executeSqlReject(err));;
-                                // transaction.executeSql(
-                                //     sql,
-                                //     Array.isArray(values) ? values : [],
-                                //     (t: WebSqlTransactionInterface, r: any) => executeSqlResolve(r),
-                                //     (t: WebSqlTransactionInterface, err: any) => executeSqlReject(err)
-                                // );
+                                    .catch(err => executeSqlReject(err));
                             });
                         }
                     });
@@ -71,14 +62,6 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                             fn({
                                 executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
                                     return this.executeSql(transaction, sql, values);
-                                    // return new Promise<DatabaseResult>((resolve, reject) => {
-                                    //     transaction.executeSql(
-                                    //         sql,
-                                    //         Array.isArray(values) ? values : [],
-                                    //         (t: WebSqlTransactionInterface, r: any) => resolve(r),
-                                    //         (t: WebSqlTransactionInterface, err: any) => reject(err)
-                                    //     );
-                                    // });
                                 }
                             });
                         });

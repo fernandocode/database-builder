@@ -25,10 +25,6 @@ export class DropBuilder<T> extends DdlBaseBuilder<T> {
         return this._mapperTable.dependencies;
     }
 
-    // constructor(typeT: TypeOrString<T>) {
-    //     super(Utils.getValueByTypeOrString(typeT));
-    // }
-
     protected buildBase(): string {
         return `DROP TABLE IF EXISTS ${this._tablename};`;
     }

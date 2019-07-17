@@ -23,7 +23,7 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
         protected readonly _alias: string = void 0,
     ) {
         if (Utils.isQueryBuilder(queryT)) {
-            this.innerUsedAliasTest.push((queryT as QueryBuilder<T>))
+            this.innerUsedAliasTest.push((queryT as QueryBuilder<T>));
         }
         this._tablename = this.createTablename(_newable, mapperTable);
         this._alias = this.createAlias(this._alias, this._tablename);

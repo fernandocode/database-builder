@@ -6,7 +6,7 @@ export class ProjectionCompile {
     public static compile(projections: ProjectionModel[]): ProjectionCompiled {
         const projectionCompiled: ProjectionCompiled = new ProjectionCompiled();
         projections.forEach(projection => {
-            projectionCompiled.projection += projectionCompiled.projection.length > 0 ? ", " : ""
+            projectionCompiled.projection += projectionCompiled.projection.length > 0 ? ", " : "";
             projectionCompiled.projection += projection.projection;
             projectionCompiled.params = projectionCompiled.params.concat(projection.params);
         });
