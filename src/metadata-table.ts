@@ -87,16 +87,20 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
         const columnKey = this.columnName(expressionKey);
         const column = `${columnReference}_${columnKey}`;
         const instance = this.validInstanceMapper(this.instance, column);
-        const referenceInstance = this.validExpressionMapper(instance, expression)(instance);
-        const mapperReference = this.getMapper(referenceInstance.constructor.name);
-        const mapperColumnReference = mapperReference.mapperTable.getColumnByField(expressionKey);
+        let fieldType: FieldType;
+        if (type) {
+            fieldType = this._databaseHelper.getFieldType(type);
+        } else {
+            const referenceInstance = this.validExpressionMapper(instance, expression)(instance);
+            const mapperReference = this.getMapper(referenceInstance.constructor.name);
+            const mapperColumnReference = mapperReference.mapperTable.getColumnByField(expressionKey);
+            fieldType = mapperColumnReference
+                ? mapperColumnReference.fieldType
+                : this.getTypeByExpression(referenceInstance, this.validExpressionMapper(referenceInstance, expressionKey));
+        }
         this.addReference(
             column,
-            type
-                ? this._databaseHelper.getFieldType(type)
-                : mapperColumnReference
-                    ? mapperColumnReference.fieldType
-                    : this.getTypeByExpression(referenceInstance, this.validExpressionMapper(referenceInstance, expressionKey))
+            fieldType
         );
         return this;
     }
@@ -165,7 +169,8 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
     private validExpressionMapper<TReturn, TType>(
         instance: TType, expression: ReturnExpression<TReturn, TType>
     ): ReturnExpression<TReturn, TType> {
-        if (Utils.isNull(expression) || Utils.isNull(expression(instance))) {
+        const expressionByInstance = expression(instance);
+        if (Utils.isNull(expression) || Utils.isNull(expressionByInstance)) {
             throw new DatabaseBuilderError(`Mapper: ${this.newable.name}, can not get instance of mapped property ('${this.columnName(expression)}')`);
         }
         return expression;

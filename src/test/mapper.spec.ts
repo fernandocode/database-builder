@@ -29,8 +29,11 @@ describe("Mapper", () => {
         m = m.ignore(x => x.cliente);
         expect(m.mapperTable.getColumnByField(expressionClienteKey)).to.equal(void 0);
         m = m.referenceKey(x => x.cliente, x => x.idErp);
+        m = m.referenceKey(x => x.clienteNotInitialized, x => x.idErp, Number);
         const expressionClienteCodeImport: Expression<ContasAReceber> = (x => x.cliente.idErp);
+        const expressionClienteNotInitializedCodeImport: Expression<ContasAReceber> = (x => x.clienteNotInitialized.idErp);
         expect(m.mapperTable.getColumnByField(expressionClienteCodeImport).column).to.equal(Utils.getColumn(expressionClienteCodeImport));
+        expect(m.mapperTable.getColumnByField(expressionClienteNotInitializedCodeImport).column).to.equal(Utils.getColumn(expressionClienteNotInitializedCodeImport));
     });
 
     const mapperGuidClass = mapperBase.mapper(GuidClazz)

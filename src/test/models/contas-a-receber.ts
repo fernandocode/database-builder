@@ -6,6 +6,7 @@ export class ContasAReceber extends BaseModelErp {
     // public numero: string = "";
     // public dataEmissao: moment.Moment = moment();
     public cliente: Cliente = new Cliente();
+    public clienteNotInitialized: Cliente;
     public dataVencimento: moment.Moment = moment();
     public dataRecebimento: string;
     // public dataProtesto: moment.Moment = moment();
