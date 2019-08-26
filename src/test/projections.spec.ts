@@ -265,13 +265,17 @@ describe("Projections", () => {
                 crud.query(TestClazzRef, "tcr")
                     .projection(s => s.min(x => x.description))
                     .where(where =>
-                        where.equal(x => x.id, query.ref(x => x.referenceTest.id))),
+                        where
+                            .equal(x => x.id, query.ref(x => x.referenceTest.id))
+                            .equal(x => x.description, "a")
+                    ),
                 "referenceTest_description"
             );
         });
         const result = query.compile();
-        expect(result[0].params.length).to.equal(0);
-        expect(result[0].query).to.equal("SELECT (SELECT MIN(tcr.description) AS description FROM TestClazzRef AS tcr WHERE tcr.id = tes.referenceTest_id) AS referenceTest_description FROM TestClazz AS tes");
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal("a");
+        expect(result[0].query).to.equal("SELECT (SELECT MIN(tcr.description) AS description FROM TestClazzRef AS tcr WHERE tcr.id = tes.referenceTest_id AND tcr.description = ?) AS referenceTest_description FROM TestClazz AS tes");
     });
 
     it("sum", () => {

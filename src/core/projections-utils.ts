@@ -80,9 +80,9 @@ export class ProjectionsUtils<T> {
         args: any[],
     ): ProjectionModel {
         if (!Utils.isNull(projection)) {
-            return this.buildColumn(this.builderProjections(projection, column, args), alias);
+            return this.buildColumn(this.builderProjections(projection, column), alias, args);
         }
-        return this.buildColumn(column, alias);
+        return this.buildColumn(column, alias, args);
     }
 
     private defaultAliasAs(column: string): string {
@@ -106,9 +106,8 @@ export class ProjectionsUtils<T> {
     private builderProjections(
         projections: Projection[],
         column: string,
-        args: any[],
     ): string {
-        let result = `${column}${this.buildArgs(args)}`;
+        let result = column;
         // reverse loop array
         for (let index = projections.length - 1; index >= 0; index--) {
             const projection = projections[index];
@@ -133,10 +132,11 @@ export class ProjectionsUtils<T> {
     private buildColumn(
         column: string,
         alias: string = this.defaultAliasAs(column),
+        args: any[]
     ): ProjectionModel {
         if (alias && alias.length) {
-            return new ProjectionModel(`${column} AS ${alias}`, []);
+            return new ProjectionModel(`${column} AS ${alias}`, args ? args : []);
         }
-        return new ProjectionModel(column, []);
+        return new ProjectionModel(column, args ? args : []);
     }
 }
