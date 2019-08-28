@@ -1,7 +1,7 @@
 import { ProjectionCompiled } from "../projection-compiled";
 import { UnionType } from "../../core/union-type";
 import { ProjectionBuilder } from "../projection-builder";
-import { ExpressionOrColumn, ParamType, Utils } from "../../core/utils";
+import { ExpressionOrColumn, ParamType, Utils, TypeOrderBy } from "../../core/utils";
 import { WhereBuilder } from "../where-builder";
 import { OrderBy } from "../../core/enums/order-by";
 import { WhereCompiled } from "../where-compiled";
@@ -22,6 +22,11 @@ import { DatabaseBuilderError } from "../../core";
 import { QueryBuilder } from "./query-builder";
 import { ModelUtils } from "../../core/model-utils";
 import { ParamFilter } from "../../core/param-filter";
+import { PlanRef } from "../../core/plan-ref";
+import { ProjectionModel } from "../projection-model";
+import { ProjectionCompile } from "../projection-compile";
+import { Replaceable } from "../../core/replaceable";
+import { QueryHelper } from "../../core/query-helper";
 
 export abstract class QueryBuilderBase<T,
     TQuery extends QueryBuilderBase<T, TQuery>>
@@ -44,10 +49,11 @@ export abstract class QueryBuilderBase<T,
         params: []
     } as WhereCompiled;
 
-    protected _projectionCompiled: ProjectionCompiled = {
-        projection: "",
-        params: []
-    } as ProjectionCompiled;
+    protected _projections: ProjectionModel[] = [];
+    // protected _projectionCompiled: ProjectionCompiled = {
+    //     projection: "",
+    //     params: []
+    // } as ProjectionCompiled;
     // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
     protected _joinParams: ParamType[] = [];
     protected _ignoreQueryFilter: boolean = false;
@@ -193,7 +199,8 @@ export abstract class QueryBuilderBase<T,
     ): TQuery {
         const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
         projectionCallback(instanceProjection);
-        this.compileProjection(instanceProjection.compile());
+        this.buildProjections(instanceProjection.result());
+        // this.compileProjection(instanceProjection.compile());
         return this._getInstance();
     }
 
@@ -204,21 +211,33 @@ export abstract class QueryBuilderBase<T,
     }
 
     public orderBy<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>,
+        expression: TypeOrderBy<TReturn, T>,
         order: OrderBy = OrderBy.ASC
     ): TQuery {
-        this.compileOrderBy(`${Utils.addAlias(Utils.getColumn(expression), this._alias)} ${order}`);
+        let columnName;
+        if (Utils.isQueryCompiled(expression)) {
+            return this.orderBy(`(${QueryHelper.compileWithoutParams(expression as QueryCompiled)})`, order);
+        } else if (Utils.isQueryCompiledArray(expression)) {
+            return this.orderBy((expression as QueryCompiled[])[0], order);
+        } else if (Utils.isPlanRef(expression)) {
+            columnName = (expression as PlanRef).result();
+        } else if (Utils.isNumber(expression)) {
+            columnName = `${(expression as number)}`;
+        } else {
+            columnName = Utils.addAlias(Utils.getColumn(expression as ExpressionOrColumn<TReturn, T>), this._alias);
+        }
+        this.compileOrderBy(`${columnName} ${order}`);
         return this._getInstance();
     }
 
     public asc<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>
+        expression: TypeOrderBy<TReturn, T>
     ): TQuery {
         return this.orderBy(expression, OrderBy.ASC);
     }
 
     public desc<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>
+        expression: TypeOrderBy<TReturn, T>
     ): TQuery {
         return this.orderBy(expression, OrderBy.DESC);
     }
@@ -244,6 +263,20 @@ export abstract class QueryBuilderBase<T,
             this._limit.params.push(offset);
         }
         return this._getInstance();
+    }
+
+    /**
+     * Find projection by alias and result index (base 1...N+1)
+     * @param projectionAlias alias to find the projection
+     * @returns index (base 1...N+1)
+     */
+    public getIndexProjection<TReturn>(projectionAlias: ExpressionOrColumn<TReturn, T>): number {
+        const projectionColumnAlias = Utils.getColumn(projectionAlias);
+        const index = this._projections.findIndex(x => x.projection.endsWith(` AS ${projectionColumnAlias}`));
+        if (index > -1) {
+            return index + 1;
+        }
+        throw new DatabaseBuilderError(`Not found projection alias ("${projectionColumnAlias}" in projections (current value: "${ProjectionCompile.compile(this._projections).projection}"))`);
     }
 
     public ignoreQueryFilters(): TQuery {
@@ -336,7 +369,8 @@ export abstract class QueryBuilderBase<T,
         this._joinsQuery.push(joinQuery);
         this._joinParams = this._joinParams.concat(joinQuery._getParams());
         this.compileWhere(this.whereCompiled, joinQuery._getWhere());
-        this.compileProjection(joinQuery._getSelect());
+        this.buildProjections(joinQuery._getProjections());
+        // this.compileProjection(joinQuery._getSelect());
         this.compileGroupBy(joinQuery._getGroupBy());
         this.compileHaving(joinQuery._getHaving());
         this.compileOrderBy(joinQuery._getOrderBy());
@@ -347,10 +381,14 @@ export abstract class QueryBuilderBase<T,
     }
 
     protected getColumnsCompiled(): ProjectionCompiled {
-        if (!this._projectionCompiled.projection.length) {
+        if (this._projections.length === 0) {
             this.setDefaultColumns();
         }
-        return this._projectionCompiled;
+        return ProjectionCompile.compile(this._projections);
+        // if (!this._projectionCompiled.projection.length) {
+        //     this.setDefaultColumns();
+        // }
+        // return this._projectionCompiled;
     }
 
     protected buildBase(): QueryCompiled {
@@ -404,15 +442,20 @@ export abstract class QueryBuilderBase<T,
         return queryBase;
     }
 
-    private compileProjection(compiled: ProjectionCompiled) {
-        if (compiled.projection.length) {
-            this._projectionCompiled.projection +=
-                `${(this._projectionCompiled.projection.length ? ", " : "")}${compiled.projection}`;
-            compiled.params.forEach((value: any) => {
-                this._projectionCompiled.params.push(value);
-            });
+    private buildProjections(projections: ProjectionModel[]) {
+        if (projections.length > 0) {
+            this._projections = [...this._projections, ...projections];
         }
     }
+    // private compileProjection(compiled: ProjectionCompiled) {
+    //     if (compiled.projection.length) {
+    //         this._projectionCompiled.projection +=
+    //             `${(this._projectionCompiled.projection.length ? ", " : "")}${compiled.projection}`;
+    //         compiled.params.forEach((value: any) => {
+    //             this._projectionCompiled.params.push(value);
+    //         });
+    //     }
+    // }
 
     private compileTableJoins<TJoin, TQueryJoin extends JoinQueryBuilderContract<TJoin, TQueryJoin>>(
         tablesBase: QueryCompiled,

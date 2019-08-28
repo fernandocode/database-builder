@@ -3,6 +3,9 @@ import { TestClazz } from "./models/test-clazz";
 import { OrderBy } from "../core/enums/order-by";
 import { Crud } from "../crud/crud";
 import { getMapper } from "./mappers-table-new";
+import { PlanRef } from "../core/plan-ref";
+import { TestClazzRef } from "./models/test-clazz-ref";
+import { QueryHelper } from "../core/query-helper";
 
 describe("Order By", () => {
 
@@ -68,6 +71,61 @@ describe("Order By", () => {
         const result = query.compile();
         expect(result[0].params.length).to.equal(0);
         expect(result[0].query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes ORDER BY strftime('%m', datetime(tes.date, 'unixepoch')) ASC");
+    });
+
+    it("order by sub query", () => {
+        const query = crud.query(TestClazz);
+        const subQuery = crud.query(TestClazzRef, "ref")
+            .projection(projection => projection.count(x => x.id))
+            .where(where => {
+                where.equal(x => x.id, query.ref(x => x.referenceTest.id));
+                where.startsWith(x => x.description, "abc");
+            });
+        query.projection(select => {
+            select.add(subQuery, "countRefDescriptionStartWithAbc");
+        });
+        query.asc(subQuery.compile());
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal("abc%");
+        expect(result[0].query).to.equal("SELECT (SELECT COUNT(ref.id) AS id FROM TestClazzRef AS ref WHERE ref.id = tes.referenceTest_id AND ref.description LIKE ?) AS countRefDescriptionStartWithAbc FROM TestClazz AS tes ORDER BY (SELECT COUNT(ref.id) AS id FROM TestClazzRef AS ref WHERE ref.id = tes.referenceTest_id AND ref.description LIKE 'abc%') ASC");
+    });
+
+    it("order by alias projection", () => {
+        const query = crud.query(TestClazz);
+        query.projection(select => {
+            select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
+        });
+        query.asc(new PlanRef(`month`));
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes ORDER BY month ASC");
+    });
+
+    it("order by index by alias projection", () => {
+        const query = crud.query(TestClazz);
+        query.projection(select => {
+            select.add(x => x.id);
+            select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
+            select.add(x => x.description);
+            select.add(x => x.disabled);
+        });
+        query.asc(query.getIndexProjection(`month`));
+        query.desc(query.getIndexProjection(x => x.description));
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS id, strftime('%m', datetime(tes.date, 'unixepoch')) AS month, tes.description AS description, tes.disabled AS disabled FROM TestClazz AS tes ORDER BY 2 ASC, 3 DESC");
+    });
+
+    it("order by index projection", () => {
+        const query = crud.query(TestClazz);
+        query.projection(select => {
+            select.add(`strftime('%m', datetime(${select.ref(x => x.date).result()}, 'unixepoch'))`, "month");
+        });
+        query.asc(1);
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT strftime('%m', datetime(tes.date, 'unixepoch')) AS month FROM TestClazz AS tes ORDER BY 1 ASC");
     });
 
 });

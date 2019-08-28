@@ -23,6 +23,7 @@ import { MetadataTable } from "../metadata-table";
 import { MetadataTableBase } from "../metadata-table-base";
 import { ProjectionCompile } from "../crud/projection-compile";
 import * as lodash from "lodash";
+import { QueryCompiled } from ".";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -32,6 +33,8 @@ export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 export type TypeOrString<T> = (new () => T) | string;
 
 export type ExpressionOrColumn<TReturn, T> = ReturnExpression<TReturn, T> | string;
+
+export type TypeOrderBy<TReturn, T> = ExpressionOrColumn<TReturn, T> | PlanRef | number | QueryCompiled | QueryCompiled[];
 
 export type TypeWhere<T> = Expression<T> | ValueTypeToParse | ColumnRef | ProjectionsHelper<T> | PlanRef;
 
@@ -111,7 +114,7 @@ export class Utils {
     }
 
     public static isReservedBoolean(value: any): boolean {
-        return value === "true" || value === "false" || value === 0 || value === 1 ;
+        return value === "true" || value === "false" || value === 0 || value === 1;
     }
 
     public static isFunction(value: any): boolean {
@@ -166,11 +169,20 @@ export class Utils {
         return instance instanceof PlanRef;
     }
 
-    public static isEmpty(value: any) {
+    public static isEmpty(value: any): boolean {
         if (this.isBoolean(value) || this.isDate(value)) {
             return this.isNull(value);
         }
         return lodash.isEmpty(value);
+    }
+
+    public static isQueryCompiled(value: any): boolean {
+        return value && this.isString(value.query) && this.isArray(value.params);
+    }
+
+    public static isQueryCompiledArray(value: any): boolean {
+        return (this.isArray(value)
+            && (value as any[]).filter(v => this.isQueryCompiled(v) === false).length === 0);
     }
 
     public static databaseName<T>(tablename: TypeOrString<T>): string {

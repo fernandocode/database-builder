@@ -9,6 +9,7 @@ import { ParamType, ValueType } from "../../core/utils";
 import { MapperTable } from "../../mapper-table";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
+import { ProjectionModel } from "../projection-model";
 
 export class JoinQueryBuilder<T>
     extends QueryBuilderBase<T, JoinQueryBuilder<T>>
@@ -37,10 +38,7 @@ export class JoinQueryBuilder<T>
     }
 
     public _getOn(): WhereCompiled {
-        const t = this.whereCompile(this._on.compile());
-        // console.log(this.tablename, t);
-        return t;
-        // return this._on.compile();
+        return this.whereCompile(this._on.compile());
     }
 
     public _getTypeJoin(): string {
@@ -52,9 +50,12 @@ export class JoinQueryBuilder<T>
         return this.whereCompiled;
     }
 
-    public _getSelect(): ProjectionCompiled {
-        return this._projectionCompiled;
+    public _getProjections(): ProjectionModel[] {
+        return this._projections;
     }
+    // public _getSelect(): ProjectionCompiled {
+    //     return this._projectionCompiled;
+    // }
 
     public _getGroupBy(): string {
         return this._groupBy;
@@ -70,12 +71,6 @@ export class JoinQueryBuilder<T>
 
     public _getParams(): ParamType[] {
         return this._joinParams;
-        // const compiled: QueryCompiled = this.buildBase();
-        // return compiled.params
-        //     .concat(this._joinParams)
-        //     .concat(this.whereCompiled.params)
-        //     .concat(this._having.params)
-        //     .concat(this._limit.params);
     }
 
     public addParamsOn(params: ValueType[]): JoinQueryBuilder<T> {
@@ -85,7 +80,6 @@ export class JoinQueryBuilder<T>
 
     // Para adicionar alias da tabela no apelido da projeção padrão
     protected createProjectionBuilder(): ProjectionBuilder<T> {
-        // return new ProjectionBuilder(this._typeT, this.alias, true);
         return super.createProjectionBuilder(true, void 0);
     }
 

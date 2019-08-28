@@ -45,7 +45,8 @@ export class ProjectionCaseWhen<T> {
             this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
             this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);
         } else if (Utils.isProjectionBuilder(projection)) {
-            const projectionCompiled = (projection as ProjectionBuilder<T>).compile();
+            const projectionCompiled = ProjectionCompile.compile((projection as ProjectionBuilder<T>).result());
+            // const projectionCompiled = (projection as ProjectionBuilder<T>).compile();
             this._whenBuilder.builder += ` ${type} ${projectionCompiled.projection}`;
             this._whenBuilder.params = this._whenBuilder.params.concat(projectionCompiled.params);
         } else {

@@ -8,7 +8,7 @@ import { WhereBuilder } from "../where-builder";
 import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
-import { ExpressionOrColumn, ParamType, Utils } from "../../core/utils";
+import { ExpressionOrColumn, ParamType, Utils, TypeOrderBy } from "../../core/utils";
 import { OrderBy } from "../../core/enums/order-by";
 import { HavingBuilder } from "../having-builder";
 import { LambdaExpression } from "lambda-expression";
@@ -145,12 +145,12 @@ export class Query<T> extends SqlBase<T> {
         return this;
     }
 
-    public asc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): Query<T> {
+    public asc<TReturn>(expression: TypeOrderBy<TReturn, T>): Query<T> {
         this._queryBuilder.asc(expression);
         return this;
     }
 
-    public desc<TReturn>(expression: ExpressionOrColumn<TReturn, T>): Query<T> {
+    public desc<TReturn>(expression: TypeOrderBy<TReturn, T>): Query<T> {
         this._queryBuilder.desc(expression);
         return this;
     }
@@ -163,6 +163,15 @@ export class Query<T> extends SqlBase<T> {
         return this;
     }
 
+    /**
+     * Find projection by alias and result index (base 1...N+1)
+     * @param projectionAlias alias to find the projection
+     * @returns index (base 1...N+1)
+     */
+    public getIndexProjection<TReturn>(projectionAlias: ExpressionOrColumn<TReturn, T>): number {
+        return this._queryBuilder.getIndexProjection(projectionAlias);
+    }
+
     public toString() {
         return this.compile().map(x => x.query).join("\n");
     }
@@ -170,7 +179,6 @@ export class Query<T> extends SqlBase<T> {
     /**
      * @link QueryReadableBuilder
      */
-
     public executeAndRead(
         cascade: boolean = true,
         mapperTable: MapperTable = this.getMapper(void 0),

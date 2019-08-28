@@ -108,11 +108,14 @@ export class ProjectionBuilder<T> {
     }
 
     public add<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>,
+        expression: ExpressionOrColumn<TReturn, T> | QueryCompiled[] | SqlCompilable,
         alias?: string,
     ): ProjectionBuilder<T> {
+        if ((expression as SqlCompilable).compile || Utils.isQueryCompiledArray(expression)) {
+            return this.subQuery((expression as (QueryCompiled[] | SqlCompilable)), alias);
+        }
         this.buildProjectionWithExpression(void 0,
-            expression,
+            expression as ExpressionOrColumn<TReturn, T>,
             alias,
         );
         return this;
@@ -284,7 +287,8 @@ export class ProjectionBuilder<T> {
     ): ProjectionBuilder<T> {
         const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this._aliasTable, void 0, false, this._getMapper);
         projectionCallback(instanceProjection);
-        const projectionInner = instanceProjection.compile();
+        const projectionInner = ProjectionCompile.compile(instanceProjection.result());
+        // const projectionInner = instanceProjection.compile();
         this.buildProjectionWithExpression(Projection.Coalesce,
             `${projectionInner.projection}, ${defaultValue}`,
             alias,
@@ -337,9 +341,12 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    public compile(): ProjectionCompiled {
-        return ProjectionCompile.compile(this._projections);
+    public result(): ProjectionModel[] {
+        return this._projections;
     }
+    // public compile(): ProjectionCompiled {
+    //     return ProjectionCompile.compile(this._projections);
+    // }
 
     private selectAllColumns(mapper: MapperTable): void {
         const columns = mapper.columns.filter(x => Utils.isNull(x.tableReference));
