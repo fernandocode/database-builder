@@ -10,9 +10,9 @@ import { MapperTable } from "../mapper-table";
 export class Ddl {
 
     constructor(
-        private _database: DatabaseBase = void 0,
-        private _mappersTable: GetMapper,
-        public enableLog: boolean = true) {
+        private readonly _database: DatabaseBase = void 0,
+        private readonly _mappersTable: GetMapper,
+        public readonly enableLog: boolean = true) {
     }
 
     public create<T>(
@@ -25,9 +25,10 @@ export class Ddl {
 
     public alter<T>(
         typeT: new () => T,
+        mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
         database: DatabaseBase = this.getDatabase()
     ): Alter<T> {
-        return new Alter(typeT, database, this.enableLog);
+        return new Alter(typeT, mapperTable, database, this.enableLog);
     }
 
     public drop<T>(

@@ -10,9 +10,13 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
     private _patternOperation: (column: string) => string;
 
     constructor(
-        private typeT: new () => T
+        typeT: new () => T,
+        private readonly _mapperTable: MapperTable
     ) {
-        super(typeT.name);
+        super(typeT && typeT.name ? typeT.name : _mapperTable.tableName);
+        if (Utils.isNull(_mapperTable)) {
+            throw new DatabaseBuilderError(`Mapper not found for '${this._tablename}'`);
+        }
     }
 
     public addColumn<TReturn extends ValueTypeToParse>(
@@ -23,8 +27,8 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
         return super.columnsBase(
             column => column.set(columnExpression, void 0, type),
             new DdlColumnsBuilder<T>(
-                void 0,
-                new this.typeT()
+                this._mapperTable,
+                void 0
             ),
             this);
     }

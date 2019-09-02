@@ -11,7 +11,7 @@ export abstract class DdlBaseBuilder<T> {
     } as ColumnsBaseCompiled;
 
     constructor(
-        protected _tablename: string
+        protected readonly _tablename: string
     ) {
     }
 

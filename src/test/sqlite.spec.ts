@@ -415,42 +415,6 @@ describe("SQLite", () => {
         const dados = Object.assign({}, ObjectToTest.contasReceber);
         dados.dataRecebimento = "2018-06-08T00:00:00Z";
 
-        // try {
-        //     const  a = crud.insert(ContasAReceber, dados).execute();
-        //     a.subscribe(result => {
-        //         try {
-        //             console.log("result", result);
-        //         } catch (error) {
-        //             console.warn("gggggg", error);
-        //         }
-        //     }, error => {
-        //         console.warn("ddddd", error);
-        //     });
-        // } catch (error) {
-        //     console.warn("hhhhhh", error);
-        // }
-
-        // try {
-        //     crud.insert(ContasAReceber, dados).execute().toPromise().then(result => {
-        //         try {
-        //             console.log("result p", result);
-        //         } catch (error) {
-        //             console.warn("aaaaaa", error);
-        //         }
-        //     }).catch(error => {
-        //         console.warn("rrrrrrr", error);
-        //     });
-        // } catch (error) {
-        //     console.warn("qqqqqqqq", error);
-        // }
-
-        // try {
-        //     const insertResult1 = await crud.insert(ContasAReceber, dados).execute().toPromise();
-        //     expect(insertResult1[0].rowsAffected).to.equal(1);
-        // } catch (error) {
-        //     console.warn("eeeeee", error);
-        // }
-
         const insertResult1 = await crud.insert(ContasAReceber, dados).execute().toPromise();
         expect(insertResult1[0].rowsAffected).to.equal(1);
 

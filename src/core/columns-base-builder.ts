@@ -48,9 +48,7 @@ export abstract class ColumnsBaseBuilder<
     ): TThis {
         return this.setColumn(
             Utils.getColumn(columnExpression),
-            type
-                ? this._databaseHelper.getFieldType(type)
-                : Utils.getType(this.modelToSave, columnExpression),
+            this.getFieldType(columnExpression, type),
             primaryKeyType
         );
     }
@@ -104,5 +102,17 @@ export abstract class ColumnsBaseBuilder<
                 );
             }
         }
+    }
+
+    private getFieldType<TReturn extends ValueTypeToParse>(
+        columnExpression: ExpressionOrColumn<TReturn, T>, type: new () => TReturn
+    ): FieldType {
+        if (type) {
+            return this._databaseHelper.getFieldType(type);
+        }
+        const fieldTypeByMapper = this.mapperTable ? this.mapperTable.getColumnByField(columnExpression) : void 0;
+        return fieldTypeByMapper
+            ? fieldTypeByMapper.fieldType
+            : Utils.getType(this.modelToSave, columnExpression);
     }
 }
