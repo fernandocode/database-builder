@@ -40,8 +40,7 @@ describe("SQLite", () => {
 
     const insertUf = async () => {
         const itemExist = await crud.query(Uf)
-            .where(w => w.equal(x => x.codeImport, ObjectToTest.uf.codeImport))
-            .firstOrDefault().toPromise();
+            .firstOrDefault(w => w.equal(x => x.codeImport, ObjectToTest.uf.codeImport)).toPromise();
         if (!itemExist) {
             const insert = crud.insert(Uf, ObjectToTest.uf);
             const insertedResult = await insert.execute().toPromise();
@@ -544,6 +543,31 @@ describe("SQLite", () => {
             expect(selectResult2[0].items[index]).to.equal(value);
         });
 
+        // mapper
+        const selectResultMapper = await crud.query(HeaderSimple)
+            .mapper<HeaderSimple>(row => {
+                return row.map().result();
+            })
+            .toPromise();
+        expect(selectResultMapper.length).to.equal(1);
+        expect(selectResultMapper[0].items.length).to.equal(headerSimple3.items.length);
+        expect(selectResultMapper[0].id).to.equal(headerSimple3.id);
+        expect(selectResultMapper[0].descricao).to.equal(headerSimple3.descricao);
+        headerSimple3.items.forEach((value, index) => {
+            expect(selectResultMapper[0].items[index]).to.equal(value);
+        });
+
+        // mapper not cascade
+        const selectResultMapperNotCascade = await crud.query(HeaderSimple)
+            .mapper<HeaderSimple>(row => {
+                return row.map().result();
+            }, false)
+            .toPromise();
+        expect(selectResultMapperNotCascade.length).to.equal(1);
+        expect(selectResultMapperNotCascade[0].items.length).to.equal(0);
+        expect(selectResultMapperNotCascade[0].id).to.equal(headerSimple3.id);
+        expect(selectResultMapperNotCascade[0].descricao).to.equal(headerSimple3.descricao);
+
         /* Test select not cascade with data in itens */
         const selectResultNotCascade = await crud.query(HeaderSimple).toList(false).toPromise();
         expect(selectResultNotCascade.length).to.equal(1);
@@ -613,7 +637,7 @@ describe("SQLite", () => {
             .where(where => {
                 where.equal(x => x.id, headerSimple2.id);
             })
-            .firstOrDefault(false).toPromise();
+            .firstOrDefault(void 0, false).toPromise();
         expect(selectUpdateResult.items.length).to.equal(0);
         expect(selectUpdateResult.id).to.equal(headerSimple2.id);
         expect(selectUpdateResult.descricao).to.equal(headerSimple2.descricao);
@@ -880,7 +904,7 @@ describe("SQLite", () => {
             join => {
                 join.projection(projection => {
                     projection.all();
-                }).enableQueryFilters().setParamsQueryFilter({startWith: "N"});
+                }).enableQueryFilters().setParamsQueryFilter({ startWith: "N" });
             }
         );
         const queryResult = await query.mapper<Cliente>(row => {

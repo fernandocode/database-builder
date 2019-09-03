@@ -25,13 +25,13 @@ import { Observable, Observer } from "rxjs";
 import { forkJoinSafe } from "../../safe-utils";
 import { ProjectionsUtils } from "../../core/projections-utils";
 
-export class Query<T> extends SqlBase<T> {
+export class Query<TType> extends SqlBase<TType> {
 
-    private _queryBuilder: QueryBuilder<T>;
-    private _queryReadableBuilder: QueryReadableBuilder<T>;
+    private _queryBuilder: QueryBuilder<TType>;
+    private _queryReadableBuilder: QueryReadableBuilder<TType>;
 
     constructor(
-        private _queryT: (new () => T) | QueryBuilder<T>,
+        private _queryT: (new () => TType) | QueryBuilder<TType>,
         alias: string = void 0,
         private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
         mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
@@ -43,7 +43,7 @@ export class Query<T> extends SqlBase<T> {
         this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, _getMapper).newable, enableLog);
     }
 
-    public clone(): Query<T> {
+    public clone(): Query<TType> {
         return ModelUtils.cloneDeep(this);
     }
 
@@ -53,12 +53,12 @@ export class Query<T> extends SqlBase<T> {
         return script;
     }
 
-    public ignoreQueryFilters(): Query<T> {
+    public ignoreQueryFilters(): Query<TType> {
         this._queryBuilder.ignoreQueryFilters();
         return this;
     }
 
-    public setParamsQueryFilter(params: { [s: string]: ParamType }): Query<T> {
+    public setParamsQueryFilter(params: { [s: string]: ParamType }): Query<TType> {
         this._queryBuilder.setParamsQueryFilter(params);
         return this;
     }
@@ -70,21 +70,21 @@ export class Query<T> extends SqlBase<T> {
         return this._queryBuilder.alias;
     }
 
-    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>): ColumnRef {
+    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, TType>): ColumnRef {
         return this._queryBuilder.ref(expression);
     }
 
-    public from(query: QueryCompiled[] | SqlCompilable): Query<T> {
+    public from(query: QueryCompiled[] | SqlCompilable): Query<TType> {
         this._queryBuilder.from(query);
         return this;
     }
 
-    public union(query: QueryCompiled[] | SqlCompilable): Query<T> {
+    public union(query: QueryCompiled[] | SqlCompilable): Query<TType> {
         this._queryBuilder.union(query);
         return this;
     }
 
-    public unionAll(query: QueryCompiled[] | SqlCompilable): Query<T> {
+    public unionAll(query: QueryCompiled[] | SqlCompilable): Query<TType> {
         this._queryBuilder.unionAll(query);
         return this;
     }
@@ -96,7 +96,7 @@ export class Query<T> extends SqlBase<T> {
         type: JoinType = JoinType.LEFT,
         alias: string = void 0,
         ignoreQueryFilters?: boolean
-    ): Query<T> {
+    ): Query<TType> {
         if (queryTJoin && (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder) {
             queryTJoin = (queryTJoin as { _builder: () => QueryBuilder<TJoin> })._builder();
         }
@@ -108,16 +108,16 @@ export class Query<T> extends SqlBase<T> {
         return this;
     }
 
-    public createWhere(): WhereBuilder<T> {
+    public createWhere(): WhereBuilder<TType> {
         return this._queryBuilder.createWhere();
     }
 
-    public where(where: (whereCallback: WhereBuilder<T>) => void): Query<T> {
+    public where(where: (whereCallback: WhereBuilder<TType>) => void): Query<TType> {
         this._queryBuilder.where(where);
         return this;
     }
 
-    public whereExp(expression: LambdaExpression<T>): Query<T> {
+    public whereExp(expression: LambdaExpression<TType>): Query<TType> {
         this._queryBuilder.whereExp(expression);
         return this;
     }
@@ -125,40 +125,40 @@ export class Query<T> extends SqlBase<T> {
     /**
      * @param projectionCallback
      */
-    public projection(projectionCallback: (projection: ProjectionBuilder<T>) => void): Query<T> {
+    public projection(projectionCallback: (projection: ProjectionBuilder<TType>) => void): Query<TType> {
         this._queryBuilder.projection(projectionCallback);
         return this;
     }
 
-    public select(...expressions: Array<ExpressionOrColumn<any, T>>): Query<T> {
+    public select(...expressions: Array<ExpressionOrColumn<any, TType>>): Query<TType> {
         this._queryBuilder.select(...expressions);
         return this;
     }
 
-    public limit(limit: number, offset?: number): Query<T> {
+    public limit(limit: number, offset?: number): Query<TType> {
         this._queryBuilder.limit(limit, offset);
         return this;
     }
 
-    public orderBy<TReturn>(expression: ExpressionOrColumn<TReturn, T>, order: OrderBy = OrderBy.ASC): Query<T> {
+    public orderBy<TReturn>(expression: ExpressionOrColumn<TReturn, TType>, order: OrderBy = OrderBy.ASC): Query<TType> {
         this._queryBuilder.orderBy(expression, order);
         return this;
     }
 
-    public asc<TReturn>(expression: TypeOrderBy<TReturn, T>): Query<T> {
+    public asc<TReturn>(expression: TypeOrderBy<TReturn, TType>): Query<TType> {
         this._queryBuilder.asc(expression);
         return this;
     }
 
-    public desc<TReturn>(expression: TypeOrderBy<TReturn, T>): Query<T> {
+    public desc<TReturn>(expression: TypeOrderBy<TReturn, TType>): Query<TType> {
         this._queryBuilder.desc(expression);
         return this;
     }
 
     public groupBy<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>,
-        havingCallback?: (having: HavingBuilder<T>, projection: ProjectionsHelper<T>) => void
-    ): Query<T> {
+        expression: ExpressionOrColumn<TReturn, TType>,
+        havingCallback?: (having: HavingBuilder<TType>, projection: ProjectionsHelper<TType>) => void
+    ): Query<TType> {
         this._queryBuilder.groupBy(expression, havingCallback);
         return this;
     }
@@ -168,7 +168,7 @@ export class Query<T> extends SqlBase<T> {
      * @param projectionAlias alias to find the projection
      * @returns index (base 1...N+1)
      */
-    public getIndexProjection<TReturn>(projectionAlias: ExpressionOrColumn<TReturn, T>): number {
+    public getIndexProjection<TReturn>(projectionAlias: ExpressionOrColumn<TReturn, TType>): number {
         return this._queryBuilder.getIndexProjection(projectionAlias);
     }
 
@@ -178,13 +178,17 @@ export class Query<T> extends SqlBase<T> {
 
     /**
      * @link QueryReadableBuilder
+     * @param cascade use cascade fetch in `hasMany` mapper (default = true)
+     * @param mapper mapper table metadata
+     * @param database database to execute query
+     * @returns Array of `TType`
      */
     public executeAndRead(
         cascade: boolean = true,
         mapperTable: MapperTable = this.getMapper(void 0),
         database: DatabaseBase = void 0,
-    ): Observable<T[]> {
-        return Observable.create((observer: Observer<T[]>) => {
+    ): Observable<TType[]> {
+        return Observable.create((observer: Observer<TType[]>) => {
             this._queryReadableBuilder.executeAndRead(
                 cascade,
                 this,
@@ -206,7 +210,53 @@ export class Query<T> extends SqlBase<T> {
         });
     }
 
-    public count(where?: (whereCallback: WhereBuilder<T>) => void): Observable<number> {
+    /**
+     * Execute query and parse to @type {TType}
+     * @param cascade use cascade fetch in `hasMany` mapper (default = true)
+     * @returns Array of @type {TType}
+     */
+    public toList(cascade?: boolean): Observable<TType[]> {
+        return this.executeAndRead(cascade);
+    }
+
+    /**
+     * Allow each parse items cursor
+     * @param mapper callback mapper item
+     * @param cascade use cascade fetch in `hasMany` mapper (default = true)
+     * @returns Array of @type {T}
+     */
+    public mapper<T extends any>(mapper: (row: RowResult<T>) => T, cascade: boolean = true): Observable<T[]> {
+        return new Observable<T[]>((observer) => {
+            this.execute()
+                .subscribe((cursors) => {
+                    const mapperTable = this.getMapper(void 0, false);
+                    if (cursors.length !== 1) {
+                        throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
+                    }
+                    const resultMain = this._queryReadableBuilder.mapper(
+                        cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder, Utils.getMapperTable(this._queryT, this._getMapper).newable
+                    );
+                    this.fetchModels(cascade, resultMain, mapperTable)
+                        .subscribe(result => {
+                            observer.next(result);
+                            observer.complete();
+                        }, err => {
+                            observer.error(err);
+                            observer.complete();
+                        });
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
+    /**
+     * Get count rows (count by key column) by query
+     * @param where where for apply in query
+     * @returns count items
+     */
+    public count(where?: (whereCallback: WhereBuilder<TType>) => void): Observable<number> {
         return new Observable<number>(observer => {
             let keyColumn = ProjectionsUtils.WILDCARD;
             if (this.mapperTable && this.mapperTable.keyColumns().length > 0) {
@@ -231,89 +281,18 @@ export class Query<T> extends SqlBase<T> {
         });
     }
 
-    public toList(cascade?: boolean): Observable<T[]> {
-        return this.executeAndRead(cascade);
-    }
-
-    public toListParse<TParse>(metadataParse: MetadataTable<TParse>): Observable<TParse[]> {
-        return Observable.create((observer: Observer<TParse[]>) => {
-            this.execute()
-                .subscribe((cursor) => {
-                    observer.next(this.read(cursor, metadataParse.newable, metadataParse.mapperTable));
-                    observer.complete();
-                }, err => {
-                    observer.error(err);
-                    observer.complete();
-                });
-        });
-    }
-
-    public toListTo<TReader>(newable: new () => TReader, mapperTable: MapperTable): Observable<TReader[]> {
-        return Observable.create((observer: Observer<TReader[]>) => {
-            this.execute()
-                .subscribe((cursor) => {
-                    observer.next(this.read(cursor, newable, mapperTable));
-                    observer.complete();
-                }, err => {
-                    observer.error(err);
-                    observer.complete();
-                });
-        });
-    }
-
-    public toCast(): Observable<any[]> {
-        return Observable.create((observer: Observer<any[]>) => {
-            this.execute()
-                .subscribe(cursors => {
-                    if (cursors.length !== 1) {
-                        throw new DatabaseBuilderError(`"toCast" is not ready to solve multiple queries in one batch!`);
-                    }
-                    observer.next(this._queryReadableBuilder.toCast(cursors[0]));
-                    observer.complete();
-                }, err => {
-                    observer.error(err);
-                    observer.complete();
-                });
-        });
-    }
-
-    public map(mapper: (row: any) => any): Observable<any[]> {
-        return Observable.create((observer: Observer<any[]>) => {
-            this.execute()
-                .subscribe((cursors) => {
-                    if (cursors.length !== 1) {
-                        throw new DatabaseBuilderError(`"map" is not ready to solve multiple queries in one batch!`);
-                    }
-                    observer.next(this._queryReadableBuilder.map(cursors[0], mapper));
-                    observer.complete();
-                }, err => {
-                    observer.error(err);
-                    observer.complete();
-                });
-        });
-    }
-
-    public mapper<T extends any>(mapper: (row: RowResult<T>) => T): Observable<T[]> {
-        return Observable.create((observer: Observer<T[]>) => {
-            this.execute()
-                .subscribe((cursors) => {
-                    const mapperTable = this.getMapper(void 0, false);
-                    if (cursors.length !== 1) {
-                        throw new DatabaseBuilderError(`"mapper" is not ready to solve multiple queries in one batch!`);
-                    }
-                    observer.next(this._queryReadableBuilder.mapper(
-                        cursors[0], mapperTable, mapper, this._getMapper, this._queryBuilder, Utils.getMapperTable(this._queryT, this._getMapper).newable
-                    ));
-                    observer.complete();
-                }, err => {
-                    observer.error(err);
-                    observer.complete();
-                });
-        });
-    }
-
-    public firstOrDefault(cascade?: boolean, _default?: any): Observable<T> {
-        return Observable.create((observer: Observer<T[]>) => {
+    /**
+     * Get first or default item by query
+     * @param where where for apply in query
+     * @param cascade use cascade fetch in `hasMany` mapper (default = true)
+     * @param _default default value if not found any item
+     * @returns first or default item by query
+     */
+    public firstOrDefault(where?: (whereCallback: WhereBuilder<TType>) => void, cascade?: boolean, _default?: any): Observable<TType> {
+        return Observable.create((observer: Observer<TType[]>) => {
+            if (where) {
+                this.where(where);
+            }
             this.limit(1)
                 .toList(cascade)
                 .subscribe((result) => {
@@ -331,12 +310,82 @@ export class Query<T> extends SqlBase<T> {
     }
 
     /**
+     * @deprecated use `.mapper`
+     */
+    public toListParse<TParse>(metadataParse: MetadataTable<TParse>): Observable<TParse[]> {
+        return Observable.create((observer: Observer<TParse[]>) => {
+            this.execute()
+                .subscribe((cursor) => {
+                    observer.next(this.read(cursor, metadataParse.newable, metadataParse.mapperTable));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
+    /**
+     * @deprecated use `.mapper`
+     */
+    public toListTo<TReader>(newable: new () => TReader, mapperTable: MapperTable): Observable<TReader[]> {
+        return Observable.create((observer: Observer<TReader[]>) => {
+            this.execute()
+                .subscribe((cursor) => {
+                    observer.next(this.read(cursor, newable, mapperTable));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
+    /**
+     * @deprecated use `.mapper`
+     */
+    public toCast(): Observable<any[]> {
+        return Observable.create((observer: Observer<any[]>) => {
+            this.execute()
+                .subscribe(cursors => {
+                    if (cursors.length !== 1) {
+                        throw new DatabaseBuilderError(`"toCast" is not ready to solve multiple queries in one batch!`);
+                    }
+                    observer.next(this._queryReadableBuilder.toCast(cursors[0]));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
+    /**
+     * @deprecated use `.mapper`
+     */
+    public map(mapper: (row: any) => any): Observable<any[]> {
+        return Observable.create((observer: Observer<any[]>) => {
+            this.execute()
+                .subscribe((cursors) => {
+                    if (cursors.length !== 1) {
+                        throw new DatabaseBuilderError(`"map" is not ready to solve multiple queries in one batch!`);
+                    }
+                    observer.next(this._queryReadableBuilder.map(cursors[0], mapper));
+                    observer.complete();
+                }, err => {
+                    observer.error(err);
+                    observer.complete();
+                });
+        });
+    }
+
+    /**
      * @hidden
      */
-    public _builder(): QueryBuilder<T> {
+    public _builder(): QueryBuilder<TType> {
         return this._queryBuilder;
     }
-    protected model(): T {
+    protected model(): TType {
         return void 0;
     }
 
@@ -365,7 +414,7 @@ export class Query<T> extends SqlBase<T> {
         return result;
     }
 
-    private fetchModels(cascade: boolean, models: T[], mapperTable: MapperTable): Observable<T[]> {
+    private fetchModels<T>(cascade: boolean, models: T[], mapperTable: MapperTable): Observable<T[]> {
         const promises: Array<Observable<T>> = [];
         models.forEach(model => {
             promises.push(this.fetchModel(cascade, model, mapperTable));
@@ -373,8 +422,8 @@ export class Query<T> extends SqlBase<T> {
         return forkJoinSafe(promises);
     }
 
-    private fetchModel(cascade: boolean, model: T, mapperTable: MapperTable): Observable<T> {
-        return Observable.create((observer: Observer<T>) => {
+    private fetchModel<T>(cascade: boolean, model: T, mapperTable: MapperTable): Observable<T> {
+        return new Observable<T>((observer) => {
             const promises: Array<Observable<{ field: string, value: any }>> = [];
             mapperTable.dependencies.forEach(dependency => {
                 if (cascade) {

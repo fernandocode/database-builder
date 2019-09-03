@@ -10,6 +10,7 @@ import { MapperUtils } from "../mapper/mapper-utils";
 import { RowMapper } from "./row-mapper";
 
 export class RowResult<T> {
+
     private _databaseHelper: DatabaseHelper;
 
     constructor(

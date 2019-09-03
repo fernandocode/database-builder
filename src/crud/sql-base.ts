@@ -14,7 +14,7 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
     protected readonly _executableBuilder: ExecutableBuilder;
 
     constructor(
-        protected mapperTable: MapperTable,
+        protected readonly mapperTable: MapperTable,
         protected readonly database: DatabaseBase = void 0,
         protected enableLog: boolean = true,
     ) {
