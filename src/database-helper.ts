@@ -121,7 +121,8 @@ export class DatabaseHelper {
         const regexISODatetime = /^(\d{4})-(\d{2})-(\d{2})(T(\d{2})\:(\d{2})\:(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
         // const regexISODatetime = /^(\d{4})-?(\d{2})-?(\d{2})(T(\d{2})\:?(\d{2})\:?(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
         if (typeof value === "string" && (type === void 0 || type === FieldType.DATE) && regexISODatetime.test(value)) {
-            return DatetimeUtils.dateToDatabase(value);
+            return DatetimeUtils.datetimeToDatabase(value);
+            // return DatetimeUtils.dateToDatabase(value);
         }
         return value;
     }

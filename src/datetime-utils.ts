@@ -4,13 +4,16 @@ import { Utils } from "./core/utils";
 
 export class DatetimeUtils {
 
-    public static datetimeToDatabase(date: moment.Moment | number | Date): number {
+    public static datetimeToDatabase(date: moment.Moment | number | Date | string): number {
         if (date) {
             if (Utils.isNumber(date)) {
                 return date as number;
             }
             if (Utils.isDate(date)) {
                 return Math.round(((date as Date).getTime() - ((date as Date).getTimezoneOffset() * 60000)) / 1000);
+            }
+            if (Utils.isString(date) && /^(\d{4})-(\d{2})-(\d{2})(T(\d{2})\:(\d{2})\:(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm.test(date as string)) {
+                return this.datetimeToDatabase(this.createDatetime(date));
             }
             if (!(date as moment.Moment).unix) {
                 throw new DatabaseBuilderError(`Date format incorrect, value: ${date}`);
@@ -47,8 +50,12 @@ export class DatetimeUtils {
         return this.datetimeToDate(date).unix();
     }
 
+    public static createDatetime(date: any): moment.Moment {
+        return this.datetimeIgnoreTimeZone(moment.utc(date));
+    }
+
     public static datetimeToDate(date: any): moment.Moment {
-        return moment.utc(moment.utc(date).toISOString(), "YYYY-MM-DD");
+        return moment.utc(this.createDatetime(date).toISOString(), "YYYY-MM-DD");
     }
 
     public static databaseToDatetime(unix: number) {
