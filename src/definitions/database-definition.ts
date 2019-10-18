@@ -29,6 +29,12 @@ export interface DatabaseObject {
      * ensure it resolved and successfully opened the database.
      */
     executeSql(statement: string, params: any): Promise<DatabaseResult>;
+
+    /**
+     * @param sqlStatements {string[] | string[][] | any[]}
+     * @returns {Promise<any>}
+     */
+    sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]>;
 }
 
 export interface DatabaseResult {

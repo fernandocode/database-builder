@@ -25,3 +25,4 @@ UserInterfaceState.xcuserstate
 
 *.js
 *.d.ts
+/dist

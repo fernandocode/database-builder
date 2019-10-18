@@ -2,6 +2,7 @@ import { DatabaseCreatorContract } from "../definitions/database-creator-contrac
 import { DatabaseConfig } from "../definitions/database-config";
 import { DatabaseObject, DatabaseResult } from "../definitions/database-definition";
 import { WebSqlInterface, WebSqlTransactionInterface } from "../definitions/websql-interface";
+import { DatabaseBuilderError } from "../core";
 
 /**
  * WARNING: Only for test app
@@ -56,16 +57,18 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                         }
                     });
                 },
-                transaction:
-                    (fn: (transaction: WebSqlTransactionInterface) => void): Promise<any> => {
-                        return database.transaction(transaction => {
-                            fn({
-                                executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
-                                    return this.executeSql(transaction, sql, values);
-                                }
-                            });
+                transaction: (fn: (transaction: WebSqlTransactionInterface) => void): Promise<any> => {
+                    return database.transaction(transaction => {
+                        fn({
+                            executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
+                                return this.executeSql(transaction, sql, values);
+                            }
                         });
-                    }
+                    });
+                },
+                sqlBatch: (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
+                    throw new DatabaseBuilderError("Not implemented sqlBatch ");
+                }
             } as DatabaseObject);
         });
     }

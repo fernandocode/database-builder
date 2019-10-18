@@ -50,6 +50,9 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
                             })
                             .catch(err => reject(err));
                     });
+                },
+                sqlBatch: (sqlStatements: any[]) => {
+                    return this.batch(database, sqlStatements);
                 }
             } as DatabaseObject);
         });
@@ -63,12 +66,27 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
         if (this.isSelect(statement)) {
             return this.query(database, statement, params);
         }
-        return this.batch(database, [[statement, params]]);
+        return new Promise((resolve, reject) => {
+            this.batch(database, [[statement, params]])
+                .then(result =>
+                    resolve(
+                        result.reduce(
+                            (a, b) => {
+                                return this.createDatabaseResult(
+                                    [], a.rowsAffected + b.rowsAffected, b.insertId
+                                );
+                            },
+                            this.createDatabaseResult([], 0, void 0)
+                        )
+                    )
+                )
+                .catch(err => reject(err));
+        });
     }
 
     private batch(
         database: SQLite3ObjectInterface, sqlStatements: Array<string | string[] | any>
-    ): Promise<any> {
+    ): Promise<DatabaseResult[]> {
         if (!sqlStatements || sqlStatements.constructor !== Array) {
             throw Error("sqlBatch expects an array");
         }
@@ -94,24 +112,46 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
         return this.executeBatchs(database, batchList);
     }
 
-    private executeBatchs(database: SQLite3ObjectInterface, batchs: Array<{ sql: string, params: any[] }>): Promise<DatabaseResult> {
-        return new Promise((resolve, reject) => {
+    private executeBatchs(database: SQLite3ObjectInterface, batchs: Array<{ sql: string, params: any[] }>): Promise<DatabaseResult[]> {
+        return new Promise(async (resolve, reject) => {
             const promises: Array<Promise<any>> = [];
+            const result: DatabaseResult[] = [];
             for (const batch of batchs) {
-                promises.push(this.executeBatch(database, batch));
+                result.push(await this.executeBatch(database, batch));
+                // promises.push(this.executeBatch(database, batch));
             }
-            Promise.all<DatabaseResult>(promises)
-                .then(result => resolve(
-                    result.reduce(
-                        (a, b) => {
-                            return this.createDatabaseResult(
-                                [], a.rowsAffected + b.rowsAffected, b.insertId
-                            );
-                        },
-                        this.createDatabaseResult([], 0, void 0)
-                    )
-                ))
-                .catch(err => reject(err));
+            // resolve(batchs.map(b => {
+            //     return b.sql
+            // }));
+            resolve(result);
+            // for (const iterator of pro) {
+
+            // }
+            // zip(promises.map(p => from(p))).subscribe(result => {
+            //     resolve(
+            //         result.reduce(
+            //             (a, b) => {
+            //                 return this.createDatabaseResult(
+            //                     [], a.rowsAffected + b.rowsAffected, b.insertId
+            //                 );
+            //             },
+            //             this.createDatabaseResult([], 0, void 0)
+            //         )
+            //     );
+            // }, err => reject(err));
+            // Promise.all<DatabaseResult>(promises)
+            //     .then(result => resolve(
+            //         result.reduce(
+            //             (a, b) => {
+            //                 return this.createDatabaseResult(
+            //                     [], a.rowsAffected + b.rowsAffected, b.insertId
+            //                 );
+            //             },
+            //             this.createDatabaseResult([], 0, void 0)
+            //         )
+            //     )
+            //     )
+            //     .catch(err => reject(err));
         });
     }
 

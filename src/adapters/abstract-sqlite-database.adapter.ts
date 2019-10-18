@@ -30,6 +30,9 @@ export abstract class DatabaseAbstractSQLiteService implements DatabaseCreatorCo
                   }
                 });
               });
+            },
+            sqlBatch: (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
+              return database.sqlBatch(sqlStatements);
             }
           } as DatabaseObject);
         })
@@ -44,6 +47,11 @@ export abstract class DatabaseAbstractSQLiteService implements DatabaseCreatorCo
 export interface DatabaseSQLiteObject {
   transaction(fn: (transaction: DatabaseSQLiteTransaction) => void): Promise<any>;
   executeSql(statement: string, params: any): Promise<DatabaseResult>;
+  /**
+   * @param sqlStatements {string[] | string[][] | any[]}
+   * @returns {Promise<any>}
+   */
+  sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<any>;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
+import { DatabaseBase, DatabaseObject, DatabaseResult } from "../definitions/database-definition";
 import { QueryCompiled } from "./query-compiled";
 import { ReplacementParam } from "./replacement-param";
 import { Observable, Observer } from "rxjs";
@@ -7,6 +7,20 @@ export class ExecutableBuilder {
 
     constructor(public enableLog: boolean = true) {
 
+    }
+
+    public executeBatch(
+        compiled: QueryCompiled[],
+        database: DatabaseObject,
+    ): Observable<DatabaseResult[]> {
+        return Observable.create((observer: Observer<DatabaseResult[]>) => {
+            database.sqlBatch(this.buildSqlBatch(compiled))
+                .then(result => {
+                    observer.next(result);
+                    observer.complete();
+                })
+                .catch(err => observer.error(err));
+        });
     }
 
     public execute(
@@ -22,6 +36,16 @@ export class ExecutableBuilder {
                     observer.error(err);
                     observer.complete();
                 });
+        });
+    }
+
+    private buildSqlBatch(compiled: QueryCompiled[]): Array<(string | string[] | any)> {
+        return compiled.map(x => {
+            const r = x.params.length > 0
+                ? [x.query, x.params]
+                : x.query;
+            this.log(r);
+            return r;
         });
     }
 

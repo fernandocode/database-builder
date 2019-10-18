@@ -13,6 +13,9 @@ export interface SQLiteObjectInterface {
         statement: string,
         params?: any[]
     ): Promise<any>;
+    sqlBatch(
+        sqlStatements: Array<(string | string[] | any)>
+    ): Promise<any>;
 }
 export interface DbTransactionInterface {
     executeSql: (

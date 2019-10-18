@@ -1,6 +1,6 @@
 {
   "name": "database-builder",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Library to assist in creating and maintaining SQL commands.",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -10,7 +10,8 @@
     "test-single": "tsc & mocha src/test/**/*.spec.js --grep Mapper --debug-brk",
     "test-debug": "mocha -r ts-node/register src/test/**/*.spec.ts --debug-brk",
     "lint": "tslint -p tsconfig.json",
-    "publish-npm": "tsc & npm publish"
+    "publish-npm": "tsc & npm publish",
+    "pack": "cd dist/ & npm pack ../"
   },
   "dependencies": {
     "lambda-expression": ">=0.1.4",
