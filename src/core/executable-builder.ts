@@ -12,11 +12,11 @@ export class ExecutableBuilder {
     public executeBatch(
         compiled: QueryCompiled[],
         database: DatabaseObject,
-    ): Observable<DatabaseResult[]> {
-        return Observable.create((observer: Observer<DatabaseResult[]>) => {
+    ): Observable<boolean> {
+        return Observable.create((observer: Observer<boolean>) => {
             database.sqlBatch(this.buildSqlBatch(compiled))
-                .then(result => {
-                    observer.next(result);
+                .then(_result => {
+                    observer.next(true);
                     observer.complete();
                 })
                 .catch(err => observer.error(err));

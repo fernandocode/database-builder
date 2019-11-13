@@ -44,7 +44,7 @@ export class CreateBuilder<T> extends DdlBaseBuilder<T> {
         return `CREATE TABLE IF NOT EXISTS ${this._tablename}(
             ${columns.columns.join(", ")}
             ${primaryColumns}
-            );`;
+            )`;
     }
 
     protected setDefaultColumns(): void {

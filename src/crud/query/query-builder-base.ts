@@ -50,10 +50,6 @@ export abstract class QueryBuilderBase<T,
     } as WhereCompiled;
 
     protected _projections: ProjectionModel[] = [];
-    // protected _projectionCompiled: ProjectionCompiled = {
-    //     projection: "",
-    //     params: []
-    // } as ProjectionCompiled;
     // TODO: remove "_joinParams" e utilizar SqlAndParams como é realizado nos projections
     protected _joinParams: ParamType[] = [];
     protected _ignoreQueryFilter: boolean = false;
@@ -102,10 +98,6 @@ export abstract class QueryBuilderBase<T,
 
     public clone(): TQuery {
         return ModelUtils.cloneDeep(this._getInstance());
-        // return ModelUtils.assignWith(Object.create(Object.getPrototypeOf(this._getInstance())), this._getInstance());
-        // return Object.assign(Object.create(Object.getPrototypeOf(this._getInstance())), this._getInstance());
-        // return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
-        // return Object.assign({ __proto__: (this._getInstance() as any).__proto__ }, this._getInstance());
     }
 
     public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this.alias): ColumnRef {
@@ -200,7 +192,6 @@ export abstract class QueryBuilderBase<T,
         const instanceProjection: ProjectionBuilder<T> = this.createProjectionBuilder();
         projectionCallback(instanceProjection);
         this.buildProjections(instanceProjection.result());
-        // this.compileProjection(instanceProjection.compile());
         return this._getInstance();
     }
 
@@ -216,7 +207,7 @@ export abstract class QueryBuilderBase<T,
     ): TQuery {
         let columnName;
         if (Utils.isQueryCompiled(expression)) {
-            return this.orderBy(`(${QueryHelper.compileWithoutParams(expression as QueryCompiled)})`, order);
+            return this.orderBy(`(${QueryHelper.compileWithoutParams((expression as QueryCompiled).query, (expression as QueryCompiled).params)})`, order);
         } else if (Utils.isQueryCompiledArray(expression)) {
             return this.orderBy((expression as QueryCompiled[])[0], order);
         } else if (Utils.isPlanRef(expression)) {
@@ -360,17 +351,10 @@ export abstract class QueryBuilderBase<T,
     protected addJoin<TJoin, TQueryJoin extends JoinQueryBuilderContract<TJoin, TQueryJoin>>(
         joinQuery: JoinQueryBuilderContract<TJoin, TQueryJoin>
     ) {
-        // if (this._ignoreQueryFilter) {
-        //     joinQuery.ignoreQueryFilters();
-        // }
-        // if (this._paramsQueryFilter) {
-        //     joinQuery.setParamsQueryFilter(this._paramsQueryFilter);
-        // }
         this._joinsQuery.push(joinQuery);
         this._joinParams = this._joinParams.concat(joinQuery._getParams());
         this.compileWhere(this.whereCompiled, joinQuery._getWhere());
         this.buildProjections(joinQuery._getProjections());
-        // this.compileProjection(joinQuery._getSelect());
         this.compileGroupBy(joinQuery._getGroupBy());
         this.compileHaving(joinQuery._getHaving());
         this.compileOrderBy(joinQuery._getOrderBy());
@@ -385,10 +369,6 @@ export abstract class QueryBuilderBase<T,
             this.setDefaultColumns();
         }
         return ProjectionCompile.compile(this._projections);
-        // if (!this._projectionCompiled.projection.length) {
-        //     this.setDefaultColumns();
-        // }
-        // return this._projectionCompiled;
     }
 
     protected buildBase(): QueryCompiled {
@@ -447,15 +427,6 @@ export abstract class QueryBuilderBase<T,
             this._projections = [...this._projections, ...projections];
         }
     }
-    // private compileProjection(compiled: ProjectionCompiled) {
-    //     if (compiled.projection.length) {
-    //         this._projectionCompiled.projection +=
-    //             `${(this._projectionCompiled.projection.length ? ", " : "")}${compiled.projection}`;
-    //         compiled.params.forEach((value: any) => {
-    //             this._projectionCompiled.params.push(value);
-    //         });
-    //     }
-    // }
 
     private compileTableJoins<TJoin, TQueryJoin extends JoinQueryBuilderContract<TJoin, TQueryJoin>>(
         tablesBase: QueryCompiled,
@@ -464,7 +435,6 @@ export abstract class QueryBuilderBase<T,
         const onWhereCompiled = join._getOn();
         return {
             params: tablesBase.params.concat(onWhereCompiled.params),
-            // params: join._getParams().concat(tablesBase.params.concat(onWhereCompiled.params)),
             query: `${tablesBase.query} ${join._getTypeJoin()} JOIN ${join.compileTable()} ON (${onWhereCompiled.where})`,
         };
     }

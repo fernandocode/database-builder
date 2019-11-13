@@ -71,7 +71,7 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
             throw new DatabaseBuilderError(`Not column for ALTER TABLE, use 'addColumn'!`);
         }
         return `ALTER TABLE ${this._tablename}
-            ${this._patternOperation(column.columns[0])};`;
+            ${this._patternOperation(column.columns[0])}`;
     }
 
     protected setDefaultColumns(): void {

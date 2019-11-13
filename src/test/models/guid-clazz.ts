@@ -8,7 +8,7 @@ export class GuidClazz {
     }
 
     constructor(
-        public _guid?: string,
+        private _guid?: string,
         public description?: string
     ) {
 

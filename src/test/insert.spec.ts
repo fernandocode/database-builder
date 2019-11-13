@@ -117,9 +117,10 @@ describe("Insert", () => {
     });
 
     it("GuidClazz", () => {
-        const result = new Insert(GuidClazz, ObjectToTest.guidClazz, mapper.get(GuidClazz).mapperTable).compile();
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        const result = new Insert(GuidClazz, obj1, mapper.get(GuidClazz).mapperTable).compile();
         expect(result[0].params[0]).to.length(36);
-        expect(result[0].params[1]).to.equal(ObjectToTest.guidClazz.description);
+        expect(result[0].params[1]).to.equal(obj1.description);
         expect(result[0].query).to.equal("INSERT INTO GuidClazz (guid, description) VALUES (?, ?)");
     });
 
