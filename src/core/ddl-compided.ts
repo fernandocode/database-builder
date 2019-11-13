@@ -1,4 +1,6 @@
+import { QueryCompiled } from "./query-compiled";
+
 export interface DdlCompiled {
-    script: string;
+    script: QueryCompiled;
     dependencies: DdlCompiled[];
 }

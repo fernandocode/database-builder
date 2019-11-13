@@ -1,3 +1,4 @@
+import { ManagedTransaction } from "../transaction/managed-transaction";
 
 export type DatabaseBase = DatabaseTransaction | DatabaseObject | DatabaseBaseTransaction;
 
@@ -34,7 +35,9 @@ export interface DatabaseObject {
      * @param sqlStatements {string[] | string[][] | any[]}
      * @returns {Promise<any>}
      */
-    sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]>;
+    sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<any>;
+
+    managedTransaction(): ManagedTransaction;
 }
 
 export interface DatabaseResult {

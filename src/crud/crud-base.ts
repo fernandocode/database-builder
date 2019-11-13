@@ -15,6 +15,9 @@ export abstract class CrudBase<
     TColumnsBuilder extends ColumnsValuesBuilder<T, TColumnsBuilder>
     > extends SqlBase<T> {
 
+    // tslint:disable-next-line: variable-name
+    public readonly __allowInTransaction: boolean = true;
+
     constructor(
         private _typeCrud: TypeCrud,
         mapperTable: MapperTable,

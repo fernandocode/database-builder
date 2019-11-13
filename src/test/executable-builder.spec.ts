@@ -68,9 +68,7 @@ describe("ExecutableBuilder", () => {
             } as QueryCompiled
         ];
         const result = await execute.executeBatch(compiled, database).toPromise();
-        expect(result.length).to.equal(compiled.length);
-        expect(result[2].rowsAffected).to.equal(1);
-        expect(result[2].insertId).to.equal(1);
+        expect(result).to.equal(true);
     });
 
 });

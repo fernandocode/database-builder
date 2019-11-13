@@ -75,27 +75,28 @@ describe("SQLite", () => {
 
         await ddl.create(GuidClazz).execute().toPromise();
 
-        const insertResult = await crud.insert(GuidClazz, ObjectToTest.guidClazz).execute().toPromise();
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        const insertResult = await crud.insert(GuidClazz, obj1).execute().toPromise();
         expect(insertResult[0].rowsAffected).to.equal(1);
 
         const queryInsertResult = await crud.query(GuidClazz).toList().toPromise();
         expect(queryInsertResult.length).to.equal(1);
-        expect(queryInsertResult[0].description).to.equal(ObjectToTest.guidClazz.description);
-        expect(queryInsertResult[0].guid).to.equal(ObjectToTest.guidClazz.guid);
+        expect(queryInsertResult[0].description).to.equal(obj1.description);
+        expect(queryInsertResult[0].guid).to.equal(obj1.guid);
 
         const modelUpdate = {
             guid: "abc",
             description: "Teste Update"
         } as GuidClazz;
         const updateResult = await crud.update(GuidClazz, modelUpdate)
-            .where(where => where.equal(x => x.guid, ObjectToTest.guidClazz.guid))
+            .where(where => where.equal(x => x.guid, obj1.guid))
             .execute().toPromise();
         expect(updateResult[0].rowsAffected).to.equal(1);
 
         const queryUpdateResult = await crud.query(GuidClazz).toList().toPromise();
         expect(queryUpdateResult.length).to.equal(1);
         expect(queryUpdateResult[0].description).to.equal(modelUpdate.description);
-        expect(queryUpdateResult[0].guid).to.equal(ObjectToTest.guidClazz.guid);
+        expect(queryUpdateResult[0].guid).to.equal(obj1.guid);
 
         const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
         const updateByDescriptionResult = await crud.update(GuidClazz, modelUpdateByDescription)

@@ -1,11 +1,10 @@
-import { QueryCompiled } from "./query-compiled";
 import { Replaceable } from "./replaceable";
 import { ParamType, Utils } from "./utils";
 
 export class QueryHelper {
 
-    public static compileWithoutParams(queryCompiled: QueryCompiled): string {
-        return Replaceable.replaceArrayPattern(queryCompiled.query, "?", this.formatParamsToInline(queryCompiled.params));
+    public static compileWithoutParams(query: string, params: ParamType[]): string {
+        return Replaceable.replaceArrayPattern(query, "?", this.formatParamsToInline(params));
     }
 
     private static formatParamsToInline(params: ParamType[]): any[] {

@@ -2,6 +2,7 @@ import { DdlColumnsBuilder } from "./ddl-columns-builder";
 import { ColumnsBaseCompiled } from "../core/columns-base-compiled";
 import { DdlCompiled } from "../core/ddl-compided";
 import { MapperTable } from "../mapper-table";
+import { QueryCompiled } from "../core/query-compiled";
 
 export abstract class DdlBaseBuilder<T> {
 
@@ -22,8 +23,12 @@ export abstract class DdlBaseBuilder<T> {
                 dependenciesCompiled.push(this.resolveDependency(dependency));
             });
         }
+        const script = this.removeMultiSpacesAndBreakLines(this.buildBase());
         return {
-            script: this.removeMultiSpacesAndBreakLines(this.buildBase()),
+            script: {
+                query: script,
+                params: []
+            } as QueryCompiled,
             dependencies: dependenciesCompiled
         } as DdlCompiled;
     }

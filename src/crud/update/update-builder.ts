@@ -9,7 +9,6 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
     constructor(
         typeT: new () => T,
         mapperTable: MapperTable,
-        // metadata: MetadataTable<T>,
         alias: string = void 0,
         protected readonly _modelToSave: T = void 0,
     ) {

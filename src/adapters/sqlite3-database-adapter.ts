@@ -2,6 +2,8 @@ import { DatabaseCreatorContract } from "../definitions/database-creator-contrac
 import { DatabaseConfig } from "../definitions/database-config";
 import { DatabaseBaseTransaction, DatabaseObject, DatabaseResult } from "../definitions/database-definition";
 import { SQLite3Interface, SQLite3ObjectInterface } from "../definitions/sqlite3-interface";
+import { ManagedTransaction } from "../transaction/managed-transaction";
+import { QueryHelper } from "../core/query-helper";
 
 /**
  * Adapter for https://www.npmjs.com/package/sqlite3
@@ -23,7 +25,7 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
         return new Promise<DatabaseObject>((resolve, reject) => {
             const database = new this._sqlite(config.name,
                 err => reject(err));
-            resolve({
+            const databaseObject = {
                 executeSql: (statement: string, params: any): Promise<DatabaseResult> => {
                     return this.executeSql(database, statement, params);
                 },
@@ -52,9 +54,13 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
                     });
                 },
                 sqlBatch: (sqlStatements: any[]) => {
-                    return this.batch(database, sqlStatements);
+                    return this.batch(database, sqlStatements, true);
                 }
-            } as DatabaseObject);
+            } as DatabaseObject;
+            databaseObject.managedTransaction = () => {
+                return new ManagedTransaction(databaseObject);
+            };
+            resolve(databaseObject);
         });
     }
 
@@ -63,21 +69,24 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
         statement: string,
         params: any
     ): Promise<DatabaseResult> {
+        // console.log("execute::: ", statement, params);
         if (this.isSelect(statement)) {
             return this.query(database, statement, params);
         }
         return new Promise((resolve, reject) => {
-            this.batch(database, [[statement, params]])
+            this.batch(database, [[statement, params]], false)
                 .then(result =>
                     resolve(
-                        result.reduce(
-                            (a, b) => {
-                                return this.createDatabaseResult(
-                                    [], a.rowsAffected + b.rowsAffected, b.insertId
-                                );
-                            },
-                            this.createDatabaseResult([], 0, void 0)
-                        )
+                        result
+                            ? result.reduce(
+                                (a, b) => {
+                                    return this.createDatabaseResult(
+                                        [], a.rowsAffected + b.rowsAffected, b.insertId
+                                    );
+                                },
+                                this.createDatabaseResult([], 0, void 0)
+                            )
+                            : this.createDatabaseResult([], 0, void 0)
                     )
                 )
                 .catch(err => reject(err));
@@ -85,7 +94,9 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
     }
 
     private batch(
-        database: SQLite3ObjectInterface, sqlStatements: Array<string | string[] | any>
+        database: SQLite3ObjectInterface,
+        sqlStatements: Array<string | string[] | any>,
+        runInTransaction: boolean
     ): Promise<DatabaseResult[]> {
         if (!sqlStatements || sqlStatements.constructor !== Array) {
             throw Error("sqlBatch expects an array");
@@ -109,50 +120,25 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
                 });
             }
         }
-        return this.executeBatchs(database, batchList);
+        return this.executeBatchs(database, batchList, runInTransaction);
     }
 
-    private executeBatchs(database: SQLite3ObjectInterface, batchs: Array<{ sql: string, params: any[] }>): Promise<DatabaseResult[]> {
-        return new Promise(async (resolve, reject) => {
-            const promises: Array<Promise<any>> = [];
-            const result: DatabaseResult[] = [];
-            for (const batch of batchs) {
-                result.push(await this.executeBatch(database, batch));
-                // promises.push(this.executeBatch(database, batch));
-            }
-            // resolve(batchs.map(b => {
-            //     return b.sql
-            // }));
-            resolve(result);
-            // for (const iterator of pro) {
-
-            // }
-            // zip(promises.map(p => from(p))).subscribe(result => {
-            //     resolve(
-            //         result.reduce(
-            //             (a, b) => {
-            //                 return this.createDatabaseResult(
-            //                     [], a.rowsAffected + b.rowsAffected, b.insertId
-            //                 );
-            //             },
-            //             this.createDatabaseResult([], 0, void 0)
-            //         )
-            //     );
-            // }, err => reject(err));
-            // Promise.all<DatabaseResult>(promises)
-            //     .then(result => resolve(
-            //         result.reduce(
-            //             (a, b) => {
-            //                 return this.createDatabaseResult(
-            //                     [], a.rowsAffected + b.rowsAffected, b.insertId
-            //                 );
-            //             },
-            //             this.createDatabaseResult([], 0, void 0)
-            //         )
-            //     )
-            //     )
-            //     .catch(err => reject(err));
-        });
+    private async executeBatchs(
+        database: SQLite3ObjectInterface,
+        batchs: Array<{ sql: string, params: any[] }>,
+        runInTransaction: boolean
+    ): Promise<DatabaseResult[]> {
+        const result: DatabaseResult[] = [];
+        if (runInTransaction) {
+            await this.beginTransaction(database);
+        }
+        for (const batch of batchs) {
+            result.push(await this.executeBatch(database, batch));
+        }
+        if (runInTransaction) {
+            await this.commitTransaction(database);
+        }
+        return result;
     }
 
     private executeBatch(
@@ -160,7 +146,12 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
     ): Promise<DatabaseResult> {
         return new Promise((resolve, reject) => {
             const that = this;
-            database.run(batch.sql, batch.params, function (err: Error | null) {
+            const cmd = QueryHelper.compileWithoutParams(batch.sql, batch.params);
+            console.log("cmd:::", cmd);
+            if (cmd.startsWith("INSERT ")) {
+                debugger;
+            }
+            database.run(cmd, [], function (err: Error | null) {
                 if (err) {
                     reject(err);
                 } else {
@@ -206,4 +197,16 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
             insertId
         } as DatabaseResult;
     }
+
+    private beginTransaction(database: SQLite3ObjectInterface): Promise<DatabaseResult> {
+        return this.executeBatch(database, { sql: "BEGIN TRANSACTION", params: [] });
+    }
+
+    private commitTransaction(database: SQLite3ObjectInterface): Promise<DatabaseResult> {
+        return this.executeBatch(database, { sql: "COMMIT", params: [] });
+    }
+
+    // private rollbackTransaction(database: SQLite3ObjectInterface): Promise<DatabaseResult> {
+    //     return this.executeBatch(database, { sql: "ROLLBACK", params: [] });
+    // }
 }
