@@ -34,8 +34,6 @@ describe("Managed Transaction", () => {
 
         const transaction = database.managedTransaction();
 
-        // transaction.add(ddl.create(GuidClazz));
-
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
@@ -66,17 +64,11 @@ describe("Managed Transaction", () => {
         expect(queryUpdateResult.length).to.equal(1);
         expect(queryUpdateResult[0].description).to.equal(modelUpdateByDescription.description);
         expect(queryUpdateResult[0].guid).to.equal(obj1.guid);
-
-        // const deleteResult = await ddl.drop(GuidClazz).execute().toPromise();
-        // expect(deleteResult.length).to.equal(1);
-        // expect(deleteResult[0].rowsAffected).to.equal(1);
     });
 
     it("Transaction inactive", async () => {
 
         const transaction = database.managedTransaction();
-
-        // transaction.add(ddl.create(GuidClazz));
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
@@ -102,8 +94,6 @@ describe("Managed Transaction", () => {
     it("Transaction execute immediate", async () => {
 
         const transaction = database.managedTransaction();
-
-        // transaction.add(ddl.create(GuidClazz));
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         const insertResult = await transaction.executeImmediate(
@@ -147,8 +137,6 @@ describe("Managed Transaction", () => {
 
         const transaction = database.managedTransaction();
 
-        // transaction.add(ddl.create(GuidClazz));
-
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         // tslint:disable-next-line: no-unused-expression
         expect(obj1.guid).to.be.undefined;
@@ -165,13 +153,9 @@ describe("Managed Transaction", () => {
         const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
         expect(queryUpdateResult.description).to.equal(obj1.description);
         expect(queryUpdateResult.guid).to.equal(obj1.guid);
-
-        // await ddl.drop(GuidClazz).execute().toPromise();
     });
 
     it("Transaction_error", async () => {
-
-        // await ddl.create(GuidClazz).execute().toPromise();
 
         const transaction = database.managedTransaction();
 
@@ -194,7 +178,6 @@ describe("Managed Transaction", () => {
                 .insert(GuidClazz, obj2)
         );
         try {
-            // transaction.test();
             await transaction.commit();
         } catch (error) {
             expect("SQLITE_ERROR").to.equal(error.code);
@@ -216,8 +199,6 @@ describe("Managed Transaction", () => {
     });
 
     it("Transaction rollback", async () => {
-
-        // await ddl.create(GuidClazz).execute().toPromise();
 
         const transaction = database.managedTransaction();
 
@@ -243,8 +224,6 @@ describe("Managed Transaction", () => {
     });
 
     it("Transaction rollback (with execute immediate)", async () => {
-
-        // await ddl.create(GuidClazz).execute().toPromise();
 
         const transaction = database.managedTransaction();
 
@@ -341,74 +320,33 @@ describe("Managed Transaction", () => {
                 params: []
             },
             {
-                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?); SAVEPOINT \"obj1\"; INSERT INTO GuidClazz (guid, description) VALUES (?, ?);RELEASE SAVEPOINT \"obj1\"",
-                params: [
-                    "a2d7e71f-ca4e-4dd0-86f0-d0359ab91d04",
-                    "Obj3",
-                    "a098153a-b86e-44d7-83ba-e5b948c6c051",
-                    "Obj1"
-                ]
+                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
+                params: ["1f38715c-9daf-4e88-b402-obj3", "Condicao Pagamento Obj3"]
             },
-            // {
-            //     query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?); SAVEPOINT \"obj1\"; INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
-            //     params: [
-            //         "a2d7e71f-ca4e-4dd0-86f0-d0359ab91d04",
-            //         "Obj3",
-            //         "a098153a-b86e-44d7-83ba-e5b948c6c051",
-            //         "Obj1"
-            //     ]
-            // },
-            // {
-            //     query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
-            //     params: [
-            //         "a2d7e71f-ca4e-4dd0-86f0-d0359ab91d04",
-            //         "Obj3"
-            //     ]
-            // },
-            // {
-            //     query: "SAVEPOINT \"obj1\";",
-            //     params: [
-            //     ]
-            // },
-            // {
-            //     query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
-            //     params: [
-            //         "a098153a-b86e-44d7-83ba-e5b948c6c051",
-            //         "Obj1"
-            //     ]
-            // },
-            // {
-            //     query: "RELEASE SAVEPOINT \"obj1\"",
-            //     params: []
-            // },
-            // {
-            //     query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
-            //     params: ["1f38715c-9daf-4e88-b402-obj3", "Condicao Pagamento Obj3"]
-            // },
-            // {
-            //     query: "SAVEPOINT \"obj1\";",
-            //     params: []
-            // },
-            // {
-            //     query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
-            //     params: ["1f38715c-9daf-4e88-b402-obj1", "Condicao Pagamento Obj1"]
-            // },
-            // {
-            //     query: "SAVEPOINT \"obj2\";",
-            //     params: []
-            // },
-            // {
-            //     query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
-            //     params: ["1f38715c-9daf-4e88-b402-obj2", "Condicao Pagamento Obj2"]
-            // },
-            // {
-            //     query: "ROLLBACK TRANSACTION TO SAVEPOINT \"obj2\";",
-            //     params: []
-            // },
-            // {
-            //     query: "RELEASE SAVEPOINT \"obj1\";",
-            //     params: []
-            // },
+            {
+                query: "SAVEPOINT \"obj1\";",
+                params: []
+            },
+            {
+                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
+                params: ["1f38715c-9daf-4e88-b402-obj1", "Condicao Pagamento Obj1"]
+            },
+            {
+                query: "SAVEPOINT \"obj2\";",
+                params: []
+            },
+            {
+                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
+                params: ["1f38715c-9daf-4e88-b402-obj2", "Condicao Pagamento Obj2"]
+            },
+            {
+                query: "ROLLBACK TRANSACTION TO SAVEPOINT \"obj2\";",
+                params: []
+            },
+            {
+                query: "RELEASE SAVEPOINT \"obj1\";",
+                params: []
+            },
             {
                 query: "COMMIT TRANSACTION;",
                 params: []
@@ -417,11 +355,48 @@ describe("Managed Transaction", () => {
         for (const command of commands) {
             await database.executeSql(command.query, command.params);
         }
-        const r = await crud.query(GuidClazz).toList().toPromise();
-        console.log("result:::", r);
+        const result = await crud.query(GuidClazz).toList().toPromise();
+        expect(result).to.have.lengthOf(2);
+        expect(result[0].description).to.equal("Condicao Pagamento Obj3");
+        expect(result[0].guid).to.equal("1f38715c-9daf-4e88-b402-obj3");
+        expect(result[1].description).to.equal("Condicao Pagamento Obj1");
+        expect(result[1].guid).to.equal("1f38715c-9daf-4e88-b402-obj1");
     });
 
-    it("Transaction_with_savepoint", async () => {
+    it("Transaction with savepoint (manual)", async () => {
+        const obj3: GuidClazz = { guid: "1f38715c-9daf-4e88-b402-obj3", description: "Obj3" };
+        const obj1: GuidClazz = { guid: "1f38715c-9daf-4e88-b402-obj1", description: "Obj1" };
+        const obj2: GuidClazz = { guid: "1f38715c-9daf-4e88-b402-obj2", description: "Obj2" };
+        const commands: QueryCompiled[] = [
+            {
+                query: "BEGIN TRANSACTION;",
+                params: []
+            },
+            {
+                query: `INSERT INTO GuidClazz (guid, description) VALUES ('${obj3.guid}', '${obj3.description}');SAVEPOINT "obj1";INSERT INTO GuidClazz (guid, description) VALUES ('${obj1.guid}', '${obj1.description}');RELEASE SAVEPOINT "obj1";`,
+                params: []
+            },
+            {
+                query: `SAVEPOINT "obj2"; INSERT INTO GuidClazz (guid, description) VALUES ('${obj2.guid}', '${obj2.description}'); ROLLBACK TRANSACTION TO SAVEPOINT "obj2";`,
+                params: []
+            },
+            {
+                query: "COMMIT TRANSACTION;",
+                params: []
+            }
+        ];
+        for (const command of commands) {
+            await database.executeSql(command.query, command.params);
+        }
+        const result = await crud.query(GuidClazz).toList().toPromise();
+        expect(result).to.have.lengthOf(2);
+        expect(result[0].guid).to.equal(obj3.guid);
+        expect(result[0].description).to.equal(obj3.description);
+        expect(result[1].guid).to.equal(obj1.guid);
+        expect(result[1].description).to.equal(obj1.description);
+    });
+
+    it("Transaction with savepoint 1", async () => {
 
         const transaction = database.managedTransaction();
 
@@ -437,53 +412,59 @@ describe("Managed Transaction", () => {
             crud
                 .insert(GuidClazz, obj1)
         );
-        await transaction.commit("obj1");
 
-        // const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
-        // transaction.createSavePoint("obj2");
-        // transaction.add(
-        //     crud
-        //         .insert(GuidClazz, obj2)
-        // );
-        // await transaction.rollback("obj2");
+        const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
+        transaction.createSavePoint("obj2");
+        transaction.add(
+            crud
+                .insert(GuidClazz, obj2)
+        );
+        await transaction.rollback("obj2");
+        await transaction.commit("obj1");
 
         const resultTransaction = await transaction.commit();
         expect(resultTransaction).to.equal(true);
 
         const result = await crud.query(GuidClazz).toList().toPromise();
-        expect(result.length).to.equal(1);
-        // expect(result.length).to.equal(2);
-        expect(result[0].description).to.equal(obj3.description);
+        expect(result).to.have.lengthOf(2);
         expect(result[0].guid).to.equal(obj3.guid);
-        // expect(result[1].description).to.equal(obj1.description);
-        // expect(result[1].guid).to.equal(obj1.guid);
+        expect(result[0].description).to.equal(obj3.description);
+        expect(result[1].guid).to.equal(obj1.guid);
+        expect(result[1].description).to.equal(obj1.description);
+    });
 
-        // const modelUpdate = {
-        //     description: "Teste Update"
-        // } as GuidClazz;
-        // transaction.add(
-        //     crud
-        //         .update(GuidClazz, modelUpdate)
-        //         .where(where => where.equal(x => x.guid, obj1.guid))
-        // );
+    it("Transaction with savepoint 2", async () => {
 
-        // const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
-        // transaction.add(
-        //     crud
-        //         .update(GuidClazz, modelUpdateByDescription)
-        //         .where(where => where.equal(x => x.description, modelUpdate.description))
-        // );
+        const transaction = database.managedTransaction();
 
-        // const resultTransaction = await transaction.commit();
-        // expect(resultTransaction).to.equal(true);
+        const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
+        transaction.add(
+            crud
+                .insert(GuidClazz, obj3)
+        );
 
-        // const queryUpdateResult = await crud.query(GuidClazz).toList().toPromise();
-        // expect(queryUpdateResult.length).to.equal(2);
-        // expect(queryUpdateResult[0].description).to.equal(modelUpdateByDescription.description);
-        // expect(queryUpdateResult[0].guid).to.equal(obj1.guid);
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
+        transaction.createSavePoint("obj1");
+        transaction.add(
+            crud
+                .insert(GuidClazz, obj1)
+        );
 
-        // const deleteResult = await ddl.drop(GuidClazz).execute().toPromise();
-        // expect(deleteResult.length).to.equal(1);
-        // expect(deleteResult[0].rowsAffected).to.equal(1);
+        const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
+        transaction.createSavePoint("obj2");
+        transaction.add(
+            crud
+                .insert(GuidClazz, obj2)
+        );
+        await transaction.commit("obj2");
+        await transaction.rollback("obj1");
+
+        const resultTransaction = await transaction.commit();
+        expect(resultTransaction).to.equal(true);
+
+        const result = await crud.query(GuidClazz).toList().toPromise();
+        expect(result).to.have.lengthOf(1);
+        expect(result[0].guid).to.equal(obj3.guid);
+        expect(result[0].description).to.equal(obj3.description);
     });
 });
