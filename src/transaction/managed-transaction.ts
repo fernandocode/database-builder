@@ -28,11 +28,6 @@ export class ManagedTransaction {
         this._idTransaction = `transaction_${Utils.GUID().replace(/-/g, "_")}`;
     }
 
-    public test() {
-        const batch = this.buildSqlExecute(this._stack);
-        console.log("test:::", batch);
-    }
-
     public addStatement(statement: string, params: any): void {
         this.checkTransactionActive();
         this._stack.push({ statement, params });
@@ -47,7 +42,6 @@ export class ManagedTransaction {
         this.checkTransactionActive();
         await this.beginTransaction();
         await this.executeStack();
-        // await this.startTransaction();
         return executable.execute().toPromise();
     }
 
@@ -55,22 +49,18 @@ export class ManagedTransaction {
         this.checkTransactionActive();
         if (this._status === TransactionStatus.STARTED
             || this._status === TransactionStatus.RELEASED) {
-            this.addStatement(this.cmdCommitTransaction(savePointName), []);
+            this.addStatement(this.commandCommitTransaction(savePointName), []);
             await this.executeStack();
-            // await this.commitTransaction(savePointName);
         } else {
             if (savePointName) {
-                // await this.startTransaction();
                 await this.beginTransaction();
                 return await this.commit(savePointName);
             }
-            console.log("commit", this._stack.length);
             const batch = this.buildSqlBatch(this._stack);
             this.clearStackTransaction();
             this.status = TransactionStatus.STARTED;
             await this._database.sqlBatch(batch);
         }
-        console.log("end commit", this._stack.length);
         return this.finishTransaction(
             savePointName
                 ? TransactionStatus.RELEASED
@@ -86,23 +76,23 @@ export class ManagedTransaction {
         this.checkTransactionActive();
         if (this._status === TransactionStatus.STARTED
             || this._status === TransactionStatus.RELEASED) {
+            this.addStatement(this.commandRollbackTransaction(savePointName), []);
             await this.executeStack();
-            await this.rollbackTransaction(savePointName);
+        } else {
+            if (savePointName) {
+                await this.beginTransaction();
+                return await this.rollback(savePointName);
+            }
         }
-        return this.finishTransaction(TransactionStatus.ROLLBACKED);
+        return this.finishTransaction(
+            savePointName
+                ? TransactionStatus.RELEASED
+                : TransactionStatus.ROLLBACKED);
     }
-
-    // private async startTransaction(): Promise<void> {
-    //     this.checkTransactionActive();
-    //     await this.beginTransaction();
-    //     await this.executeStack();
-    // }
 
     private async executeStack(): Promise<void> {
         if (this._stack.length > 0) {
-            console.log("executeStack", this._stack.length);
             const batch = this.buildSqlExecute(this._stack);
-            // console.log("stack::::", batch);
             await this._database.executeSql(batch.statement, batch.params);
             this.clearStackTransaction();
         }
@@ -121,14 +111,12 @@ export class ManagedTransaction {
     }
 
     private finishTransaction(status: TransactionStatus.ROLLBACKED | TransactionStatus.COMMITED | TransactionStatus.RELEASED): boolean {
-        console.log("finishTransaction", this._stack.length);
         this.status = status;
         this.clearStackTransaction();
         return true;
     }
 
     private clearStackTransaction() {
-        console.log("clear stack", this._stack.length);
         this._stack = [];
     }
 
@@ -161,31 +149,16 @@ export class ManagedTransaction {
         return result;
     }
 
-    private cmdCommitTransaction(savePointName?: string): string {
+    private commandCommitTransaction(savePointName?: string): string {
         return savePointName
             ? `RELEASE ${this.formatSavePoint(savePointName)}`
             : "COMMIT TRANSACTION";
     }
-    // private async commitTransaction(savePointName?: string): Promise<DatabaseResult> {
-    //     const command = savePointName
-    //         ? `RELEASE ${this.formatSavePoint(savePointName)}`
-    //         : "COMMIT TRANSACTION";
-    //     const result = await this._database.executeSql(command, []);
-    //     // this.status = savePointName
-    //     //     ? TransactionStatus.RELEASED
-    //     //     : TransactionStatus.COMMITED;
-    //     return result;
-    // }
 
-    private async rollbackTransaction(savePointName?: string): Promise<DatabaseResult> {
-        const command = savePointName
+    private commandRollbackTransaction(savePointName?: string): string {
+        return savePointName
             ? `ROLLBACK TRANSACTION TO ${this.formatSavePoint(savePointName)}`
             : "ROLLBACK TRANSACTION";
-        const result = await this._database.executeSql(command, []);
-        this.status = savePointName
-            ? TransactionStatus.RELEASED
-            : TransactionStatus.ROLLBACKED;
-        return result;
     }
 
     private formatSavePoint(savePointName: string): string {

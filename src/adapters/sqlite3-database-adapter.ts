@@ -70,7 +70,27 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
         params: any
     ): Promise<DatabaseResult> {
         // console.log("execute::: ", statement, params);
-        if (this.isSelect(statement)) {
+        if (QueryHelper.isMultipleCommands(statement)) {
+            return new Promise((resolve, reject) => {
+                const commands = QueryHelper.splitMultipleCommands(statement, params).map(x => [x.sql, x.params]);
+                this.batch(database, commands, false)
+                    .then(result =>
+                        resolve(
+                            result
+                                ? result.reduce(
+                                    (a, b) => {
+                                        return this.createDatabaseResult(
+                                            [], a.rowsAffected + b.rowsAffected, b.insertId
+                                        );
+                                    },
+                                    this.createDatabaseResult([], 0, void 0)
+                                )
+                                : this.createDatabaseResult([], 0, void 0)
+                        )
+                    )
+                    .catch(err => reject(err));
+            });
+        } else if (this.isSelect(statement)) {
             return this.query(database, statement, params);
         }
         return new Promise((resolve, reject) => {
@@ -146,11 +166,8 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
     ): Promise<DatabaseResult> {
         return new Promise((resolve, reject) => {
             const that = this;
+            // console.log("batch:::", batch);
             const cmd = QueryHelper.compileWithoutParams(batch.sql, batch.params);
-            console.log("cmd:::", cmd);
-            if (cmd.startsWith("INSERT ")) {
-                debugger;
-            }
             database.run(cmd, [], function (err: Error | null) {
                 if (err) {
                     reject(err);
@@ -205,8 +222,4 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
     private commitTransaction(database: SQLite3ObjectInterface): Promise<DatabaseResult> {
         return this.executeBatch(database, { sql: "COMMIT", params: [] });
     }
-
-    // private rollbackTransaction(database: SQLite3ObjectInterface): Promise<DatabaseResult> {
-    //     return this.executeBatch(database, { sql: "ROLLBACK", params: [] });
-    // }
 }
