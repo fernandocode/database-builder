@@ -1,5 +1,6 @@
+import { Resultable } from "./resultable";
 
-export class PlanRef {
+export class PlanRef implements Resultable {
     constructor(
         public value?: string
     ) {

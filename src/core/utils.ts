@@ -24,6 +24,7 @@ import { MetadataTableBase } from "../metadata-table-base";
 import { ProjectionCompile } from "../crud/projection-compile";
 import * as lodash from "lodash";
 import { QueryCompiled } from ".";
+import { Resultable } from "./resultable";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -169,6 +170,13 @@ export class Utils {
         return instance instanceof PlanRef;
     }
 
+    public static isResultable(instance: any): instance is Resultable {
+        return instance
+            && this.isObject(instance)
+            && "result" in instance
+            && this.isFunction(instance.result);
+    }
+
     public static isEmpty(value: any): boolean {
         if (this.isBoolean(value) || this.isDate(value)) {
             return this.isNull(value);
@@ -247,13 +255,14 @@ export class Utils {
                     params: []
                 };
             case (ExpressionOrValueEnum.Ref):
-                return {
-                    column: (expression as ColumnRef).result(),
-                    params: []
-                };
+            // return {
+            //     column: (expression as ColumnRef).result(),
+            //     params: []
+            // };
             case (ExpressionOrValueEnum.Plan):
                 return {
-                    column: (expression as PlanRef).result(),
+                    // column: (expression as PlanRef).result(),
+                    column: expression as Resultable,
                     params: []
                 };
             case (ExpressionOrValueEnum.Value):
@@ -381,12 +390,15 @@ export class Utils {
     }
 
     public static addAlias(
-        column: string, alias: string
+        column: string | Resultable, alias: string
     ): string {
-        if (column && alias && Utils.isNameColumn(column)) {
+        if (this.isResultable(column)) {
+            return (column as Resultable).result();
+        }
+        if (column && alias && Utils.isNameColumn(column as string)) {
             return `${alias}.${column}`;
         }
-        return column;
+        return column as string;
     }
 
     private static isColumnReservedNameOrNotAllowed(columnName: string): boolean {

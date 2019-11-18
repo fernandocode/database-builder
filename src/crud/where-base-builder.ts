@@ -455,7 +455,7 @@ export abstract class WhereBaseBuilder<
                 params: []
             } as ColumnParams;
             param.forEach((value) => {
-                result.column += result.column.length > 0 ? ", ?" : "?";
+                result.column += (result.column as string).length > 0 ? ", ?" : "?";
                 result.params.push(value);
             });
             return result;

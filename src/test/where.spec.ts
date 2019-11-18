@@ -6,6 +6,8 @@ import * as moment from "moment";
 import { Crud } from "../crud/crud";
 import { getMapper } from "./mappers-table-new";
 import { TestClazzRef } from "./models/test-clazz-ref";
+import { PlanRef } from "../core/plan-ref";
+import { ColumnRef } from "../core/column-ref";
 
 describe("Where", () => {
 
@@ -630,6 +632,20 @@ describe("Where", () => {
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal("2isso");
         expect(result[0].query).to.equal("SELECT (tes.id || tes.description) AS iddescription FROM TestClazz AS tes WHERE (tes.id || tes.description) = ?");
+    });
+
+    it("where in column alias by projection without alias table default", () => {
+        const query = crud.query(TestClazz);
+        query.projection(projection => {
+            projection.add(x => x.id, "iiiiddd");
+        });
+        query.where(where => {
+            where.equal(new PlanRef("iiiiddd"), x => x.id);
+            where.equal(new ColumnRef("description", query.alias()), new ColumnRef("dateStr"));
+        });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(0);
+        expect(result[0].query).to.equal("SELECT tes.id AS iiiiddd FROM TestClazz AS tes WHERE iiiiddd = tes.id AND tes.description = dateStr");
     });
 
 });

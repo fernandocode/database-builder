@@ -9,12 +9,11 @@ describe("ExecutableBuilder", () => {
 
     beforeEach(async () => {
         database = await new SQLiteDatabase().init();
-        console.log("database", database);
     });
 
     it("build sql batch", () => {
 
-        const execute = new ExecutableBuilder(true);
+        const execute = new ExecutableBuilder(false);
         const compiled = [
             {
                 query: "DROP TABLE IF EXISTS MyTable",
@@ -53,7 +52,7 @@ describe("ExecutableBuilder", () => {
     });
 
     it("executeBatch", async () => {
-        const execute = new ExecutableBuilder(true);
+        const execute = new ExecutableBuilder(false);
         const compiled = [
             {
                 query: "DROP TABLE IF EXISTS MyTable",
@@ -69,8 +68,6 @@ describe("ExecutableBuilder", () => {
             } as QueryCompiled
         ];
         const result = await execute.executeBatch(compiled, database).toPromise();
-        console.log("result", result.length, result);
-        console.log("equal", result.length, compiled.length);
         expect(result.length).to.equal(compiled.length);
         expect(result[2].rowsAffected).to.equal(1);
         expect(result[2].insertId).to.equal(1);

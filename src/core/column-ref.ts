@@ -1,5 +1,6 @@
+import { Resultable } from "./resultable";
 
-export class ColumnRef {
+export class ColumnRef implements Resultable {
     constructor(
         public column?: string,
         public alias?: string

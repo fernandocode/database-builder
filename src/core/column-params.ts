@@ -1,6 +1,7 @@
 import { ValueTypeToParse } from "./utils";
+import { Resultable } from "./resultable";
 
 export interface ColumnParams {
-    column: string;
+    column: string | Resultable;
     params: ValueTypeToParse[];
 }
