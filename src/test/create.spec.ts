@@ -18,6 +18,7 @@ import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { GuidClazz } from "./models/guid-clazz";
 import { HeaderSimple } from "./models/header-simple";
+import { Referencia } from "./models/referencia";
 
 describe("Create", () => {
 
@@ -135,13 +136,20 @@ describe("Create", () => {
         expect(result[0].query).to.equal(`CREATE TABLE IF NOT EXISTS GuidClazz( guid TEXT NOT NULL PRIMARY KEY, description TEXT )`);
     });
 
-    it("HeaderSimple", () => {
+    it("HeaderSimple cascade", () => {
         const create = new Create(HeaderSimple, mapper.get(HeaderSimple).mapperTable);
         const result = create.compile();
         expect(result.length).to.equal(2);
-        // expect(result[0].query.length > 0).to.equal(true);
         expect(result[0].query).to.equal(`CREATE TABLE IF NOT EXISTS HeaderSimple( id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, descricao TEXT )`);
         expect(result[1].query).to.equal(`CREATE TABLE IF NOT EXISTS ItemHeaderSimple( indexArray INTEGER, value TEXT, HeaderSimple_id INTEGER , PRIMARY KEY (indexArray, HeaderSimple_id) )`);
+    });
+
+    it("Referencia cascade", () => {
+        const create = new Create(Referencia, mapper.get(Referencia).mapperTable);
+        const result = create.compile();
+        expect(result.length).to.equal(2);
+        expect(result[0].query).to.equal(`CREATE TABLE IF NOT EXISTS Referencia( codeImport INTEGER NOT NULL PRIMARY KEY, codigo TEXT, descricao TEXT, deleted BOOLEAN )`);
+        expect(result[1].query).to.equal(`CREATE TABLE IF NOT EXISTS ReferenciasRelacionadas( indexArray INTEGER, value INTEGER, Referencia_codeImport INTEGER , PRIMARY KEY (indexArray, Referencia_codeImport) )`);
     });
 
 });

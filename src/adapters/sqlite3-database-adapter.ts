@@ -4,6 +4,7 @@ import { DatabaseBaseTransaction, DatabaseObject, DatabaseResult } from "../defi
 import { SQLite3Interface, SQLite3ObjectInterface } from "../definitions/sqlite3-interface";
 import { ManagedTransaction } from "../transaction/managed-transaction";
 import { QueryHelper } from "../core/query-helper";
+import { BaseDatabaseAdapter } from "./base-database.adapter";
 
 /**
  * Adapter for https://www.npmjs.com/package/sqlite3
@@ -15,10 +16,10 @@ import { QueryHelper } from "../core/query-helper";
  * @class SQLite3DatabaseAdapter
  * @implements {DatabaseCreatorContract}
  */
-export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
+export class SQLite3DatabaseAdapter extends BaseDatabaseAdapter implements DatabaseCreatorContract {
 
     constructor(private _sqlite: SQLite3Interface) {
-
+        super();
     }
 
     public create(config: DatabaseConfig): Promise<DatabaseObject> {
@@ -57,10 +58,10 @@ export class SQLite3DatabaseAdapter implements DatabaseCreatorContract {
                     return this.batch(database, sqlStatements, true);
                 }
             } as DatabaseObject;
-            databaseObject.managedTransaction = () => {
-                return new ManagedTransaction(databaseObject);
-            };
-            resolve(databaseObject);
+            // databaseObject.managedTransaction = () => {
+            //     return new ManagedTransaction(databaseObject);
+            // };
+            resolve(this.injectManagedTransactionInDatabase(databaseObject));
         });
     }
 
