@@ -257,7 +257,13 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    // CASE {expression} {when} END
+    /**
+     * https://www.sqlite.org/lang_expr.html
+     * CASE {expression} {when} END
+     * @param caseCallback
+     * @param expression
+     * @param alias
+     */
     public case<TReturn>(
         caseCallback: (caseInstance: ProjectionCase<TReturn, T>) => void,
         expression: ExpressionOrColumn<TReturn, T> = void 0,

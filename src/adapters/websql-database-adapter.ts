@@ -3,6 +3,8 @@ import { DatabaseConfig } from "../definitions/database-config";
 import { DatabaseObject, DatabaseResult } from "../definitions/database-definition";
 import { WebSqlInterface, WebSqlTransactionInterface } from "../definitions/websql-interface";
 import { DatabaseBuilderError } from "../core";
+import { ManagedTransaction } from "../transaction/managed-transaction";
+import { BaseDatabaseAdapter } from "./base-database.adapter";
 
 /**
  * WARNING: Only for test app
@@ -20,10 +22,10 @@ import { DatabaseBuilderError } from "../core";
  * @class WebSqlDatabaseAdapter
  * @implements {DatabaseCreatorContract}
  */
-export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
+export class WebSqlDatabaseAdapter extends BaseDatabaseAdapter implements DatabaseCreatorContract {
 
     constructor(private _creator: WebSqlInterface) {
-
+        super();
     }
 
     public create(config: DatabaseConfig): Promise<DatabaseObject> {
@@ -35,7 +37,7 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
             if (!database) {
                 reject("Não foi possivel iniciar o banco de dados no Browser!");
             }
-            resolve({
+            const databaseObject = {
                 executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
                     return new Promise<DatabaseResult>((executeSqlResolve, executeSqlReject) => {
                         if (
@@ -69,7 +71,8 @@ export class WebSqlDatabaseAdapter implements DatabaseCreatorContract {
                 sqlBatch: (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
                     throw new DatabaseBuilderError("Not implemented sqlBatch ");
                 }
-            } as DatabaseObject);
+            } as DatabaseObject;
+            resolve(this.injectManagedTransactionInDatabase(databaseObject));
         });
     }
 
