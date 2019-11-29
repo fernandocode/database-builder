@@ -12,15 +12,22 @@ describe("Count", () => {
     let crud: Crud;
     let ddl: Ddl;
 
-    beforeEach(async () => {
+    before(async () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
         crud = new Crud(database, mapper, false);
         ddl = new Ddl(database, mapper, false);
+    });
 
+    beforeEach(async () => {
         await ddl.create(Cliente).execute().toPromise();
         await ddl.create(Cidade).execute().toPromise();
+    });
+
+    afterEach(async () => {
+        await ddl.drop(Cliente).execute().toPromise();
+        await ddl.drop(Cidade).execute().toPromise();
     });
 
     it("count default", async () => {

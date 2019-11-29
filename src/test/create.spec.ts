@@ -19,10 +19,15 @@ import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { GuidClazz } from "./models/guid-clazz";
 import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
+import { GetMapper } from "../mapper";
 
 describe("Create", () => {
 
-    const mapper = getMapper();
+    let mapper: GetMapper;
+
+    before(async () => {
+        mapper = getMapper();
+    });
 
     it("Classificacao", () => {
         const create = new Create(Classificacao, mapper.get(Classificacao).mapperTable);

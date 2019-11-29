@@ -1,49 +1,93 @@
-import { DatabaseCreatorContract } from "../definitions/database-creator-contract";
 import { DatabaseConfig } from "../definitions/database-config";
-import { DatabaseBaseTransaction, DatabaseObject, DatabaseResult } from "../definitions/database-definition";
+import { DatabaseBaseTransaction, DatabaseResult } from "../definitions/database-definition";
 import { BaseDatabaseAdapter } from "./base-database.adapter";
+import { WebSqlTransactionInterface } from "../definitions/websql-interface";
 
-export abstract class DatabaseAbstractSQLiteService extends BaseDatabaseAdapter implements DatabaseCreatorContract {
+export abstract class DatabaseAbstractSQLiteService extends BaseDatabaseAdapter<DatabaseSQLiteObject> {
 
   protected abstract sqliteCreate(config: DatabaseConfig)
     : Promise<DatabaseSQLiteObject>;
 
-  public create(config: DatabaseConfig): Promise<DatabaseObject> {
-    return new Promise<DatabaseObject>((resolve, reject) => {
-      return this.sqliteCreate(config)
-        .then(database => {
-          resolve(
-            this.injectManagedTransactionInDatabase(
-              {
-                executeSql: (statement: string, params: any): Promise<DatabaseResult> => {
-                  return database.executeSql(statement, params);
-                },
-                transaction: (fn: (transaction: DatabaseBaseTransaction) => void): Promise<any> => {
-                  return database.transaction(transiction => {
-                    fn({
-                      executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
-                        return new Promise<DatabaseResult>((executeSqlResolve, executeSqlReject) => {
-                          transiction.executeSql(sql, Array.isArray(values) ? values : [],
-                            (_s: any, r: DatabaseResult | PromiseLike<DatabaseResult>) => {
-                              executeSqlResolve(r);
-                            },
-                            (_r: any, err: any) => {
-                              executeSqlReject(err);
-                            });
-                        });
-                      }
-                    });
-                  });
-                },
-                sqlBatch: (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
-                  return database.sqlBatch(sqlStatements);
-                }
-              } as DatabaseObject)
-          );
-        })
-        .catch(err => reject(err));
-    });
+  protected createDatabaseNative(
+    config: DatabaseConfig
+  ): Promise<DatabaseSQLiteObject> {
+    return this.sqliteCreate(config);
   }
+
+  protected convertToExecuteSql(
+    databaseNative: DatabaseSQLiteObject
+  ): (sql: string, values: any) => Promise<DatabaseResult> {
+    return (statement: string, params: any): Promise<DatabaseResult> => {
+      return databaseNative.executeSql(statement, params);
+    };
+  }
+
+  protected convertToTransaction(
+    databaseNative: DatabaseSQLiteObject
+  ): (fn: (transaction: WebSqlTransactionInterface) => void) => Promise<any> {
+    return (fn: (transaction: DatabaseBaseTransaction) => void): Promise<any> => {
+      return databaseNative.transaction(transiction => {
+        fn({
+          executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
+            return new Promise<DatabaseResult>((executeSqlResolve, executeSqlReject) => {
+              transiction.executeSql(sql, Array.isArray(values) ? values : [],
+                (_s: any, r: DatabaseResult | PromiseLike<DatabaseResult>) => {
+                  executeSqlResolve(r);
+                },
+                (_r: any, err: any) => {
+                  executeSqlReject(err);
+                });
+            });
+          }
+        });
+      });
+    };
+  }
+
+  protected convertToSqlBatch(
+    databaseNative: DatabaseSQLiteObject
+  ): (sqlStatements: any[]) => Promise<DatabaseResult[]> {
+    return (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
+      return databaseNative.sqlBatch(sqlStatements);
+    };
+  }
+
+  // public create(config: DatabaseConfig): Promise<DatabaseObject> {
+  //   return new Promise<DatabaseObject>((resolve, reject) => {
+  //     return this.sqliteCreate(config)
+  //       .then((databaseNative: DatabaseSQLiteObject) => {
+  //         resolve(
+  //           this.injectManagedTransactionInDatabase(
+  //             {
+  //               executeSql: (statement: string, params: any): Promise<DatabaseResult> => {
+  //                 return databaseNative.executeSql(statement, params);
+  //               },
+  //               transaction: (fn: (transaction: DatabaseBaseTransaction) => void): Promise<any> => {
+  //                 return databaseNative.transaction(transiction => {
+  //                   fn({
+  //                     executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
+  //                       return new Promise<DatabaseResult>((executeSqlResolve, executeSqlReject) => {
+  //                         transiction.executeSql(sql, Array.isArray(values) ? values : [],
+  //                           (_s: any, r: DatabaseResult | PromiseLike<DatabaseResult>) => {
+  //                             executeSqlResolve(r);
+  //                           },
+  //                           (_r: any, err: any) => {
+  //                             executeSqlReject(err);
+  //                           });
+  //                       });
+  //                     }
+  //                   });
+  //                 });
+  //               },
+  //               sqlBatch: (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
+  //                 return databaseNative.sqlBatch(sqlStatements);
+  //               }
+  //             } as DatabaseObject)
+  //         );
+  //       })
+  //       .catch(err => reject(err));
+  //   });
+  // }
 }
 
 /**
