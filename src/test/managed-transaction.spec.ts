@@ -229,10 +229,12 @@ describe("Managed Transaction", () => {
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
 
-        await transaction.executeImmediate(
+        const resultImmediate = await transaction.executeImmediate(
             crud
                 .insert(GuidClazz, obj1)
         );
+        expect(resultImmediate.length).to.equal(1);
+        expect(resultImmediate[0].rowsAffected).to.equal(1);
 
         const queryUpdateResult1 = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
         expect(queryUpdateResult1.description).to.equal(obj1.description);

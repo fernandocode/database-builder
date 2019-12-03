@@ -3,7 +3,6 @@ import { DatabaseResult } from "../definitions/database-definition";
 import { WebSqlInterface, WebSqlObjectInterface, WebSqlTransactionInterface } from "../definitions/websql-interface";
 import { DatabaseBuilderError } from "../core";
 import { BaseDatabaseAdapter } from "./base-database.adapter";
-import { QueryHelper } from "../core/query-helper";
 
 /**
  * WARNING: Only for test app
@@ -94,9 +93,6 @@ export class WebSqlDatabaseAdapter extends BaseDatabaseAdapter<WebSqlObjectInter
         return (sqlStatements: any[]) => {
             return this.batch(databaseNative, sqlStatements, true);
         };
-        // return (): Promise<DatabaseResult[]> => {
-        //     throw new DatabaseBuilderError("Not implemented sqlBatch ");
-        // };
     }
 
     protected executeSql(transaction: WebSqlTransactionInterface, sql: string, values: any): Promise<DatabaseResult> {
@@ -105,7 +101,12 @@ export class WebSqlDatabaseAdapter extends BaseDatabaseAdapter<WebSqlObjectInter
                 sql,
                 Array.isArray(values) ? values : [],
                 (_t: WebSqlTransactionInterface, r: any) => resolve(r),
-                (_t: WebSqlTransactionInterface, err: any) => reject(err)
+                (_t: WebSqlTransactionInterface, err: any) => {
+                    reject(err);
+                    // It is need to return truely to rollback in the transaction
+                    // https://stackoverflow.com/a/21993115/2290538
+                    return true;
+                }
             );
         });
     }
@@ -118,7 +119,7 @@ export class WebSqlDatabaseAdapter extends BaseDatabaseAdapter<WebSqlObjectInter
         });
     }
 
-    private batch(
+    protected batch(
         database: WebSqlObjectInterface,
         sqlStatements: Array<string | string[] | any>,
         runInTransaction: boolean
@@ -148,54 +149,28 @@ export class WebSqlDatabaseAdapter extends BaseDatabaseAdapter<WebSqlObjectInter
         return this.executeBatchs(database, batchList, runInTransaction);
     }
 
-    private async executeBatchs(
-        database: WebSqlObjectInterface,
+    protected async executeBatchs(
+        databaseNative: WebSqlObjectInterface,
         batchs: Array<{ sql: string, params: any[] }>,
         runInTransaction: boolean
     ): Promise<DatabaseResult[]> {
         const result: DatabaseResult[] = [];
-        if (runInTransaction) {
-            await this.beginTransaction(database);
-        }
+        const transaction = await this.transaction(databaseNative);
         for (const batch of batchs) {
-            result.push(await this.executeBatch(database, batch));
-        }
-        if (runInTransaction) {
-            await this.commitTransaction(database);
+            result.push(await this.executeSql(transaction, batch.sql, batch.params));
         }
         return result;
     }
 
-    private async executeBatch(
-        databaseNative: WebSqlObjectInterface, batch: { sql: string, params: any[] }
-    ): Promise<DatabaseResult> {
-        return await this.convertToExecuteSql(databaseNative)(batch.sql, batch.params);
-        // return new Promise((resolve, reject) => {
-        //     const that = this;
-        // const cmd = QueryHelper.compileWithoutParams(batch.sql, batch.params);
-
-        // databaseNative.transaction(transaction => {
-        //     return this.executeSql(transaction, batch.sql, batch.params)
-        //         .then(result => executeSqlResolve(result))
-        //         .catch(err => executeSqlReject(err));
-        // });
-        // databaseNative.run(cmd, [], function (err: Error | null) {
-        //     if (err) {
-        //         reject(err);
-        //     } else {
-        //         resolve(
-        //             that.createDatabaseResult([], this.changes, this.lastID)
-        //         );
-        //     }
-        // });
-        // });
-    }
-
-    private beginTransaction(database: WebSqlObjectInterface): Promise<DatabaseResult> {
-        return this.executeBatch(database, { sql: "BEGIN TRANSACTION", params: [] });
-    }
-
-    private commitTransaction(database: WebSqlObjectInterface): Promise<DatabaseResult> {
-        return this.executeBatch(database, { sql: "COMMIT", params: [] });
+    protected transaction(databaseNative: WebSqlObjectInterface) {
+        return new Promise<WebSqlTransactionInterface>((resolve, reject) => {
+            try {
+                databaseNative.transaction(async transaction => {
+                    resolve(transaction);
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 }
