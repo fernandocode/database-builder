@@ -261,54 +261,42 @@ describe("Managed Transaction", () => {
      * OK
      */
 
-    // it("Transaction deny query", async () => {
+    it("Transaction deny query", async () => {
 
-    //     const transaction = database.managedTransaction();
+        const transaction = database.managedTransaction();
 
-    //     transaction.add(ddl.create(GuidClazz));
+        transaction.add(ddl.create(GuidClazz));
 
-    //     const obj1 = Object.assign({}, ObjectToTest.guidClazz);
-    //     transaction.add(
-    //         crud
-    //             .insert(GuidClazz, obj1)
-    //     );
-    //     transaction.add(
-    //         crud
-    //             .query(GuidClazz)
-    //     );
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        transaction.add(
+            crud
+                .insert(GuidClazz, obj1)
+        );
+        transaction.add(
+            crud
+                .query(GuidClazz) as any
+        );
 
-    //     const modelUpdate = {
-    //         guid: "abc",
-    //         description: "Teste Update"
-    //     } as GuidClazz;
-    //     transaction.add(
-    //         crud
-    //             .update(GuidClazz, modelUpdate)
-    //             .where(where => where.equal(x => x.guid, obj1.guid))
-    //     );
+        const modelUpdate = {
+            guid: "abc",
+            description: "Teste Update"
+        } as GuidClazz;
+        transaction.add(
+            crud
+                .update(GuidClazz, modelUpdate)
+                .where(where => where.equal(x => x.guid, obj1.guid))
+        );
 
-    //     const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
-    //     transaction.add(
-    //         crud
-    //             .update(GuidClazz, modelUpdateByDescription)
-    //             .where(where => where.equal(x => x.description, modelUpdate.description))
-    //     );
+        const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
+        transaction.add(
+            crud
+                .update(GuidClazz, modelUpdateByDescription)
+                .where(where => where.equal(x => x.description, modelUpdate.description))
+        );
 
-    //     // transaction.add(ddl.drop(GuidClazz));
-
-    //     const resultTransaction = await transaction.commit();
-    //     expect(resultTransaction).to.equal(true);
-    //     console.log(resultTransaction);
-
-    //     // const queryUpdateResult = await crud.query(GuidClazz).toList().toPromise();
-    //     // expect(queryUpdateResult.length).to.equal(1);
-    //     // expect(queryUpdateResult[0].description).to.equal(modelUpdateByDescription.description);
-    //     // expect(queryUpdateResult[0].guid).to.equal(obj1.guid);
-
-    //     // const deleteResult = await ddl.drop(GuidClazz).execute().toPromise();
-    //     // expect(deleteResult.length).to.equal(1);
-    //     // expect(deleteResult[0].rowsAffected).to.equal(1);
-    // });
+        const resultTransaction = await transaction.commit();
+        expect(resultTransaction).to.equal(true);
+    });
 
     /**
      * TODO: implementar savepoint in transaction
