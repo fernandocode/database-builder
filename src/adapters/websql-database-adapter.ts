@@ -58,6 +58,10 @@ export class WebSqlDatabaseAdapter extends BaseDatabaseAdapter<WebSqlObjectInter
                     sql.toUpperCase().indexOf("COMMIT") > -1
                     ||
                     sql.toUpperCase().indexOf("ROLLBACK") > -1
+                    // ||
+                    // sql.toUpperCase().indexOf("SAVEPOINT") > -1
+                    // ||
+                    // sql.toUpperCase().indexOf("RELEASE") > -1
                 ) {
                     this.ignoreExecuteSql(sql, values)
                         .then(result => executeSqlResolve(result))
