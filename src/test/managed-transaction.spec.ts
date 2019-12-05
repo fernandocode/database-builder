@@ -150,7 +150,7 @@ describe("Managed Transaction", () => {
         const resultTransaction = await transaction.commit();
         expect(resultTransaction).to.equal(true);
 
-        const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
+        const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
         expect(queryUpdateResult.description).to.equal(obj1.description);
         expect(queryUpdateResult.guid).to.equal(obj1.guid);
     });
@@ -183,14 +183,14 @@ describe("Managed Transaction", () => {
             expect("SQLITE_ERROR").to.equal(error.code);
             expect(obj1.guid).to.have.lengthOf(36);
 
-            const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
+            const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
             expect(queryUpdateResult.description).to.equal(obj1.description);
             expect(queryUpdateResult.guid).to.equal(obj1.guid);
 
             const resultRollback = await transaction.rollback();
             expect(resultRollback).to.equal(true);
 
-            const queryUpdateResult2 = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
+            const queryUpdateResult2 = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
             // tslint:disable-next-line: no-unused-expression
             expect(queryUpdateResult2).to.be.undefined;
             return;
@@ -218,7 +218,7 @@ describe("Managed Transaction", () => {
         const resultRollback = await transaction.rollback();
         expect(resultRollback).to.equal(true);
 
-        const queryUpdateResult2 = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
+        const queryUpdateResult2 = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
         // tslint:disable-next-line: no-unused-expression
         expect(queryUpdateResult2).to.be.undefined;
     });
@@ -236,7 +236,7 @@ describe("Managed Transaction", () => {
         expect(resultImmediate.length).to.equal(1);
         expect(resultImmediate[0].rowsAffected).to.equal(1);
 
-        const queryUpdateResult1 = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
+        const queryUpdateResult1 = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
         expect(queryUpdateResult1.description).to.equal(obj1.description);
         expect(queryUpdateResult1.guid).to.equal(obj1.guid);
 
@@ -249,7 +249,7 @@ describe("Managed Transaction", () => {
         const resultRollback = await transaction.rollback();
         expect(resultRollback).to.equal(true);
 
-        const queryUpdateResult2 = await crud.query(GuidClazz).firstOrDefault(where => where.equal(x => x.guid, obj1.guid)).toPromise();
+        const queryUpdateResult2 = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
         // tslint:disable-next-line: no-unused-expression
         expect(queryUpdateResult2).to.be.undefined;
     });

@@ -51,7 +51,7 @@ describe("Count", () => {
             await crud.insert(Cidade, cidade).execute().toPromise();
         }
         const query = crud.query(Cidade).ignoreQueryFilters();
-        const resultCount = await query.count(where => where.lessAndEqual(x => x.codeImport, countExpected / 2)).toPromise();
+        const resultCount = await query.count({ where: where => where.lessAndEqual(x => x.codeImport, countExpected / 2) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(countExpected / 2);
     });
@@ -81,7 +81,7 @@ describe("Count", () => {
         const query = crud.query(Cidade).ignoreQueryFilters();
         const resultCount = await query
             .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
-            .count(where => where.great(x => x.codeImport, countExpected / 4)).toPromise();
+            .count({ where: where => where.great(x => x.codeImport, countExpected / 4) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(countExpected / 4);
     });
@@ -97,7 +97,7 @@ describe("Count", () => {
         const query = crud.query(Cidade);
         const resultCount = await query
             .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
-            .count(where => where.great(x => x.codeImport, countExpected / 4)).toPromise();
+            .count({ where: where => where.great(x => x.codeImport, countExpected / 4) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(1);
     });
@@ -111,7 +111,7 @@ describe("Count", () => {
             await crud.insert(Cidade, cidade).execute().toPromise();
         }
         const query = crud.query(Cidade);
-        const resultCount = await query.count(where => where.lessAndEqual(x => x.codeImport, countExpected / 2)).toPromise();
+        const resultCount = await query.count({ where: where => where.lessAndEqual(x => x.codeImport, countExpected / 2) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(countExpected / 4);
     });
