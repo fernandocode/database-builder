@@ -76,9 +76,9 @@ export class Crud {
     }
 
     private getDatabase() {
-        if (!this._database) {
-            throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
-        }
+        // if (!this._database) {
+        //     throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
+        // }
         return this._database;
     }
 
