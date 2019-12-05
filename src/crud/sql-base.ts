@@ -11,6 +11,26 @@ import { Observable } from "rxjs";
 
 export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
 
+    // protected readonly _executableBuilder: ExecutableBuilder;
+    // protected readonly mapperTable: MapperTable;
+    // protected readonly database: DatabaseBase;
+
+    // constructor(
+    //     {
+    //         mapperTable,
+    //         database = void 0,
+    //         enableLog = true
+    //     }: {
+    //         mapperTable?: MapperTable,
+    //         database?: DatabaseBase,
+    //         enableLog?: boolean
+    //     } = {}
+    // ) {
+    //     this.mapperTable = mapperTable;
+    //     this.database = database;
+    //     this._executableBuilder = new ExecutableBuilder(enableLog);
+    // }
+
     protected readonly _executableBuilder: ExecutableBuilder;
 
     constructor(
@@ -21,7 +41,15 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(cascade?: boolean, database?: DatabaseBase): Observable<DatabaseResult[]> {
+    public execute(
+        {
+            cascade = true,
+            database
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase
+        } = {}
+    ): Observable<DatabaseResult[]> {
         return new Observable<DatabaseResult[]>(observer => {
             try {
                 this.checkDatabaseResult(

@@ -21,7 +21,15 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> implements SqlCompil
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(cascade: boolean = true, database: DatabaseBase = void 0): Observable<DatabaseResult[]> {
+    public execute(
+        {
+            cascade = true,
+            database
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase
+        } = {}
+    ): Observable<DatabaseResult[]> {
         const compiled = this.compile(cascade);
         return this._executableBuilder.execute(
             compiled,

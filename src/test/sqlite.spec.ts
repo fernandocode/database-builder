@@ -40,7 +40,7 @@ describe("SQLite", () => {
 
     const insertUf = async () => {
         const itemExist = await crud.query(Uf)
-            .firstOrDefault(w => w.equal(x => x.codeImport, ObjectToTest.uf.codeImport)).toPromise();
+            .firstOrDefault({ where: w => w.equal(x => x.codeImport, ObjectToTest.uf.codeImport) }).toPromise();
         if (!itemExist) {
             const insert = crud.insert(Uf, ObjectToTest.uf);
             const insertedResult = await insert.execute().toPromise();
@@ -107,10 +107,6 @@ describe("SQLite", () => {
     });
 
     it("Cidade", async () => {
-
-        // await ddl.create(Cidade).execute().toPromise();
-        // await ddl.create(Uf).execute().toPromise();
-        // await ddl.create(SubRegiao).execute().toPromise();
 
         const subRegiaoKeyZero = {
             codeImport: 0,
@@ -562,7 +558,7 @@ describe("SQLite", () => {
         const selectResultMapperNotCascade = await crud.query(HeaderSimple)
             .mapper<HeaderSimple>(row => {
                 return row.map().result();
-            }, false)
+            }, { cascade: false })
             .toPromise();
         expect(selectResultMapperNotCascade.length).to.equal(1);
         expect(selectResultMapperNotCascade[0].items.length).to.equal(0);
@@ -570,7 +566,7 @@ describe("SQLite", () => {
         expect(selectResultMapperNotCascade[0].descricao).to.equal(headerSimple3.descricao);
 
         /* Test select not cascade with data in itens */
-        const selectResultNotCascade = await crud.query(HeaderSimple).toList(false).toPromise();
+        const selectResultNotCascade = await crud.query(HeaderSimple).toList({ cascade: false }).toPromise();
         expect(selectResultNotCascade.length).to.equal(1);
         expect(selectResultNotCascade[0].items.length).to.equal(0);
         expect(selectResultNotCascade[0].id).to.equal(headerSimple3.id);
@@ -582,10 +578,10 @@ describe("SQLite", () => {
 
     it("HeaderSimple not cascade", async () => {
 
-        const createResult = await ddl.create(HeaderSimple).execute(false).toPromise();
+        const createResult = await ddl.create(HeaderSimple).execute({ cascade: false }).toPromise();
         expect(createResult.length).to.equal(1);
 
-        const insertResult1 = await crud.insert(HeaderSimple, ObjectToTest.headerSimple).execute(false).toPromise();
+        const insertResult1 = await crud.insert(HeaderSimple, ObjectToTest.headerSimple).execute({ cascade: false }).toPromise();
         expect(insertResult1.length).to.equal(1);
         expect(insertResult1[0].rowsAffected).to.equal(1);
 
@@ -594,7 +590,7 @@ describe("SQLite", () => {
             items: ["123", "456", "789", "10a"]
         } as HeaderSimple;
 
-        const insertResult2 = await crud.insert(HeaderSimple, headerSimple2).execute(false).toPromise();
+        const insertResult2 = await crud.insert(HeaderSimple, headerSimple2).execute({ cascade: false }).toPromise();
         expect(insertResult2.length).to.equal(1);
         expect(insertResult2[0].rowsAffected).to.equal(1);
 
@@ -603,11 +599,11 @@ describe("SQLite", () => {
             items: ["a1", "b2"]
         } as HeaderSimple;
 
-        const insertResult3 = await crud.insert(HeaderSimple, headerSimple3).execute(false).toPromise();
+        const insertResult3 = await crud.insert(HeaderSimple, headerSimple3).execute({ cascade: false }).toPromise();
         expect(insertResult3.length).to.equal(1);
         expect(insertResult3[0].rowsAffected).to.equal(1);
 
-        const selectResult = await crud.query(HeaderSimple).toList(false).toPromise();
+        const selectResult = await crud.query(HeaderSimple).toList({ cascade: false }).toPromise();
         expect(selectResult.length).to.equal(3);
 
         expect(selectResult[0].items.length).to.equal(0);
@@ -630,7 +626,7 @@ describe("SQLite", () => {
             .where(where => {
                 where.equal(x => x.id, headerSimple2.id);
             })
-            .execute(false).toPromise();
+            .execute({ cascade: false }).toPromise();
         expect(updateResult.length).to.equal(1);
         expect(updateResult[0].rowsAffected).to.equal(1);
 
@@ -638,30 +634,30 @@ describe("SQLite", () => {
             .where(where => {
                 where.equal(x => x.id, headerSimple2.id);
             })
-            .firstOrDefault(void 0, false).toPromise();
+            .firstOrDefault({ cascade: false }).toPromise();
         expect(selectUpdateResult.items.length).to.equal(0);
         expect(selectUpdateResult.id).to.equal(headerSimple2.id);
         expect(selectUpdateResult.descricao).to.equal(headerSimple2.descricao);
 
         const deleteResult1 = await crud.delete(HeaderSimple, headerSimple2)
-            .execute(false).toPromise();
+            .execute({ cascade: false }).toPromise();
         expect(deleteResult1.length).to.equal(1);
         /* Main deleted */
         expect(deleteResult1[0].rowsAffected).to.equal(1);
 
         const deleteResult2 = await crud.deleteByKey(HeaderSimple, ObjectToTest.headerSimple.id)
-            .execute(false).toPromise();
+            .execute({ cascade: false }).toPromise();
         expect(deleteResult2.length).to.equal(1);
         /* Main deleted */
         expect(deleteResult2[0].rowsAffected).to.equal(1);
 
-        const selectResult2 = await crud.query(HeaderSimple).toList(false).toPromise();
+        const selectResult2 = await crud.query(HeaderSimple).toList({ cascade: false }).toPromise();
         expect(selectResult2.length).to.equal(1);
         expect(selectResult2[0].items.length).to.equal(0);
         expect(selectResult2[0].id).to.equal(headerSimple3.id);
         expect(selectResult2[0].descricao).to.equal(headerSimple3.descricao);
 
-        const dropResult = await ddl.drop(HeaderSimple).execute(false).toPromise();
+        const dropResult = await ddl.drop(HeaderSimple).execute({ cascade: false }).toPromise();
         expect(dropResult.length).to.equal(1);
     });
 
@@ -825,7 +821,7 @@ describe("SQLite", () => {
         });
 
         /* Test select not cascade with data in itens */
-        const selectResultNotCascade = await crud.query(Referencia).toList(false).toPromise();
+        const selectResultNotCascade = await crud.query(Referencia).toList({ cascade: false }).toPromise();
         expect(selectResultNotCascade.length).to.equal(1);
         expect(selectResultNotCascade[0].referenciasRelacionadas.length).to.equal(0);
         expect(selectResultNotCascade[0].codeImport).to.equal(referencia3.codeImport);
