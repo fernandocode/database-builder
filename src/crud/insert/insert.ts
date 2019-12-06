@@ -12,13 +12,27 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
 
     constructor(
         typeT: new () => T,
-        modelToSave: T,
-        mapperTable: MapperTable,
-        alias: string = void 0,
-        database: DatabaseBase = void 0,
-        enableLog: boolean = true,
+        {
+            modelToSave,
+            mapperTable,
+            alias,
+            database,
+            enableLog = true
+        }: {
+            modelToSave: T,
+            mapperTable: MapperTable,
+            alias?: string,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        }
+        // typeT: new () => T,
+        // modelToSave: T,
+        // mapperTable: MapperTable,
+        // alias: string = void 0,
+        // database: DatabaseBase = void 0,
+        // enableLog: boolean = true,
     ) {
-        super(TypeCrud.CREATE, mapperTable, new InsertBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog);
+        super(TypeCrud.CREATE, { mapperTable, builder: new InsertBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog });
     }
 
     public columns(columnsCallback: (columns: InsertColumnsBuilder<T>) => void): Insert<T> {

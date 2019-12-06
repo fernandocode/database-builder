@@ -9,15 +9,32 @@ import { MapperTable } from "../mapper-table";
 
 export class Ddl {
 
+    public readonly enableLog: boolean;
+    private readonly _database: DatabaseBase;
+    private readonly _getMapper: GetMapper;
+
     constructor(
-        private readonly _database: DatabaseBase = void 0,
-        private readonly _mappersTable: GetMapper,
-        public readonly enableLog: boolean = true) {
+        {
+            getMapper,
+            database = void 0,
+            enableLog = true
+        }: {
+            getMapper?: GetMapper,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        } = {}
+        // private readonly _database: DatabaseBase = void 0,
+        // private readonly _mappersTable: GetMapper,
+        // public readonly enableLog: boolean = true
+    ) {
+        this._getMapper = getMapper;
+        this._database = database;
+        this.enableLog = enableLog;
     }
 
     public create<T>(
         typeT: new () => T,
-        mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
+        mapperTable: MapperTable = this._getMapper.get(typeT).mapperTable,
         database: DatabaseBase = this.getDatabase()
     ): Create<T> {
         return new Create(typeT, mapperTable, database, this.enableLog);
@@ -25,7 +42,7 @@ export class Ddl {
 
     public alter<T>(
         typeT: new () => T,
-        mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
+        mapperTable: MapperTable = this._getMapper.get(typeT).mapperTable,
         database: DatabaseBase = this.getDatabase()
     ): Alter<T> {
         return new Alter(typeT, mapperTable, database, this.enableLog);
@@ -33,7 +50,7 @@ export class Ddl {
 
     public drop<T>(
         typeT: new () => T,
-        mapperTable: MapperTable = this._mappersTable.get(typeT).mapperTable,
+        mapperTable: MapperTable = this._getMapper.get(typeT).mapperTable,
         database: DatabaseBase = this.getDatabase()
     ): Drop<T> {
         return new Drop(typeT, mapperTable, database, this.enableLog);

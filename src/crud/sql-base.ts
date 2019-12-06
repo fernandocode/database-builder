@@ -11,35 +11,37 @@ import { Observable } from "rxjs";
 
 export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
 
-    // protected readonly _executableBuilder: ExecutableBuilder;
-    // protected readonly mapperTable: MapperTable;
-    // protected readonly database: DatabaseBase;
-
-    // constructor(
-    //     {
-    //         mapperTable,
-    //         database = void 0,
-    //         enableLog = true
-    //     }: {
-    //         mapperTable?: MapperTable,
-    //         database?: DatabaseBase,
-    //         enableLog?: boolean
-    //     } = {}
-    // ) {
-    //     this.mapperTable = mapperTable;
-    //     this.database = database;
-    //     this._executableBuilder = new ExecutableBuilder(enableLog);
-    // }
-
     protected readonly _executableBuilder: ExecutableBuilder;
+    protected readonly mapperTable: MapperTable;
+    protected readonly database: DatabaseBase;
+    protected readonly enableLog: boolean;
 
     constructor(
-        protected readonly mapperTable: MapperTable,
-        protected readonly database: DatabaseBase = void 0,
-        protected enableLog: boolean = true,
+        {
+            mapperTable,
+            database = void 0,
+            enableLog = true
+        }: {
+            mapperTable: MapperTable,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        }
     ) {
+        this.mapperTable = mapperTable;
+        this.database = database;
+        this.enableLog = enableLog;
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
+
+    // protected readonly _executableBuilder: ExecutableBuilder;
+
+    // constructor(
+    //     protected readonly mapperTable: MapperTable,
+    //     protected readonly database: DatabaseBase = void 0,
+    //     protected enableLog: boolean = true,
+    // ) {
+    //     this._executableBuilder = new ExecutableBuilder(enableLog);
+    // }
 
     public execute(
         {

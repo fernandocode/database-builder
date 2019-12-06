@@ -8,7 +8,7 @@ import { ReferencesModelTest } from "./models/reference-model-test";
 
 describe("Projections", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({ getMapper: getMapper() });
 
     it("default", () => {
         const query = crud.query(TestClazz);
@@ -262,7 +262,7 @@ describe("Projections", () => {
         const query = crud.query(TestClazz);
         query.projection(select => {
             select.subQuery(
-                crud.query(TestClazzRef, "tcr")
+                crud.query(TestClazzRef, { alias: "tcr" })
                     .projection(s => s.min(x => x.description))
                     .where(where =>
                         where

@@ -21,7 +21,7 @@ import { MetadataTable } from "../metadata-table";
 
 describe("Query", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({ getMapper: getMapper() });
 
     it("none", () => {
         const query = crud.query(TestClazz);
@@ -185,7 +185,7 @@ describe("Query", () => {
     });
 
     it("from", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.from(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -200,7 +200,7 @@ describe("Query", () => {
     });
 
     it("union", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.union(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -215,7 +215,7 @@ describe("Query", () => {
     });
 
     it("union all", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.unionAll(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -230,7 +230,7 @@ describe("Query", () => {
     });
 
     it("union all and union", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.unionAll(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)

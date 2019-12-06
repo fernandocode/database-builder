@@ -29,18 +29,33 @@ export class Query<TType> extends SqlBase<TType> {
 
     private _queryBuilder: QueryBuilder<TType>;
     private _queryReadableBuilder: QueryReadableBuilder<TType>;
+    private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>;
 
     constructor(
         private _queryT: (new () => TType) | QueryBuilder<TType>,
-        alias: string = void 0,
-        private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
-        mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
-        database?: DatabaseBase,
-        enableLog: boolean = true,
+        {
+            alias = void 0,
+            getMapper,
+            mapperTable,
+            database = void 0,
+            enableLog = true
+        }: {
+            alias?: string,
+            getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>,
+            mapperTable?: MapperTable,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        } = {}
+        // alias: string = void 0,
+        // private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
+        // mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
+        // database?: DatabaseBase,
+        // enableLog: boolean = true,
     ) {
-        super(mapperTable, database, enableLog);
-        this._queryBuilder = new QueryBuilder(_queryT, mapperTable, alias, _getMapper);
-        this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, _getMapper).newable, enableLog);
+        super({ mapperTable, database, enableLog });
+        this._getMapper = getMapper;
+        this._queryBuilder = new QueryBuilder(_queryT, mapperTable, alias, getMapper);
+        this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, getMapper).newable, enableLog);
     }
 
     public clone(): Query<TType> {
@@ -480,7 +495,13 @@ export class Query<TType> extends SqlBase<TType> {
             const promises: Array<Observable<{ field: string, value: any }>> = [];
             mapperTable.dependencies.forEach(dependency => {
                 if (cascade) {
-                    const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
+                    const queryDependency = new Query<DependencyListSimpleModel>(void 0, {
+                        getMapper: this._getMapper,
+                        mapperTable: dependency,
+                        database: this.database,
+                        enableLog: this.enableLog
+                    });
+                    // const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
                     queryDependency.where(where => {
                         const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                         where.equal(new ColumnRef(columnReference), KeyUtils.getKey(mapperTable, model));
