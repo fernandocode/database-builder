@@ -9,7 +9,7 @@ import { QueryHelper } from "../core/query-helper";
 
 describe("Order By", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({ getMapper: getMapper() });
 
     it("none", () => {
         const query = crud.query(TestClazz);
@@ -75,7 +75,7 @@ describe("Order By", () => {
 
     it("order by sub query", () => {
         const query = crud.query(TestClazz);
-        const subQuery = crud.query(TestClazzRef, "ref")
+        const subQuery = crud.query(TestClazzRef, { alias: "ref" })
             .projection(projection => projection.count(x => x.id))
             .where(where => {
                 where.equal(x => x.id, query.ref(x => x.referenceTest.id));

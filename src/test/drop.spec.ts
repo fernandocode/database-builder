@@ -5,7 +5,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Drop", () => {
 
-    const dll = new Ddl({} as any, getMapper());
+    const dll = new Ddl({getMapper: getMapper()});
 
     it("by type", () => {
         const drop = dll.drop(TestClazz);

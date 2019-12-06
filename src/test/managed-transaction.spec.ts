@@ -18,8 +18,8 @@ describe("Managed Transaction", () => {
         const mapper = getMapper();
 
         database = await new SQLiteDatabase().init();
-        crud = new Crud(database, mapper, false);
-        ddl = new Ddl(database, mapper, false);
+        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
     beforeEach(async () => {
@@ -37,7 +37,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
 
         const modelUpdate = {
@@ -46,14 +46,14 @@ describe("Managed Transaction", () => {
         } as GuidClazz;
         transaction.add(
             crud
-                .update(GuidClazz, modelUpdate)
+                .update(GuidClazz, { modelToSave: modelUpdate })
                 .where(where => where.equal(x => x.guid, obj1.guid))
         );
 
         const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
         transaction.add(
             crud
-                .update(GuidClazz, modelUpdateByDescription)
+                .update(GuidClazz, { modelToSave: modelUpdateByDescription })
                 .where(where => where.equal(x => x.description, modelUpdate.description))
         );
 
@@ -73,7 +73,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
 
         const resultTransaction = await transaction.commit();
@@ -98,7 +98,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         const insertResult = await transaction.executeImmediate(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
 
         expect(insertResult).to.have.lengthOf(1);
@@ -142,7 +142,7 @@ describe("Managed Transaction", () => {
         expect(obj1.guid).to.be.undefined;
 
         transaction.add(
-            crud.insert(GuidClazz, obj1)
+            crud.insert(GuidClazz, { modelToSave: obj1 })
         );
 
         expect(obj1.guid).to.have.lengthOf(36);
@@ -163,19 +163,19 @@ describe("Managed Transaction", () => {
 
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
         // script with error, table not exist
         transaction.add(
             crud
-                .insert(TestClazz, ObjectToTest.testClazz)
+                .insert(TestClazz, { modelToSave: ObjectToTest.testClazz })
         );
 
         const obj2 = Object.assign({}, ObjectToTest.guidClazz);
 
         transaction.add(
             crud
-                .insert(GuidClazz, obj2)
+                .insert(GuidClazz, { modelToSave: obj2 })
         );
         try {
             await transaction.commit();
@@ -206,14 +206,14 @@ describe("Managed Transaction", () => {
 
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
 
         const obj2 = Object.assign({}, ObjectToTest.guidClazz);
 
         transaction.add(
             crud
-                .insert(GuidClazz, obj2)
+                .insert(GuidClazz, { modelToSave: obj2 })
         );
         const resultRollback = await transaction.rollback();
         expect(resultRollback).to.equal(true);
@@ -231,7 +231,7 @@ describe("Managed Transaction", () => {
 
         const resultImmediate = await transaction.executeImmediate(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
         expect(resultImmediate.length).to.equal(1);
         expect(resultImmediate[0].rowsAffected).to.equal(1);
@@ -244,7 +244,7 @@ describe("Managed Transaction", () => {
 
         transaction.add(
             crud
-                .insert(GuidClazz, obj2)
+                .insert(GuidClazz, { modelToSave: obj2 })
         );
         const resultRollback = await transaction.rollback();
         expect(resultRollback).to.equal(true);
@@ -270,7 +270,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
         transaction.add(
             crud
@@ -283,14 +283,14 @@ describe("Managed Transaction", () => {
         } as GuidClazz;
         transaction.add(
             crud
-                .update(GuidClazz, modelUpdate)
+                .update(GuidClazz, { modelToSave: modelUpdate })
                 .where(where => where.equal(x => x.guid, obj1.guid))
         );
 
         const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
         transaction.add(
             crud
-                .update(GuidClazz, modelUpdateByDescription)
+                .update(GuidClazz, { modelToSave: modelUpdateByDescription })
                 .where(where => where.equal(x => x.description, modelUpdate.description))
         );
 
@@ -393,21 +393,21 @@ describe("Managed Transaction", () => {
         const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
         transaction.add(
             crud
-                .insert(GuidClazz, obj3)
+                .insert(GuidClazz, { modelToSave: obj3 })
         );
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
         transaction.createSavePoint("obj1");
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
 
         const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
         transaction.createSavePoint("obj2");
         transaction.add(
             crud
-                .insert(GuidClazz, obj2)
+                .insert(GuidClazz, { modelToSave: obj2 })
         );
         await transaction.rollback("obj2");
         await transaction.commit("obj1");
@@ -430,21 +430,21 @@ describe("Managed Transaction", () => {
         const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
         transaction.add(
             crud
-                .insert(GuidClazz, obj3)
+                .insert(GuidClazz, { modelToSave: obj3 })
         );
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
         transaction.createSavePoint("obj1");
         transaction.add(
             crud
-                .insert(GuidClazz, obj1)
+                .insert(GuidClazz, { modelToSave: obj1 })
         );
 
         const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
         transaction.createSavePoint("obj2");
         transaction.add(
             crud
-                .insert(GuidClazz, obj2)
+                .insert(GuidClazz, { modelToSave: obj2 })
         );
         await transaction.commit("obj2");
         await transaction.rollback("obj1");

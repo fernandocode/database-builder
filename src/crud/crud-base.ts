@@ -18,14 +18,28 @@ export abstract class CrudBase<
     // tslint:disable-next-line: variable-name
     public readonly __allowInTransaction: boolean = true;
 
+    protected readonly _builder: TBuilder;
+
     constructor(
         private _typeCrud: TypeCrud,
-        mapperTable: MapperTable,
-        protected readonly _builder: TBuilder,
-        database: DatabaseBase = void 0,
-        enableLog: boolean = true,
+        {
+            mapperTable,
+            builder,
+            database = void 0,
+            enableLog = true
+        }: {
+            mapperTable: MapperTable,
+            builder: TBuilder,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        }
+        // mapperTable: MapperTable,
+        // protected readonly _builder: TBuilder,
+        // database: DatabaseBase = void 0,
+        // enableLog: boolean = true,
     ) {
-        super(mapperTable, database, enableLog);
+        super({ mapperTable, database, enableLog });
+        this._builder = builder;
     }
 
     protected model(): T {

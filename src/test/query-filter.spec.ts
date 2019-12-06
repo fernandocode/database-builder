@@ -14,7 +14,7 @@ import { ParamFilter } from "../core/param-filter";
 describe("Query filter", () => {
 
     const mapperBase = new MapperTest();
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({ getMapper: getMapper() });
 
     const mapperGuidClass = mapperBase.mapper(GuidClazz)
         .key(x => x.guid, PrimaryKeyType.Guid, String)
@@ -34,7 +34,7 @@ describe("Query filter", () => {
     // });
 
     it("QueryFilter with parameter", () => {
-        const query = crud.query(GuidClazz, "ab", mapperGuidClass);
+        const query = crud.query(GuidClazz, { alias: "ab", metadata: mapperGuidClass });
         const result = query
             .setParamsQueryFilter({ id: 100 })
             .compile();

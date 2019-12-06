@@ -7,7 +7,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Lambda Expression", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({getMapper: getMapper()});
 
     it("simple lambda", () => {
         const query = crud.query(Cliente)
