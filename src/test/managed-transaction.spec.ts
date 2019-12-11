@@ -8,6 +8,7 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { DatabaseObject } from "../definitions";
 import { QueryCompiled } from "../core";
 import { TestClazz } from "./models/test-clazz";
+import { tap } from "rxjs/operators";
 
 describe("Managed Transaction", () => {
     let crud: Crud;
@@ -57,7 +58,7 @@ describe("Managed Transaction", () => {
                 .where(where => where.equal(x => x.description, modelUpdate.description))
         );
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
 
         const queryUpdateResult = await crud.query(GuidClazz).toList().toPromise();
@@ -76,7 +77,7 @@ describe("Managed Transaction", () => {
                 .insert(GuidClazz, { modelToSave: obj1 })
         );
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
 
         const queryUpdateResult = await crud.query(GuidClazz).toList().toPromise();
@@ -105,7 +106,7 @@ describe("Managed Transaction", () => {
         expect(insertResult[0].insertId).to.have.lengthOf(36);
         expect(insertResult[0].insertId).to.equal(obj1.guid);
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
     });
 
@@ -147,7 +148,7 @@ describe("Managed Transaction", () => {
 
         expect(obj1.guid).to.have.lengthOf(36);
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
 
         const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
@@ -155,7 +156,7 @@ describe("Managed Transaction", () => {
         expect(queryUpdateResult.guid).to.equal(obj1.guid);
     });
 
-    it("Transaction_error", async () => {
+    it("Transaction error", async () => {
 
         const transaction = database.managedTransaction();
 
@@ -178,7 +179,7 @@ describe("Managed Transaction", () => {
                 .insert(GuidClazz, { modelToSave: obj2 })
         );
         try {
-            await transaction.commit();
+            await transaction.commit().toPromise();
         } catch (error) {
             expect("SQLITE_ERROR").to.equal(error.code);
             expect(obj1.guid).to.have.lengthOf(36);
@@ -294,7 +295,7 @@ describe("Managed Transaction", () => {
                 .where(where => where.equal(x => x.description, modelUpdate.description))
         );
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
     });
 
@@ -412,7 +413,7 @@ describe("Managed Transaction", () => {
         await transaction.rollback("obj2");
         await transaction.commit("obj1");
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
 
         const result = await crud.query(GuidClazz).toList().toPromise();
@@ -449,7 +450,7 @@ describe("Managed Transaction", () => {
         await transaction.commit("obj2");
         await transaction.rollback("obj1");
 
-        const resultTransaction = await transaction.commit();
+        const resultTransaction = await transaction.commit().toPromise();
         expect(resultTransaction).to.equal(true);
 
         const result = await crud.query(GuidClazz).toList().toPromise();
