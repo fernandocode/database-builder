@@ -300,10 +300,9 @@ describe("Managed Transaction", () => {
     });
 
     /**
-     * TODO: implementar savepoint in transaction
+     * Implementado savepoint in transaction
      * https://sqlite.org/lang_savepoint.html
      */
-
     it("Transaction manual with savepoint", async () => {
         const commands: QueryCompiled[] = [
             {
@@ -387,75 +386,78 @@ describe("Managed Transaction", () => {
         expect(result[1].description).to.equal(obj1.description);
     });
 
-    it("Transaction with savepoint 1", async () => {
+    /**
+     * Descontinuado pois não é suportado por todos os providers
+     */
+    // it("Transaction with savepoint 1", async () => {
 
-        const transaction = database.managedTransaction();
+    //     const transaction = database.managedTransaction();
 
-        const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
-        transaction.add(
-            crud
-                .insert(GuidClazz, { modelToSave: obj3 })
-        );
+    //     const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
+    //     transaction.add(
+    //         crud
+    //             .insert(GuidClazz, { modelToSave: obj3 })
+    //     );
 
-        const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
-        transaction.createSavePoint("obj1");
-        transaction.add(
-            crud
-                .insert(GuidClazz, { modelToSave: obj1 })
-        );
+    //     const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
+    //     transaction.createSavePoint("obj1");
+    //     transaction.add(
+    //         crud
+    //             .insert(GuidClazz, { modelToSave: obj1 })
+    //     );
 
-        const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
-        transaction.createSavePoint("obj2");
-        transaction.add(
-            crud
-                .insert(GuidClazz, { modelToSave: obj2 })
-        );
-        await transaction.rollback("obj2");
-        await transaction.commit("obj1");
+    //     const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
+    //     transaction.createSavePoint("obj2");
+    //     transaction.add(
+    //         crud
+    //             .insert(GuidClazz, { modelToSave: obj2 })
+    //     );
+    //     await transaction.rollback("obj2");
+    //     await transaction.commit("obj1");
 
-        const resultTransaction = await transaction.commit().toPromise();
-        expect(resultTransaction).to.equal(true);
+    //     const resultTransaction = await transaction.commit().toPromise();
+    //     expect(resultTransaction).to.equal(true);
 
-        const result = await crud.query(GuidClazz).toList().toPromise();
-        expect(result).to.have.lengthOf(2);
-        expect(result[0].guid).to.equal(obj3.guid);
-        expect(result[0].description).to.equal(obj3.description);
-        expect(result[1].guid).to.equal(obj1.guid);
-        expect(result[1].description).to.equal(obj1.description);
-    });
+    //     const result = await crud.query(GuidClazz).toList().toPromise();
+    //     expect(result).to.have.lengthOf(2);
+    //     expect(result[0].guid).to.equal(obj3.guid);
+    //     expect(result[0].description).to.equal(obj3.description);
+    //     expect(result[1].guid).to.equal(obj1.guid);
+    //     expect(result[1].description).to.equal(obj1.description);
+    // });
 
-    it("Transaction with savepoint 2", async () => {
+    // it("Transaction with savepoint 2", async () => {
 
-        const transaction = database.managedTransaction();
+    //     const transaction = database.managedTransaction();
 
-        const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
-        transaction.add(
-            crud
-                .insert(GuidClazz, { modelToSave: obj3 })
-        );
+    //     const obj3 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj3" });
+    //     transaction.add(
+    //         crud
+    //             .insert(GuidClazz, { modelToSave: obj3 })
+    //     );
 
-        const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
-        transaction.createSavePoint("obj1");
-        transaction.add(
-            crud
-                .insert(GuidClazz, { modelToSave: obj1 })
-        );
+    //     const obj1 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj1" });
+    //     transaction.createSavePoint("obj1");
+    //     transaction.add(
+    //         crud
+    //             .insert(GuidClazz, { modelToSave: obj1 })
+    //     );
 
-        const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
-        transaction.createSavePoint("obj2");
-        transaction.add(
-            crud
-                .insert(GuidClazz, { modelToSave: obj2 })
-        );
-        await transaction.commit("obj2");
-        await transaction.rollback("obj1");
+    //     const obj2 = Object.assign({}, ObjectToTest.guidClazz, { description: "Obj2" });
+    //     transaction.createSavePoint("obj2");
+    //     transaction.add(
+    //         crud
+    //             .insert(GuidClazz, { modelToSave: obj2 })
+    //     );
+    //     await transaction.commit("obj2");
+    //     await transaction.rollback("obj1");
 
-        const resultTransaction = await transaction.commit().toPromise();
-        expect(resultTransaction).to.equal(true);
+    //     const resultTransaction = await transaction.commit().toPromise();
+    //     expect(resultTransaction).to.equal(true);
 
-        const result = await crud.query(GuidClazz).toList().toPromise();
-        expect(result).to.have.lengthOf(1);
-        expect(result[0].guid).to.equal(obj3.guid);
-        expect(result[0].description).to.equal(obj3.description);
-    });
+    //     const result = await crud.query(GuidClazz).toList().toPromise();
+    //     expect(result).to.have.lengthOf(1);
+    //     expect(result[0].guid).to.equal(obj3.guid);
+    //     expect(result[0].description).to.equal(obj3.description);
+    // });
 });

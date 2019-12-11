@@ -72,24 +72,35 @@ export class ManagedTransaction {
 
     /**
      * Commit a transaction
-     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
      */
-    public commit(savePointName?: string): Observable<boolean> {
+    public commit(): Observable<boolean> {
         if (this._singleTransactionManager) {
             return this._singleTransactionManager.commitOnStack(
-                this.commitExecuteObservable(savePointName)
+                this.commitExecuteObservable()
             );
         }
-        return this.commitExecuteObservable(savePointName);
+        return this.commitExecuteObservable();
+    }
+
+    /**
+     * Rollback in current transaction
+     */
+    public async rollback(): Promise<boolean> {
+        this.checkTransactionActive();
+        if (this._status === TransactionStatus.STARTED
+            || this._status === TransactionStatus.RELEASED) {
+            this.addStatement(this.commandRollbackTransaction(), []);
+            await this.executeStack();
+        }
+        return this.finishTransaction(TransactionStatus.ROLLBACKED);
     }
 
     /**
      * Commit a transaction
-     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
      */
-    private commitExecuteObservable(savePointName?: string): Observable<boolean> {
+    private commitExecuteObservable(): Observable<boolean> {
         return new Observable<boolean>(observer => {
-            this.commitExecute(savePointName)
+            this.commitExecute()
                 .then(result => {
                     observer.next(result);
                     observer.complete();
@@ -100,29 +111,24 @@ export class ManagedTransaction {
     }
     /**
      * Commit a transaction
-     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
      */
-    private async commitExecute(savePointName?: string): Promise<boolean> {
+    private async commitExecute(): Promise<boolean> {
         this.checkTransactionActive();
         if (this._status === TransactionStatus.STARTED
             || this._status === TransactionStatus.RELEASED) {
-            this.addStatement(this.commandCommitTransaction(savePointName), []);
+            this.addStatement(this.commandCommitTransaction(), []);
             await this.executeStack();
         } else {
-            if (savePointName) {
-                await this.beginTransaction();
-                return await this.commitExecute(savePointName);
-            }
+            // if (savePointName) {
+            //     await this.beginTransaction();
+            //     return await this.commitExecute(savePointName);
+            // }
             const batch = this.buildSqlBatch(this._stack);
             this.clearStackTransaction();
             this.status = TransactionStatus.STARTED;
             await this._database.sqlBatch(batch);
         }
-        return this.finishTransaction(
-            savePointName
-                ? TransactionStatus.RELEASED
-                : TransactionStatus.COMMITED
-        );
+        return this.finishTransaction(TransactionStatus.COMMITED);
     }
     // /**
     //  * Commit a transaction
@@ -151,35 +157,13 @@ export class ManagedTransaction {
     //     );
     // }
 
-    /**
-     * @deprecated Será removido pois não funciona bem em todos os contextos
-     * @param savePointName
-     */
-    public createSavePoint(savePointName: string): void {
-        this.addStatement(this.formatSavePoint(savePointName), []);
-    }
-
-    /**
-     * Rollback in current transaction
-     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
-     */
-    public async rollback(savePointName?: string): Promise<boolean> {
-        this.checkTransactionActive();
-        if (this._status === TransactionStatus.STARTED
-            || this._status === TransactionStatus.RELEASED) {
-            this.addStatement(this.commandRollbackTransaction(savePointName), []);
-            await this.executeStack();
-        } else {
-            if (savePointName) {
-                await this.beginTransaction();
-                return await this.rollback(savePointName);
-            }
-        }
-        return this.finishTransaction(
-            savePointName
-                ? TransactionStatus.RELEASED
-                : TransactionStatus.ROLLBACKED);
-    }
+    // /**
+    //  * @deprecated Será removido pois não funciona bem em todos os contextos
+    //  * @param savePointName
+    //  */
+    // public createSavePoint(savePointName: string): void {
+    //     this.addStatement(this.formatSavePoint(savePointName), []);
+    // }
 
     /**
      * Execute stack in Database
@@ -269,28 +253,22 @@ export class ManagedTransaction {
 
     /**
      * Command commit transaction
-     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
      */
-    private commandCommitTransaction(savePointName?: string): string {
-        return savePointName
-            ? `RELEASE ${this.formatSavePoint(savePointName)}`
-            : "COMMIT TRANSACTION";
+    private commandCommitTransaction(): string {
+        return "COMMIT TRANSACTION";
     }
 
     /**
      * Command roolback transaction
-     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
      */
-    private commandRollbackTransaction(savePointName?: string): string {
-        return savePointName
-            ? `ROLLBACK TRANSACTION TO ${this.formatSavePoint(savePointName)}`
-            : "ROLLBACK TRANSACTION";
+    private commandRollbackTransaction(): string {
+        return "ROLLBACK TRANSACTION";
     }
 
-    /**
-     * @deprecated Será removido pois não funciona bem em todos os contextos
-     */
-    private formatSavePoint(savePointName: string): string {
-        return `SAVEPOINT "${savePointName}"`;
-    }
+    // /**
+    //  * @deprecated Será removido pois não funciona bem em todos os contextos
+    //  */
+    // private formatSavePoint(savePointName: string): string {
+    //     return `SAVEPOINT "${savePointName}"`;
+    // }
 }
