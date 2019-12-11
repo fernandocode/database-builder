@@ -3,7 +3,6 @@ import { Drop } from "./drop/drop";
 import { Create } from "./create/create";
 import { Alter } from "./alter/alter";
 import { DatabaseBase } from "../definitions/database-definition";
-import { DatabaseBuilderError } from "../core/errors";
 import { GetMapper } from "../mapper/interface-get-mapper";
 import { MapperTable } from "../mapper-table";
 
@@ -77,7 +76,7 @@ export class Ddl {
     }
 
     /**
-     * hasTable
+     * hasColumn
      */
     public hasColumn<T>(
         tablename: (new () => T) | string,
@@ -97,9 +96,9 @@ export class Ddl {
     }
 
     private getDatabase() {
-        if (!this._database) {
-            throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
-        }
+        // if (!this._database) {
+        //     throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
+        // }
         return this._database;
     }
 }

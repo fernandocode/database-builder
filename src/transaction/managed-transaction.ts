@@ -4,6 +4,8 @@ import { SqlCompilable } from "../crud/sql-compilable";
 import { TransactionStatus } from "./transaction-status";
 import { DatabaseBuilderError } from "../core";
 import { SqlExecutable } from "../crud/sql-executable";
+import { SingleTransactionManager } from "./single-transaction-manager";
+import { Observable } from "rxjs";
 
 /**
  * Manages better and homogeneous transaction between providers
@@ -32,7 +34,8 @@ export class ManagedTransaction {
         private _database: {
             sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]>,
             executeSql(statement: string, params: any): Promise<DatabaseResult>;
-        }
+        },
+        private _singleTransactionManager: SingleTransactionManager
     ) {
         this._idTransaction = `transaction_${Utils.GUID().replace(/-/g, "_")}`;
     }
@@ -71,7 +74,35 @@ export class ManagedTransaction {
      * Commit a transaction
      * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
      */
-    public async commit(savePointName?: string): Promise<boolean> {
+    public commit(savePointName?: string): Observable<boolean> {
+        if (this._singleTransactionManager) {
+            return this._singleTransactionManager.commitOnStack(
+                this.commitExecuteObservable(savePointName)
+            );
+        }
+        return this.commitExecuteObservable(savePointName);
+    }
+
+    /**
+     * Commit a transaction
+     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
+     */
+    private commitExecuteObservable(savePointName?: string): Observable<boolean> {
+        return new Observable<boolean>(observer => {
+            this.commitExecute(savePointName)
+                .then(result => {
+                    observer.next(result);
+                    observer.complete();
+                }).catch(error => {
+                    observer.error(error);
+                });
+        });
+    }
+    /**
+     * Commit a transaction
+     * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
+     */
+    private async commitExecute(savePointName?: string): Promise<boolean> {
         this.checkTransactionActive();
         if (this._status === TransactionStatus.STARTED
             || this._status === TransactionStatus.RELEASED) {
@@ -80,7 +111,7 @@ export class ManagedTransaction {
         } else {
             if (savePointName) {
                 await this.beginTransaction();
-                return await this.commit(savePointName);
+                return await this.commitExecute(savePointName);
             }
             const batch = this.buildSqlBatch(this._stack);
             this.clearStackTransaction();
@@ -93,6 +124,32 @@ export class ManagedTransaction {
                 : TransactionStatus.COMMITED
         );
     }
+    // /**
+    //  * Commit a transaction
+    //  * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
+    //  */
+    // public async commit(savePointName?: string): Promise<boolean> {
+    //     this.checkTransactionActive();
+    //     if (this._status === TransactionStatus.STARTED
+    //         || this._status === TransactionStatus.RELEASED) {
+    //         this.addStatement(this.commandCommitTransaction(savePointName), []);
+    //         await this.executeStack();
+    //     } else {
+    //         if (savePointName) {
+    //             await this.beginTransaction();
+    //             return await this.commit(savePointName);
+    //         }
+    //         const batch = this.buildSqlBatch(this._stack);
+    //         this.clearStackTransaction();
+    //         this.status = TransactionStatus.STARTED;
+    //         await this._database.sqlBatch(batch);
+    //     }
+    //     return this.finishTransaction(
+    //         savePointName
+    //             ? TransactionStatus.RELEASED
+    //             : TransactionStatus.COMMITED
+    //     );
+    // }
 
     /**
      * @deprecated Será removido pois não funciona bem em todos os contextos

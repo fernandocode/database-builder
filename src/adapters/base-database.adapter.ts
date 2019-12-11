@@ -3,8 +3,15 @@ import { ManagedTransaction } from "../transaction/managed-transaction";
 import { DatabaseCreatorContract } from "../definitions/database-creator-contract";
 import { DatabaseConfig } from "../definitions/database-config";
 import { WebSqlTransactionInterface } from "../definitions/websql-interface";
+import { SingleTransactionManager } from "../transaction/single-transaction-manager";
 
 export abstract class BaseDatabaseAdapter<DatabaseNativeInterface> implements DatabaseCreatorContract {
+
+    private _singleTransactionManager: SingleTransactionManager;
+
+    constructor() {
+        this._singleTransactionManager = new SingleTransactionManager();
+    }
 
     public async create(
         config: DatabaseConfig
@@ -42,7 +49,7 @@ export abstract class BaseDatabaseAdapter<DatabaseNativeInterface> implements Da
 
     protected injectManagedTransactionInDatabase(databaseObject: DatabaseObject) {
         databaseObject.managedTransaction = () => {
-            return new ManagedTransaction(databaseObject);
+            return new ManagedTransaction(databaseObject, this._singleTransactionManager);
         };
         return databaseObject;
     }
