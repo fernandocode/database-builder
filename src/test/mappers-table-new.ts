@@ -41,7 +41,8 @@ export class MappersTableNew extends MapperTest {
             .hasQueryFilter(where => where.startsWith(x => x.nome, ParamFilter.builder("startWith")));
         this.autoMapperIdImport(SubRegiao, Number, PrimaryKeyType.Assigned)
             .hasQueryFilter(where => where.lessAndEqual(x => x.codeImport, 100000));
-        this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned);
+        this.autoMapperIdImport(Uf, String, PrimaryKeyType.Assigned)
+            .hasQueryFilter(where => where.greatAndEqual(x => x.population, 100));
         this.autoMapperIdImport(Cidade, Number, PrimaryKeyType.Assigned)
             .reference(x => x.uf, Uf)
             .hasQueryFilter(where => where.great(x => x.population, 0));
