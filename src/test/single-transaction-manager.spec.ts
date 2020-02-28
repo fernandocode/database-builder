@@ -4,13 +4,14 @@ import { getMapper } from "./mappers-table-new";
 import { Crud } from "../crud";
 import { GuidClazz } from "./models/guid-clazz";
 import { SQLiteDatabase } from "./database/sqlite-database";
-import { DatabaseObject } from "../definitions";
+import { DatabaseObject, DatabaseResult } from "../definitions";
 import { SingleTransactionManager } from "../transaction/single-transaction-manager";
 import { Observable } from "rxjs";
 import { forkJoinSafe } from "../safe-utils";
+import { HeaderSimple } from "./models/header-simple";
 
 describe("Single Transaction Manager", function () {
-    this.enableTimeouts(false);
+    (this as any).enableTimeouts(false);
 
     let crud: Crud;
     let ddl: Ddl;
@@ -92,6 +93,24 @@ describe("Single Transaction Manager", function () {
         const deleteResult = await crud.delete(GuidClazz).execute().toPromise();
         expect(deleteResult.length).to.equal(1);
         expect(deleteResult[0].rowsAffected).to.equal(countTransactions);
+    });
+
+    it("cascade mapper transaction", async () => {
+        const createResult = await ddl.create(HeaderSimple).execute().toPromise();
+        expect(createResult.length).to.equal(2);
+
+        const observers: Array<Observable<DatabaseResult[]>> = [];
+        const countTransactions = 100;
+
+        for (let index = 0; index < countTransactions; index++) {
+            const headerSimple2 = {
+                descricao: "Header 2",
+                items: ["123", "456", "789", "10a"]
+            } as HeaderSimple;
+            observers.push(crud.insert(HeaderSimple, { modelToSave: headerSimple2 }).execute());
+        }
+        const result = await forkJoinSafe(observers).toPromise();
+        expect(result.length).to.equal(countTransactions);
     });
 
 });

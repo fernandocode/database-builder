@@ -8,7 +8,6 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { DatabaseObject } from "../definitions";
 import { QueryCompiled } from "../core";
 import { TestClazz } from "./models/test-clazz";
-import { tap } from "rxjs/operators";
 
 describe("Managed Transaction", () => {
     let crud: Crud;
