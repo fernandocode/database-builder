@@ -11,6 +11,7 @@ import { Expression } from "lambda-expression";
 import { Utils } from "../core/utils";
 import { MapperTest } from "./mapper-test";
 import { GuidClazz } from "./models/guid-clazz";
+import { Create, Insert } from "..";
 
 describe("Mapper", () => {
 
@@ -46,4 +47,23 @@ describe("Mapper", () => {
         expect(mapperGuidClass.mapperTable.queryFilter.params[0]).to.equal(":id");
     });
 
+    it("mapper sub property", () => {
+        const mapper = mapperBase.mapper(SubRegiao)
+            .key(x => x.codeImport, PrimaryKeyType.Assigned, Number)
+            .column(x => x.nome, String)
+            .column(x => x.regiao.codeImport, Number);
+
+        const create = new Create(SubRegiao, mapper.mapperTable);
+
+        expect(create.compile()[0]).to.equal('CREATE TABLE IF NOT EXISTS SubRegiao( codeImport INTEGER NOT NULL PRIMARY KEY, nome TEXT, regiao_codeImport INTEGER );');
+        
+        const subRegiao = {nome: 'test', codeImport: 1, regiao: { codeImport: 2 }  as Regiao}  as SubRegiao;
+
+        const insert = new Insert(SubRegiao, subRegiao, mapper.mapperTable);
+
+        const insertCompiled = insert.compile()[0];
+
+        expect(insertCompiled.query).to.equal('INSERT INTO SubRegiao (codeImport, nome, regiao_codeImport) VALUES (?, ?, ?)');
+        expect(insertCompiled.params.join(', ')).to.equal([1, 'test', 2].join(', '));
+    });
 });
