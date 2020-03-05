@@ -152,9 +152,10 @@ describe("Create", () => {
     it("Referencia cascade", () => {
         const create = new Create(Referencia, mapper.get(Referencia).mapperTable);
         const result = create.compile();
-        expect(result.length).to.equal(2);
+        expect(result.length).to.equal(3);
         expect(result[0].query).to.equal(`CREATE TABLE IF NOT EXISTS Referencia( codeImport INTEGER NOT NULL PRIMARY KEY, codigo TEXT, descricao TEXT, deleted BOOLEAN )`);
-        expect(result[1].query).to.equal(`CREATE TABLE IF NOT EXISTS ReferenciasRelacionadas( indexArray INTEGER, value INTEGER, Referencia_codeImport INTEGER , PRIMARY KEY (indexArray, Referencia_codeImport) )`);
+        expect(result[1].query).to.equal(`CREATE TABLE IF NOT EXISTS RestricaoGrade( indexArray INTEGER, value TEXT, Referencia_codeImport INTEGER , PRIMARY KEY (indexArray, Referencia_codeImport) )`);
+        expect(result[2].query).to.equal(`CREATE TABLE IF NOT EXISTS ReferenciasRelacionadas( indexArray INTEGER, value INTEGER, Referencia_codeImport INTEGER , PRIMARY KEY (indexArray, Referencia_codeImport) )`);
     });
 
 });
