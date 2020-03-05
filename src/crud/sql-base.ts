@@ -33,16 +33,6 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    // protected readonly _executableBuilder: ExecutableBuilder;
-
-    // constructor(
-    //     protected readonly mapperTable: MapperTable,
-    //     protected readonly database: DatabaseBase = void 0,
-    //     protected enableLog: boolean = true,
-    // ) {
-    //     this._executableBuilder = new ExecutableBuilder(enableLog);
-    // }
-
     public execute(
         {
             cascade = true,

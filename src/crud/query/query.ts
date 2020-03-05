@@ -46,11 +46,6 @@ export class Query<TType> extends SqlBase<TType> {
             database?: DatabaseBase,
             enableLog?: boolean
         } = {}
-        // alias: string = void 0,
-        // private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
-        // mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
-        // database?: DatabaseBase,
-        // enableLog: boolean = true,
     ) {
         super({ mapperTable, database, enableLog });
         this._getMapper = getMapper;
