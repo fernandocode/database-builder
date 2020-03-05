@@ -6,6 +6,7 @@ import { DatabaseBuilderError } from "../core";
 import { SqlExecutable } from "../crud/sql-executable";
 import { SingleTransactionManager } from "./single-transaction-manager";
 import { Observable } from "rxjs";
+import { ReplacementParam } from "../core/replacement-param";
 
 /**
  * Manages better and homogeneous transaction between providers
@@ -14,7 +15,7 @@ export class ManagedTransaction {
 
     private _idTransaction: string;
     private _status: TransactionStatus = TransactionStatus.OPEN;
-    private _stack: Array<{ statement: string, params: any }> = [];
+    private _stack: Array<{ statement: string, params: any[] }> = [];
 
     /**
      * return transaction id
@@ -45,7 +46,7 @@ export class ManagedTransaction {
      * @param statement command to apply
      * @param params command params
      */
-    public addStatement(statement: string, params: any): void {
+    public addStatement(statement: string, params: any[]): void {
         this.checkTransactionActive();
         this._stack.push({ statement, params });
     }
@@ -109,20 +110,18 @@ export class ManagedTransaction {
                 });
         });
     }
+
     /**
      * Commit a transaction
      */
     private async commitExecute(): Promise<boolean> {
+        this.checkParametersAllowedInTransaction();
         this.checkTransactionActive();
         if (this._status === TransactionStatus.STARTED
             || this._status === TransactionStatus.RELEASED) {
             this.addStatement(this.commandCommitTransaction(), []);
             await this.executeStack();
         } else {
-            // if (savePointName) {
-            //     await this.beginTransaction();
-            //     return await this.commitExecute(savePointName);
-            // }
             const batch = this.buildSqlBatch(this._stack);
             this.clearStackTransaction();
             this.status = TransactionStatus.STARTED;
@@ -130,40 +129,6 @@ export class ManagedTransaction {
         }
         return this.finishTransaction(TransactionStatus.COMMITED);
     }
-    // /**
-    //  * Commit a transaction
-    //  * @param savePointName @deprecated Será removido pois não funciona bem em todos os contextos
-    //  */
-    // public async commit(savePointName?: string): Promise<boolean> {
-    //     this.checkTransactionActive();
-    //     if (this._status === TransactionStatus.STARTED
-    //         || this._status === TransactionStatus.RELEASED) {
-    //         this.addStatement(this.commandCommitTransaction(savePointName), []);
-    //         await this.executeStack();
-    //     } else {
-    //         if (savePointName) {
-    //             await this.beginTransaction();
-    //             return await this.commit(savePointName);
-    //         }
-    //         const batch = this.buildSqlBatch(this._stack);
-    //         this.clearStackTransaction();
-    //         this.status = TransactionStatus.STARTED;
-    //         await this._database.sqlBatch(batch);
-    //     }
-    //     return this.finishTransaction(
-    //         savePointName
-    //             ? TransactionStatus.RELEASED
-    //             : TransactionStatus.COMMITED
-    //     );
-    // }
-
-    // /**
-    //  * @deprecated Será removido pois não funciona bem em todos os contextos
-    //  * @param savePointName
-    //  */
-    // public createSavePoint(savePointName: string): void {
-    //     this.addStatement(this.formatSavePoint(savePointName), []);
-    // }
 
     /**
      * Execute stack in Database
@@ -174,6 +139,16 @@ export class ManagedTransaction {
             await this._database.executeSql(batch.statement, batch.params);
             this.clearStackTransaction();
         }
+    }
+
+    private checkParametersAllowedInTransaction(): void {
+        this._stack.forEach(itemStack => {
+            itemStack.params.forEach((param, index) => {
+                if (param instanceof ReplacementParam) {
+                    throw new DatabaseBuilderError(`Insert cascading with autoincrement mapper not supported with transaction. (Found in "${itemStack.statement}", params: [${itemStack.params.map(x => x instanceof ReplacementParam ? `[${x.properties.join(",")}]` : x).join(",")}], paramIndex: ${index})`);
+                }
+            });
+        });
     }
 
     /**
@@ -264,11 +239,4 @@ export class ManagedTransaction {
     private commandRollbackTransaction(): string {
         return "ROLLBACK TRANSACTION";
     }
-
-    // /**
-    //  * @deprecated Será removido pois não funciona bem em todos os contextos
-    //  */
-    // private formatSavePoint(savePointName: string): string {
-    //     return `SAVEPOINT "${savePointName}"`;
-    // }
 }
