@@ -17,7 +17,7 @@ export abstract class BaseDatabaseAdapter<DatabaseNativeInterface> implements Da
         config: DatabaseConfig
     ): Promise<DatabaseObject> {
         const databaseNative: DatabaseNativeInterface = await this.createDatabaseNative(config);
-        return this.convertDatabaseNativeToDatabaseObject(databaseNative);
+        return this.convertDatabaseNativeToDatabaseObject(databaseNative, enableLog);
     }
 
     protected abstract createDatabaseNative(
@@ -37,19 +37,20 @@ export abstract class BaseDatabaseAdapter<DatabaseNativeInterface> implements Da
     ): (sqlStatements: Array<(string | string[] | any)>) => Promise<DatabaseResult[]>;
 
     protected convertDatabaseNativeToDatabaseObject(
-        databaseNative: DatabaseNativeInterface
+        databaseNative: DatabaseNativeInterface,
+        enableLog: boolean
     ): DatabaseObject {
         const databaseObject = {
             executeSql: this.convertToExecuteSql(databaseNative),
             transaction: this.convertToTransaction(databaseNative),
             sqlBatch: this.convertToSqlBatch(databaseNative)
         } as DatabaseObject;
-        return this.injectManagedTransactionInDatabase(databaseObject);
+        return this.injectManagedTransactionInDatabase(databaseObject, enableLog);
     }
 
-    protected injectManagedTransactionInDatabase(databaseObject: DatabaseObject) {
+    protected injectManagedTransactionInDatabase(databaseObject: DatabaseObject, enableLog: boolean) {
         databaseObject.managedTransaction = () => {
-            return new ManagedTransaction(databaseObject, this._singleTransactionManager);
+            return new ManagedTransaction(databaseObject, this._singleTransactionManager, enableLog);
         };
         return databaseObject;
     }
