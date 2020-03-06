@@ -2,7 +2,7 @@ import { Utils } from "../core/utils";
 import { DatabaseResult } from "../definitions/database-definition";
 import { SqlCompilable } from "../crud/sql-compilable";
 import { TransactionStatus } from "./transaction-status";
-import { DatabaseBuilderError } from "../core";
+import { DatabaseBuilderError, QueryCompiled } from "../core";
 import { SqlExecutable } from "../crud/sql-executable";
 import { SingleTransactionManager } from "./single-transaction-manager";
 import { Observable } from "rxjs";
@@ -36,7 +36,8 @@ export class ManagedTransaction {
             sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]>,
             executeSql(statement: string, params: any): Promise<DatabaseResult>;
         },
-        private _singleTransactionManager: SingleTransactionManager
+        private _singleTransactionManager: SingleTransactionManager,
+        private enableLog: boolean
     ) {
         this._idTransaction = `transaction_${Utils.GUID().replace(/-/g, "_")}`;
     }
@@ -96,6 +97,23 @@ export class ManagedTransaction {
         return this.finishTransaction(TransactionStatus.ROLLBACKED);
     }
 
+    private sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> {
+        this.log(sqlStatements);
+        return this._database.sqlBatch(sqlStatements);
+    }
+
+    private executeSql(statement: string, params: any): Promise<DatabaseResult> {
+        this.log({ query: statement, params } as QueryCompiled);
+        return this._database.executeSql(statement, params);
+    }
+
+    private log(log: any) {
+        if (this.enableLog) {
+            // tslint:disable-next-line
+            console.log(log);
+        }
+    }
+
     /**
      * Commit a transaction
      */
@@ -125,7 +143,7 @@ export class ManagedTransaction {
             const batch = this.buildSqlBatch(this._stack);
             this.clearStackTransaction();
             this.status = TransactionStatus.STARTED;
-            await this._database.sqlBatch(batch);
+            await this.sqlBatch(batch);
         }
         return this.finishTransaction(TransactionStatus.COMMITED);
     }
@@ -136,7 +154,7 @@ export class ManagedTransaction {
     private async executeStack(): Promise<void> {
         if (this._stack.length > 0) {
             const batch = this.buildSqlExecute(this._stack);
-            await this._database.executeSql(batch.statement, batch.params);
+            await this.executeSql(batch.statement, batch.params);
             this.clearStackTransaction();
         }
     }
@@ -221,7 +239,7 @@ export class ManagedTransaction {
         if (this._status === TransactionStatus.STARTED) {
             return Promise.resolve(void 0);
         }
-        const result = await this._database.executeSql("BEGIN TRANSACTION", []);
+        const result = await this.executeSql("BEGIN TRANSACTION", []);
         this.status = TransactionStatus.STARTED;
         return result;
     }
