@@ -27,6 +27,7 @@ import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 import { ContasAReceber } from "./models/contas-a-receber";
 import { DatabaseTypes } from "../definitions/database-types";
 import { ParamFilter } from "../core/param-filter";
+import { RefToHeaderSimple } from "./models/ref-to-header-simple";
 
 export class MappersTableNew extends MapperTest {
 
@@ -88,6 +89,10 @@ export class MappersTableNew extends MapperTest {
             .column(x => x.descricao, String)
             .hasMany(x => x.items, String, "ItemHeaderSimple")
             ;
+
+        this.mapper(RefToHeaderSimple)
+            .key(x => x.id, PrimaryKeyType.AutoIncrement, Number)
+            .reference(x => x.headerSimple, HeaderSimple);
 
         this.autoMapperKey(Imagem, PrimaryKeyType.Assigned);
         this.autoMapper(Linha, x => x.codeImport, PrimaryKeyType.Assigned, Number);
