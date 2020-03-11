@@ -31,7 +31,6 @@ import { RefToHeaderSimple } from "./models/ref-to-header-simple";
 import { GuidClazzHasMany } from "./models/guid-clazz-has-many";
 
 export class MappersTableNew extends MapperTest {
-
     constructor() {
         super();
 
