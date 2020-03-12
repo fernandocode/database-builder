@@ -26,9 +26,6 @@ export class Crud {
             database?: DatabaseBase,
             enableLog?: boolean
         } = {}
-        // private _database: DatabaseBase = void 0,
-        // private _getMapper: GetMapper,
-        // public enableLog: boolean = true
     ) {
         this._getMapper = getMapper;
         this._database = database;
@@ -46,10 +43,6 @@ export class Crud {
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
-        // typeT: new () => T,
-        // modelToSave: T = void 0,
-        // metadata: MetadataTable<T> = this.getMapper(typeT),
-        // database: DatabaseBase = this.getDatabase()
     ): Delete<T> {
         return new Delete(typeT, { modelToSave, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
     }
@@ -64,10 +57,6 @@ export class Crud {
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
-        // typeT: new () => T,
-        // key: any,
-        // metadata: MetadataTable<T> = this.getMapper(typeT),
-        // database: DatabaseBase = this.getDatabase()
     ): Delete<T> {
         const obj = {} as T;
         KeyUtils.setKey(metadata.mapperTable, obj, key);
@@ -108,10 +97,6 @@ export class Crud {
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
-        // modelToSave: T = void 0,
-        // alias: string = void 0,
-        // metadata: MetadataTable<T> = this.getMapper(typeT),
-        // database: DatabaseBase = this.getDatabase(),
     ): Insert<T> {
         return new Insert(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
     }
@@ -127,9 +112,6 @@ export class Crud {
             metadata?: MetadataTableBase<T>,
             database?: DatabaseBase
         } = {}
-        // alias: string = void 0,
-        // metadata?: MetadataTableBase<T>,
-        // database: DatabaseBase = this.getDatabase(),
     ): Query<T> {
         if (typeT && (typeT as { _builder: () => QueryBuilder<T> })._builder) {
             typeT = (typeT as { _builder: () => QueryBuilder<T> })._builder();

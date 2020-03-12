@@ -15,8 +15,8 @@ describe("Cascade", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        crud = new Crud(database, mapper, false);
-        ddl = new Ddl(database, mapper, false);
+        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
     // #1800
@@ -33,14 +33,14 @@ describe("Cascade", () => {
             } as HeaderSimple
         } as RefToHeaderSimple;
 
-        const insertResult = await crud.insert(HeaderSimple, refToHeaderSimple.headerSimple).execute().toPromise();
+        const insertResult = await crud.insert(HeaderSimple, { modelToSave: refToHeaderSimple.headerSimple }).execute().toPromise();
         expect(insertResult.length).to.equal(refToHeaderSimple.headerSimple.items.length + 1);
         expect(insertResult[0].rowsAffected).to.equal(1);
         refToHeaderSimple.headerSimple.items.forEach((value, index) => {
             expect(insertResult[index + 1].rowsAffected).to.equal(1);
         });
 
-        const insertRefResult = await crud.insert(RefToHeaderSimple, refToHeaderSimple).execute().toPromise();
+        const insertRefResult = await crud.insert(RefToHeaderSimple, { modelToSave: refToHeaderSimple }).execute().toPromise();
         expect(insertRefResult.length).to.equal(1);
 
         const query = crud.query(RefToHeaderSimple);
@@ -48,8 +48,8 @@ describe("Cascade", () => {
             .join(HeaderSimple,
                 on => on.equal(x => x.id, query.ref(x => x.headerSimple.id)),
                 join => join.projection(p => p.all()), JoinType.LEFT)
-                // TODO: #1802 - fazer implementação de possibilidade de realizar Fetch em relações, isso ira criar associação com as tabelas e buscas os dados relacionados, verificar como funciona no NHibernate QueryOver
-                // .fetch(x => x.items)
+            // TODO: #1802 - fazer implementação de possibilidade de realizar Fetch em relações, isso ira criar associação com as tabelas e buscas os dados relacionados, verificar como funciona no NHibernate QueryOver
+            // .fetch(x => x.items)
             ;
         const selectResult = await query
             .projection(p => p.all())

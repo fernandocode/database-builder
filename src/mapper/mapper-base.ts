@@ -87,6 +87,10 @@ export class MapperBase implements GetMapper {
         this._mappers.forEach(callbackfn);
     }
 
+    public clear() {
+        this._mappers = new Map<string, MetadataTable<any>>();
+    }
+
     private push(metadataTable: MetadataTable<any>): void {
         if (this.has(metadataTable.newable.name)) {
             throw new DatabaseBuilderError(`Duplicate mapper: '${metadataTable.newable.name}'`);

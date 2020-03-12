@@ -64,7 +64,6 @@ describe("Lambda Expression", () => {
     //         ;
     //     })
     //     .compile();
-    //     console.log(result);
     //     expect(result[0].params.length).to.equal(3);
     //     expect(result[0].params[0]).to.equal("Test");
     //     expect(result[0].params[1]).to.equal(2);

@@ -46,16 +46,12 @@ export class JoinQueryBuilder<T>
     }
 
     public _getWhere(): WhereCompiled {
-        // return this.whereCompile();
         return this.whereCompiled;
     }
 
     public _getProjections(): ProjectionModel[] {
         return this._projections;
     }
-    // public _getSelect(): ProjectionCompiled {
-    //     return this._projectionCompiled;
-    // }
 
     public _getGroupBy(): string {
         return this._groupBy;

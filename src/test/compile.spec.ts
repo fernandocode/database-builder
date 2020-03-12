@@ -17,8 +17,8 @@ describe("Compile", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        crud = new Crud(database, mapper, false);
-        ddl = new Ddl(database, mapper, false);
+        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
 
         await ddl.create(Cidade).execute().toPromise();
         await ddl.create(Uf).execute().toPromise();
@@ -139,20 +139,20 @@ describe("Compile", () => {
                 join.where(where => where.greatAndEqual(x => x.population, 200));
             });
         const result1 = query.compile();
-        expect(result1[0].params.length).to.equal(3);
-        expect(result1[0].params[0]).to.equal(20);
-        expect(result1[0].params[1]).to.equal(200);
-        expect(result1[0].params[2]).to.equal(0);
-        expect(result1[0].query).to.equal("SELECT cid.nome AS nome, uf.nome AS uf_nome FROM Cidade AS cid LEFT JOIN Uf AS uf ON (uf.codeImport = cid.uf_codeImport) WHERE cid.population < ? AND uf.population >= ? AND (cid.population > ?)");
+        expect(result1[0].params.length).to.equal(4);
+        expect(result1[0].params[0]).to.equal(100);
+        expect(result1[0].params[1]).to.equal(20);
+        expect(result1[0].params[2]).to.equal(200);
+        expect(result1[0].params[3]).to.equal(0);
+        expect(result1[0].query).to.equal("SELECT cid.nome AS nome, uf.nome AS uf_nome FROM Cidade AS cid LEFT JOIN Uf AS uf ON (uf.codeImport = cid.uf_codeImport AND (uf.population >= ?)) WHERE cid.population < ? AND uf.population >= ? AND (cid.population > ?)");
 
-        // const resultExecute = await query.toList().toPromise();
-        // console.log(resultExecute);
         const result2 = query.compile();
-        expect(result2[0].params.length).to.equal(3);
-        expect(result2[0].params[0]).to.equal(20);
-        expect(result2[0].params[1]).to.equal(200);
-        expect(result2[0].params[2]).to.equal(0);
-        expect(result2[0].query).to.equal("SELECT cid.nome AS nome, uf.nome AS uf_nome FROM Cidade AS cid LEFT JOIN Uf AS uf ON (uf.codeImport = cid.uf_codeImport) WHERE cid.population < ? AND uf.population >= ? AND (cid.population > ?)");
+        expect(result2[0].params.length).to.equal(4);
+        expect(result2[0].params[0]).to.equal(100);
+        expect(result2[0].params[1]).to.equal(20);
+        expect(result2[0].params[2]).to.equal(200);
+        expect(result2[0].params[3]).to.equal(0);
+        expect(result2[0].query).to.equal("SELECT cid.nome AS nome, uf.nome AS uf_nome FROM Cidade AS cid LEFT JOIN Uf AS uf ON (uf.codeImport = cid.uf_codeImport AND (uf.population >= ?)) WHERE cid.population < ? AND uf.population >= ? AND (cid.population > ?)");
     });
 
 });

@@ -12,7 +12,6 @@ export class QueryHelper {
         return sqls.map(x => {
             const count = this.countOccurrence(x, "\\?");
             const r = { sql: x.trim(), params: params.splice(0, count) };
-            // console.log(`split::: ${count} - `, r, x, params);
             return r;
         });
     }

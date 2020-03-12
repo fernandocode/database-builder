@@ -36,8 +36,7 @@ export class ManagedTransaction {
             sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]>,
             executeSql(statement: string, params: any): Promise<DatabaseResult>;
         },
-        private _singleTransactionManager: SingleTransactionManager,
-        private enableLog: boolean
+        private _singleTransactionManager: SingleTransactionManager
     ) {
         this._idTransaction = `transaction_${Utils.GUID().replace(/-/g, "_")}`;
     }
@@ -98,20 +97,11 @@ export class ManagedTransaction {
     }
 
     private sqlBatch(sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> {
-        this.log(sqlStatements);
         return this._database.sqlBatch(sqlStatements);
     }
 
     private executeSql(statement: string, params: any): Promise<DatabaseResult> {
-        this.log({ query: statement, params } as QueryCompiled);
         return this._database.executeSql(statement, params);
-    }
-
-    private log(log: any) {
-        if (this.enableLog) {
-            // tslint:disable-next-line
-            console.log(log);
-        }
     }
 
     /**

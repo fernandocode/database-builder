@@ -302,14 +302,16 @@ export abstract class QueryBuilderBase<T,
         const whereCompiled: WhereCompiled = this.whereCompile(this.whereCompiled);
 
         const compiled: QueryCompiled = this.buildBase();
+        const compiledJoin: QueryCompiled = this.compileJoin();
         return this.buildUnions({
             params: compiled.params
-                .concat(this._joinParams)
+                .concat(compiledJoin.params)
+                // .concat(this._joinParams)
                 .concat(whereCompiled.params)
                 .concat(this._having.params)
                 .concat(this._limit.params),
             // Template: https://sqlite.org/lang_select.html
-            query: `${compiled.query}${whereCompiled.where}${this._groupBy}${this._having.where}${this._orderBy}${this._limit.builder}`
+            query: `${compiled.query}${compiledJoin.query}${whereCompiled.where}${this._groupBy}${this._having.where}${this._orderBy}${this._limit.builder}`
         });
     }
 
@@ -371,23 +373,38 @@ export abstract class QueryBuilderBase<T,
         return ProjectionCompile.compile(this._projections);
     }
 
-    protected buildBase(): QueryCompiled {
-        const columnsCompiled = this.getColumnsCompiled();
-
-        let tablenameAndJoins: QueryCompiled = { query: this.compileTable(), params: this._fromParams };
+    protected compileJoin(): QueryCompiled {
+        let joinsBuild: QueryCompiled = { query: "", params: [] };
         for (const key in this._joinsQuery) {
             if (this._joinsQuery.hasOwnProperty(key)) {
                 const joinQuery = this._joinsQuery[key];
-                tablenameAndJoins = this.compileTableJoins(tablenameAndJoins, joinQuery);
+                joinsBuild = this.compileTableJoins(joinsBuild, joinQuery);
             }
         }
+        return joinsBuild;
+    }
 
-        this._joinParams = this._joinParams.concat(tablenameAndJoins.params);
+    protected buildBase(): QueryCompiled {
+        const columnsCompiled = this.getColumnsCompiled();
+
+        // let tablenameAndJoins: QueryCompiled = { query: this.compileTable(), params: this._fromParams };
+        // for (const key in this._joinsQuery) {
+        //     if (this._joinsQuery.hasOwnProperty(key)) {
+        //         const joinQuery = this._joinsQuery[key];
+        //         tablenameAndJoins = this.compileTableJoins(tablenameAndJoins, joinQuery);
+        //     }
+        // }
+
+        // this._joinParams = this._joinParams.concat(tablenameAndJoins.params);
 
         return {
-            params: columnsCompiled.params,
-            query: `SELECT ${columnsCompiled.projection} FROM ${tablenameAndJoins.query}`,
+            params: columnsCompiled.params.concat(this._fromParams),
+            query: `SELECT ${columnsCompiled.projection} FROM ${this.compileTable()}`,
         } as QueryCompiled;
+        // return {
+        //     params: columnsCompiled.params.concat(tablenameAndJoins.params),
+        //     query: `SELECT ${columnsCompiled.projection} FROM ${tablenameAndJoins.query}`,
+        // } as QueryCompiled;
     }
 
     protected compileGroupBy(groupBy: string, addCommand: boolean = true) {
@@ -434,7 +451,7 @@ export abstract class QueryBuilderBase<T,
     ): QueryCompiled {
         const onWhereCompiled = join._getOn();
         return {
-            params: tablesBase.params.concat(onWhereCompiled.params),
+            params: tablesBase.params.concat(onWhereCompiled.params).concat(join._getParams()),
             query: `${tablesBase.query} ${join._getTypeJoin()} JOIN ${join.compileTable()} ON (${onWhereCompiled.where})`,
         };
     }

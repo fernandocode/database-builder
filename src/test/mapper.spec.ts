@@ -48,6 +48,7 @@ describe("Mapper", () => {
     });
 
     it("mapper sub property", () => {
+        mapperBase.clear();
         const mapper = mapperBase.mapper(SubRegiao)
             .key(x => x.codeImport, PrimaryKeyType.Assigned, Number)
             .column(x => x.nome, String)
@@ -55,15 +56,15 @@ describe("Mapper", () => {
 
         const create = new Create(SubRegiao, mapper.mapperTable);
 
-        expect(create.compile()[0]).to.equal('CREATE TABLE IF NOT EXISTS SubRegiao( codeImport INTEGER NOT NULL PRIMARY KEY, nome TEXT, regiao_codeImport INTEGER );');
-        
-        const subRegiao = {nome: 'test', codeImport: 1, regiao: { codeImport: 2 }  as Regiao}  as SubRegiao;
+        expect(create.compile()[0].query).to.equal("CREATE TABLE IF NOT EXISTS SubRegiao( codeImport INTEGER NOT NULL PRIMARY KEY, nome TEXT, regiao_codeImport INTEGER )");
 
-        const insert = new Insert(SubRegiao, subRegiao, mapper.mapperTable);
+        const subRegiao = { nome: "test", codeImport: 1, regiao: { codeImport: 2 } as Regiao } as SubRegiao;
+
+        const insert = new Insert(SubRegiao, { modelToSave: subRegiao, mapperTable: mapper.mapperTable });
 
         const insertCompiled = insert.compile()[0];
 
-        expect(insertCompiled.query).to.equal('INSERT INTO SubRegiao (codeImport, nome, regiao_codeImport) VALUES (?, ?, ?)');
-        expect(insertCompiled.params.join(', ')).to.equal([1, 'test', 2].join(', '));
+        expect(insertCompiled.query).to.equal("INSERT INTO SubRegiao (codeImport, nome, regiao_codeImport) VALUES (?, ?, ?)");
+        expect(insertCompiled.params.join(", ")).to.equal([1, "test", 2].join(", "));
     });
 });
