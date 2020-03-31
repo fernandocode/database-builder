@@ -47,6 +47,14 @@ export abstract class WhereBaseBuilder<
         return this.proj().concat("", ...projections);
     }
 
+    public coalesce<TReturn>(
+        expression: ExpressionOrColumn<TReturn, T>,
+        // alias?: string,
+        ...args: any[]
+    ): ProjectionsHelper<T> {
+        return this.proj().coalesce(expression, "", args);
+    }
+
     public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this._alias): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
@@ -336,7 +344,6 @@ export abstract class WhereBaseBuilder<
                 this.getColumnParams(expression),
                 valuesOrQuery as ValueTypeToParse[]);
         } else {
-            // const compiled = (valuesOrQuery as QueryCompilable).compile();
             const compileds = (valuesOrQuery as SqlCompilable).compile();
             compileds.forEach(compiled => {
                 this.buildWhereColumn(

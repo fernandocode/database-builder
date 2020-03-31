@@ -1,6 +1,9 @@
 import { ProjectionModel } from "./../crud/projection-model";
 import { Projection } from "../crud/enums/projection";
-import { ExpressionOrColumn, Utils } from "./utils";
+import { ExpressionOrColumn, Utils, ExpressionQuery } from "./utils";
+import { SqlCompilable } from "../crud/sql-compilable";
+import { QueryCompiled } from "./query-compiled";
+import { DatabaseBuilderError } from "./errors";
 export class ProjectionsUtils<T> {
 
     public static readonly WILDCARD = "*";
@@ -16,7 +19,7 @@ export class ProjectionsUtils<T> {
     }
 
     public apply<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
@@ -35,19 +38,29 @@ export class ProjectionsUtils<T> {
     }
 
     private _apply<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>,
+        expression: ExpressionQuery<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]
     ): ProjectionModel {
+        if (Utils.isQueryCompilable(expression)) {
+            return this._apply((expression as SqlCompilable).compile(), projections, alias, args);
+        }
+        if (Utils.isQueryCompiledArray(expression)) {
+            if ((expression as QueryCompiled[]).length === 1) {
+                return this._apply((expression as QueryCompiled[])[0].query, projections, alias, [...args, ...(expression as QueryCompiled[])[0].params]);
+            } else {
+                throw new DatabaseBuilderError(`query cascade isn't supported in projections (${(expression as QueryCompiled[]).length})`);
+            }
+        }
         return this.register(
-            this.create(Utils.getColumn(expression),
+            this.create(Utils.getColumn(expression as ExpressionOrColumn<TReturn, T>),
                 projections, alias, args)
         );
     }
 
     private checkApply<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
         args?: any[]

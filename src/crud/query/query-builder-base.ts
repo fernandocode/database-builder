@@ -126,7 +126,7 @@ export abstract class QueryBuilderBase<T,
     public from(
         query: QueryCompiled[] | SqlCompilable
     ): TQuery {
-        if ((query as SqlCompilable).compile) {
+        if (Utils.isQueryCompilable(query)) {
             return this.from((query as SqlCompilable).compile());
         }
         (query as QueryCompiled[])
@@ -147,7 +147,7 @@ export abstract class QueryBuilderBase<T,
         query: QueryCompiled[] | SqlCompilable,
         type: UnionType = UnionType.None
     ): TQuery {
-        if ((query as SqlCompilable).compile) {
+        if (Utils.isQueryCompilable(query)) {
             return this.union((query as SqlCompilable).compile(), type);
         }
         (query as QueryCompiled[])

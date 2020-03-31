@@ -2,12 +2,12 @@ import { Resultable } from "./resultable";
 
 export class PlanRef implements Resultable {
     constructor(
-        public value?: string
+        public value?: any
     ) {
 
     }
 
     public result(): string {
-        return this.value;
+        return `${this.value}`;
     }
 }

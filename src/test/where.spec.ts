@@ -648,4 +648,19 @@ describe("Where", () => {
         expect(result[0].query).to.equal("SELECT tes.id AS iiiiddd FROM TestClazz AS tes WHERE iiiiddd = tes.id AND tes.description = dateStr");
     });
 
+    it("where compare with subquery", () => {
+        const query = crud.query(TestClazz);
+        const subQuery = crud.query(TestClazzRef).where(where => where.equal(x => x.id, 1)).limit(1);
+        query
+            .where(where => {
+                where.equal(x => x.id, where.coalesce(subQuery.compile()[0].query, 123));
+                // where.equal(where.concat(where.ref(x => x.id), "||", where.ref(x => x.description)), 2 + "isso");
+            });
+        const result = query.compile();
+        console.log(result);
+        // expect(result[0].params.length).to.equal(1);
+        // expect(result[0].params[0]).to.equal(2);
+        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ?");
+    });
+
 });

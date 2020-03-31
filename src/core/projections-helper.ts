@@ -1,6 +1,6 @@
 import { ProjectionModel } from "./../crud/projection-model";
 import { Projection } from "../crud/enums/projection";
-import { ExpressionOrColumn, ExpressionProjection, Utils } from "./utils";
+import { ExpressionOrColumn, ExpressionProjection, Utils, ExpressionQuery } from "./utils";
 import { ProjectionsUtils } from "./projections-utils";
 import { ProjectionCompiled } from "../crud/projection-compiled";
 
@@ -45,7 +45,6 @@ export class ProjectionsHelper<T> {
         const projectionsCompiled = new ProjectionCompiled();
         projections.forEach((projection) => {
             const compiled = Utils.resolveExpressionProjection(projection);
-            // const compiled = Utils.resolveProjection(projection);
             projectionsCompiled.projection += `${compiled.projection} `;
             projectionsCompiled.params = projectionsCompiled.params.concat(compiled.params);
         });
@@ -122,7 +121,7 @@ export class ProjectionsHelper<T> {
     }
 
     public coalesce<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {

@@ -24,6 +24,7 @@ import { ProjectionCompile } from "../crud/projection-compile";
 import * as lodash from "lodash";
 import { QueryCompiled } from ".";
 import { Resultable } from "./resultable";
+import { SqlCompilable } from "../crud/sql-compilable";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -32,7 +33,11 @@ export type ValueTypeToParse = ValueType | moment.Moment | Date | object;
 
 export type TypeOrString<T> = (new () => T) | string;
 
+export type TQuery = QueryCompiled[] | SqlCompilable;
+
 export type ExpressionOrColumn<TReturn, T> = ReturnExpression<TReturn, T> | string;
+
+export type ExpressionQuery<TReturn, T> = ExpressionOrColumn<TReturn, T> | TQuery;
 
 export type TypeOrderBy<TReturn, T> = ExpressionOrColumn<TReturn, T> | PlanRef | number | QueryCompiled | QueryCompiled[];
 
@@ -190,6 +195,14 @@ export class Utils {
     public static isQueryCompiledArray(value: any): boolean {
         return (this.isArray(value)
             && (value as any[]).filter(v => this.isQueryCompiled(v) === false).length === 0);
+    }
+
+    public static isQueryCompilable(value: any): boolean {
+        return value.compile && this.isFunction(value.compile);
+    }
+
+    public static isTQuery(value: any): boolean {
+        return this.isQueryCompilable(value) || this.isQueryCompiledArray(value);
     }
 
     public static databaseName<T>(tablename: TypeOrString<T>): string {
