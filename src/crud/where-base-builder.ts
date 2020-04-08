@@ -1,6 +1,6 @@
 import { LambdaExpression } from "lambda-expression";
 import { LambdaMetadata } from "../core/lambda-metadata";
-import { ExpressionOrColumn, ExpressionProjection, ParamType, Utils, ValueTypeToParse } from "../core/utils";
+import { ExpressionOrColumn, ExpressionProjection, ParamType, Utils, ValueTypeToParse, ExpressionQuery } from "../core/utils";
 import { WhereCompiled } from "./where-compiled";
 import { Condition } from "./enums/condition";
 import { DatabaseHelper } from "../database-helper";
@@ -47,15 +47,19 @@ export abstract class WhereBaseBuilder<
         return this.proj().concat("", ...projections);
     }
 
-    public coalesce<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T>,
-        // alias?: string,
-        ...args: any[]
+    public coalesce<TExpressionReturn>(
+        expression: ExpressionQuery<TExpressionReturn, T>,
+        argumentsCoalesce: any[],
+        alias: string = "",
+        args?: any[]
+        // expression: ExpressionOrColumn<TReturn, T>,
+        // // alias?: string,
+        // ...args: any[]
     ): ProjectionsHelper<T> {
-        return this.proj().coalesce(expression, "", args);
+        return this.proj().coalesce(expression, argumentsCoalesce, alias, args);
     }
 
-    public ref<TReturn>(expression: ExpressionOrColumn<TReturn, T>, alias: string = this._alias): ColumnRef {
+    public ref<TExpressionReturn>(expression: ExpressionOrColumn<TExpressionReturn, T>, alias: string = this._alias): ColumnRef {
         return new ColumnRef(
             Utils.getColumn(expression),
             alias

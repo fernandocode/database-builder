@@ -173,17 +173,4 @@ describe("Query filter", () => {
         expect(result[0].params[1]).to.equal("N%");
         expect(result[0].params[2]).to.equal(0);
     });
-
-    it("QueryFilter join deep enableQueryFilters in join Cidade", () => {
-        const subQuery = new Query(TestClazzRef, {
-            getMapper: (t) => {
-                const mm = getMapper().get(t);
-                console.log("mmm:::", mm);
-                return mm;
-            }
-        })
-            .where(where => where.equal(x => x.id, 1))
-            .limit(1);
-        const compiled = subQuery.compile();
-    });
 });

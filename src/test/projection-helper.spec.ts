@@ -9,6 +9,18 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Projections Helper", () => {
 
+    const subQuery = new Query(TestClazzRef,
+        {
+            getMapper: (t) => {
+                return getMapper().get(t);
+            },
+            mapperTable: getMapper().get(TestClazzRef).mapperTable
+        }
+    )
+        .where(where => where.equal(x => x.id, 2))
+        .select(x => x.autoReference.id)
+        .limit(1);
+
     it("exp", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
         const result = helper.exp(x => x.numero)._result();
@@ -45,12 +57,32 @@ describe("Projections Helper", () => {
         expect(result[0].params.length).equal(0);
     });
 
+    it("sum subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.sum(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("SUM((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
+    });
+
     it("max", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
         const result = helper.max(x => x.id, "__op")._result();
         expect(result.length).equal(1);
         expect(result[0].projection).equal("MAX(__abc.id) AS __op");
         expect(result[0].params.length).equal(0);
+    });
+
+    it("max subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.max(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("MAX((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
     });
 
     it("min", () => {
@@ -61,12 +93,32 @@ describe("Projections Helper", () => {
         expect(result[0].params.length).equal(0);
     });
 
+    it("min subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.min(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("MIN((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
+    });
+
     it("avg", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
         const result = helper.avg(x => x.id, "__op")._result();
         expect(result.length).equal(1);
         expect(result[0].projection).equal("AVG(__abc.id) AS __op");
         expect(result[0].params.length).equal(0);
+    });
+
+    it("avg subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.avg(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("AVG((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
     });
 
     it("count", () => {
@@ -77,12 +129,32 @@ describe("Projections Helper", () => {
         expect(result[0].params.length).equal(0);
     });
 
+    it("count subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.count(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("COUNT((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
+    });
+
     it("cast", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
         const result = helper.cast(x => x.id, "__op")._result();
         expect(result.length).equal(1);
         expect(result[0].projection).equal("CAST(__abc.id) AS __op");
         expect(result[0].params.length).equal(0);
+    });
+
+    it("cast subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.cast(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("CAST((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
     });
 
     it("distinct", () => {
@@ -93,6 +165,16 @@ describe("Projections Helper", () => {
         expect(result[0].params.length).equal(0);
     });
 
+    it("distinct subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.distinct(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("DISTINCT((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
+    });
+
     it("round", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
         const result = helper.round(x => x.id, "__op")._result();
@@ -101,31 +183,33 @@ describe("Projections Helper", () => {
         expect(result[0].params.length).equal(0);
     });
 
+    it("round subQuery", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.round(subQuery, "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("ROUND((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?)) AS __op");
+        expect(result[0].params.length).equal(2);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
+    });
+
     it("coalesce", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
-        const result = helper.coalesce(x => x.id, "__op")._result();
+        const result = helper.coalesce(x => x.id, [12], "__op")._result();
         expect(result.length).equal(1);
-        expect(result[0].projection).equal("COALESCE(__abc.id) AS __op");
-        expect(result[0].params.length).equal(0);
+        expect(result[0].projection).equal("COALESCE(__abc.id, ?) AS __op");
+        expect(result[0].params.length).equal(1);
+        expect(result[0].params[0]).equal(12);
     });
 
     it("coalesce subQuery", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
-        const m = getMapper().get(TestClazzRef);
-        console.log("ttt ::::", m);
-        const subQuery = new Query(TestClazzRef, {
-            getMapper: (t) => {
-                const mm = getMapper().get(t);
-                console.log("mmm:::", mm);
-                return mm;
-            }
-        })
-            .where(where => where.equal(x => x.id, 1))
-            .limit(1);
-        const compiled = subQuery.compile();
-        // const result = helper.coalesce(subQuery, "__op")._result();
-        // expect(result.length).equal(1);
-        // expect(result[0].projection).equal("COALESCE(__abc.id) AS __op");
-        // expect(result[0].params.length).equal(0);
+        const result = helper.coalesce(subQuery, [23], "__op")._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("COALESCE((SELECT tes.autoReference_id AS autoReference_id FROM TestClazzRef AS tes WHERE tes.id = ? LIMIT ?), ?) AS __op");
+        expect(result[0].params.length).equal(3);
+        expect(result[0].params[0]).equal(2);
+        expect(result[0].params[1]).equal(1);
+        expect(result[0].params[2]).equal(23);
     });
 });

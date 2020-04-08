@@ -37,18 +37,27 @@ export class ProjectionsUtils<T> {
             this.addAliasTable(column), alias, args);
     }
 
+    public addAliasTable(
+        column: string,
+    ): string {
+        if (Utils.isNameColumn(column)) {
+            return `${this._aliasTable}.${column}`;
+        }
+        return column;
+    }
+
     private _apply<TReturn>(
         expression: ExpressionQuery<TReturn, T>,
         projections: Projection[] = [],
         alias?: string,
-        args?: any[]
+        args: any[] = []
     ): ProjectionModel {
         if (Utils.isQueryCompilable(expression)) {
             return this._apply((expression as SqlCompilable).compile(), projections, alias, args);
         }
         if (Utils.isQueryCompiledArray(expression)) {
             if ((expression as QueryCompiled[]).length === 1) {
-                return this._apply((expression as QueryCompiled[])[0].query, projections, alias, [...args, ...(expression as QueryCompiled[])[0].params]);
+                return this._apply(`(${(expression as QueryCompiled[])[0].query})`, projections, alias, [...args, ...(expression as QueryCompiled[])[0].params]);
             } else {
                 throw new DatabaseBuilderError(`query cascade isn't supported in projections (${(expression as QueryCompiled[]).length})`);
             }
@@ -105,15 +114,6 @@ export class ProjectionsUtils<T> {
         return this._addAliasTableToAlias
             ? `${this._aliasTable}_${column}`
             : column;
-    }
-
-    private addAliasTable(
-        column: string,
-    ): string {
-        if (Utils.isNameColumn(column)) {
-            return `${this._aliasTable}.${column}`;
-        }
-        return column;
     }
 
     private builderProjections(

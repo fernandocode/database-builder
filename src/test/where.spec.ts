@@ -11,7 +11,7 @@ import { ColumnRef } from "../core/column-ref";
 
 describe("Where", () => {
 
-    const crud = new Crud({getMapper: getMapper()});
+    const crud = new Crud({ getMapper: getMapper() });
 
     it("none", () => {
         const query = crud.query(TestClazz);
@@ -648,19 +648,65 @@ describe("Where", () => {
         expect(result[0].query).to.equal("SELECT tes.id AS iiiiddd FROM TestClazz AS tes WHERE iiiiddd = tes.id AND tes.description = dateStr");
     });
 
-    it("where compare with subquery", () => {
+    it("where coalesce with subquery default type number", () => {
         const query = crud.query(TestClazz);
-        const subQuery = crud.query(TestClazzRef).where(where => where.equal(x => x.id, 1)).limit(1);
+        const subQuery = crud.query(TestClazzRef, {alias: "tesRef"})
+            .where(where => where.equal(x => x.id, 2))
+            .select(x => x.autoReference.id)
+            .limit(1);
         query
             .where(where => {
-                where.equal(x => x.id, where.coalesce(subQuery.compile()[0].query, 123));
-                // where.equal(where.concat(where.ref(x => x.id), "||", where.ref(x => x.description)), 2 + "isso");
-            });
+                where.equal(x => x.id, where.coalesce(subQuery, [123]));
+            })
+            .select(x => x.description);
         const result = query.compile();
-        console.log(result);
-        // expect(result[0].params.length).to.equal(1);
-        // expect(result[0].params[0]).to.equal(2);
-        expect(result[0].query).to.equal("SELECT tes.internalKey AS internalKey, tes.id AS id, tes.description AS description, tes.date AS date, tes.dateMoment AS dateMoment, tes.dateDate AS dateDate, tes.numero AS numero, tes.referenceTest_id AS referenceTest_id, tes.referenceTestCode_code AS referenceTestCode_code, tes.dateStr AS dateStr FROM TestClazz AS tes WHERE tes.id = ?");
+        expect(result[0].params.length).to.equal(3);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal(1);
+        expect(result[0].params[2]).to.equal(123);
+        expect(result[0].query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes WHERE tes.id = COALESCE((SELECT tesRef.autoReference_id AS autoReference_id FROM TestClazzRef AS tesRef WHERE tesRef.id = ? LIMIT ?), ?)");
+    });
+
+    it("where coalesce with subquery default type string with param main query before subquery", () => {
+        const query = crud.query(TestClazz);
+        const subQuery = crud.query(TestClazzRef, {alias: "tesRef"})
+            .where(where => where.equal(x => x.id, 2))
+            .select(x => x.autoReference.id)
+            .limit(1);
+        query
+            .where(where => {
+                where.great(x => x.numero, 12);
+                where.equal(x => x.id, where.coalesce(subQuery, ["abc"]));
+            })
+            .select(x => x.description);
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(4);
+        expect(result[0].params[0]).to.equal(12);
+        expect(result[0].params[1]).to.equal(2);
+        expect(result[0].params[2]).to.equal(1);
+        expect(result[0].params[3]).to.equal("abc");
+        expect(result[0].query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes WHERE tes.numero > ? AND tes.id = COALESCE((SELECT tesRef.autoReference_id AS autoReference_id FROM TestClazzRef AS tesRef WHERE tesRef.id = ? LIMIT ?), ?)");
+    });
+
+    it("where coalesce with subquery default type string with param main query after subquery", () => {
+        const query = crud.query(TestClazz);
+        const subQuery = crud.query(TestClazzRef, {alias: "tesRef"})
+            .where(where => where.equal(x => x.id, 2))
+            .select(x => x.autoReference.id)
+            .limit(1);
+        query
+            .where(where => {
+                where.equal(x => x.id, where.coalesce(subQuery, ["abc"]));
+                where.great(x => x.numero, 12);
+            })
+            .select(x => x.description);
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(4);
+        expect(result[0].params[0]).to.equal(2);
+        expect(result[0].params[1]).to.equal(1);
+        expect(result[0].params[2]).to.equal("abc");
+        expect(result[0].params[3]).to.equal(12);
+        expect(result[0].query).to.equal("SELECT tes.description AS description FROM TestClazz AS tes WHERE tes.id = COALESCE((SELECT tesRef.autoReference_id AS autoReference_id FROM TestClazzRef AS tesRef WHERE tesRef.id = ? LIMIT ?), ?) AND tes.numero > ?");
     });
 
 });

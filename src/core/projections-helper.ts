@@ -1,8 +1,11 @@
 import { ProjectionModel } from "./../crud/projection-model";
 import { Projection } from "../crud/enums/projection";
-import { ExpressionOrColumn, ExpressionProjection, Utils, ExpressionQuery } from "./utils";
+import { ExpressionOrColumn, ExpressionProjection, ExpressionQuery, Utils } from "./utils";
 import { ProjectionsUtils } from "./projections-utils";
 import { ProjectionCompiled } from "../crud/projection-compiled";
+import { SqlCompilable } from "../crud/sql-compilable";
+import { QueryCompiled } from "./query-compiled";
+import { DatabaseBuilderError } from "./errors";
 
 export class ProjectionsHelper<T> {
 
@@ -57,7 +60,7 @@ export class ProjectionsHelper<T> {
     }
 
     public sum<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -65,7 +68,7 @@ export class ProjectionsHelper<T> {
     }
 
     public max<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -73,7 +76,7 @@ export class ProjectionsHelper<T> {
     }
 
     public min<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -81,7 +84,7 @@ export class ProjectionsHelper<T> {
     }
 
     public avg<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -89,7 +92,7 @@ export class ProjectionsHelper<T> {
     }
 
     public count<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -97,7 +100,7 @@ export class ProjectionsHelper<T> {
     }
 
     public cast<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -105,7 +108,7 @@ export class ProjectionsHelper<T> {
     }
 
     public distinct<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -113,7 +116,7 @@ export class ProjectionsHelper<T> {
     }
 
     public round<TReturn>(
-        expression?: ExpressionOrColumn<TReturn, T>,
+        expression?: ExpressionQuery<TReturn, T>,
         alias: string = "",
         args?: any[]
     ): ProjectionsHelper<T> {
@@ -121,11 +124,25 @@ export class ProjectionsHelper<T> {
     }
 
     public coalesce<TReturn>(
-        expression?: ExpressionQuery<TReturn, T>,
+        expression: ExpressionQuery<TReturn, T>,
+        argumentsCoalesce: any[],
         alias: string = "",
-        args?: any[]
+        args: any[] = []
     ): ProjectionsHelper<T> {
-        return this.getResult(this._projectionsUtils.apply(expression, [Projection.Coalesce], alias, args));
+        if (argumentsCoalesce && argumentsCoalesce.length === 0) {
+            throw new DatabaseBuilderError(`At least one argument is necessary in the coalesce!`);
+        }
+        if (Utils.isQueryCompilable(expression)) {
+            return this.coalesce((expression as SqlCompilable).compile(), argumentsCoalesce, alias, args);
+        }
+        if (Utils.isQueryCompiledArray(expression)) {
+            if ((expression as QueryCompiled[]).length === 1) {
+                return this.coalesce(`(${(expression as QueryCompiled[])[0].query})`, argumentsCoalesce, alias, (expression as QueryCompiled[])[0].params);
+            } else {
+                throw new DatabaseBuilderError(`query cascade isn't supported in projections (${(expression as QueryCompiled[]).length})`);
+            }
+        }
+        return this.getResult(this._projectionsUtils.apply([`${this._projectionsUtils.addAliasTable(Utils.getColumn(expression as ExpressionOrColumn<TReturn, T>))}`, ...argumentsCoalesce.map(x => "?")].join(", "), [Projection.Coalesce], alias, [...args, ...argumentsCoalesce]));
     }
 
     private getResult(result: ProjectionModel): ProjectionsHelper<T> {
