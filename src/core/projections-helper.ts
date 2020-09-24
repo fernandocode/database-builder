@@ -6,6 +6,7 @@ import { ProjectionCompiled } from "../crud/projection-compiled";
 import { SqlCompilable } from "../crud/sql-compilable";
 import { QueryCompiled } from "./query-compiled";
 import { DatabaseBuilderError } from "./errors";
+import { QueryHelper } from "./query-helper";
 
 export class ProjectionsHelper<T> {
 
@@ -24,6 +25,11 @@ export class ProjectionsHelper<T> {
 
     public _result(): ProjectionModel[] {
         return this.__result;
+    }
+
+    public resultWithoutParams(): string[] {
+        const result = this._result();
+        return result.map(r => QueryHelper.compileWithoutParams(r.projection, r.params));
     }
 
     public exp<TReturn>(

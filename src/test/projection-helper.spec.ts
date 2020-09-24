@@ -49,6 +49,15 @@ describe("Projections Helper", () => {
         expect(result[0].params.length).equal(0);
     });
 
+    it("concat with coalesce", () => {
+        const helper = new ProjectionsHelper(TestClazz, "__abc");
+        const result = helper.concat("__concat", x => x.numero, "||", helper.coalesce(x => x.id, [0]))._result();
+        expect(result.length).equal(1);
+        expect(result[0].projection).equal("(numero || COALESCE(__abc.id, ?)) AS __concat");
+        expect(result[0].params.length).equal(1);
+        expect(result[0].params[0]).equal(0);
+    });
+
     it("sum", () => {
         const helper = new ProjectionsHelper(TestClazz, "__abc");
         const result = helper.sum(x => x.id, "__sum")._result();
