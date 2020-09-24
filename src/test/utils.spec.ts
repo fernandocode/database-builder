@@ -3,7 +3,6 @@ import { expect } from "chai";
 import { ExpressionOrValueEnum } from "../core/enums/expression-or-value-enum";
 import moment = require("moment");
 import { FieldType } from "../core/enums/field-type";
-import { DatabaseBuilderError } from "../core/errors";
 
 describe("Utils", () => {
 

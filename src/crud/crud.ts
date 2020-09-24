@@ -12,53 +12,106 @@ import { QueryBuilder } from "./query/query-builder";
 import { MetadataTableBase } from "../metadata-table-base";
 
 export class Crud {
+    public enableLog: boolean;
+    private _database: DatabaseBase;
+    private _getMapper: GetMapper;
 
     constructor(
-        private _database: DatabaseBase = void 0,
-        private _getMapper: GetMapper,
-        public enableLog: boolean = true) {
+        {
+            getMapper,
+            database,
+            enableLog = true
+        }: {
+            getMapper?: GetMapper,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        } = {}
+    ) {
+        this._getMapper = getMapper;
+        this._database = database;
+        this.enableLog = enableLog;
     }
 
     public delete<T>(
         typeT: new () => T,
-        modelToSave: T = void 0,
-        metadata: MetadataTable<T> = this.getMapper(typeT),
-        database: DatabaseBase = this.getDatabase()
+        {
+            modelToSave = void 0,
+            metadata = this.getMapper(typeT),
+            database = this.getDatabase()
+        }: {
+            modelToSave?: T,
+            metadata?: MetadataTable<T>,
+            database?: DatabaseBase
+        } = {}
     ): Delete<T> {
-        return new Delete(typeT, modelToSave, metadata.mapperTable, database, this.enableLog);
+        return new Delete(typeT, { modelToSave, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
     }
 
     public deleteByKey<T>(
         typeT: new () => T,
         key: any,
-        metadata: MetadataTable<T> = this.getMapper(typeT),
-        database: DatabaseBase = this.getDatabase()
+        {
+            metadata = this.getMapper(typeT),
+            database = this.getDatabase()
+        }: {
+            metadata?: MetadataTable<T>,
+            database?: DatabaseBase
+        } = {}
     ): Delete<T> {
         const obj = {} as T;
         KeyUtils.setKey(metadata.mapperTable, obj, key);
-        return new Delete(typeT, obj, metadata.mapperTable, database, this.enableLog);
+        return new Delete(typeT, { modelToSave: obj, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
     }
 
     public update<T>(
-        typeT: new () => T, modelToSave: T = void 0, alias: string = void 0,
-        metadata: MetadataTable<T> = this.getMapper(typeT),
-        database: DatabaseBase = this.getDatabase(),
+        typeT: new () => T,
+        {
+            modelToSave,
+            alias,
+            metadata = this.getMapper(typeT),
+            database = this.getDatabase()
+        }: {
+            modelToSave?: T,
+            alias?: string
+            metadata?: MetadataTable<T>,
+            database?: DatabaseBase
+        } = {}
+        // modelToSave: T = void 0,
+        // alias: string = void 0,
+        // metadata: MetadataTable<T> = this.getMapper(typeT),
+        // database: DatabaseBase = this.getDatabase(),
     ): Update<T> {
-        return new Update(typeT, modelToSave, metadata.mapperTable, alias, database, this.enableLog);
+        return new Update(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
     }
 
     public insert<T>(
-        typeT: new () => T, modelToSave: T = void 0, alias: string = void 0,
-        metadata: MetadataTable<T> = this.getMapper(typeT),
-        database: DatabaseBase = this.getDatabase(),
+        typeT: new () => T,
+        {
+            modelToSave,
+            alias,
+            metadata = this.getMapper(typeT),
+            database = this.getDatabase()
+        }: {
+            modelToSave?: T,
+            alias?: string
+            metadata?: MetadataTable<T>,
+            database?: DatabaseBase
+        } = {}
     ): Insert<T> {
-        return new Insert(typeT, modelToSave, metadata.mapperTable, alias, database, this.enableLog);
+        return new Insert(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
     }
 
     public query<T>(
-        typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> }, alias: string = void 0,
-        metadata?: MetadataTableBase<T>,
-        database: DatabaseBase = this.getDatabase(),
+        typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> },
+        {
+            alias,
+            metadata,
+            database = this.getDatabase()
+        }: {
+            alias?: string
+            metadata?: MetadataTableBase<T>,
+            database?: DatabaseBase
+        } = {}
     ): Query<T> {
         if (typeT && (typeT as { _builder: () => QueryBuilder<T> })._builder) {
             typeT = (typeT as { _builder: () => QueryBuilder<T> })._builder();
@@ -69,16 +122,24 @@ export class Crud {
             });
         }
         const that = this;
-        return new Query(typeT as (new () => T) | QueryBuilder<T>, alias,
-            (tKey: (new () => any) | string) => {
-                return that.getMapper(tKey);
-            }, metadata.mapperTable, database, this.enableLog);
+        return new Query(
+            typeT as (new () => T) | QueryBuilder<T>,
+            {
+                alias,
+                getMapper: (tKey: (new () => any) | string) => {
+                    return that.getMapper(tKey);
+                },
+                mapperTable: metadata.mapperTable,
+                database,
+                enableLog: this.enableLog
+            }
+        );
     }
 
     private getDatabase() {
-        if (!this._database) {
-            throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
-        }
+        // if (!this._database) {
+        //     throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
+        // }
         return this._database;
     }
 

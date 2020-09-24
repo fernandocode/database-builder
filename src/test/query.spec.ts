@@ -18,10 +18,11 @@ import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { ContasAReceber } from "./models/contas-a-receber";
 import { QueryBuilder } from "../crud";
 import { MetadataTable } from "../metadata-table";
+import { QueryHelper } from "../core/query-helper";
 
 describe("Query", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({ getMapper: getMapper() });
 
     it("none", () => {
         const query = crud.query(TestClazz);
@@ -185,7 +186,7 @@ describe("Query", () => {
     });
 
     it("from", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.from(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -200,7 +201,7 @@ describe("Query", () => {
     });
 
     it("union", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.union(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -215,7 +216,7 @@ describe("Query", () => {
     });
 
     it("union all", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.unionAll(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -230,7 +231,7 @@ describe("Query", () => {
     });
 
     it("union all and union", () => {
-        const query = crud.query(TestClazz, "p");
+        const query = crud.query(TestClazz, { alias: "p" });
         query.unionAll(
             crud.query(ReferencesModelTest)
                 .select(x => x.id, x => x.name)
@@ -268,6 +269,26 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal("%abcd%");
         expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE tes.description || '|' || ref.name LIKE ?");
+    });
+
+    it("join where concat columns with coalesce", () => {
+        const query = crud.query(TestClazz);
+        query.select(
+            x => x.id,
+            x => x.description,
+            x => x.disabled);
+        query.join(ReferencesModelTest,
+            on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+            join => {
+                join.select(x => x.name, x => x.id);
+                join.where(where => {
+                    where.contains(new ColumnRef(`${where.coalesce(query.ref(x => x.description).result(), ["a1"]).resultWithoutParams()[0]} || '|' || ${where.coalesce(join.ref(x => x.name).result(), ["b2"]).resultWithoutParams()[0]}`), "abcd");
+                });
+            });
+        const result = query.compile();
+        expect(result[0].params.length).to.equal(1);
+        expect(result[0].params[0]).to.equal("%abcd%");
+        expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE COALESCE(tes.description, 'a1') || '|' || COALESCE(ref.name, 'b2') LIKE ?");
     });
 
     it("join linked", () => {

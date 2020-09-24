@@ -2,7 +2,7 @@ import { QueryCompiled } from "../core/query-compiled";
 import { ProjectionsUtils } from "../core/projections-utils";
 import { BuilderCompiled } from "../core/builder-compiled";
 import { MapperTable } from "../mapper-table";
-import { ExpressionOrColumn, ExpressionProjection, Utils } from "../core/utils";
+import { ExpressionOrColumn, ExpressionProjection, Utils, ExpressionQuery, TQuery } from "../core/utils";
 import { ColumnRef } from "../core/column-ref";
 import { PlanRef } from "../core/plan-ref";
 import { ProjectionCompiled } from "./projection-compiled";
@@ -108,11 +108,12 @@ export class ProjectionBuilder<T> {
     }
 
     public add<TReturn>(
-        expression: ExpressionOrColumn<TReturn, T> | QueryCompiled[] | SqlCompilable,
+        // expression: ExpressionOrColumn<TReturn, T> | QueryCompiled[] | SqlCompilable,
+        expression: ExpressionQuery<TReturn, T>,
         alias?: string,
     ): ProjectionBuilder<T> {
-        if ((expression as SqlCompilable).compile || Utils.isQueryCompiledArray(expression)) {
-            return this.subQuery((expression as (QueryCompiled[] | SqlCompilable)), alias);
+        if (Utils.isQueryCompilable(expression) || Utils.isQueryCompiledArray(expression)) {
+            return this.subQuery((expression as (TQuery)), alias);
         }
         this.buildProjectionWithExpression(void 0,
             expression as ExpressionOrColumn<TReturn, T>,
@@ -257,7 +258,13 @@ export class ProjectionBuilder<T> {
         return this;
     }
 
-    // CASE {expression} {when} END
+    /**
+     * https://www.sqlite.org/lang_expr.html
+     * CASE {expression} {when} END
+     * @param caseCallback
+     * @param expression
+     * @param alias
+     */
     public case<TReturn>(
         caseCallback: (caseInstance: ProjectionCase<TReturn, T>) => void,
         expression: ExpressionOrColumn<TReturn, T> = void 0,
@@ -288,7 +295,6 @@ export class ProjectionBuilder<T> {
         const instanceProjection: ProjectionBuilder<T> = new ProjectionBuilder(this._typeT, this._aliasTable, void 0, false, this._getMapper);
         projectionCallback(instanceProjection);
         const projectionInner = ProjectionCompile.compile(instanceProjection.result());
-        // const projectionInner = instanceProjection.compile();
         this.buildProjectionWithExpression(Projection.Coalesce,
             `${projectionInner.projection}, ${defaultValue}`,
             alias,
@@ -328,10 +334,10 @@ export class ProjectionBuilder<T> {
     }
 
     public subQuery(
-        subQuery: QueryCompiled[] | SqlCompilable,
+        subQuery: TQuery,
         alias: string = "",
     ): ProjectionBuilder<T> {
-        if ((subQuery as SqlCompilable).compile) {
+        if (Utils.isQueryCompilable(subQuery)) {
             return this.subQuery((subQuery as SqlCompilable).compile(), alias);
         }
         (subQuery as QueryCompiled[])
@@ -344,9 +350,6 @@ export class ProjectionBuilder<T> {
     public result(): ProjectionModel[] {
         return this._projections;
     }
-    // public compile(): ProjectionCompiled {
-    //     return ProjectionCompile.compile(this._projections);
-    // }
 
     private selectAllColumns(mapper: MapperTable): void {
         const columns = mapper.columns.filter(x => Utils.isNull(x.tableReference));

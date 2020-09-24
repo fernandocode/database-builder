@@ -6,7 +6,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Getting Started", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({getMapper: getMapper()});
 
     it("query", () => {
         const query = crud.query(TestClazz);

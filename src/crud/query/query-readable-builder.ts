@@ -21,7 +21,7 @@ export class QueryReadableBuilder<T> extends QueryReadableBuilderBase {
         database: DatabaseBase,
     ): Observable<T[]> {
         return Observable.create((observer: Observer<T[]>) => {
-            queryBuilder.execute(cascade, database)
+            queryBuilder.execute({cascade, database})
                 .subscribe((cursors) => {
                     this.log(cursors);
                     try {

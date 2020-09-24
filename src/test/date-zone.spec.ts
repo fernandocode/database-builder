@@ -18,8 +18,8 @@ describe("Date", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        const crud = new Crud(database, mapper, false);
-        const ddl = new Ddl(database, mapper, false);
+        const crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        const ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
         return _databaseInstance = { crud, ddl };
     };
 
@@ -34,7 +34,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, dataExample);
+        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -53,7 +53,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, dataExample);
+        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -72,7 +72,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, dataExample);
+        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -92,7 +92,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, dataExample);
+        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 

@@ -5,10 +5,13 @@ import { DdlBaseBuilder } from "./ddl-base-builder";
 import { DatabaseBuilderError } from "../core/errors";
 import { QueryCompiled } from "../core/query-compiled";
 import { Observable } from "rxjs";
+import { SqlCompilable } from "../crud/sql-compilable";
 
-export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
+export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> implements SqlCompilable {
 
     protected readonly _executableBuilder: ExecutableBuilder;
+    // tslint:disable-next-line: variable-name
+    public readonly __allowInTransaction: boolean = true;
 
     constructor(
         protected readonly _builder: TBuilder,
@@ -18,20 +21,23 @@ export class DdlBase<T, TBuilder extends DdlBaseBuilder<T>> {
         this._executableBuilder = new ExecutableBuilder(enableLog);
     }
 
-    public execute(cascade: boolean = true, database: DatabaseBase = void 0): Observable<DatabaseResult[]> {
+    public execute(
+        {
+            cascade = true,
+            database
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase
+        } = {}
+    ): Observable<DatabaseResult[]> {
         const compiled = this.compile(cascade);
         return this._executableBuilder.execute(
-            compiled.map(query => {
-                return {
-                    query,
-                    params: []
-                } as QueryCompiled;
-            }),
+            compiled,
             this.getDatabase(database)
         );
     }
 
-    public compile(cascade: boolean = true): string[] {
+    public compile(cascade: boolean = true): QueryCompiled[] {
         const compiled = this.build(cascade);
         const script = [compiled.script];
         compiled.dependencies.forEach(dependency => {

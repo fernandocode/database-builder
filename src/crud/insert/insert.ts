@@ -4,21 +4,31 @@ import { CrudBase } from "../crud-base";
 import { InsertBuilder } from "./insert-builder";
 import { TypeCrud } from "../enums/type-crud";
 import { MapperTable } from "../../mapper-table";
-import { QueryCompiled } from "../../core";
+import { DatabaseBuilderError, QueryCompiled } from "../../core";
 import { DependencyListSimpleModel } from "../../definitions/dependency-definition";
 import { ReplacementParam } from "../../core/replacement-param";
+import { PrimaryKeyType } from "../../core/enums/primary-key-type";
+import { ModelUtils } from "../../core/model-utils";
 
 export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
-        modelToSave: T,
-        mapperTable: MapperTable,
-        alias: string = void 0,
-        database: DatabaseBase = void 0,
-        enableLog: boolean = true,
+        {
+            modelToSave,
+            mapperTable,
+            alias,
+            database,
+            enableLog = true
+        }: {
+            modelToSave: T,
+            mapperTable: MapperTable,
+            alias?: string,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        }
     ) {
-        super(TypeCrud.CREATE, mapperTable, new InsertBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog);
+        super(TypeCrud.CREATE, { mapperTable, builder: new InsertBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog });
     }
 
     public columns(columnsCallback: (columns: InsertColumnsBuilder<T>) => void): Insert<T> {
@@ -27,13 +37,32 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
     }
 
     protected resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled {
-        const builder = new InsertBuilder(void 0, dependency, void 0,
-            {
-                index,
-                value,
-                reference: new ReplacementParam("0", "insertId")
-            } as DependencyListSimpleModel
-        );
+        const modelBase = this.model();
+        const modelDependency = {
+            index,
+            value,
+            // reference: new ReplacementParam("0", "insertId")
+        } as DependencyListSimpleModel;
+        // Verificar se é Assigned a estrategia de Id, se for já adicionar como parametro
+        if (this.mapperTable.keyColumns().length > 1) {
+            throw new DatabaseBuilderError("Mapper with composite id not supported hasMany dependence");
+        }
+        const keyMapperBase = this.mapperTable.keyColumns()[0];
+        switch (keyMapperBase.primaryKeyType) {
+            case PrimaryKeyType.Assigned:
+            case PrimaryKeyType.Guid:
+                modelDependency.reference = ModelUtils.get(modelBase, keyMapperBase.fieldReference);
+                if (modelDependency.reference === void 0) {
+                    throw new DatabaseBuilderError(`Reference for dependency '${dependency.tableName}' of '${this.mapperTable.tableName}' don´t could be obtido!`);
+                }
+                break;
+            case PrimaryKeyType.AutoIncrement:
+                modelDependency.reference = new ReplacementParam("0", "insertId");
+                break;
+            default:
+                break;
+        }
+        const builder = new InsertBuilder(void 0, dependency, void 0, modelDependency);
         return builder.compile();
     }
 

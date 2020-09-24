@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { TestClazz } from "./models/test-clazz";
 import { Crud } from "../crud/crud";
 import { getMapper } from "./mappers-table-new";
 import { Ddl } from "../ddl/ddl";
@@ -12,15 +11,22 @@ describe("Count", () => {
     let crud: Crud;
     let ddl: Ddl;
 
-    beforeEach(async () => {
+    before(async () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        crud = new Crud(database, mapper, false);
-        ddl = new Ddl(database, mapper, false);
+        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
+    });
 
+    beforeEach(async () => {
         await ddl.create(Cliente).execute().toPromise();
         await ddl.create(Cidade).execute().toPromise();
+    });
+
+    afterEach(async () => {
+        await ddl.drop(Cliente).execute().toPromise();
+        await ddl.drop(Cidade).execute().toPromise();
     });
 
     it("count default", async () => {
@@ -28,7 +34,7 @@ describe("Count", () => {
         for (let index = 1; index <= countExpected; index++) {
             const cidade = Object.assign({}, ObjectToTest.cidade);
             cidade.codeImport = index;
-            await crud.insert(Cidade, cidade).execute().toPromise();
+            await crud.insert(Cidade, { modelToSave: cidade }).execute().toPromise();
         }
         const query = crud.query(Cidade).ignoreQueryFilters();
         const resultCount = await query.count().toPromise();
@@ -41,10 +47,10 @@ describe("Count", () => {
         for (let index = 1; index <= countExpected; index++) {
             const cidade = Object.assign({}, ObjectToTest.cidade);
             cidade.codeImport = index;
-            await crud.insert(Cidade, cidade).execute().toPromise();
+            await crud.insert(Cidade, { modelToSave: cidade }).execute().toPromise();
         }
         const query = crud.query(Cidade).ignoreQueryFilters();
-        const resultCount = await query.count(where => where.lessAndEqual(x => x.codeImport, countExpected / 2)).toPromise();
+        const resultCount = await query.count({ where: where => where.lessAndEqual(x => x.codeImport, countExpected / 2) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(countExpected / 2);
     });
@@ -54,7 +60,7 @@ describe("Count", () => {
         for (let index = 1; index <= countExpected; index++) {
             const cidade = Object.assign({}, ObjectToTest.cidade);
             cidade.codeImport = index;
-            await crud.insert(Cidade, cidade).execute().toPromise();
+            await crud.insert(Cidade, { modelToSave: cidade }).execute().toPromise();
         }
         const query = crud.query(Cidade).ignoreQueryFilters();
         const resultCount = await query
@@ -69,12 +75,12 @@ describe("Count", () => {
         for (let index = 1; index <= countExpected; index++) {
             const cidade = Object.assign({}, ObjectToTest.cidade);
             cidade.codeImport = index;
-            await crud.insert(Cidade, cidade).execute().toPromise();
+            await crud.insert(Cidade, { modelToSave: cidade }).execute().toPromise();
         }
         const query = crud.query(Cidade).ignoreQueryFilters();
         const resultCount = await query
             .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
-            .count(where => where.great(x => x.codeImport, countExpected / 4)).toPromise();
+            .count({ where: where => where.great(x => x.codeImport, countExpected / 4) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(countExpected / 4);
     });
@@ -85,12 +91,12 @@ describe("Count", () => {
             const cidade = Object.assign({}, ObjectToTest.cidade);
             cidade.codeImport = index;
             cidade.population = index === 7 ? 10 : 0;
-            await crud.insert(Cidade, cidade).execute().toPromise();
+            await crud.insert(Cidade, { modelToSave: cidade }).execute().toPromise();
         }
         const query = crud.query(Cidade);
         const resultCount = await query
             .where(where => where.lessAndEqual(x => x.codeImport, countExpected / 2))
-            .count(where => where.great(x => x.codeImport, countExpected / 4)).toPromise();
+            .count({ where: where => where.great(x => x.codeImport, countExpected / 4) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(1);
     });
@@ -101,10 +107,10 @@ describe("Count", () => {
             const cidade = Object.assign({}, ObjectToTest.cidade);
             cidade.codeImport = index;
             cidade.population = index % 2 === 0 ? 10 : 0;
-            await crud.insert(Cidade, cidade).execute().toPromise();
+            await crud.insert(Cidade, { modelToSave: cidade }).execute().toPromise();
         }
         const query = crud.query(Cidade);
-        const resultCount = await query.count(where => where.lessAndEqual(x => x.codeImport, countExpected / 2)).toPromise();
+        const resultCount = await query.count({ where: where => where.lessAndEqual(x => x.codeImport, countExpected / 2) }).toPromise();
         await crud.delete(Cidade).execute().toPromise();
         expect(resultCount).to.equal(countExpected / 4);
     });

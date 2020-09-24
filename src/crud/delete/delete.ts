@@ -16,12 +16,23 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
 
     constructor(
         typeT: new () => T,
-        modelToSave: T = void 0,
-        mapperTable: MapperTable,
-        database: DatabaseBase = void 0,
-        enableLog: boolean = true,
+        {
+            modelToSave,
+            mapperTable,
+            database,
+            enableLog = true
+        }: {
+            modelToSave: T,
+            mapperTable: MapperTable,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        }
+        // modelToSave: T = void 0,
+        // mapperTable: MapperTable,
+        // database: DatabaseBase = void 0,
+        // enableLog: boolean = true,
     ) {
-        super(TypeCrud.DELETE, mapperTable, new DeleteBuilder(typeT, modelToSave, mapperTable), database, enableLog);
+        super(TypeCrud.DELETE, { mapperTable, builder: new DeleteBuilder(typeT, modelToSave, mapperTable), database, enableLog });
     }
 
     public where(where: (whereCallback: WhereBuilder<T>) => void): Delete<T> {

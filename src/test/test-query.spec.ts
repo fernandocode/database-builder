@@ -8,7 +8,7 @@ import { Crud } from "../crud/crud";
 describe("Query method", () => {
 
     const mapper = getMapper();
-    const crud = new Crud({} as any, mapper);
+    const crud = new Crud({ getMapper: mapper });
 
     it("test simple select", () => {
         const query = crud.query(Cliente);
@@ -18,13 +18,13 @@ describe("Query method", () => {
     });
 
     it("test simple select with custom alias", () => {
-        const result = crud.query(Cliente, "abc").compile()[0].query;
+        const result = crud.query(Cliente, { alias: "abc" }).compile()[0].query;
         expect(result).to.equal("SELECT abc.idErp AS idErp, abc.versao AS versao, abc.id AS id, abc.deleted AS deleted, abc.razaoSocial AS razaoSocial, abc.nomeFantasia AS nomeFantasia, abc.cidade_codeImport AS cidade_codeImport, abc.change AS change FROM Cliente AS abc");
     });
 
     it("test simple select with custom alias and where equal", () => {
         const result =
-            crud.query(Cliente, "abc")
+            crud.query(Cliente, { alias: "abc" })
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
                 })
@@ -36,7 +36,7 @@ describe("Query method", () => {
 
     it("test select with scope", () => {
         const query =
-            crud.query(Cliente, "abc")
+            crud.query(Cliente, { alias: "abc" })
                 .where(where => {
                     where.equalValue(x => x.razaoSocial, "ABC");
                     where.scope(scope => {

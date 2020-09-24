@@ -5,7 +5,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Limit and Offset", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({getMapper: getMapper()});
 
     it("limit", () => {
         const query = crud.query(TestClazz);

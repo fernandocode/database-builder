@@ -77,7 +77,6 @@ export class ObjectToTest {
     } as Pedido;
 
     public static guidClazz = {
-        // guid: "hdasjhas",
         description: "Condicao Pagamento 25"
     } as GuidClazz;
 

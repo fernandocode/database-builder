@@ -5,7 +5,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Group By", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({getMapper: getMapper()});
 
     it("none", () => {
         const query = crud.query(TestClazz);

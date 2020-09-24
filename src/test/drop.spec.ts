@@ -5,18 +5,11 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Drop", () => {
 
-    const dll = new Ddl({} as any, getMapper());
+    const dll = new Ddl({getMapper: getMapper()});
 
     it("by type", () => {
         const drop = dll.drop(TestClazz);
         const result = drop.compile();
-        expect(result[0]).to.equal("DROP TABLE IF EXISTS TestClazz;");
+        expect(result[0].query).to.equal("DROP TABLE IF EXISTS TestClazz");
     });
-
-    // Deprecated
-    // it("by name", () => {
-    //     const drop = dll.drop("AbC");
-    //     const result = drop.compile();
-    //     expect(result[0]).to.equal("DROP TABLE IF EXISTS AbC;");
-    // });
 });

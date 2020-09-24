@@ -1,5 +1,5 @@
 
-export class DatabaseBuilderError extends Error {
+export class DatabaseBuilderError extends TypeError {
     constructor(message: string) {
         super(message);
         // Maintains proper stack trace for where our error was thrown (only available on V8)

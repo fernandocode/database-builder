@@ -7,7 +7,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Lambda Expression", () => {
 
-    const crud = new Crud({} as any, getMapper());
+    const crud = new Crud({getMapper: getMapper()});
 
     it("simple lambda", () => {
         const query = crud.query(Cliente)
@@ -64,7 +64,6 @@ describe("Lambda Expression", () => {
     //         ;
     //     })
     //     .compile();
-    //     console.log(result);
     //     expect(result[0].params.length).to.equal(3);
     //     expect(result[0].params[0]).to.equal("Test");
     //     expect(result[0].params[1]).to.equal(2);

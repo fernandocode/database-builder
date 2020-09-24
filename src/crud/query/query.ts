@@ -8,7 +8,7 @@ import { WhereBuilder } from "../where-builder";
 import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
-import { ExpressionOrColumn, ParamType, Utils, TypeOrderBy } from "../../core/utils";
+import { ExpressionOrColumn, ParamType, TypeOrderBy, Utils } from "../../core/utils";
 import { OrderBy } from "../../core/enums/order-by";
 import { HavingBuilder } from "../having-builder";
 import { LambdaExpression } from "lambda-expression";
@@ -29,18 +29,28 @@ export class Query<TType> extends SqlBase<TType> {
 
     private _queryBuilder: QueryBuilder<TType>;
     private _queryReadableBuilder: QueryReadableBuilder<TType>;
+    private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>;
 
     constructor(
         private _queryT: (new () => TType) | QueryBuilder<TType>,
-        alias: string = void 0,
-        private _getMapper: (tKey: (new () => any) | string) => MetadataTable<any>,
-        mapperTable: MapperTable = Utils.getMapperTable(_queryT, _getMapper).mapperTable,
-        database?: DatabaseBase,
-        enableLog: boolean = true,
+        {
+            alias = void 0,
+            getMapper,
+            mapperTable,
+            database = void 0,
+            enableLog = true
+        }: {
+            alias?: string,
+            getMapper?: (tKey: (new () => any) | string) => MetadataTable<any>,
+            mapperTable?: MapperTable,
+            database?: DatabaseBase,
+            enableLog?: boolean
+        } = {}
     ) {
-        super(mapperTable, database, enableLog);
-        this._queryBuilder = new QueryBuilder(_queryT, mapperTable, alias, _getMapper);
-        this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, _getMapper).newable, enableLog);
+        super({ mapperTable, database, enableLog });
+        this._getMapper = getMapper;
+        this._queryBuilder = new QueryBuilder(_queryT, mapperTable, alias, getMapper);
+        this._queryReadableBuilder = new QueryReadableBuilder(Utils.getMapperTable(_queryT, getMapper).newable, enableLog);
     }
 
     public clone(): Query<TType> {
@@ -184,9 +194,15 @@ export class Query<TType> extends SqlBase<TType> {
      * @returns Array of `TType`
      */
     public executeAndRead(
-        cascade: boolean = true,
-        mapperTable: MapperTable = this.getMapper(void 0),
-        database: DatabaseBase = void 0,
+        {
+            cascade = true,
+            database,
+            mapperTable = this.getMapper(void 0)
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase,
+            mapperTable?: MapperTable
+        } = {}
     ): Observable<TType[]> {
         return Observable.create((observer: Observer<TType[]>) => {
             this._queryReadableBuilder.executeAndRead(
@@ -215,8 +231,16 @@ export class Query<TType> extends SqlBase<TType> {
      * @param cascade use cascade fetch in `hasMany` mapper (default = true)
      * @returns Array of @type {TType}
      */
-    public toList(cascade?: boolean): Observable<TType[]> {
-        return this.executeAndRead(cascade);
+    public toList(
+        {
+            cascade = true,
+            database
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase
+        } = {}
+    ): Observable<TType[]> {
+        return this.executeAndRead({ cascade, database });
     }
 
     /**
@@ -225,9 +249,18 @@ export class Query<TType> extends SqlBase<TType> {
      * @param cascade use cascade fetch in `hasMany` mapper (default = true)
      * @returns Array of @type {T}
      */
-    public mapper<T extends any>(mapper: (row: RowResult<T>) => T, cascade: boolean = true): Observable<T[]> {
+    public mapper<T extends any>(
+        mapper: (row: RowResult<T>) => T,
+        {
+            cascade = true,
+            database
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase
+        } = {}
+    ): Observable<T[]> {
         return new Observable<T[]>((observer) => {
-            this.execute()
+            this.execute({ cascade, database })
                 .subscribe((cursors) => {
                     const mapperTable = this.getMapper(void 0, false);
                     if (cursors.length !== 1) {
@@ -256,7 +289,17 @@ export class Query<TType> extends SqlBase<TType> {
      * @param where where for apply in query
      * @returns count items
      */
-    public count(where?: (whereCallback: WhereBuilder<TType>) => void): Observable<number> {
+    public count(
+        {
+            cascade = true,
+            database,
+            where
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase,
+            where?: (whereCallback: WhereBuilder<TType>) => void
+        } = {}
+    ): Observable<number> {
         return new Observable<number>(observer => {
             let keyColumn = ProjectionsUtils.WILDCARD;
             if (this.mapperTable && this.mapperTable.keyColumns().length > 0) {
@@ -267,7 +310,7 @@ export class Query<TType> extends SqlBase<TType> {
             }
             this
                 .projection(p => p.clean().count(keyColumn, "count_id"))
-                .mapper<number>(r => r.get<number>("count_id"))
+                .mapper<number>(r => r.get<number>("count_id"), { cascade, database })
                 .subscribe(
                     result => {
                         observer.next(result[0]);
@@ -288,13 +331,25 @@ export class Query<TType> extends SqlBase<TType> {
      * @param _default default value if not found any item
      * @returns first or default item by query
      */
-    public firstOrDefault(where?: (whereCallback: WhereBuilder<TType>) => void, cascade?: boolean, _default?: any): Observable<TType> {
+    public firstOrDefault(
+        {
+            cascade = true,
+            database,
+            where,
+            _default
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase,
+            where?: (whereCallback: WhereBuilder<TType>) => void,
+            _default?: any
+        } = {}
+    ): Observable<TType> {
         return Observable.create((observer: Observer<TType[]>) => {
             if (where) {
                 this.where(where);
             }
             this.limit(1)
-                .toList(cascade)
+                .toList({ cascade, database })
                 .subscribe((result) => {
                     observer.next((result && result.length) ? result[0] : _default);
                     observer.complete();
@@ -305,12 +360,17 @@ export class Query<TType> extends SqlBase<TType> {
         });
     }
 
+    /**
+     * @deprecated use `.mapper`
+     * Supported up to version 1.0.0
+     */
     public read<TReader>(cursor: any, newable: new () => TReader, mapperTable: MapperTable): TReader[] {
         return this._queryReadableBuilder.read(cursor, newable, mapperTable);
     }
 
     /**
      * @deprecated use `.mapper`
+     * Supported up to version 1.0.0
      */
     public toListParse<TParse>(metadataParse: MetadataTable<TParse>): Observable<TParse[]> {
         return Observable.create((observer: Observer<TParse[]>) => {
@@ -327,6 +387,7 @@ export class Query<TType> extends SqlBase<TType> {
 
     /**
      * @deprecated use `.mapper`
+     * Supported up to version 1.0.0
      */
     public toListTo<TReader>(newable: new () => TReader, mapperTable: MapperTable): Observable<TReader[]> {
         return Observable.create((observer: Observer<TReader[]>) => {
@@ -343,6 +404,7 @@ export class Query<TType> extends SqlBase<TType> {
 
     /**
      * @deprecated use `.mapper`
+     * Supported up to version 1.0.0
      */
     public toCast(): Observable<any[]> {
         return Observable.create((observer: Observer<any[]>) => {
@@ -362,6 +424,7 @@ export class Query<TType> extends SqlBase<TType> {
 
     /**
      * @deprecated use `.mapper`
+     * Supported up to version 1.0.0
      */
     public map(mapper: (row: any) => any): Observable<any[]> {
         return Observable.create((observer: Observer<any[]>) => {
@@ -427,7 +490,13 @@ export class Query<TType> extends SqlBase<TType> {
             const promises: Array<Observable<{ field: string, value: any }>> = [];
             mapperTable.dependencies.forEach(dependency => {
                 if (cascade) {
-                    const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
+                    const queryDependency = new Query<DependencyListSimpleModel>(void 0, {
+                        getMapper: this._getMapper,
+                        mapperTable: dependency,
+                        database: this.database,
+                        enableLog: this.enableLog
+                    });
+                    // const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
                     queryDependency.where(where => {
                         const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                         where.equal(new ColumnRef(columnReference), KeyUtils.getKey(mapperTable, model));

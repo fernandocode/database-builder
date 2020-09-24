@@ -27,15 +27,21 @@ import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
 import { ContasAReceber } from "./models/contas-a-receber";
 import { DatabaseTypes } from "../definitions/database-types";
 import { ParamFilter } from "../core/param-filter";
+import { RefToHeaderSimple } from "./models/ref-to-header-simple";
+import { GuidClazzHasMany } from "./models/guid-clazz-has-many";
 
 export class MappersTableNew extends MapperTest {
-
     constructor() {
         super();
 
         this.mapper(GuidClazz)
             .key(x => x.guid, PrimaryKeyType.Guid, String)
             .column(x => x.description, String);
+
+        this.mapper(GuidClazzHasMany)
+            .key(x => x.guid, PrimaryKeyType.Guid, String)
+            .column(x => x.description, String)
+            .hasMany(x => x.items, String, "ItemGuidClazzHasMany");
 
         this.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned)
             .hasQueryFilter(where => where.startsWith(x => x.nome, ParamFilter.builder("startWith")));
@@ -89,17 +95,20 @@ export class MappersTableNew extends MapperTest {
             .hasMany(x => x.items, String, "ItemHeaderSimple")
             ;
 
+        this.mapper(RefToHeaderSimple)
+            .key(x => x.id, PrimaryKeyType.AutoIncrement, Number)
+            .reference(x => x.headerSimple, HeaderSimple);
+
         this.autoMapperKey(Imagem, PrimaryKeyType.Assigned);
         this.autoMapper(Linha, x => x.codeImport, PrimaryKeyType.Assigned, Number);
         this.autoMapper(Referencia, x => x.codeImport, PrimaryKeyType.Assigned, Number)
+            .hasMany(x => x.restricaoGrade, String, "RestricaoGrade")
             .hasMany(x => x.referenciasRelacionadas, Referencia, "ReferenciasRelacionadas")
             ;
         this.autoMapper(Estrutura, x => x.codeImport, PrimaryKeyType.Assigned, Number);
 
         this.mapper(ModeloDetalheProduto, true)
             .key(x => x.codeImport, void 0, Number)
-            //   .reference(x => x.caracteristica, Caracteristica)
-            //   .reference(x => x.material, Material)
             .column(x => x.observacao, String)
             .column(x => x.variacao, Boolean);
     }

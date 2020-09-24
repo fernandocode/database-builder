@@ -26,7 +26,7 @@ export class DropBuilder<T> extends DdlBaseBuilder<T> {
     }
 
     protected buildBase(): string {
-        return `DROP TABLE IF EXISTS ${this._tablename};`;
+        return `DROP TABLE IF EXISTS ${this._tablename}`;
     }
 
     protected setDefaultColumns(): void {

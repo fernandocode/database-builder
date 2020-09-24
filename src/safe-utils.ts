@@ -1,8 +1,8 @@
-import { forkJoin, Observable, of } from "rxjs";
+import { forkJoin, Observable, ObservableInput, of } from "rxjs";
 
-export function forkJoinSafe<T = any>(array: Array<Observable<T>>): Observable<T[]> {
+export function forkJoinSafe<T>(array: Array<ObservableInput<T>>): Observable<T[]> {
     if (!array.length) {
         return of([]);
     }
-    return forkJoin<T>(array);
+    return forkJoin(array);
 }
