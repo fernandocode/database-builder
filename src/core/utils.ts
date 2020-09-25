@@ -475,7 +475,7 @@ export class Utils {
         return this._expressionUtils = this._expressionUtils ? this._expressionUtils : new ExpressionUtils();
     }
 
-    private static getDatabaseHelper(): DatabaseHelper {
+    public static getDatabaseHelper(): DatabaseHelper {
         return this._databaseHelper = this._databaseHelper ? this._databaseHelper : new DatabaseHelper();
     }
 }
