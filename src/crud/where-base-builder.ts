@@ -10,6 +10,8 @@ import { ColumnParams } from "../core/column-params";
 import { ColumnRef } from "../core/column-ref";
 import { ProjectionsHelper } from "../core/projections-helper";
 import { SqlCompilable } from "./sql-compilable";
+import { QueryHelper } from '../core/query-helper';
+import { PlanRef } from '../core/plan-ref';
 
 export abstract class WhereBaseBuilder<
     T,
@@ -157,6 +159,22 @@ export abstract class WhereBaseBuilder<
             this.getColumnParams(expression1),
             this.getColumnParams(expression2)
         );
+        return this._getInstance();
+    }
+
+    public multiColumnLike(like: string, separator: string, ...columns: TExpression[]): TWhere {
+        const columnsExpression = columns
+            .map((column) => this.getColumnParams(column))
+            .map(({ column, params }) => this.coalesce(
+                QueryHelper.compileWithoutParams(
+                    Utils.addAlias(column, this._alias),
+                    params.map(param => Utils.getDatabaseHelper().parseToValueType(param))
+                ), ['']).resultWithoutParams()[0]
+            )
+            .join(` || '${separator}' || `);
+
+        this.contains(new PlanRef(columnsExpression) as any, like.toUpperCase());
+
         return this._getInstance();
     }
 

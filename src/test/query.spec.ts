@@ -16,9 +16,11 @@ import { Imagem } from "./models/imagem";
 import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { ContasAReceber } from "./models/contas-a-receber";
-import { QueryBuilder } from "../crud";
+import { Query, QueryBuilder } from "../crud";
 import { MetadataTable } from "../metadata-table";
 import { QueryHelper } from "../core/query-helper";
+import { TypeWhere } from '../core/utils';
+import { ProjectionsHelper } from '../core/projections-helper';
 
 describe("Query", () => {
 
@@ -289,6 +291,64 @@ describe("Query", () => {
         expect(result[0].params.length).to.equal(1);
         expect(result[0].params[0]).to.equal("%abcd%");
         expect(result[0].query).to.equal("SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) WHERE COALESCE(tes.description, 'a1') || '|' || COALESCE(ref.name, 'b2') LIKE ?");
+    });
+
+    describe('join where with multi columns like', () => {
+        let query: Query<TestClazz>;
+        let joinRefModel: JoinQueryBuilder<ReferencesModelTest>;
+        const joinRefAlias = 'ref';
+        const like = "abcd";
+
+        const testMultiColumnLike = (
+            expectedResult = "SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id "
+                + "FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) "
+                + "WHERE COALESCE(tes.description, '') || '|' || COALESCE(ref.name, '') LIKE ?",
+            ...columns: TypeWhere<TestClazz>[]) => {
+            query.where(where => where.multiColumnLike(like, '|', ...columns));
+
+            const result = query.compile();
+
+            expect(result[0].params.length).to.equal(1);
+            expect(result[0].params[0]).to.equal(`%${like.toUpperCase()}%`);
+            expect(result[0].query).to.equal(expectedResult);
+        };
+
+        beforeEach(() => {
+            query = crud
+                .query(TestClazz);
+
+            query
+                .select(x => x.id, x => x.description, x => x.disabled)
+                .join(
+                    ReferencesModelTest,
+                    on => on.equal(x => x.id, query.ref(x => x.referenceTest.id)),
+                    join => {
+                        join.select(x => x.name, x => x.id);
+                        joinRefModel = join;
+                    },
+                    void 0,
+                    joinRefAlias)
+        });
+
+        it('using ColumnRef/ColumnRef', () => testMultiColumnLike(void 0, query.ref(x => x.description), joinRefModel.ref(x => x.name)));
+
+        it('using Expression/ColumnRef', () => testMultiColumnLike(void 0, x => x.description, joinRefModel.ref(x => x.name)));
+
+        it('using ValueTypeToParse/PlanRef', () => testMultiColumnLike(
+            "SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id "
+            + "FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) "
+            + "WHERE COALESCE('abc', '') || '|' || COALESCE(ref.name, '') LIKE ?",
+            'abc',
+            new PlanRef('ref.name')
+        ));
+
+        it('using Expression/ProjectionsHelper', () => testMultiColumnLike(
+            "SELECT tes.id AS id, tes.description AS description, tes.disabled AS disabled, ref.name AS ref_name, ref.id AS ref_id "
+            + "FROM TestClazz AS tes LEFT JOIN ReferencesModelTest AS ref ON (ref.id = tes.referenceTest_id) "
+            + "WHERE COALESCE(tes.description, '') || '|' || COALESCE(MAX(ref.id), '') LIKE ?",
+            x => x.description,
+            new ProjectionsHelper(ReferencesModelTest, joinRefAlias).max(x => x.id)
+        ));
     });
 
     it("join linked", () => {
