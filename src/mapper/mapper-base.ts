@@ -1,6 +1,6 @@
 import { PrimaryKeyType } from "./../core/enums/primary-key-type";
 import { MapperSettingsModel } from "./mapper-settings-model";
-import { Expression, ReturnExpression } from "lambda-expression";
+import { ReturnExpression } from "lambda-expression";
 import { GetMapper } from "./interface-get-mapper";
 import { MetadataTable } from "../metadata-table";
 import { DatabaseHelper } from "../database-helper";
@@ -9,7 +9,7 @@ import { MapperUtils } from "./mapper-utils";
 
 export class MapperBase implements GetMapper {
 
-    private _mappers: Map<string, MetadataTable<any>> = new Map<string, MetadataTable<any>>();
+    private _mappers = new Map<string, MetadataTable<any>>();
 
     constructor(
         private _databaseHelper: DatabaseHelper,
@@ -29,6 +29,7 @@ export class MapperBase implements GetMapper {
      * @param isAutoIncrement If primary key is autoincrement, default 'false'
      * @param readOnly if column is readonly, default 'false'
      * @param settings settings mapper, default settings construtor
+     * @deprecated use {@link mapper} instead.
      */
     public autoMapper<TReturn, T>(
         newable: new () => T,
@@ -45,7 +46,9 @@ export class MapperBase implements GetMapper {
                 settings.referencesId,
                 settings.referencesIdRecursive
             );
+
         this.push(metadata);
+
         return metadata;
     }
 
@@ -53,13 +56,40 @@ export class MapperBase implements GetMapper {
      * Mapper Table for Model
      * @param newable Type Model
      * @param readOnly if column is readonly, default 'false'
+     * @deprecated use {@link mapper} with tableName overload instead.
      */
     public mapper<T>(
         newable: new () => T,
         readOnly?: boolean
+    ): MetadataTable<T>;
+
+    /**
+     * Mapper Table for Model
+     * @param newable Type Model
+     * @param tableName Table Name
+     * @param readOnly if column is readonly, default 'false'
+     */
+    public mapper<T>(
+        newable: new () => T,
+        tableName: string,
+        readOnly?: boolean
+    ): MetadataTable<T>;
+
+    public mapper<T>(
+        ...args: [new () => T, boolean?] | [new () => T, string, boolean?]
     ): MetadataTable<T> {
-        const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly);
+        let newable: new () => T, tableName: string, readOnly: boolean;
+
+        if (typeof args[1] === 'string')
+            [newable, tableName, readOnly] = args as [new () => T, string, boolean?];
+
+        else
+            [newable, readOnly] = args as [new () => T, boolean?];
+
+        const metadata = new MetadataTable(newable, this._databaseHelper, this, readOnly, tableName);
+
         this.push(metadata);
+
         return metadata;
     }
 
@@ -68,15 +98,13 @@ export class MapperBase implements GetMapper {
     }
 
     public get<T>(tKey: (new () => T) | string): MetadataTable<T> {
-        return this._mappers.get(
-            MapperUtils.resolveKey(tKey)
-        );
+        return this._mappers.get(MapperUtils.resolveKey(tKey));
     }
 
     public getThrowErrorNotFound<T>(tKey: (new () => T) | string): MetadataTable<T> {
-        if (!this.has(tKey)) {
+        if (!this.has(tKey))
             throw new DatabaseBuilderError(`Mapper not found for '${MapperUtils.resolveKey(tKey)}'`);
-        }
+
         return this.get(tKey);
     }
 
@@ -92,9 +120,12 @@ export class MapperBase implements GetMapper {
     }
 
     private push(metadataTable: MetadataTable<any>): void {
-        if (this.has(metadataTable.newable.name)) {
-            throw new DatabaseBuilderError(`Duplicate mapper: '${metadataTable.newable.name}'`);
-        }
-        this._mappers.set(metadataTable.newable.name, metadataTable);
+        const { tableName } = metadataTable;
+
+        if (this.has(tableName))
+            throw new DatabaseBuilderError(`Duplicate mapper: '${tableName}'`);
+
+        this._mappers.set(tableName, metadataTable);
     }
+
 }

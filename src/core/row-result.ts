@@ -70,7 +70,7 @@ export class RowResult<T> {
                 ModelUtils.set(result, column.fieldReference, value);
                 // TODO: essa associação será redundante para itens de primeiro nivel, mas será mantida para compatibilidade com itens de segundo nivel ou mais, pois há mapper que buscam a propriedade de sub nivel pelo nome da coluna por exemplo: 'cliente_cidade_uf_id'
                 // BREAKING-CHANGE: Na proxima versão da aplicação essa compatibilidade deve ser removida, o que era causar quebra de versão, onde terá que ser alterada implementações que o "mapper" para obter valores de propriedades de sub nivel.
-                result[column.column] = value;
+                (result as any)[column.column] = value;
             }
         });
         return result;

@@ -7,18 +7,24 @@
   "scripts": {
     "test": "tsc & mocha src/test/**/*.spec.js",
     "test-grep": "tsc & mocha src/test/**/*.spec.js --grep",
-    "test-single": "tsc & mocha src/test/**/*.spec.js --grep Mapper --debug-brk",
+    "test-single": "tsc && mocha --inspect src/test/**/*.spec.js --grep Mapper",
     "test-debug": "mocha -r ts-node/register src/test/**/*.spec.ts --debug-brk",
     "lint": "tslint -p tsconfig.json",
     "build": "tsc",
     "publish-npm": "tsc & npm publish",
     "publish-npm-alpha": "tsc && npm publish --tag alpha",
-    "pack": "cd dist/ & npm pack ../"
+    "pack": "cd dist/ & npm pack ../",
+    "minify": "terser -o minification-test.spec.min.js -m -- minification-test.spec.js",
+    "mapper-test-minified": "tsc && npm run minify && mocha --inspect minification-test.spec.min.js",
+    "terser": "terser",
+    "compile-watch": "tsc -w",
+    "mocha": "mocha"
   },
   "dependencies": {
     "lambda-expression": ">=0.1.4",
     "lodash": "^4.17.15",
     "moment": "^2.22.0",
+    "reflect-metadata": "^0.1.13",
     "rxjs": "^6.5.3",
     "uuid": "^3.3.2"
   },
@@ -35,9 +41,10 @@
     "mocha": "^6.2.2",
     "sinon": "^9.0.0",
     "sqlite3": "^4.1.1",
+    "terser": "^5.10.0",
     "ts-node": "^8.5.4",
     "tslint": "^5.20.1",
-    "typescript": "~3.2.2"
+    "typescript": "^4.5.4"
   },
   "keywords": [
     "orm",

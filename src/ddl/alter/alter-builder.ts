@@ -4,6 +4,7 @@ import { MapperTable } from "../../mapper-table";
 import { DdlCompiled } from "../../core/ddl-compided";
 import { ExpressionOrColumn, Utils, ValueTypeToParse } from "../../core/utils";
 import { DatabaseBuilderError } from "../../core";
+import { MapperUtils } from "../../mapper/mapper-utils";
 
 export class AlterBuilder<T> extends DdlBaseBuilder<T> {
 
@@ -13,7 +14,7 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
         typeT: new () => T,
         private readonly _mapperTable: MapperTable
     ) {
-        super(typeT && typeT.name ? typeT.name : _mapperTable.tableName);
+        super(_mapperTable.tableName);
         if (Utils.isNull(_mapperTable)) {
             throw new DatabaseBuilderError(`Mapper not found for '${this._tablename}'`);
         }
@@ -50,7 +51,7 @@ export class AlterBuilder<T> extends DdlBaseBuilder<T> {
     public renameTable<TNewTable>(
         newTableName: string | (new () => TNewTable)
     ): AlterBuilder<T> {
-        this._patternOperation = () => `RENAME TO ${(Utils.isString(newTableName) ? newTableName as string : (newTableName as new () => void).name)}`;
+        this._patternOperation = () => `RENAME TO ${MapperUtils.resolveKey(newTableName)}`;
         return this;
     }
 

@@ -10,6 +10,5 @@ export class DeleteColumnsBuilder<T> extends ColumnsValuesBuilder<T, DeleteColum
 
     protected columnFormat(column: Column): string {
         throw new DatabaseBuilderError(`Mapper '${this.mapperTable.tableName}', method not supported.`);
-        // throw new DatabaseBuilderError(`Mapper '${this.metadata.newable.name}', method not supported.`);
     }
 }

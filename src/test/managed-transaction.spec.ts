@@ -180,7 +180,7 @@ describe("Managed Transaction", () => {
         try {
             await transaction.commit().toPromise();
         } catch (error) {
-            expect("SQLITE_ERROR").to.equal(error.code);
+            expect("SQLITE_ERROR").to.equal((error as any).code);
             expect(obj1.guid).to.have.lengthOf(36);
 
             const queryUpdateResult = await crud.query(GuidClazz).firstOrDefault({ where: where => where.equal(x => x.guid, obj1.guid) }).toPromise();
