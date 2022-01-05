@@ -14,6 +14,7 @@ import { DatabaseBuilderError } from "../core/errors";
 import { SqlCompilable } from "./sql-compilable";
 import { ProjectionModel } from "./projection-model";
 import { ProjectionCompile } from "./projection-compile";
+import { MapperUtils } from "../mapper/mapper-utils";
 
 export class ProjectionBuilder<T> {
     private _projections: ProjectionModel[] = [];
@@ -47,7 +48,7 @@ export class ProjectionBuilder<T> {
 
     public allByMap(metadata: MetadataTable<T>) {
         if (Utils.isNull(metadata)) {
-            throw new DatabaseBuilderError(`Mapper not found for '${this._typeT.name}'`);
+            throw new DatabaseBuilderError(`Mapper not found for '${MapperUtils.resolveKey(this._typeT)}'`);
         }
         this.selectAllColumns(metadata.mapperTable);
     }

@@ -205,10 +205,6 @@ export class Utils {
         return this.isQueryCompilable(value) || this.isQueryCompiledArray(value);
     }
 
-    public static databaseName<T>(tablename: TypeOrString<T>): string {
-        return this.getValueByTypeOrString(tablename);
-    }
-
     public static getMapperTable<T>(
         typeT: (new () => T) | QueryBuilder<T> | { _builder: () => QueryBuilder<T> },
         getMapper: (tKey: (new () => any) | string) => MetadataTable<any>
@@ -242,10 +238,6 @@ export class Utils {
                         : this.isValue(value)
                             ? ExpressionOrValueEnum.Value
                             : ExpressionOrValueEnum.Expression;
-    }
-
-    public static getValueByTypeOrString<T>(param: TypeOrString<T>): string {
-        return this.isString(param) ? param as string : (param as (new () => T)).name;
     }
 
     public static getColumn<TReturn, T>(expression: ExpressionOrColumn<TReturn, T>, separator?: string): string {

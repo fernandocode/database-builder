@@ -11,7 +11,7 @@ export class CreateBuilder<T> extends DdlBaseBuilder<T> {
         typeT: new () => T,
         private _mapperTable: MapperTable
     ) {
-        super(typeT && typeT.name ? typeT.name : _mapperTable.tableName);
+        super(_mapperTable.tableName);
         if (Utils.isNull(_mapperTable)) {
             throw new DatabaseBuilderError(`Mapper not found for '${this._tablename}'`);
         }

@@ -10,6 +10,7 @@ import { Utils } from "../core/utils";
 import { KeyUtils } from "../core/key-utils";
 import { QueryBuilder } from "./query/query-builder";
 import { MetadataTableBase } from "../metadata-table-base";
+import { MapperUtils } from "../mapper/mapper-utils";
 
 export class Crud {
     public enableLog: boolean;
@@ -137,16 +138,13 @@ export class Crud {
     }
 
     private getDatabase() {
-        // if (!this._database) {
-        //     throw new DatabaseBuilderError("Transaction ou Database not specified in query.");
-        // }
         return this._database;
     }
 
     private getMapper<T>(tKey: (new () => T) | string): MetadataTable<T> {
         const metadata = this._getMapper.get(tKey);
         if (Utils.isNull(metadata)) {
-            throw new DatabaseBuilderError(`Mapper for "${Utils.isString(tKey) ? tKey : (tKey as new () => T).name}" not found!"`);
+            throw new DatabaseBuilderError(`Mapper for "${MapperUtils.resolveKey(tKey)}" not found!"`);
         }
         return metadata;
     }

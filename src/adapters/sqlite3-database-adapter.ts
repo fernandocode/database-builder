@@ -39,7 +39,7 @@ export class SQLite3DatabaseAdapter extends BaseDatabaseAdapter<SQLite3ObjectInt
         databaseNative: SQLite3ObjectInterface
     ): (fn: (transaction: WebSqlTransactionInterface) => void) => Promise<any> {
         return (fn: (transaction: DatabaseBaseTransaction) => void): Promise<any> => {
-            return new Promise<any>((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 this.executeSql(databaseNative, "BEGIN TRANSACTION", [])
                     .then(_ => {
                         try {

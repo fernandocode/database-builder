@@ -67,7 +67,7 @@ export class Ddl {
                     FROM sqlite_master
                 WHERE type = 'table' AND
                         name = ?;
-                `, [Utils.databaseName(tablename)])
+                `, [this._getMapper.get(tablename).tableName])
                 .then(result => {
                     resolve(result.rows.length > 0);
                 })
@@ -87,7 +87,7 @@ export class Ddl {
                 SELECT name
                     FROM pragma_table_info(?)
                 WHERE name = ?;
-                `, [Utils.databaseName(tablename), Utils.getColumn(column)])
+                `, [this._getMapper.get(tablename).tableName, Utils.getColumn(column)])
                 .then(result => {
                     resolve(result.rows.length > 0);
                 })

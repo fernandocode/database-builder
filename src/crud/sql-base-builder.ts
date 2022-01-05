@@ -29,8 +29,8 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
         this._alias = this.createAlias(this._alias, this._tablename);
     }
 
-    protected createTablename<TTable>(currentTypeT: new () => TTable, currentMapper: MapperTable): string {
-        return currentTypeT ? currentTypeT.name : currentMapper.tableName;
+    protected createTablename<TTable>(_currentTypeT: new () => TTable, currentMapper: MapperTable): string {
+        return currentMapper.tableName;
     }
 
     protected createAlias(currentAlias: string, currentTablename: string): string {

@@ -4,6 +4,7 @@ import * as moment from "moment";
 import { FieldType } from "./core/enums/field-type";
 import { ColumnType } from "./core/enums/column-type";
 import { DatabaseBuilderError } from "./core/errors";
+import { MapperUtils } from "./mapper/mapper-utils";
 
 export class DatabaseHelper {
 
@@ -32,7 +33,7 @@ export class DatabaseHelper {
     }
 
     public getFieldType<T>(type: string | (new () => T), constructorName?: string) {
-        const typeCase: string = (Utils.isString(type) ? type as string : (type as new () => void).name).toLowerCase();
+        const typeCase: string = typeof type === 'string' ? type : MapperUtils.resolveKey(type).toLowerCase();
         switch (typeCase) {
             case "string":
                 return FieldType.STRING;
@@ -77,7 +78,7 @@ export class DatabaseHelper {
     public getType(value: ValueTypeToParse): FieldType {
         const valueFormatted = this.preFormatValue(value);
         const tipo = typeof valueFormatted;
-        return this.getFieldType(tipo, valueFormatted ? valueFormatted.constructor.name : void 0);
+        return this.getFieldType(tipo, valueFormatted?.constructor.name);
     }
 
     public parseToColumnType(type: FieldType): ColumnType {

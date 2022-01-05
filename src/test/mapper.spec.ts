@@ -12,6 +12,7 @@ import { Utils } from "../core/utils";
 import { MapperTest } from "./mapper-test";
 import { GuidClazz } from "./models/guid-clazz";
 import { Create, Insert } from "..";
+import { MapperTestModel } from "./models/mapper-test-model";
 
 describe("Mapper", () => {
 
@@ -66,5 +67,22 @@ describe("Mapper", () => {
 
         expect(insertCompiled.query).to.equal("INSERT INTO SubRegiao (codeImport, nome, regiao_codeImport) VALUES (?, ?, ?)");
         expect(insertCompiled.params.join(", ")).to.equal([1, "test", 2].join(", "));
+    });
+
+    it("when providing tableName, should be able to use Mapper.get with both constructor and tableName", () => {
+        // Arrange 
+        const metadata = mapperBase.mapper(MapperTestModel, 'MapperTestModelz');
+
+        // Act
+        const metatadaByTableName = mapperBase.get('MapperTestModelz');
+        const metadataByConstructor = mapperBase.get(MapperTestModel);
+        const metadataByWrongTableName = mapperBase.get('MapperTestModel');
+        const metadataByWrongConstructor = mapperBase.get(Cidade);
+
+        // Assert
+        expect(metadataByConstructor).to.eq(metadata);
+        expect(metatadaByTableName).to.eq(metadata);
+        expect(metadataByWrongTableName).to.not.eq(metadata);
+        expect(metadataByWrongConstructor).to.not.eq(metadata);
     });
 });
