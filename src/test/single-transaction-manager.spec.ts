@@ -17,7 +17,7 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 describe("Single Transaction Manager", function () {
-    (this as any).enableTimeouts(false);
+    this.timeout(999999);
 
     let crud: Crud;
     let ddl: Ddl;

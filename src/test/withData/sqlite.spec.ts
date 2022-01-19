@@ -1,24 +1,26 @@
-import { Marca } from "./models/marca";
-import { ContasAReceber } from "./models/contas-a-receber";
-import { Ddl } from "./../ddl/ddl";
+import { Marca } from "../models/marca";
+import { ContasAReceber } from "../models/contas-a-receber";
+import { Ddl } from "../../ddl/ddl";
 import { expect } from "chai";
-import { Cidade } from "./models/cidade";
-import { ObjectToTest } from "./objeto-to-test";
-import { getMapper } from "./mappers-table-new";
-import { Crud, JoinType } from "../crud";
-import { GuidClazz } from "./models/guid-clazz";
-import { Uf } from "./models/uf";
-import { HeaderSimple } from "./models/header-simple";
-import { Referencia } from "./models/referencia";
-import { Imagem } from "./models/imagem";
-import { SQLiteDatabase } from "./database/sqlite-database";
-import { Regiao } from "./models/regiao";
-import { SubRegiao } from "./models/sub-regiao";
-import { JoinQueryBuilder } from "../crud/query/join-query-builder";
-import { ModeloDetalheProduto } from "./models/modelo-detalhe-produto";
-import { Utils } from "../core/utils";
-import { FieldType } from "../core/enums/field-type";
-import { Cliente } from "./models/cliente";
+import { Cidade } from "../models/cidade";
+import { ObjectToTest } from "../objeto-to-test";
+import { getMapper } from "../mappers-table-new";
+import { Crud, JoinType } from "../../crud";
+import { GuidClazz } from "../models/guid-clazz";
+import { Uf } from "../models/uf";
+import { HeaderSimple } from "../models/header-simple";
+import { Referencia } from "../models/referencia";
+import { Imagem } from "../models/imagem";
+import { SQLiteDatabase } from "../database/sqlite-database";
+import { Regiao } from "../models/regiao";
+import { SubRegiao } from "../models/sub-regiao";
+import { JoinQueryBuilder } from "../../crud/query/join-query-builder";
+import { ModeloDetalheProduto } from "../models/modelo-detalhe-produto";
+import { Utils } from "../../core/utils";
+import { FieldType } from "../../core/enums/field-type";
+import { Cliente } from "../models/cliente";
+import { lastValueFrom } from "rxjs";
+
 
 describe("SQLite", () => {
     let crud: Crud;
@@ -31,11 +33,11 @@ describe("SQLite", () => {
         crud = new Crud({ database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
 
-        await ddl.create(Cliente).execute().toPromise();
-        await ddl.create(Cidade).execute().toPromise();
-        await ddl.create(Uf).execute().toPromise();
-        await ddl.create(SubRegiao).execute().toPromise();
-        await ddl.create(Regiao).execute().toPromise();
+        await lastValueFrom(ddl.create(Cliente).execute());
+        await lastValueFrom(ddl.create(Cidade).execute());
+        await lastValueFrom(ddl.create(Uf).execute());
+        await lastValueFrom(ddl.create(SubRegiao).execute());
+        await lastValueFrom(ddl.create(Regiao).execute());
     });
 
     const insertUf = async () => {
@@ -43,43 +45,43 @@ describe("SQLite", () => {
             .firstOrDefault({ where: w => w.equal(x => x.codeImport, ObjectToTest.uf.codeImport) }).toPromise();
         if (!itemExist) {
             const insert = crud.insert(Uf, { modelToSave: ObjectToTest.uf });
-            const insertedResult = await insert.execute().toPromise();
+            const insertedResult = await lastValueFrom(insert.execute());
             expect(insertedResult[0].rowsAffected).to.equal(1);
         }
     };
 
     const insertSubRegiao = async () => {
-        const itemExist = await crud.query(SubRegiao)
+        const itemExist = await lastValueFrom(crud.query(SubRegiao)
             .where(w => w.equal(x => x.codeImport, ObjectToTest.subRegiao.codeImport))
-            .firstOrDefault().toPromise();
+            .firstOrDefault());
         if (!itemExist) {
             const insert = crud.insert(SubRegiao, { modelToSave: ObjectToTest.subRegiao });
-            const insertedResult = await insert.execute().toPromise();
+            const insertedResult = await lastValueFrom(insert.execute());
             expect(insertedResult[0].rowsAffected).to.equal(1);
         }
     };
 
     const insertRegiao = async () => {
-        const itemExist = await crud.query(Regiao)
+        const itemExist = await lastValueFrom(crud.query(Regiao)
             .ignoreQueryFilters()
             .where(w => w.equal(x => x.codeImport, ObjectToTest.regiao.codeImport))
-            .firstOrDefault().toPromise();
+            .firstOrDefault());
         if (!itemExist) {
             const insert = crud.insert(Regiao, { modelToSave: ObjectToTest.regiao });
-            const insertedResult = await insert.execute().toPromise();
+            const insertedResult = await lastValueFrom(insert.execute());
             expect(insertedResult[0].rowsAffected).to.equal(1);
         }
     };
 
     it("GuidClazz", async () => {
 
-        await ddl.create(GuidClazz).execute().toPromise();
+        await lastValueFrom(ddl.create(GuidClazz).execute());
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
-        const insertResult = await crud.insert(GuidClazz, { modelToSave: obj1 }).execute().toPromise();
+        const insertResult = await lastValueFrom(crud.insert(GuidClazz, { modelToSave: obj1 }).execute());
         expect(insertResult[0].rowsAffected).to.equal(1);
 
-        const queryInsertResult = await crud.query(GuidClazz).toList().toPromise();
+        const queryInsertResult = await lastValueFrom(crud.query(GuidClazz).toList());
         expect(queryInsertResult.length).to.equal(1);
         expect(queryInsertResult[0].description).to.equal(obj1.description);
         expect(queryInsertResult[0].guid).to.equal(obj1.guid);
@@ -93,7 +95,7 @@ describe("SQLite", () => {
             .execute().toPromise();
         expect(updateResult[0].rowsAffected).to.equal(1);
 
-        const queryUpdateResult = await crud.query(GuidClazz).toList().toPromise();
+        const queryUpdateResult = await lastValueFrom(crud.query(GuidClazz).toList());
         expect(queryUpdateResult.length).to.equal(1);
         expect(queryUpdateResult[0].description).to.equal(modelUpdate.description);
         expect(queryUpdateResult[0].guid).to.equal(obj1.guid);
@@ -114,13 +116,13 @@ describe("SQLite", () => {
             regiao: ObjectToTest.regiao
         } as SubRegiao;
 
-        const insertUf = await crud.insert(Uf, { modelToSave: ObjectToTest.uf }).execute().toPromise();
+        const insertUf = await lastValueFrom(crud.insert(Uf, { modelToSave: ObjectToTest.uf }).execute());
         expect(insertUf[0].rowsAffected).to.equal(1);
 
-        const insertSubRegiao = await crud.insert(SubRegiao, { modelToSave: subRegiaoKeyZero }).execute().toPromise();
+        const insertSubRegiao = await lastValueFrom(crud.insert(SubRegiao, { modelToSave: subRegiaoKeyZero }).execute());
         expect(insertSubRegiao[0].rowsAffected).to.equal(1);
 
-        const insertResult1 = await crud.insert(Cidade, { modelToSave: ObjectToTest.cidade }).execute().toPromise();
+        const insertResult1 = await lastValueFrom(crud.insert(Cidade, { modelToSave: ObjectToTest.cidade }).execute());
         expect(insertResult1[0].rowsAffected).to.equal(1);
         const insertResult2 = await crud.insert(Cidade, {
             modelToSave: {
@@ -222,7 +224,7 @@ describe("SQLite", () => {
             subRegiao: ObjectToTest.subRegiao,
         } as Cidade;
         const insert = crud.insert(Cidade, { modelToSave: model4 });
-        const insertResult4 = await insert.execute().toPromise();
+        const insertResult4 = await lastValueFrom(insert.execute());
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
         const queryResult4 = await crud.query(Cidade)
@@ -255,7 +257,7 @@ describe("SQLite", () => {
         } as Cidade;
 
         const insert = crud.insert(Cidade, { modelToSave: model });
-        const insertResult4 = await insert.execute().toPromise();
+        const insertResult4 = await lastValueFrom(insert.execute());
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
         const query = await crud.query(Cidade)
@@ -309,9 +311,9 @@ describe("SQLite", () => {
             descricao: "testsnfsf"
         } as Marca;
 
-        await ddl.create(Marca).execute().toPromise();
+        await lastValueFrom(ddl.create(Marca).execute());
         const insert = crud.insert(Marca, { modelToSave: model });
-        const insertResult4 = await insert.execute().toPromise();
+        const insertResult4 = await lastValueFrom(insert.execute());
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
         const queryItemEscolhaReferencia = crud
@@ -354,7 +356,7 @@ describe("SQLite", () => {
         } as Cidade;
 
         const insert = crud.insert(Cidade, { modelToSave: model });
-        const insertResult4 = await insert.execute().toPromise();
+        const insertResult4 = await lastValueFrom(insert.execute());
         expect(insertResult4[0].rowsAffected).to.equal(1);
 
         const query = await crud.query(Cidade)
@@ -414,12 +416,12 @@ describe("SQLite", () => {
     });
 
     it("ContasAReceber", async () => {
-        await ddl.create(ContasAReceber).execute().toPromise();
+        await lastValueFrom(ddl.create(ContasAReceber).execute());
 
         const dados = Object.assign({}, ObjectToTest.contasReceber);
         dados.dataRecebimento = "2018-06-08T00:00:00Z";
 
-        const insertResult1 = await crud.insert(ContasAReceber, { modelToSave: dados }).execute().toPromise();
+        const insertResult1 = await lastValueFrom(crud.insert(ContasAReceber, { modelToSave: dados }).execute());
         expect(insertResult1[0].rowsAffected).to.equal(1);
 
         const queryResult = await crud.query(ContasAReceber)
@@ -433,10 +435,10 @@ describe("SQLite", () => {
     });
 
     it("HeaderSimple cascade", async () => {
-        const createResult = await ddl.create(HeaderSimple).execute().toPromise();
+        const createResult = await lastValueFrom(ddl.create(HeaderSimple).execute());
         expect(createResult.length).to.equal(2);
 
-        const insertResult1 = await crud.insert(HeaderSimple, { modelToSave: ObjectToTest.headerSimple }).execute().toPromise();
+        const insertResult1 = await lastValueFrom(crud.insert(HeaderSimple, { modelToSave: ObjectToTest.headerSimple }).execute());
         expect(insertResult1.length).to.equal(ObjectToTest.headerSimple.items.length + 1);
         expect(insertResult1[0].rowsAffected).to.equal(1);
         ObjectToTest.headerSimple.items.forEach((value, index) => {
@@ -448,7 +450,7 @@ describe("SQLite", () => {
             items: ["123", "456", "789", "10a"]
         } as HeaderSimple;
 
-        const insertResult2 = await crud.insert(HeaderSimple, { modelToSave: headerSimple2 }).execute().toPromise();
+        const insertResult2 = await lastValueFrom(crud.insert(HeaderSimple, { modelToSave: headerSimple2 }).execute());
         expect(insertResult2.length).to.equal(headerSimple2.items.length + 1);
         expect(insertResult2[0].rowsAffected).to.equal(1);
         headerSimple2.items.forEach((value, index) => {
@@ -460,14 +462,14 @@ describe("SQLite", () => {
             items: ["a1", "b2"]
         } as HeaderSimple;
 
-        const insertResult3 = await crud.insert(HeaderSimple, { modelToSave: headerSimple3 }).execute().toPromise();
+        const insertResult3 = await lastValueFrom(crud.insert(HeaderSimple, { modelToSave: headerSimple3 }).execute());
         expect(insertResult3.length).to.equal(headerSimple3.items.length + 1);
         expect(insertResult3[0].rowsAffected).to.equal(1);
         headerSimple3.items.forEach((value, index) => {
             expect(insertResult3[index + 1].rowsAffected).to.equal(1);
         });
 
-        const selectResult = await crud.query(HeaderSimple).toList().toPromise();
+        const selectResult = await lastValueFrom(crud.query(HeaderSimple).toList());
         expect(selectResult.length).to.equal(3);
 
         expect(selectResult[0].items.length).to.equal(ObjectToTest.headerSimple.items.length);
@@ -539,7 +541,7 @@ describe("SQLite", () => {
         /* Itens deleted */
         expect(deleteResult2[1].rowsAffected).to.equal(ObjectToTest.headerSimple.items.length);
 
-        const selectResult2 = await crud.query(HeaderSimple).toList().toPromise();
+        const selectResult2 = await lastValueFrom(crud.query(HeaderSimple).toList());
         expect(selectResult2.length).to.equal(1);
         expect(selectResult2[0].items.length).to.equal(headerSimple3.items.length);
         expect(selectResult2[0].id).to.equal(headerSimple3.id);
@@ -574,22 +576,22 @@ describe("SQLite", () => {
         expect(selectResultMapperNotCascade[0].descricao).to.equal(headerSimple3.descricao);
 
         /* Test select not cascade with data in itens */
-        const selectResultNotCascade = await crud.query(HeaderSimple).toList({ cascade: false }).toPromise();
+        const selectResultNotCascade = await lastValueFrom(crud.query(HeaderSimple).toList({ cascade: false }));
         expect(selectResultNotCascade.length).to.equal(1);
         expect(selectResultNotCascade[0].items.length).to.equal(0);
         expect(selectResultNotCascade[0].id).to.equal(headerSimple3.id);
         expect(selectResultNotCascade[0].descricao).to.equal(headerSimple3.descricao);
 
-        const dropResult = await ddl.drop(HeaderSimple).execute().toPromise();
+        const dropResult = await lastValueFrom(ddl.drop(HeaderSimple).execute());
         expect(dropResult.length).to.equal(2);
     });
 
     it("HeaderSimple not cascade", async () => {
 
-        const createResult = await ddl.create(HeaderSimple).execute({ cascade: false }).toPromise();
+        const createResult = await lastValueFrom(ddl.create(HeaderSimple).execute({ cascade: false }));
         expect(createResult.length).to.equal(1);
 
-        const insertResult1 = await crud.insert(HeaderSimple, { modelToSave: ObjectToTest.headerSimple }).execute({ cascade: false }).toPromise();
+        const insertResult1 = await lastValueFrom(crud.insert(HeaderSimple, { modelToSave: ObjectToTest.headerSimple }).execute({ cascade: false }));
         expect(insertResult1.length).to.equal(1);
         expect(insertResult1[0].rowsAffected).to.equal(1);
 
@@ -598,7 +600,7 @@ describe("SQLite", () => {
             items: ["123", "456", "789", "10a"]
         } as HeaderSimple;
 
-        const insertResult2 = await crud.insert(HeaderSimple, { modelToSave: headerSimple2 }).execute({ cascade: false }).toPromise();
+        const insertResult2 = await lastValueFrom(crud.insert(HeaderSimple, { modelToSave: headerSimple2 }).execute({ cascade: false }));
         expect(insertResult2.length).to.equal(1);
         expect(insertResult2[0].rowsAffected).to.equal(1);
 
@@ -607,11 +609,11 @@ describe("SQLite", () => {
             items: ["a1", "b2"]
         } as HeaderSimple;
 
-        const insertResult3 = await crud.insert(HeaderSimple, { modelToSave: headerSimple3 }).execute({ cascade: false }).toPromise();
+        const insertResult3 = await lastValueFrom(crud.insert(HeaderSimple, { modelToSave: headerSimple3 }).execute({ cascade: false }));
         expect(insertResult3.length).to.equal(1);
         expect(insertResult3[0].rowsAffected).to.equal(1);
 
-        const selectResult = await crud.query(HeaderSimple).toList({ cascade: false }).toPromise();
+        const selectResult = await lastValueFrom(crud.query(HeaderSimple).toList({ cascade: false }));
         expect(selectResult.length).to.equal(3);
 
         expect(selectResult[0].items.length).to.equal(0);
@@ -659,22 +661,22 @@ describe("SQLite", () => {
         /* Main deleted */
         expect(deleteResult2[0].rowsAffected).to.equal(1);
 
-        const selectResult2 = await crud.query(HeaderSimple).toList({ cascade: false }).toPromise();
+        const selectResult2 = await lastValueFrom(crud.query(HeaderSimple).toList({ cascade: false }));
         expect(selectResult2.length).to.equal(1);
         expect(selectResult2[0].items.length).to.equal(0);
         expect(selectResult2[0].id).to.equal(headerSimple3.id);
         expect(selectResult2[0].descricao).to.equal(headerSimple3.descricao);
 
-        const dropResult = await ddl.drop(HeaderSimple).execute({ cascade: false }).toPromise();
+        const dropResult = await lastValueFrom(ddl.drop(HeaderSimple).execute({ cascade: false }));
         expect(dropResult.length).to.equal(1);
     });
 
     it("Referencia cascade (property compost)", async () => {
 
-        const createResult = await ddl.create(Referencia).execute().toPromise();
+        const createResult = await lastValueFrom(ddl.create(Referencia).execute());
         expect(createResult.length).to.equal(3);
 
-        const insertResult1 = await crud.insert(Referencia, { modelToSave: ObjectToTest.referencia }).execute().toPromise();
+        const insertResult1 = await lastValueFrom(crud.insert(Referencia, { modelToSave: ObjectToTest.referencia }).execute());
         expect(insertResult1.length).to.equal(ObjectToTest.referencia.referenciasRelacionadas.length + ObjectToTest.referencia.restricaoGrade.length + 1);
         expect(insertResult1[0].rowsAffected).to.equal(1);
         [...ObjectToTest.referencia.referenciasRelacionadas, ...ObjectToTest.referencia.restricaoGrade].forEach((value, index) => {
@@ -706,7 +708,7 @@ describe("SQLite", () => {
             deleted: false
         } as Referencia;
 
-        const insertResult2 = await crud.insert(Referencia, { modelToSave: referencia2 }).execute().toPromise();
+        const insertResult2 = await lastValueFrom(crud.insert(Referencia, { modelToSave: referencia2 }).execute());
         expect(insertResult2.length).to.equal(referencia2.referenciasRelacionadas.length + referencia2.restricaoGrade.length + 1);
         expect(insertResult2[0].rowsAffected).to.equal(1);
         [...referencia2.referenciasRelacionadas, ...referencia2.restricaoGrade].forEach((value, index) => {
@@ -738,14 +740,14 @@ describe("SQLite", () => {
             deleted: false
         } as Referencia;
 
-        const insertResult3 = await crud.insert(Referencia, { modelToSave: referencia3 }).execute().toPromise();
+        const insertResult3 = await lastValueFrom(crud.insert(Referencia, { modelToSave: referencia3 }).execute());
         expect(insertResult3.length).to.equal(referencia3.referenciasRelacionadas.length + referencia3.restricaoGrade.length + 1);
         expect(insertResult3[0].rowsAffected).to.equal(1);
         [...referencia3.referenciasRelacionadas, ...referencia3.restricaoGrade].forEach((value, index) => {
             expect(insertResult3[index + 1].rowsAffected).to.equal(1);
         });
 
-        const selectResult = await crud.query(Referencia).toList().toPromise();
+        const selectResult = await lastValueFrom(crud.query(Referencia).toList());
         expect(selectResult.length).to.equal(3);
 
         expect(selectResult[0].restricaoGrade.length).to.equal(ObjectToTest.referencia.restricaoGrade.length);
@@ -842,7 +844,7 @@ describe("SQLite", () => {
         expect(deleteResult2[1].rowsAffected).to.equal(ObjectToTest.referencia.restricaoGrade.length);
         expect(deleteResult2[2].rowsAffected).to.equal(ObjectToTest.referencia.referenciasRelacionadas.length);
 
-        const selectResult2 = await crud.query(Referencia).toList().toPromise();
+        const selectResult2 = await lastValueFrom(crud.query(Referencia).toList());
         expect(selectResult2.length).to.equal(1);
         expect(selectResult2[0].restricaoGrade.length).to.equal(referencia3.restricaoGrade.length);
         expect(selectResult2[0].referenciasRelacionadas.length).to.equal(referencia3.referenciasRelacionadas.length);
@@ -856,14 +858,14 @@ describe("SQLite", () => {
         });
 
         /* Test select not cascade with data in itens */
-        const selectResultNotCascade = await crud.query(Referencia).toList({ cascade: false }).toPromise();
+        const selectResultNotCascade = await lastValueFrom(crud.query(Referencia).toList({ cascade: false }));
         expect(selectResultNotCascade.length).to.equal(1);
         expect(selectResultNotCascade[0].restricaoGrade.length).to.equal(0);
         expect(selectResultNotCascade[0].referenciasRelacionadas.length).to.equal(0);
         expect(selectResultNotCascade[0].codeImport).to.equal(referencia3.codeImport);
         expect(selectResultNotCascade[0].descricao).to.equal(referencia3.descricao);
 
-        const dropResult = await ddl.drop(Referencia).execute().toPromise();
+        const dropResult = await lastValueFrom(ddl.drop(Referencia).execute());
         expect(dropResult.length).to.equal(3);
     });
 
@@ -892,11 +894,11 @@ describe("SQLite", () => {
         } as Cliente;
 
         const insertCidade = crud.insert(Cidade, { modelToSave: cidade });
-        const insertResultCidade = await insertCidade.execute().toPromise();
+        const insertResultCidade = await lastValueFrom(insertCidade.execute());
         expect(insertResultCidade[0].rowsAffected).to.equal(1);
 
         const insertCliente = crud.insert(Cliente, { modelToSave: cliente });
-        const insertResultCliente = await insertCliente.execute().toPromise();
+        const insertResultCliente = await lastValueFrom(insertCliente.execute());
         expect(insertResultCliente[0].rowsAffected).to.equal(1);
 
         const query = await crud.query(Cliente)

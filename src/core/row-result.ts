@@ -43,6 +43,14 @@ export class RowResult<T> {
         return Utils.getValue(this._valueT, expression);
     }
 
+    public single<TReturn extends string | number | boolean>(): TReturn {
+        const keys = Object.keys(this._valueT);
+        if(keys.length == 1){
+            return Utils.getValue(this._valueT, keys[0]);
+        }
+        throw `It is not possible to get a single result (using .single()) when there are multiple projections in the query. Details: number of projections: ${keys.length}, current projections: ${keys}`;
+    }
+
     public coalesce<TReturn>(expression: ExpressionOrColumn<TReturn, T>, defaultValue: TReturn) {
         const value = this.get(expression);
         // tslint:disable-next-line:triple-equals

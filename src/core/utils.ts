@@ -15,7 +15,7 @@ import { ProjectionsHelper } from "./projections-helper";
 import { ColumnParams } from "./column-params";
 import { ColumnRef } from "./column-ref";
 import { PlanRef } from "./plan-ref";
-import * as uuidv4 from "uuid/v4";
+import * as uuid from "uuid";
 import { ReplacementParam } from "./replacement-param";
 import { Query, QueryBuilder } from "../crud";
 import { MetadataTable } from "../metadata-table";
@@ -66,7 +66,7 @@ export class Utils {
 
     // Fonte: https://www.npmjs.com/package/uuid
     public static GUID() {
-        return uuidv4();
+        return uuid.v4();
     }
 
     public static isFlag(value: any, flag: any) {

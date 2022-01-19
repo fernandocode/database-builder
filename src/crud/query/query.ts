@@ -21,7 +21,7 @@ import { SqlBase } from "../sql-base";
 import { ModelUtils } from "../../core/model-utils";
 import { DependencyListSimpleModel } from "../../definitions/dependency-definition";
 import { KeyUtils } from "../../core/key-utils";
-import { Observable, Observer } from "rxjs";
+import { map, Observable, Observer } from "rxjs";
 import { forkJoinSafe } from "../../safe-utils";
 import { ProjectionsUtils } from "../../core/projections-utils";
 
@@ -241,6 +241,51 @@ export class Query<TType> extends SqlBase<TType> {
         } = {}
     ): Observable<TType[]> {
         return this.executeAndRead({ cascade, database });
+    }
+
+    /**
+     * Execute query and parse to @type {TPrimitiveType}
+     * @param cascade use cascade fetch in `hasMany` mapper (default = true)
+     * @returns first or default @type {TPrimitiveType}
+     */
+    public toSingle<TPrimitiveType extends string|number|boolean>(
+        {
+            cascade = true,
+            database,
+            where,
+            _default
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase,
+            where?: (whereCallback: WhereBuilder<TType>) => void,
+            _default?: any
+        } = {}
+    ): Observable<TPrimitiveType> {        
+        if (where) {
+            this.where(where);
+        }
+        return this.limit(1)
+            .toSingleList<TPrimitiveType>({ cascade, database })
+            .pipe(
+                map(result => (result && result.length) ? result[0] : _default)
+            );
+    }
+
+    /**
+     * Execute query and parse to @type {TPrimitiveType}
+     * @param cascade use cascade fetch in `hasMany` mapper (default = true)
+     * @returns Array of @type {TPrimitiveType}
+     */
+    public toSingleList<TPrimitiveType extends string|number|boolean>(
+        {
+            cascade = true,
+            database
+        }: {
+            cascade?: boolean,
+            database?: DatabaseBase
+        } = {}
+    ): Observable<TPrimitiveType[]> {
+        return this.mapper<TPrimitiveType>(r => r.single<TPrimitiveType>(), { cascade, database });
     }
 
     /**
