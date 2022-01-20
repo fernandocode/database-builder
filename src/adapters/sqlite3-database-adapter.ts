@@ -4,6 +4,7 @@ import { SQLite3Interface, SQLite3ObjectInterface } from "../definitions/sqlite3
 import { QueryHelper } from "../core/query-helper";
 import { BaseDatabaseAdapter } from "./base-database.adapter";
 import { WebSqlTransactionInterface } from "../definitions/websql-interface";
+import { Utils } from "../core/utils";
 
 /**
  * Adapter for https://www.npmjs.com/package/sqlite3
@@ -209,16 +210,7 @@ export class SQLite3DatabaseAdapter extends BaseDatabaseAdapter<SQLite3ObjectInt
         rowsAffected: number = 0,
         insertId: any = void 0
     ): DatabaseResult {
-        return {
-            rows: {
-                length: rows.length,
-                item: (index: number) => {
-                    return rows[index];
-                }
-            },
-            rowsAffected,
-            insertId
-        } as DatabaseResult;
+        return Utils.objectToDatabaseResult(rows, rowsAffected, insertId);
     }
 
     private beginTransaction(database: SQLite3ObjectInterface): Promise<DatabaseResult> {

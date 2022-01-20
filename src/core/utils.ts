@@ -25,6 +25,7 @@ import * as lodash from "lodash";
 import { QueryCompiled } from ".";
 import { Resultable } from "./resultable";
 import { SqlCompilable } from "../crud/sql-compilable";
+import { DatabaseResult } from "../definitions/database-definition";
 
 export type ParamType = ValueType | ReplacementParam;
 
@@ -469,5 +470,22 @@ export class Utils {
 
     public static getDatabaseHelper(): DatabaseHelper {
         return this._databaseHelper = this._databaseHelper ? this._databaseHelper : new DatabaseHelper();
+    }    
+
+    public static objectToDatabaseResult(
+        rows: any[],
+        rowsAffected: number = 0,
+        insertId: any = void 0
+    ): DatabaseResult {
+        return {
+            rows: {
+                length: rows.length,
+                item: (index: number) => {
+                    return rows[index];
+                }
+            },
+            rowsAffected,
+            insertId
+        } as DatabaseResult;
     }
 }
