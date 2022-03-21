@@ -1,14 +1,15 @@
 {
   "name": "database-builder",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Library to assist in creating and maintaining SQL commands.",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "scripts": {
     "test": "tsc & mocha src/test/**/*.spec.js",
     "test-grep": "tsc & mocha src/test/**/*.spec.js --grep",
-    "test-single": "tsc && mocha --inspect src/test/**/*.spec.js --grep Mapper",
-    "test-debug": "mocha -r ts-node/register src/test/**/*.spec.ts --debug-brk",
+    "test-single": "tsc && mocha --inspect src/test/**/*.spec.js --grep \"Insert Cascade\"",
+    "test-d": "tsc && mocha --inspect src/test/**/*.spec.js",
+    "test-debug": "mocha -r ts-node/register src/test/**/*.spec.ts --debug-brk --grep aqui",
     "lint": "tslint -p tsconfig.json",
     "build": "tsc",
     "publish-npm": "tsc & npm publish",

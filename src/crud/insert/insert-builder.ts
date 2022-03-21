@@ -1,8 +1,9 @@
-import { Utils } from "../../core/utils";
+import { Utils, ValueType } from "../../core/utils";
 import { InsertColumnsBuilder } from "./insert-columns-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { QueryCompiled } from "../../core/query-compiled";
+import { CommanderBuilder } from "../batch-insert/commander-builder";
 
 export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>> {
 
@@ -21,21 +22,8 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
     }
 
     protected buildBase(): QueryCompiled {
-        const parameterValues: any[] = [];
-
         const columnsCompiled = this.getColumnsCompiled();
-        columnsCompiled.columns.forEach((column) => {
-            parameterValues.push("?");
-        });
-
-        return {
-            params: columnsCompiled.params,
-            query: Utils.normalizeSqlString(
-                `INSERT INTO ${this._tablename}
-                    (${columnsCompiled.columns.join(", ")})
-                    VALUES (${parameterValues.join(", ")})`
-            ),
-        };
+        return CommanderBuilder.batchInsert(this._tablename, columnsCompiled.columns, columnsCompiled.params)?.[0];
     }
 
     public getModel(): T {

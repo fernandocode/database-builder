@@ -77,10 +77,6 @@ export class Crud {
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
-        // modelToSave: T = void 0,
-        // alias: string = void 0,
-        // metadata: MetadataTable<T> = this.getMapper(typeT),
-        // database: DatabaseBase = this.getDatabase(),
     ): Update<T> {
         return new Update(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
     }

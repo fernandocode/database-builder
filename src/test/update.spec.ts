@@ -107,8 +107,8 @@ describe("Update", () => {
         expect(result[0].query).to.equal("UPDATE Marca SET codeImport = ?");
     });
 
-    it("Marca (parcial update by model)", () => {
-        const marcaParcial: Marca = { codeImport: 2 } as any;
+    it("Marca parcial update by model", () => {
+        const marcaParcial: Marca = { codeImport: 2 } as Marca;
         const result = new Update(Marca, { modelToSave: marcaParcial, mapperTable: mapper.get(Marca).mapperTable })
             .columns(c => c.set(x => x.codeImport))
             .compile();

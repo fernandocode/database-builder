@@ -131,13 +131,13 @@ describe("Insert", () => {
         const result = new Insert(TestClazz, { modelToSave: ObjectToTest.testClazz, mapperTable: mapper.get(TestClazz).mapperTable }).compile();
         expect(result[0].params[0]).to.equal(ObjectToTest.testClazz.id);
         expect(result[0].params[1]).to.equal(ObjectToTest.testClazz.description);
-        expect(result[0].params[2]).to.equal(Utils.getValueType(ObjectToTest.testClazz.date, FieldType.DATE));
-        expect(result[0].params[3]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateMoment, FieldType.DATE));
-        expect(result[0].params[4]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateDate, FieldType.DATE));
+        expect(result[0].params[2]).to.equal(Utils.getValueType(ObjectToTest.testClazz.date, FieldType.DATE)?.[0]);
+        expect(result[0].params[3]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateMoment, FieldType.DATE)?.[0]);
+        expect(result[0].params[4]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateDate, FieldType.DATE)?.[0]);
         expect(result[0].params[5]).to.equal(ObjectToTest.testClazz.numero);
         expect(result[0].params[6]).to.equal(ObjectToTest.testClazz.referenceTest.id);
         expect(result[0].params[7]).to.equal(ObjectToTest.testClazz.referenceTestCode.code);
-        expect(result[0].params[8]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateStr, FieldType.DATE));
+        expect(result[0].params[8]).to.equal(Utils.getValueType(ObjectToTest.testClazz.dateStr, FieldType.DATE)?.[0]);
         expect(result[0].query).to.equal("INSERT INTO TestClazz (id, description, date, dateMoment, dateDate, numero, referenceTest_id, referenceTestCode_code, dateStr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     });
 

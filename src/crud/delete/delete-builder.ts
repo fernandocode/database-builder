@@ -6,6 +6,7 @@ import { QueryCompiled } from "../../core";
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { Utils } from "../../core/utils";
+import { CommanderBuilder } from "../batch-insert/commander-builder";
 
 export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>> {
 
@@ -28,10 +29,7 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
     }
 
     protected buildBase(): QueryCompiled {
-        return {
-            params: [],
-            query: `DELETE FROM ${this._tablename}`,
-        };
+        return CommanderBuilder.delete(this._tablename);
     }
 
     public getModel(): T {

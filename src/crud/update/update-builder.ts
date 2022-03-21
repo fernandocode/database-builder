@@ -3,6 +3,7 @@ import { WhereBuilder } from "../where-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { QueryCompiled } from "../../core";
+import { CommanderBuilder } from "../batch-insert/commander-builder";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {
 
@@ -28,10 +29,8 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
     }
 
     protected buildBase(): QueryCompiled {
-        return {
-            params: this.getColumnsCompiled().params,
-            query: `UPDATE ${this._tablename} SET ${this.getColumnsCompiled().columns.join(", ")}`,
-        };
+        const columnsCompiled = this.getColumnsCompiled();
+        return CommanderBuilder.update(this._tablename, columnsCompiled.columns, columnsCompiled.params[0])
     }
 
     public getModel(): T {

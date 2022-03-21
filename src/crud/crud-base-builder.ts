@@ -61,7 +61,7 @@ export abstract class CrudBaseBuilder<
 
     protected abstract setDefaultColumns(): void;
 
-    public abstract getModel(): T;
+    public abstract getModel(): T | Array<T>;
 
     private compileColumns(compiled: ColumnsCompiled) {
         if (compiled.columns.length) {

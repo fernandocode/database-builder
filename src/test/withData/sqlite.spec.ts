@@ -430,7 +430,7 @@ describe("SQLite", () => {
 
         expect(queryResult.length).to.equal(1);
         expect(queryResult[0].idErp).to.equal(dados.idErp);
-        expect(Utils.getValueType(queryResult[0].dataRecebimento, FieldType.DATE)).to.equal(Utils.getValueType(dados.dataRecebimento, FieldType.DATE));
+        expect(Utils.getValueType(queryResult[0].dataRecebimento, FieldType.DATE)?.[0]).to.equal(Utils.getValueType(dados.dataRecebimento, FieldType.DATE)?.[0]);
         expect(queryResult[0].dataVencimento.unix()).to.equal(dados.dataVencimento.unix());
     });
 
@@ -498,10 +498,11 @@ describe("SQLite", () => {
         headerSimple2.items.splice(headerSimple2.items.length - 1, 1);
         headerSimple2.items = [...headerSimple2.items, "agora", "tem", "novo", "valor"];
 
-        const updateResult = await crud.update(HeaderSimple, { modelToSave: headerSimple2 })
-            .where(where => {
-                where.equal(x => x.id, headerSimple2.id);
-            })
+        const update = crud.update(HeaderSimple, { modelToSave: headerSimple2 })
+        .where(where => {
+            where.equal(x => x.id, headerSimple2.id);
+        });
+        const updateResult = await update
             .execute().toPromise();
         const countUpdateResultExtraItems = 2; /* Update (Main) e Delete (Items) */
         expect(updateResult.length).to.equal(headerSimple2.items.length + countUpdateResultExtraItems);

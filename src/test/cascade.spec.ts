@@ -6,6 +6,7 @@ import { HeaderSimple } from "./models/header-simple";
 import { SQLiteDatabase } from "./database/sqlite-database";
 import { RefToHeaderSimple } from "./models/ref-to-header-simple";
 import { RowResult } from "../core/row-result";
+import { ReplacementParam } from "../core/replacement-param";
 
 describe("Cascade", () => {
     let crud: Crud;
@@ -17,6 +18,57 @@ describe("Cascade", () => {
         const database = await new SQLiteDatabase().init();
         crud = new Crud({ database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
+    });
+
+    it("Insert Cascade", () => {
+        const headerSimple2 = {
+            descricao: "Header 2",
+            items: ["123", "456", "789", "10a"]
+        } as HeaderSimple;
+
+        const insertCompiled = crud.insert(HeaderSimple, { modelToSave: headerSimple2 })
+            .columns(x => x.set(x => x.descricao)).compile();
+        expect(insertCompiled.length).to.equal(5);
+        expect(insertCompiled[0].params.toString()).to.equal([
+            headerSimple2.descricao
+        ].toString());
+        expect(insertCompiled[1].params.toString()).to.equal([
+            0,
+            headerSimple2.items[0],
+            new ReplacementParam("0", "insertId")
+        ].toString());
+        expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?)");
+        expect(insertCompiled[1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
+    });
+
+    it("Update Cascade", () => {
+        const headerSimple2 = {
+            id: 123,
+            descricao: "Editado",
+            items: ["123", "adadad", "789", "10a"]
+        } as HeaderSimple;
+
+        const updateCompiled = crud.update(HeaderSimple, { modelToSave: headerSimple2 })
+            .where(where => {
+                where.equal(x => x.id, headerSimple2.id);
+            }).compile();
+        expect(updateCompiled.length).to.equal(6);
+        expect(updateCompiled[0].params[0]).to.equal(headerSimple2.descricao);
+        expect(updateCompiled[0].params.toString()).to.equal([
+            headerSimple2.descricao,
+            headerSimple2.id
+        ].toString());
+        expect(updateCompiled[1].params.toString()).to.equal([
+            headerSimple2.id
+        ].toString());
+        expect(updateCompiled[2].params.toString()).to.equal([
+            0,
+            headerSimple2.items[0],
+            headerSimple2.id
+        ].toString());
+        expect(updateCompiled[0].query).to.equal("UPDATE HeaderSimple SET descricao = ? WHERE id = ?");
+        expect(updateCompiled[1].query).to.equal("DELETE FROM ItemHeaderSimple WHERE HeaderSimple_id = ?");
+        expect(updateCompiled[2].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
     });
 
     // #1800

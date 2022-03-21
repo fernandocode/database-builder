@@ -74,13 +74,15 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         const script: QueryCompiled[] = [];
         const columnDependency = this.mapperTable.columns.find(x => x.tableReference === dependency.tableName);
         const fieldArraySplit = columnDependency.fieldReference.split("[?].");
-        const valuesDependency: any[] = Utils.getValue(this.model(), fieldArraySplit[0]);
-        if (valuesDependency) {
-            valuesDependency.forEach((value, index) => {
-                const valueItem = fieldArraySplit.length > 1 ? ModelUtils.get(value, fieldArraySplit[1]) : value;
-                this.checkAndPush(script, this.resolveDependencyByValue(dependency, valueItem, index));
-            });
-        }
+        const valuesDependencyArray: any[][] = Utils.getValue(this.model(), fieldArraySplit[0]);
+        valuesDependencyArray.forEach((valuesDependency) => {
+            if (valuesDependency) {
+                valuesDependency.forEach((value, index) => {
+                    const valueItem = fieldArraySplit.length > 1 ? ModelUtils.get(value, fieldArraySplit[1]) : value;
+                    this.checkAndPush(script, this.resolveDependencyByValue(dependency, valueItem, index));
+                });
+            }
+        });
         return script;
     }
 
@@ -88,7 +90,7 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         return this.mapperTable.dependencies;
     }
 
-    protected abstract model(): T;
+    protected abstract model(): T | Array<T>;
 
     protected abstract builderCompiled(): QueryCompiled;
 

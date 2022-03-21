@@ -3,7 +3,7 @@ import * as moment from "moment";
 import { WhereBuilder } from "../crud/where-builder";
 import { DatabaseHelper } from "../database-helper";
 import { ProjectionBuilder } from "../crud/projection-builder";
-import { Expression, ExpressionUtils, LambdaColumnMetadata, LambdaExpression, ReturnExpression } from "lambda-expression";
+import { Expression, ExpressionMetadata, ExpressionUtils, LambdaColumnMetadata, LambdaExpression, LambdaExpressionMetadata, LambdaPropertiesMetadata, ReturnExpression } from "lambda-expression";
 import { LambdaMetadata } from "./lambda-metadata";
 import { ExpressionOrColumnEnum } from "./enums/expression-or-column-enum";
 import { FieldType } from "./enums/field-type";
@@ -260,13 +260,8 @@ export class Utils {
                     params: []
                 };
             case (ExpressionOrValueEnum.Ref):
-            // return {
-            //     column: (expression as ColumnRef).result(),
-            //     params: []
-            // };
             case (ExpressionOrValueEnum.Plan):
                 return {
-                    // column: (expression as PlanRef).result(),
                     column: expression as Resultable,
                     params: []
                 };
@@ -306,20 +301,30 @@ export class Utils {
         return this.getExpressionUtils().getColumnByExpression(expression, ".");
     }
 
-    public static getValue<TReturn, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): TReturn {
+    public static getValue<TReturn, T>(instance: any | Array<any>, expression: ExpressionOrColumn<TReturn, T>)
+        : Array<TReturn> {
+        return this.getValues(Utils.isArray(instance) ? instance as Array<any> : [instance], expression)
+    }
+
+    public static getValues<TReturn, T>(instance: Array<any>, expression: ExpressionOrColumn<TReturn, T>)
+        : Array<TReturn> {
         return this.expressionOrColumn(expression) === ExpressionOrColumnEnum.Expression
-            ? this.getExpressionUtils().getValueByExpression(instance, expression as Expression<T>)
-            : this.getExpressionUtils().getValue(instance, expression as string);
+            ? instance.map(item => this.getExpressionUtils().getValueByExpression(item, expression as Expression<T>))
+            : instance.map(item => this.getExpressionUtils().getValue(item, expression as string));
     }
 
     public static getTypeByValue(value: ValueTypeToParse): FieldType {
         return this.getDatabaseHelper().getType(value);
     }
 
+    public static getType(instance: Array<ValueTypeToParse>): FieldType;
     public static getType(instance: ValueTypeToParse): FieldType;
     public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression: ExpressionOrColumn<TReturn, T>): FieldType;
     public static getType<TReturn extends ValueTypeToParse, T>(instance: any, expression?: ExpressionOrColumn<TReturn, T>): FieldType {
-        if (Utils.isNull(instance)) {
+        if (this.isArray(instance)) {
+            return this.getType((instance as Array<ValueTypeToParse>).find(x => !this.isNull(x) && this.isValue(x)));
+        }
+        if (this.isNull(instance)) {
             return void 0;
         }
         if (expression) {
@@ -328,8 +333,19 @@ export class Utils {
         return this.getTypeByValue(instance);
     }
 
-    public static getValueType(value: ValueTypeToParse, type: FieldType = void 0): ValueType {
-        return this.getDatabaseHelper().parseToValueType(value, type);
+    public static getValueType(value: ValueTypeToParse | Array<ValueTypeToParse>, type: FieldType = void 0)
+        : Array<ValueType> {
+        return this.getValuesType(Utils.isArray(value) ? value as Array<ValueTypeToParse> : [value], type);
+    }
+
+    public static getValuesType(values: Array<ValueTypeToParse>, type: FieldType = void 0)
+        : Array<ValueType> {
+        if (this.isFlag(type, FieldType.ARRAY)) {
+            // se o campo for do type ARRAY, passar o array para o tratamento e não tratar cada valor individualmente
+            var t = this.getDatabaseHelper().parseToValueType(values?.[0], type);
+            return [t];
+        }
+        return values.map(value => this.getDatabaseHelper().parseToValueType(value, type));
     }
 
     public static parseColumnType(type: FieldType): ColumnType {
@@ -470,7 +486,7 @@ export class Utils {
 
     public static getDatabaseHelper(): DatabaseHelper {
         return this._databaseHelper = this._databaseHelper ? this._databaseHelper : new DatabaseHelper();
-    }    
+    }
 
     public static objectToDatabaseResult(
         rows: any[],
