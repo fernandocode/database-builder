@@ -84,7 +84,7 @@ describe("Single Transaction Manager", function () {
             } as GuidClazz;
             transaction.add(
                 crud
-                    .insert(GuidClazz, { modelToSave: obj1 })
+                    .insert(GuidClazz, { toSave: obj1 })
             );
             observers.push(transaction.commit());
         }
@@ -117,7 +117,7 @@ describe("Single Transaction Manager", function () {
             } as HeaderSimple;
             objectsSaved.push(headerSimple2);
             transaction.add(
-                crud.insert(HeaderSimple, { modelToSave: headerSimple2 })
+                crud.insert(HeaderSimple, { toSave: headerSimple2 })
             );
             observers.push(transaction.commit());
         }
@@ -141,7 +141,7 @@ describe("Single Transaction Manager", function () {
             } as GuidClazzHasMany;
             objectsSaved.push(guidClass);
             transaction.add(
-                crud.insert(GuidClazzHasMany, { modelToSave: guidClass })
+                crud.insert(GuidClazzHasMany, { toSave: guidClass })
             );
             observers.push(transaction.commit());
         }
@@ -183,7 +183,7 @@ describe("Single Transaction Manager", function () {
             } as Referencia;
             objectsSaved.push(referencia);
             transaction.add(
-                crud.insert(Referencia, { modelToSave: referencia })
+                crud.insert(Referencia, { toSave: referencia })
             );
             observers.push(transaction.commit());
         }

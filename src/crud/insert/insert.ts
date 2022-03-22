@@ -9,26 +9,27 @@ import { DependencyListSimpleModel } from "../../definitions/dependency-definiti
 import { ReplacementParam } from "../../core/replacement-param";
 import { PrimaryKeyType } from "../../core/enums/primary-key-type";
 import { ModelUtils } from "../../core/model-utils";
+import { ValueTypeToParse } from "../../core/utils";
 
 export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
         {
-            modelToSave,
+            toSave,
             mapperTable,
             alias,
             database,
             enableLog = true
         }: {
-            modelToSave: T,
+            toSave?: T | Array<T>,
             mapperTable: MapperTable,
             alias?: string,
             database?: DatabaseBase,
             enableLog?: boolean
         }
     ) {
-        super(TypeCrud.CREATE, { mapperTable, builder: new InsertBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog });
+        super(TypeCrud.CREATE, { mapperTable, builder: new InsertBuilder(typeT, mapperTable, alias, toSave), database, enableLog });
     }
 
     public columns(columnsCallback: (columns: InsertColumnsBuilder<T>) => void): Insert<T> {
@@ -36,7 +37,7 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
         return this;
     }
 
-    protected resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled {
+    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
         const modelBase = this.model();
         const modelDependency = {
             index,

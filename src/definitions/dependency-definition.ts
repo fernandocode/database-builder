@@ -1,6 +1,8 @@
+import { ValueTypeToParse } from "../core/utils";
+
 export interface DependencyListSimpleModel {
     index: number;
-    value: any;
+    value: ValueTypeToParse;
     reference: any;
 }
 

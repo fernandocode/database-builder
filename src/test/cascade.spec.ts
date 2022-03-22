@@ -26,8 +26,7 @@ describe("Cascade", () => {
             items: ["123", "456", "789", "10a"]
         } as HeaderSimple;
 
-        const insertCompiled = crud.insert(HeaderSimple, { modelToSave: headerSimple2 })
-            .columns(x => x.set(x => x.descricao)).compile();
+        const insertCompiled = crud.insert(HeaderSimple, { toSave: headerSimple2 }).compile();
         expect(insertCompiled.length).to.equal(5);
         expect(insertCompiled[0].params.toString()).to.equal([
             headerSimple2.descricao
@@ -41,6 +40,22 @@ describe("Cascade", () => {
         expect(insertCompiled[1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
     });
 
+    it("Insert Cascade set columns (ignore cascade)", () => {
+        const headerSimple2 = {
+            descricao: "Header 2",
+            items: ["123", "456", "789", "10a"]
+        } as HeaderSimple;
+
+        const insertCommand = crud.insert(HeaderSimple, { toSave: headerSimple2 })
+            .columns(column => column.set(x => x.descricao));
+        const insertCompiled = insertCommand.compile();
+        expect(insertCompiled.length).to.equal(1);
+        expect(insertCompiled[0].params.toString()).to.equal([
+            headerSimple2.descricao
+        ].toString());
+        expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?)");
+    });
+
     it("Update Cascade", () => {
         const headerSimple2 = {
             id: 123,
@@ -48,7 +63,7 @@ describe("Cascade", () => {
             items: ["123", "adadad", "789", "10a"]
         } as HeaderSimple;
 
-        const updateCompiled = crud.update(HeaderSimple, { modelToSave: headerSimple2 })
+        const updateCompiled = crud.update(HeaderSimple, { toSave: headerSimple2 })
             .where(where => {
                 where.equal(x => x.id, headerSimple2.id);
             }).compile();
@@ -71,6 +86,27 @@ describe("Cascade", () => {
         expect(updateCompiled[2].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
     });
 
+    it("Update Cascade set columns (ignore cascade)", () => {
+        const headerSimple2 = {
+            id: 123,
+            descricao: "Editado",
+            items: ["123", "adadad", "789", "10a"]
+        } as HeaderSimple;
+
+        const updateCompiled = crud.update(HeaderSimple, { toSave: headerSimple2 })
+            .columns(column => column.set(x => x.descricao))
+            .where(where => {
+                where.equal(x => x.id, headerSimple2.id);
+            }).compile();
+        expect(updateCompiled.length).to.equal(1);
+        expect(updateCompiled[0].params[0]).to.equal(headerSimple2.descricao);
+        expect(JSON.stringify(updateCompiled[0].params)).to.equal(JSON.stringify([
+            headerSimple2.descricao,
+            headerSimple2.id
+        ]));
+        expect(updateCompiled[0].query).to.equal("UPDATE HeaderSimple SET descricao = ? WHERE id = ?");
+    });
+
     // #1800
     it("cascade in left outer join", async () => {
         const createRefResult = await ddl.create(RefToHeaderSimple).execute().toPromise();
@@ -85,14 +121,14 @@ describe("Cascade", () => {
             } as HeaderSimple
         } as RefToHeaderSimple;
 
-        const insertResult = await crud.insert(HeaderSimple, { modelToSave: refToHeaderSimple.headerSimple }).execute().toPromise();
+        const insertResult = await crud.insert(HeaderSimple, { toSave: refToHeaderSimple.headerSimple }).execute().toPromise();
         expect(insertResult.length).to.equal(refToHeaderSimple.headerSimple.items.length + 1);
         expect(insertResult[0].rowsAffected).to.equal(1);
         refToHeaderSimple.headerSimple.items.forEach((value, index) => {
             expect(insertResult[index + 1].rowsAffected).to.equal(1);
         });
 
-        const insertRefResult = await crud.insert(RefToHeaderSimple, { modelToSave: refToHeaderSimple }).execute().toPromise();
+        const insertRefResult = await crud.insert(RefToHeaderSimple, { toSave: refToHeaderSimple }).execute().toPromise();
         expect(insertRefResult.length).to.equal(1);
 
         const query = crud.query(RefToHeaderSimple);

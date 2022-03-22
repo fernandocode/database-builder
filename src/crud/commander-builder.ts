@@ -1,7 +1,7 @@
-import { QueryCompiled } from "../../core";
-import { Utils, ValueType } from "../../core/utils";
-import { MapperColumn } from "../../mapper-column";
-import { MapperTable } from "../../mapper-table";
+import { DatabaseBuilderError, QueryCompiled } from "../core";
+import { Utils, ValueType } from "../core/utils";
+import { MapperColumn } from "../mapper-column";
+import { MapperTable } from "../mapper-table";
 
 export class CommanderBuilder {
 
@@ -55,18 +55,31 @@ export class CommanderBuilder {
 
     public static batchInsert(tableName: string, columnsNames: string[], values: Array<ValueType[]>)
         : QueryCompiled[] {
-        return this.splitChunks(values, this.LIMIT_VARIABLES_INSERT).map(valuesChunk => {
-            return {
-                params: [].concat(...valuesChunk),
-                query: Utils.normalizeSqlString(
-                    `INSERT INTO ${tableName}
+        if (this.validValues(values)) {
+            return this.splitChunks(values, this.LIMIT_VARIABLES_INSERT).map(valuesChunk => {
+                return {
+                    params: [].concat(...valuesChunk),
+                    query: Utils.normalizeSqlString(
+                        `INSERT INTO ${tableName}
                     (${columnsNames.join(", ")})
                     VALUES ${valuesChunk
-                        .map(a => `(${a.map(() => "?").join(", ")})`)
-                        .join(", ")}`
-                ),
-            };
-        });
+                            .map(a => `(${a.map(() => "?").join(", ")})`)
+                            .join(", ")}`
+                    ),
+                };
+            });
+        }
+    }
+
+    private static validValues(values: Array<ValueType[]>): boolean {
+        if (values.length < 1)
+            throw new DatabaseBuilderError(`Values not informed`);
+        const sizeInnerArray = values?.[0].length;
+        if (sizeInnerArray < 1)
+            throw new DatabaseBuilderError(`Inner values not informed`);
+        if (!values.every(x => x.length === sizeInnerArray))
+            throw new DatabaseBuilderError(`Values with different size not suportted, values: ${JSON.stringify(values)}`);
+        return true;
     }
 
     public static batchInsertColumn<T>(tableName: string, columns: MapperColumn[], models: Array<T>)

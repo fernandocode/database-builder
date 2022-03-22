@@ -17,26 +17,20 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
     constructor(
         typeT: new () => T,
         {
-            modelToSave,
+            toSave: toSave,
             mapperTable,
             alias,
             database,
             enableLog = true
         }: {
-            modelToSave?: T,
+            toSave?: T,
             mapperTable: MapperTable,
             alias?: string,
             database?: DatabaseBase,
             enableLog?: boolean
         }
-        // typeT: new () => T,
-        // modelToSave: T = void 0,
-        // mapperTable: MapperTable,
-        // alias: string = void 0,
-        // database: DatabaseBase = void 0,
-        // enableLog: boolean = true,
     ) {
-        super(TypeCrud.UPDATE, { mapperTable, builder: new UpdateBuilder(typeT, mapperTable, alias, modelToSave), database, enableLog });
+        super(TypeCrud.UPDATE, { mapperTable, builder: new UpdateBuilder(typeT, mapperTable, alias, toSave), database, enableLog });
     }
 
     public columns(columnsCallback: (columns: UpdateColumnsBuilder<T>) => void): Update<T> {

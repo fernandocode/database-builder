@@ -2,7 +2,7 @@ import { ExecutableBuilder } from "../core/executable-builder";
 import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
 import { MapperTable } from "../mapper-table";
-import { Utils } from "../core/utils";
+import { Utils, ValueTypeToParse } from "../core/utils";
 import { SqlCompilable } from "./sql-compilable";
 import { QueryCompiled } from "../core/query-compiled";
 import { SqlExecutable } from "./sql-executable";
@@ -74,7 +74,7 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         const script: QueryCompiled[] = [];
         const columnDependency = this.mapperTable.columns.find(x => x.tableReference === dependency.tableName);
         const fieldArraySplit = columnDependency.fieldReference.split("[?].");
-        const valuesDependencyArray: any[][] = Utils.getValue(this.model(), fieldArraySplit[0]);
+        const valuesDependencyArray: ValueTypeToParse[][] = Utils.getValue(this.model(), fieldArraySplit[0]);
         valuesDependencyArray.forEach((valuesDependency) => {
             if (valuesDependency) {
                 valuesDependency.forEach((value, index) => {
@@ -89,12 +89,13 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
     protected dependencies(): MapperTable[] {
         return this.mapperTable.dependencies;
     }
+    // protected abstract dependencies(): MapperTable[];
 
     protected abstract model(): T | Array<T>;
 
     protected abstract builderCompiled(): QueryCompiled;
 
-    protected abstract resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled;
+    protected abstract resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled;
     protected abstract resolveDependency(dependency: MapperTable): QueryCompiled;
 
     protected abstract checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]>;

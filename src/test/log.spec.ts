@@ -34,7 +34,7 @@ describe("Log", () => {
         await ddl.create(GuidClazz).execute().toPromise();
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
-        const resultInsert = await crud.insert(GuidClazz, { modelToSave: obj1 }).execute().toPromise();
+        const resultInsert = await crud.insert(GuidClazz, { toSave: obj1 }).execute().toPromise();
 
         const expectedCreate: any = {
             query:

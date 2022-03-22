@@ -61,7 +61,7 @@ describe("Mapper", () => {
 
         const subRegiao = { nome: "test", codeImport: 1, regiao: { codeImport: 2 } as Regiao } as SubRegiao;
 
-        const insert = new Insert(SubRegiao, { modelToSave: subRegiao, mapperTable: mapper.mapperTable });
+        const insert = new Insert(SubRegiao, { toSave: subRegiao, mapperTable: mapper.mapperTable });
 
         const insertCompiled = insert.compile()[0];
 

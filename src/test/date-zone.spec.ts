@@ -34,7 +34,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -53,7 +53,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -72,7 +72,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -92,7 +92,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 

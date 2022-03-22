@@ -69,4 +69,13 @@ export abstract class CrudBaseBuilder<
             this._columnsCompiled.params = this._columnsCompiled.params.concat(compiled.params);
         }
     }
+
+    public get specifiedColumns() { return this.columnsBuilder.columns; }
+
+    private _columnsBuilder: TColumnsBuilder;
+    protected get columnsBuilder() {
+        return this._columnsBuilder ??= this.createColumnsBuilder();
+    }
+
+    protected abstract createColumnsBuilder(): TColumnsBuilder;
 }

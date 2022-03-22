@@ -12,20 +12,22 @@ export abstract class ColumnsBaseBuilder<
     TColumn extends Column
     > {
 
-    protected columns: TColumn[] = [];
+    protected _columns: TColumn[] = [];
 
     private _databaseHelper: DatabaseHelper = new DatabaseHelper();
 
     constructor(
         protected readonly mapperTable: MapperTable,
-        protected readonly modelToSave: T | Array<T>
+        protected readonly toSave: T | Array<T>
     ) {
     }
 
+    public get columns() { return this._columns };
+
     public allColumns() {
         // clear columns
-        this.columns = [];
-        this.setAllColumns(this.mapperTable, this.modelToSave);
+        this._columns = [];
+        this.setAllColumns(this.mapperTable, this.toSave);
     }
 
     public setColumn(
@@ -33,7 +35,7 @@ export abstract class ColumnsBaseBuilder<
         type: FieldType,
         primaryKeyType: PrimaryKeyType
     ): TThis {
-        this.columns.push({
+        this._columns.push({
             name: column,
             type,
             primaryKeyType
@@ -59,9 +61,9 @@ export abstract class ColumnsBaseBuilder<
             keyColumns: [],
             params: [],
         };
-        for (const key in this.columns) {
-            if (this.columns.hasOwnProperty(key)) {
-                const column = this.columns[key];
+        for (const key in this._columns) {
+            if (this._columns.hasOwnProperty(key)) {
+                const column = this._columns[key];
                 if (column.primaryKeyType) {
                     result.keyColumns.push(column.name);
                 }
@@ -114,6 +116,6 @@ export abstract class ColumnsBaseBuilder<
             : void 0;
         return fieldTypeByMapper
             ? fieldTypeByMapper.fieldType
-            : Utils.getType(this.modelToSave, columnExpression);
+            : Utils.getType(this.toSave, columnExpression);
     }
 }

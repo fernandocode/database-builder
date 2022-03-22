@@ -67,35 +67,35 @@ export class Crud {
     public update<T>(
         typeT: new () => T,
         {
-            modelToSave,
+            toSave,
             alias,
             metadata = this.getMapper(typeT),
             database = this.getDatabase()
         }: {
-            modelToSave?: T,
+            toSave?: T,
             alias?: string
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
     ): Update<T> {
-        return new Update(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
+        return new Update(typeT, { toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
     }
 
     public insert<T>(
         typeT: new () => T,
         {
-            modelToSave,
+            toSave,
             alias,
             metadata = this.getMapper(typeT),
             database = this.getDatabase()
         }: {
-            modelToSave?: T,
+            toSave?: T | Array<T>,
             alias?: string
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
     ): Insert<T> {
-        return new Insert(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
+        return new Insert(typeT, { toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
     }
 
     public query<T>(

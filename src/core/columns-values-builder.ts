@@ -15,9 +15,9 @@ export abstract class ColumnsValuesBuilder<
 
     constructor(
         mapperTable: MapperTable,
-        modelToSave: T | Array<T>,
+        toSave: T | Array<T>,
     ) {
-        super(mapperTable, modelToSave);
+        super(mapperTable, toSave);
     }
 
     protected setColumnValue(
@@ -39,9 +39,9 @@ export abstract class ColumnsValuesBuilder<
                         value = Utils.GUID();
                         // set value GUID in model
                         KeyUtils.setKey(this.mapperTable,
-                            Utils.isArray(this.modelToSave)
-                                ? (this.modelToSave as Array<T>)[index]
-                                : this.modelToSave,
+                            Utils.isArray(this.toSave)
+                                ? (this.toSave as Array<T>)[index]
+                                : this.toSave,
                             value);
                     }
                     return value;
@@ -50,7 +50,7 @@ export abstract class ColumnsValuesBuilder<
                     return value;
             }
         });
-        this.columns.push({
+        this._columns.push({
             name: column,
             type: fieldType,
             value: Utils.getValueType(values, fieldType),
@@ -89,8 +89,8 @@ export abstract class ColumnsValuesBuilder<
             keyColumns: [],
             params: [],
         };
-        result.keyColumns = this.columns.filter(x => !!x.primaryKeyType).map(x => x.name);
-        this.columns.forEach((column) => {
+        result.keyColumns = this._columns.filter(x => !!x.primaryKeyType).map(x => x.name);
+        this._columns.forEach((column) => {
             if (this.isAddColumn(column)) {
                 const columnName = this.columnFormat(column);
                 if (!Utils.isNull(columnName)) {
@@ -130,6 +130,6 @@ export abstract class ColumnsValuesBuilder<
     }
 
     protected getValueByExpression<TReturn>(expression: ExpressionOrColumn<TReturn, T>): Array<TReturn> {
-        return Utils.getValue(this.modelToSave, expression);
+        return Utils.getValue(this.toSave, expression);
     }
 }

@@ -40,6 +40,19 @@ export abstract class CrudBase<
         this._builder = builder;
     }
 
+    protected dependencies(): MapperTable[] {
+        /**
+         * retornar apenas as dependencias que foram solititadas nas colunas especificadas
+         */
+        return this.mapperTable.dependencies.filter(
+            dependency => this._builder.specifiedColumns.some(
+                x => x.name === this.mapperTable.columns.find(
+                    column => column.tableReference === dependency.tableName
+                ).column
+            )
+        );
+    }
+
     protected model(): T | Array<T> {
         return this._builder.getModel();
     }
@@ -51,8 +64,6 @@ export abstract class CrudBase<
     protected checkDatabaseResult(observable: Observable<DatabaseResult[]>): Observable<DatabaseResult[]> {
         if (this._typeCrud === TypeCrud.CREATE) {
             return observable.pipe(map(results => {
-                debugger;
-
                 const models: Array<T> = Utils.isArray(this.model())
                         ? this.model() as Array<T>
                         : [this.model() as T];

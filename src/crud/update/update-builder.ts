@@ -3,7 +3,7 @@ import { WhereBuilder } from "../where-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { QueryCompiled } from "../../core";
-import { CommanderBuilder } from "../batch-insert/commander-builder";
+import { CommanderBuilder } from "../commander-builder";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {
 
@@ -11,7 +11,7 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
         typeT: new () => T,
         mapperTable: MapperTable,
         alias: string = void 0,
-        protected readonly _modelToSave: T = void 0,
+        protected readonly _toSave: T = void 0,
     ) {
         super(typeT, mapperTable, alias);
     }
@@ -19,7 +19,7 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
     public columns(
         columnsCallback: (columns: UpdateColumnsBuilder<T>) => void,
     ): UpdateBuilder<T> {
-        return super.columnsBase(columnsCallback, new UpdateColumnsBuilder<T>(this.mapperTable, this._modelToSave), this);
+        return super.columnsBase(columnsCallback, this.columnsBuilder, this);
     }
 
     public where(
@@ -34,10 +34,14 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
     }
 
     public getModel(): T {
-        return this._modelToSave;
+        return this._toSave;
     }
 
     protected setDefaultColumns(): void {
         this.columns((columns) => columns.allColumns());
+    }
+
+    protected createColumnsBuilder(): UpdateColumnsBuilder<T> {
+        return new UpdateColumnsBuilder<T>(this.mapperTable, this._toSave);
     }
 }
