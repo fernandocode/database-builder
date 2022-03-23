@@ -8,7 +8,7 @@ import { WhereBuilder } from "../where-builder";
 import { DatabaseBase, DatabaseResult } from "../../definitions/database-definition";
 import { MetadataTable } from "../../metadata-table";
 import { QueryBuilder } from "./query-builder";
-import { ExpressionOrColumn, ParamType, TypeOrderBy, Utils } from "../../core/utils";
+import { ExpressionOrColumn, ParamType, TypeOrderBy, Utils, ValueTypeToParse } from "../../core/utils";
 import { OrderBy } from "../../core/enums/order-by";
 import { HavingBuilder } from "../having-builder";
 import { LambdaExpression } from "lambda-expression";
@@ -248,7 +248,7 @@ export class Query<TType> extends SqlBase<TType> {
      * @param cascade use cascade fetch in `hasMany` mapper (default = true)
      * @returns first or default @type {TPrimitiveType}
      */
-    public toSingle<TPrimitiveType extends string|number|boolean>(
+    public toSingle<TPrimitiveType extends string | number | boolean>(
         {
             cascade = true,
             database,
@@ -260,7 +260,7 @@ export class Query<TType> extends SqlBase<TType> {
             where?: (whereCallback: WhereBuilder<TType>) => void,
             _default?: any
         } = {}
-    ): Observable<TPrimitiveType> {        
+    ): Observable<TPrimitiveType> {
         if (where) {
             this.where(where);
         }
@@ -276,7 +276,7 @@ export class Query<TType> extends SqlBase<TType> {
      * @param cascade use cascade fetch in `hasMany` mapper (default = true)
      * @returns Array of @type {TPrimitiveType}
      */
-    public toSingleList<TPrimitiveType extends string|number|boolean>(
+    public toSingleList<TPrimitiveType extends string | number | boolean>(
         {
             cascade = true,
             database
@@ -501,7 +501,7 @@ export class Query<TType> extends SqlBase<TType> {
         return this._queryBuilder.compile();
     }
 
-    protected resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled {
+    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
         const insert = new QueryBuilder(void 0, dependency, void 0);
         return insert.compile();
     }
@@ -541,7 +541,6 @@ export class Query<TType> extends SqlBase<TType> {
                         database: this.database,
                         enableLog: this.enableLog
                     });
-                    // const queryDependency = new Query<DependencyListSimpleModel>(void 0, void 0, this._getMapper, dependency, this.database, this.enableLog);
                     queryDependency.where(where => {
                         const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                         where.equal(new ColumnRef(columnReference), KeyUtils.getKey(mapperTable, model));
@@ -587,5 +586,9 @@ export class Query<TType> extends SqlBase<TType> {
                     observer.complete();
                 });
         });
+    }
+
+    protected dependencies(): MapperTable[] {
+        return this.mapperTable.dependencies;
     }
 }

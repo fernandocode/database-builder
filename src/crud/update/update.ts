@@ -11,6 +11,8 @@ import { DeleteBuilder } from "../delete/delete-builder";
 import { InsertBuilder } from "../insert/insert-builder";
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
+import { ValueTypeToParse } from "../../core/utils";
+import { ModelUtils } from "../../core/model-utils";
 
 export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>> {
 
@@ -43,15 +45,23 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
         return this;
     }
 
-    protected resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled {
-        const builder = new InsertBuilder(void 0, dependency, void 0,
-            {
-                index,
-                value,
-                reference: KeyUtils.getKey(this.mapperTable, this.model())
-            } as DependencyListSimpleModel
-        );
-        return builder.compile();
+    protected compileValuesDependency(dependency: MapperTable, valuesDependencyArray: ValueTypeToParse[][], fieldReferenceSubItem: string): QueryCompiled[] {
+        const scripts: QueryCompiled[] = [];
+        valuesDependencyArray.forEach((valuesDependency) => {
+            if (valuesDependency) {
+                const dependenciesListSimpleModel = valuesDependency.map((value, index) => {
+                    const valueItem = fieldReferenceSubItem ? ModelUtils.get(value, fieldReferenceSubItem) : value;
+                    return {
+                        index,
+                        value: valueItem,
+                        reference: KeyUtils.getKey(this.mapperTable, this.model())
+                    } as DependencyListSimpleModel;
+                });
+                const builder = new InsertBuilder(void 0, dependency, void 0, dependenciesListSimpleModel);
+                this.checkAndPush(scripts, builder.compile());
+            }
+        });
+        return scripts;
     }
 
     protected resolveDependency(dependency: MapperTable): QueryCompiled {

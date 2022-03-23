@@ -71,7 +71,6 @@ export abstract class CrudBase<
                     throw new DatabaseBuilderError(`Há ${models.length} models e ${results.length} results, e o "checkDatabaseResult" ainda não sabe como proceder nessa situação, possivelmente você está tentando executar multi comandos em combinação com comandos em cascade`);
                 }
                 // como não sei qual será o retorno do insertMultiple, vou continuar considerando apenas o primeiro para pegar o id inserted do head
-                // let index = 0;
                 for (let index = 0; index < models.length; index++) {
                     const result = results[index];
                     const model = models[index];

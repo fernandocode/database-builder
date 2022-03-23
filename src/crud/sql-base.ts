@@ -75,30 +75,35 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         const columnDependency = this.mapperTable.columns.find(x => x.tableReference === dependency.tableName);
         const fieldArraySplit = columnDependency.fieldReference.split("[?].");
         const valuesDependencyArray: ValueTypeToParse[][] = Utils.getValue(this.model(), fieldArraySplit[0]);
+        return [...script, ...this.compileValuesDependency(dependency, valuesDependencyArray, fieldArraySplit?.[1])];
+    }
+
+    protected compileValuesDependency(dependency: MapperTable, valuesDependencyArray: ValueTypeToParse[][], fieldReferenceSubItem: string): QueryCompiled[] {
+        const scripts: QueryCompiled[] = [];
         valuesDependencyArray.forEach((valuesDependency) => {
             if (valuesDependency) {
                 valuesDependency.forEach((value, index) => {
-                    const valueItem = fieldArraySplit.length > 1 ? ModelUtils.get(value, fieldArraySplit[1]) : value;
-                    this.checkAndPush(script, this.resolveDependencyByValue(dependency, valueItem, index));
+                    const valueItem = fieldReferenceSubItem ? ModelUtils.get(value, fieldReferenceSubItem) : value;
+                    this.checkAndPush(scripts, this.resolveDependencyByValue(dependency, valueItem, index));
                 });
             }
         });
-        return script;
+        return scripts;
     }
 
-    protected dependencies(): MapperTable[] {
-        return this.mapperTable.dependencies;
-    }
-    // protected abstract dependencies(): MapperTable[];
+    protected abstract dependencies(): MapperTable[];
 
     protected abstract model(): T | Array<T>;
 
     protected abstract builderCompiled(): QueryCompiled;
 
-    protected abstract resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled;
     protected abstract resolveDependency(dependency: MapperTable): QueryCompiled;
-
+    
     protected abstract checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]>;
+    
+    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled{
+        return void 0;
+    }
 
     protected getDatabase(database: DatabaseBase): DatabaseBase {
         const result = (database ? database : this.database);

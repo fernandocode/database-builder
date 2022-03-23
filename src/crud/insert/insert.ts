@@ -37,12 +37,27 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
         return this;
     }
 
-    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
+    protected compileValuesDependency(dependency: MapperTable, valuesDependencyArray: ValueTypeToParse[][], fieldReferenceSubItem: string): QueryCompiled[] {
+        const scripts: QueryCompiled[] = [];
+        valuesDependencyArray.forEach((valuesDependency) => {
+            if (valuesDependency) {
+                const dependenciesListSimpleModel = valuesDependency.map((value, index) => {
+                    const valueItem = fieldReferenceSubItem ? ModelUtils.get(value, fieldReferenceSubItem) : value;
+                    return this.createDependencyListSimpleModel(dependency, valueItem, index);
+                });
+                const builder = new InsertBuilder(void 0, dependency, void 0, dependenciesListSimpleModel);
+                this.checkAndPush(scripts, builder.compile());
+            }
+        });
+        return scripts;
+    }
+
+
+    private createDependencyListSimpleModel(dependency: MapperTable, value: ValueTypeToParse, index: number) {
         const modelBase = this.model();
         const modelDependency = {
             index,
             value,
-            // reference: new ReplacementParam("0", "insertId")
         } as DependencyListSimpleModel;
         // Verificar se é Assigned a estrategia de Id, se for já adicionar como parametro
         if (this.mapperTable.keyColumns().length > 1) {
@@ -63,8 +78,7 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
             default:
                 break;
         }
-        const builder = new InsertBuilder(void 0, dependency, void 0, modelDependency);
-        return builder.compile();
+        return modelDependency;
     }
 
     protected resolveDependency(dependency: MapperTable): QueryCompiled {

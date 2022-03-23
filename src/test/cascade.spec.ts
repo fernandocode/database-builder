@@ -7,6 +7,7 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { RefToHeaderSimple } from "./models/ref-to-header-simple";
 import { RowResult } from "../core/row-result";
 import { ReplacementParam } from "../core/replacement-param";
+import { firstValueFrom } from "rxjs";
 
 describe("Cascade", () => {
     let crud: Crud;
@@ -20,24 +21,34 @@ describe("Cascade", () => {
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
-    it("Insert Cascade", () => {
+    it("Insert Cascade optimized", () => {
         const headerSimple2 = {
             descricao: "Header 2",
             items: ["123", "456", "789", "10a"]
         } as HeaderSimple;
 
         const insertCompiled = crud.insert(HeaderSimple, { toSave: headerSimple2 }).compile();
-        expect(insertCompiled.length).to.equal(5);
-        expect(insertCompiled[0].params.toString()).to.equal([
+        console.log(insertCompiled);
+        expect(insertCompiled.length).to.equal(2);
+        expect(JSON.stringify(insertCompiled[0].params)).to.equal(JSON.stringify([
             headerSimple2.descricao
-        ].toString());
-        expect(insertCompiled[1].params.toString()).to.equal([
+        ]));
+        expect(JSON.stringify(insertCompiled[1].params)).to.equal(JSON.stringify([
             0,
             headerSimple2.items[0],
+            new ReplacementParam("0", "insertId"),
+            1,
+            headerSimple2.items[1],
+            new ReplacementParam("0", "insertId"),
+            2,
+            headerSimple2.items[2],
+            new ReplacementParam("0", "insertId"),
+            3,
+            headerSimple2.items[3],
             new ReplacementParam("0", "insertId")
-        ].toString());
+        ]));
         expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?)");
-        expect(insertCompiled[1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
+        expect(insertCompiled[1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)");
     });
 
     it("Insert Cascade set columns (ignore cascade)", () => {
@@ -50,13 +61,13 @@ describe("Cascade", () => {
             .columns(column => column.set(x => x.descricao));
         const insertCompiled = insertCommand.compile();
         expect(insertCompiled.length).to.equal(1);
-        expect(insertCompiled[0].params.toString()).to.equal([
+        expect(JSON.stringify(insertCompiled[0].params)).to.equal(JSON.stringify([
             headerSimple2.descricao
-        ].toString());
+        ]));
         expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?)");
     });
 
-    it("Update Cascade", () => {
+    it("Update Cascade optimized", () => {
         const headerSimple2 = {
             id: 123,
             descricao: "Editado",
@@ -67,23 +78,32 @@ describe("Cascade", () => {
             .where(where => {
                 where.equal(x => x.id, headerSimple2.id);
             }).compile();
-        expect(updateCompiled.length).to.equal(6);
+        expect(updateCompiled.length).to.equal(3);
         expect(updateCompiled[0].params[0]).to.equal(headerSimple2.descricao);
-        expect(updateCompiled[0].params.toString()).to.equal([
+        expect(JSON.stringify(updateCompiled[0].params)).to.equal(JSON.stringify([
             headerSimple2.descricao,
             headerSimple2.id
-        ].toString());
-        expect(updateCompiled[1].params.toString()).to.equal([
+        ]));
+        expect(JSON.stringify(updateCompiled[1].params)).to.equal(JSON.stringify([
             headerSimple2.id
-        ].toString());
-        expect(updateCompiled[2].params.toString()).to.equal([
+        ]));
+        expect(JSON.stringify(updateCompiled[2].params)).to.equal(JSON.stringify([
             0,
             headerSimple2.items[0],
+            headerSimple2.id,
+            1,
+            headerSimple2.items[1],
+            headerSimple2.id,
+            2,
+            headerSimple2.items[2],
+            headerSimple2.id,
+            3,
+            headerSimple2.items[3],
             headerSimple2.id
-        ].toString());
+        ]));
         expect(updateCompiled[0].query).to.equal("UPDATE HeaderSimple SET descricao = ? WHERE id = ?");
         expect(updateCompiled[1].query).to.equal("DELETE FROM ItemHeaderSimple WHERE HeaderSimple_id = ?");
-        expect(updateCompiled[2].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)");
+        expect(updateCompiled[2].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)");
     });
 
     it("Update Cascade set columns (ignore cascade)", () => {
@@ -99,7 +119,6 @@ describe("Cascade", () => {
                 where.equal(x => x.id, headerSimple2.id);
             }).compile();
         expect(updateCompiled.length).to.equal(1);
-        expect(updateCompiled[0].params[0]).to.equal(headerSimple2.descricao);
         expect(JSON.stringify(updateCompiled[0].params)).to.equal(JSON.stringify([
             headerSimple2.descricao,
             headerSimple2.id
@@ -107,8 +126,30 @@ describe("Cascade", () => {
         expect(updateCompiled[0].query).to.equal("UPDATE HeaderSimple SET descricao = ? WHERE id = ?");
     });
 
+    it("Cascade execute with result", async () => {
+        try {
+            const createResult = await firstValueFrom(ddl.create(HeaderSimple).execute());
+            expect(createResult.length).to.equal(2);
+
+            const headerSimple = {
+                descricao: "Exemplo",
+                items: ["jão", "juca", "zé"]
+            } as HeaderSimple;
+
+            const insertResult = await firstValueFrom(crud.insert(HeaderSimple, { toSave: headerSimple }).execute());
+            expect(insertResult.length).to.equal(2);
+            expect(insertResult[0].rowsAffected).to.equal(1);
+            expect(insertResult[0].insertId).to.equal(1);
+            expect(insertResult[1].rowsAffected).to.equal(headerSimple.items.length);
+            expect(insertResult[1].insertId).to.equal(headerSimple.items.length);
+        } finally {
+            const dropResult = await ddl.drop(HeaderSimple).execute().toPromise();
+            expect(dropResult.length).to.equal(2);
+        }
+    });
+
     // #1800
-    it("cascade in left outer join", async () => {
+    it("Cascade in left outer join", async () => {
         const createRefResult = await ddl.create(RefToHeaderSimple).execute().toPromise();
         expect(createRefResult.length).to.equal(1);
         const createResult = await ddl.create(HeaderSimple).execute().toPromise();
@@ -122,11 +163,9 @@ describe("Cascade", () => {
         } as RefToHeaderSimple;
 
         const insertResult = await crud.insert(HeaderSimple, { toSave: refToHeaderSimple.headerSimple }).execute().toPromise();
-        expect(insertResult.length).to.equal(refToHeaderSimple.headerSimple.items.length + 1);
+        expect(insertResult.length).to.equal(2);
         expect(insertResult[0].rowsAffected).to.equal(1);
-        refToHeaderSimple.headerSimple.items.forEach((value, index) => {
-            expect(insertResult[index + 1].rowsAffected).to.equal(1);
-        });
+        expect(insertResult[1].rowsAffected).to.equal(refToHeaderSimple.headerSimple.items.length);
 
         const insertRefResult = await crud.insert(RefToHeaderSimple, { toSave: refToHeaderSimple }).execute().toPromise();
         expect(insertRefResult.length).to.equal(1);

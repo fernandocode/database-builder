@@ -10,7 +10,7 @@ import { DependencyListSimpleModel } from "../../definitions/dependency-definiti
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { DatabaseBuilderError } from "../../core";
-import { Utils } from "../../core/utils";
+import { Utils, ValueTypeToParse } from "../../core/utils";
 
 export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilder<T>> {
 
@@ -41,7 +41,7 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
         return this;
     }
 
-    protected resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled {
+    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
         const builder = new DeleteBuilder(void 0, void 0, dependency);
         return builder.compile();
     }

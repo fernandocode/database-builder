@@ -5,7 +5,7 @@ import { GuidClazz } from "./models/guid-clazz";
 import { SQLiteDatabase } from "./database/sqlite-database";
 import { DatabaseObject } from "../definitions";
 import { SingleTransactionManager } from "../transaction/single-transaction-manager";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { forkJoinSafe } from "../safe-utils";
 import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
@@ -122,7 +122,8 @@ describe("Single Transaction Manager", function () {
             observers.push(transaction.commit());
         }
 
-        return expect(forkJoinSafe(observers).toPromise()).to.be.rejectedWith(`Insert cascading with autoincrement mapper not supported with transaction. (Found in "INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)", params: [0,123,[0,insertId]], paramIndex: 2)`);
+        return expect(firstValueFrom(forkJoinSafe(observers))).to.be.rejectedWith(
+            `Insert cascading with autoincrement mapper not supported with transaction. (Found in "INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)", params: [0,123,[0,insertId],1,456,[0,insertId],2,789,[0,insertId],3,10a,[0,insertId]], paramIndex: 2)`);
     });
 
     it("cascade mapper transaction guid", async () => {
