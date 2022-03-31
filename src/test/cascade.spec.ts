@@ -17,7 +17,7 @@ describe("Cascade", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
@@ -28,7 +28,6 @@ describe("Cascade", () => {
         } as HeaderSimple;
 
         const insertCompiled = crud.insert(HeaderSimple, { toSave: headerSimple2 }).compile();
-        console.log(insertCompiled);
         expect(insertCompiled.length).to.equal(2);
         expect(JSON.stringify(insertCompiled[0].params)).to.equal(JSON.stringify([
             headerSimple2.descricao
@@ -49,6 +48,73 @@ describe("Cascade", () => {
         ]));
         expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?)");
         expect(insertCompiled[1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)");
+    });
+
+    it("Insert Cascade optimized items empty", () => {
+        const headerSimple2 = {
+            descricao: "Header 2",
+            items: []
+        } as HeaderSimple;
+
+        const insertCompiled = crud.insert(HeaderSimple, { toSave: headerSimple2 }).compile();
+
+        expect(insertCompiled.length).to.equal(1);
+        expect(JSON.stringify(insertCompiled[0].params)).to.equal(JSON.stringify([
+            headerSimple2.descricao
+        ]));
+        expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?)");
+    });
+
+    it("Insert Cascade optimized header in batch", () => {
+        const toInsert = [
+            {
+                descricao: "Header 1",
+                items: ["123", "456"]
+            },
+            {
+                descricao: "Header 2",
+                items: ["789", "0ab", "cde"]
+            },
+            {
+                descricao: "Header 3",
+                items: ["fgh", "456"]
+            },
+            {
+                descricao: "Header 4",
+                items: []
+            }
+        ] as Array<HeaderSimple>;
+
+        const insertCompiled = crud.insert(HeaderSimple, { toSave: toInsert }).compile();
+
+        expect(insertCompiled.length).to.equal(2);
+        expect(insertCompiled[0].query).to.equal("INSERT INTO HeaderSimple (descricao) VALUES (?), (?), (?), (?)");
+        expect(insertCompiled[0].params.join("|")).to.equal(toInsert.map(x => x.descricao).join("|"));
+        
+        expect(insertCompiled[1].query).to.equal("INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)");
+        expect(insertCompiled[1].params[0]).to.equal(0);
+        expect(insertCompiled[1].params[1]).to.equal(toInsert[0].items[0]);
+        expect((insertCompiled[1].params[2] as ReplacementParam).properties.join("|")).to.equal(["0", "insertId"].join("|"));
+        expect(insertCompiled[1].params[3]).to.equal(1);
+        expect(insertCompiled[1].params[4]).to.equal(toInsert[0].items[1]);
+        expect((insertCompiled[1].params[5] as ReplacementParam).properties.join("|")).to.equal(["0", "insertId"].join("|"));
+
+        expect(insertCompiled[1].params[6]).to.equal(0);
+        expect(insertCompiled[1].params[7]).to.equal(toInsert[1].items[0]);
+        expect((insertCompiled[1].params[8] as ReplacementParam).properties.join("|")).to.equal(["1", "insertId"].join("|"));
+        expect(insertCompiled[1].params[9]).to.equal(1);
+        expect(insertCompiled[1].params[10]).to.equal(toInsert[1].items[1]);
+        expect((insertCompiled[1].params[11] as ReplacementParam).properties.join("|")).to.equal(["1", "insertId"].join("|"));
+        expect(insertCompiled[1].params[12]).to.equal(2);
+        expect(insertCompiled[1].params[13]).to.equal(toInsert[1].items[2]);
+        expect((insertCompiled[1].params[14] as ReplacementParam).properties.join("|")).to.equal(["1", "insertId"].join("|"));
+
+        expect(insertCompiled[1].params[15]).to.equal(0);
+        expect(insertCompiled[1].params[16]).to.equal(toInsert[2].items[0]);
+        expect((insertCompiled[1].params[17] as ReplacementParam).properties.join("|")).to.equal(["2", "insertId"].join("|"));
+        expect(insertCompiled[1].params[18]).to.equal(1);
+        expect(insertCompiled[1].params[19]).to.equal(toInsert[2].items[1]);
+        expect((insertCompiled[1].params[20] as ReplacementParam).properties.join("|")).to.equal(["2", "insertId"].join("|"));
     });
 
     it("Insert Cascade set columns (ignore cascade)", () => {

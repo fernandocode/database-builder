@@ -13,10 +13,12 @@ import { MapperTest } from "./mapper-test";
 import { GuidClazz } from "./models/guid-clazz";
 import { Create, Insert } from "..";
 import { MapperTestModel } from "./models/mapper-test-model";
+import { ConfigCommander } from "../crud/config-commander";
 
 describe("Mapper", () => {
 
     const mapperBase = new MapperTest();
+    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
 
     it("testeContasReceber", () => {
         mapperBase.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);
@@ -61,7 +63,7 @@ describe("Mapper", () => {
 
         const subRegiao = { nome: "test", codeImport: 1, regiao: { codeImport: 2 } as Regiao } as SubRegiao;
 
-        const insert = new Insert(SubRegiao, { toSave: subRegiao, mapperTable: mapper.mapperTable });
+        const insert = new Insert(SubRegiao, { toSave: subRegiao, mapperTable: mapper.mapperTable, config });
 
         const insertCompiled = insert.compile()[0];
 

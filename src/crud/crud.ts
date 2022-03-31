@@ -11,6 +11,7 @@ import { KeyUtils } from "../core/key-utils";
 import { QueryBuilder } from "./query/query-builder";
 import { MetadataTableBase } from "../metadata-table-base";
 import { MapperUtils } from "../mapper/mapper-utils";
+import { ConfigCommander } from "./config-commander";
 
 export class Crud {
     public enableLog: boolean;
@@ -18,6 +19,7 @@ export class Crud {
     private _getMapper: GetMapper;
 
     constructor(
+        private _config: ConfigCommander,
         {
             getMapper,
             database,
@@ -45,7 +47,9 @@ export class Crud {
             database?: DatabaseBase
         } = {}
     ): Delete<T> {
-        return new Delete(typeT, { modelToSave, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
+        return new Delete(typeT, {
+            modelToSave, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public deleteByKey<T>(
@@ -61,7 +65,9 @@ export class Crud {
     ): Delete<T> {
         const obj = {} as T;
         KeyUtils.setKey(metadata.mapperTable, obj, key);
-        return new Delete(typeT, { modelToSave: obj, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
+        return new Delete(typeT, {
+            modelToSave: obj, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public update<T>(
@@ -78,7 +84,9 @@ export class Crud {
             database?: DatabaseBase
         } = {}
     ): Update<T> {
-        return new Update(typeT, { toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
+        return new Update(typeT, {
+            toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public insert<T>(
@@ -95,7 +103,9 @@ export class Crud {
             database?: DatabaseBase
         } = {}
     ): Insert<T> {
-        return new Insert(typeT, { toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
+        return new Insert(typeT, {
+            toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public query<T>(

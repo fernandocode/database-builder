@@ -11,6 +11,7 @@ import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { DatabaseBuilderError } from "../../core";
 import { Utils, ValueTypeToParse } from "../../core/utils";
+import { ConfigCommander } from "../config-commander";
 
 export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilder<T>> {
 
@@ -20,15 +21,17 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
             modelToSave,
             mapperTable,
             database,
-            enableLog = true
+            enableLog = true,
+            config
         }: {
             modelToSave: T,
             mapperTable: MapperTable,
             database?: DatabaseBase,
-            enableLog?: boolean
+            enableLog?: boolean,
+            config: ConfigCommander
         }
     ) {
-        super(TypeCrud.DELETE, { mapperTable, builder: new DeleteBuilder(typeT, modelToSave, mapperTable), database, enableLog });
+        super(TypeCrud.DELETE, { mapperTable, builder: new DeleteBuilder(typeT, modelToSave, mapperTable, config), database, enableLog });
     }
 
     protected dependencies(): MapperTable[] {
@@ -42,12 +45,12 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
     }
 
     protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
-        const builder = new DeleteBuilder(void 0, void 0, dependency);
+        const builder = new DeleteBuilder(void 0, void 0, dependency, this._builder.config);
         return builder.compile();
     }
 
     protected resolveDependency(dependency: MapperTable): QueryCompiled {
-        const deleteBuilder = new DeleteBuilder<DependencyListSimpleModel>(void 0, void 0, dependency)
+        const deleteBuilder = new DeleteBuilder<DependencyListSimpleModel>(void 0, void 0, dependency, this._builder.config)
             .where(where => {
                 const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                 if (Utils.isNull(this.model())) {

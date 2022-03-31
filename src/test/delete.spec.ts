@@ -4,7 +4,7 @@ import { getMapper } from "./mappers-table-new";
 import { Crud } from "../crud";
 
 describe("Delete", () => {
-    const crud = new Crud({getMapper: getMapper()});
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, {getMapper: getMapper()});
 
     it("Classificacao", () => {
         const result = crud.delete(Classificacao)

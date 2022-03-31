@@ -10,9 +10,12 @@ import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { Utils } from "../core/utils";
 import { FieldType } from "../core/enums/field-type";
+import { ConfigCommander } from "../crud/config-commander";
 
 describe("Batch Insert", () => {
     const mapper = getMapper();
+    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
+    const commanderBuilder = new CommanderBuilder(config);
 
     it("Regiao batch", () => {
         const mapperTable = mapper.get(Regiao).mapperTable;
@@ -27,7 +30,7 @@ describe("Batch Insert", () => {
                 codeImport: 903,
                 nome: "Oeste 903"
             }];
-        const result = CommanderBuilder.batchInsertMapper(mapperTable, models);
+        const result = commanderBuilder.batchInsertMapper(mapperTable, models);
         expect(result.length).to.equal(1);
         expect(result[0].params.toString()).to.equal([
             [].concat(...models.map(m => [m.codeImport, m.nome]))
@@ -36,7 +39,7 @@ describe("Batch Insert", () => {
     });
 
     it("Regiao grupo", () => {
-        const result = CommanderBuilder.insertMapper(mapper.get(Regiao).mapperTable, ObjectToTest.regiao);
+        const result = commanderBuilder.insertMapper(mapper.get(Regiao).mapperTable, ObjectToTest.regiao);
         expect(result.params.toString()).to.equal([
             ObjectToTest.regiao.codeImport, ObjectToTest.regiao.nome
         ].toString());
@@ -55,7 +58,7 @@ describe("Batch Insert", () => {
                 codeImport: 903,
                 nome: "Oeste 903"
             }];
-        const result = new Insert(Regiao, { toSave: models, mapperTable: mapper.get(Regiao).mapperTable }).compile();
+        const result = new Insert(Regiao, { toSave: models, mapperTable: mapper.get(Regiao).mapperTable, config }).compile();
         expect(result.length).to.equal(1);
         expect(result[0].params.toString()).to.equal([
             [].concat(...models.map(m => [m.codeImport, m.nome]))
@@ -81,7 +84,7 @@ describe("Batch Insert", () => {
 
     it("Regiao batch Insert set only any columns", () => {
         const models: TestClazz[] = Array.from({ length: 5 }, (_, i) => data(i));
-        const insertCommand = new Insert(TestClazz, { toSave: models, mapperTable: mapper.get(TestClazz).mapperTable })
+        const insertCommand = new Insert(TestClazz, { toSave: models, mapperTable: mapper.get(TestClazz).mapperTable, config })
             .columns(column => column
                 .set(x => x.dateDate)
                 .set(x => x.id)
@@ -99,7 +102,7 @@ describe("Batch Insert", () => {
         const ids = [1101, 1102, 1103];
         const descriptions = ["Description 1", "Option 2", "other"];
         const numeros = [10, 11, 12];
-        const result = new Insert(TestClazz, { mapperTable: mapper.get(TestClazz).mapperTable })
+        const result = new Insert(TestClazz, { mapperTable: mapper.get(TestClazz).mapperTable, config })
             .columns(column => column
                 .setValue(x => x.id, ids)
                 .setValue(x => x.description, descriptions)
@@ -117,7 +120,7 @@ describe("Batch Insert", () => {
         const ids = [1103];
         const descriptions = ["Description 1", "other"];
         const numeros = [10, 11, 12];
-        const insert = new Insert(TestClazz, { mapperTable: mapper.get(TestClazz).mapperTable })
+        const insert = new Insert(TestClazz, { mapperTable: mapper.get(TestClazz).mapperTable, config })
             .columns(column => column
                 .setValue(x => x.id, ids)
                 .setValue(x => x.description, descriptions)

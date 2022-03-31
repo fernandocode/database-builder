@@ -88,6 +88,7 @@ export class ManagedTransaction {
      */
     public async rollback(): Promise<boolean> {
         this.checkTransactionActive();
+        this.clearStackTransaction();
         if (this._status === TransactionStatus.STARTED
             || this._status === TransactionStatus.RELEASED) {
             this.addStatement(this.commandRollbackTransaction(), []);

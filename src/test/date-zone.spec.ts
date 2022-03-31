@@ -18,7 +18,7 @@ describe("Date", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        const crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        const crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         const ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
         return _databaseInstance = { crud, ddl };
     };

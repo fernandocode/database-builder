@@ -8,7 +8,7 @@ import { Crud } from "../crud/crud";
 describe("Query method", () => {
 
     const mapper = getMapper();
-    const crud = new Crud({ getMapper: mapper });
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, { getMapper: mapper });
 
     it("test simple select", () => {
         const query = crud.query(Cliente);

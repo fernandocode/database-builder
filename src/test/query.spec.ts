@@ -24,7 +24,7 @@ import { ProjectionsHelper } from '../core/projections-helper';
 
 describe("Query", () => {
 
-    const crud = new Crud({ getMapper: getMapper() });
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, { getMapper: getMapper() });
 
     it("none", () => {
         const query = crud.query(TestClazz);

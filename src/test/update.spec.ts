@@ -12,12 +12,16 @@ import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { getMapper } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
+import { ConfigCommander } from "../crud/config-commander";
 
 describe("Update", () => {
     const mapper = getMapper();
+    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
 
     it("Classificacao", () => {
-        const result = new Update(Classificacao, { toSave: ObjectToTest.classificacao, mapperTable: mapper.get(Classificacao).mapperTable })
+        const result = new Update(Classificacao, {
+            toSave: ObjectToTest.classificacao, mapperTable: mapper.get(Classificacao).mapperTable, config
+        })
             .where(where => where.equal(x => x.codeImport, ObjectToTest.classificacao.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -27,7 +31,9 @@ describe("Update", () => {
     });
 
     it("Regiao", () => {
-        const result = new Update(Regiao, { toSave: ObjectToTest.regiao, mapperTable: mapper.get(Regiao).mapperTable })
+        const result = new Update(Regiao, {
+            toSave: ObjectToTest.regiao, mapperTable: mapper.get(Regiao).mapperTable, config
+        })
             .where(where => where.equal(x => x.codeImport, ObjectToTest.regiao.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -37,7 +43,9 @@ describe("Update", () => {
     });
 
     it("SubRegiao", () => {
-        const result = new Update(SubRegiao, { toSave: ObjectToTest.subRegiao, mapperTable: mapper.get(SubRegiao).mapperTable })
+        const result = new Update(SubRegiao, {
+            toSave: ObjectToTest.subRegiao, mapperTable: mapper.get(SubRegiao).mapperTable, config
+        })
             .where(where => where.equal(x => x.codeImport, ObjectToTest.subRegiao.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -49,7 +57,9 @@ describe("Update", () => {
     });
 
     it("Uf", () => {
-        const result = new Update(Uf, { toSave: ObjectToTest.uf, mapperTable: mapper.get(Uf).mapperTable })
+        const result = new Update(Uf, {
+            toSave: ObjectToTest.uf, mapperTable: mapper.get(Uf).mapperTable, config
+        })
             .where(where => where.equal(x => x.codeImport, ObjectToTest.uf.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -59,7 +69,9 @@ describe("Update", () => {
     });
 
     it("Cidade", () => {
-        const result = new Update(Cidade, { toSave: ObjectToTest.cidade, mapperTable: mapper.get(Cidade).mapperTable })
+        const result = new Update(Cidade, {
+            toSave: ObjectToTest.cidade, mapperTable: mapper.get(Cidade).mapperTable, config
+        })
             .where(where => where.equal(x => x.codeImport, ObjectToTest.cidade.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -73,7 +85,9 @@ describe("Update", () => {
     });
 
     it("Cliente", () => {
-        const result = new Update(Cliente, { toSave: ObjectToTest.cliente, mapperTable: mapper.get(Cliente).mapperTable })
+        const result = new Update(Cliente, {
+            toSave: ObjectToTest.cliente, mapperTable: mapper.get(Cliente).mapperTable, config
+        })
             .compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.cliente.idErp,
@@ -88,7 +102,9 @@ describe("Update", () => {
     });
 
     it("Marca", () => {
-        const result = new Update(Marca, { toSave: ObjectToTest.marca, mapperTable: mapper.get(Marca).mapperTable })
+        const result = new Update(Marca, {
+            toSave: ObjectToTest.marca, mapperTable: mapper.get(Marca).mapperTable, config
+        })
             .compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.marca.codeImport, ObjectToTest.marca.descricao
@@ -98,7 +114,9 @@ describe("Update", () => {
 
     it("Marca (parcial update)", () => {
         const marcaCodeImport = 2;
-        const result = new Update(Marca, { mapperTable: mapper.get(Marca).mapperTable })
+        const result = new Update(Marca, {
+            mapperTable: mapper.get(Marca).mapperTable, config
+        })
             .columns(c => c.setValue(x => x.codeImport, marcaCodeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -109,7 +127,9 @@ describe("Update", () => {
 
     it("Marca parcial update by model", () => {
         const marcaParcial: Marca = { codeImport: 2 } as Marca;
-        const result = new Update(Marca, { toSave: marcaParcial, mapperTable: mapper.get(Marca).mapperTable })
+        const result = new Update(Marca, {
+            toSave: marcaParcial, mapperTable: mapper.get(Marca).mapperTable, config
+        })
             .columns(c => c.set(x => x.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -119,7 +139,9 @@ describe("Update", () => {
     });
 
     it("CondicaoPagamento", () => {
-        const result = new Update(CondicaoPagamento, { toSave: ObjectToTest.condicaoPagamento, mapperTable: mapper.get(CondicaoPagamento).mapperTable })
+        const result = new Update(CondicaoPagamento, {
+            toSave: ObjectToTest.condicaoPagamento, mapperTable: mapper.get(CondicaoPagamento).mapperTable, config
+        })
             .where(where => where.equal(x => x.codeImport, ObjectToTest.condicaoPagamento.codeImport))
             .compile();
         expect(result[0].params.toString()).to.equal([
@@ -130,7 +152,9 @@ describe("Update", () => {
     });
 
     it("Pedido", () => {
-        const result = new Update(Pedido, { toSave: ObjectToTest.pedido, mapperTable: mapper.get(Pedido).mapperTable })
+        const result = new Update(Pedido, {
+            toSave: ObjectToTest.pedido, mapperTable: mapper.get(Pedido).mapperTable, config
+        })
             .compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.pedido.codeImport,
@@ -143,7 +167,7 @@ describe("Update", () => {
 
     it("TestClazz", () => {
         const descriptionNewValue = "hdajhdja";
-        const result = new Update(TestClazz, { toSave: ObjectToTest.testClazz, mapperTable: mapper.get(TestClazz).mapperTable })
+        const result = new Update(TestClazz, { toSave: ObjectToTest.testClazz, mapperTable: mapper.get(TestClazz).mapperTable, config })
             .columns(columns => {
                 columns.setValue(x => x.description, descriptionNewValue);
                 columns.set(x => x.numero);

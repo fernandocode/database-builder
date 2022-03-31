@@ -2,11 +2,11 @@ import { DeleteColumnsBuilder } from "./delete-columns-builder";
 import { WhereBuilder } from "../where-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
-import { DatabaseBuilderError, QueryCompiled } from "../../core";
+import { QueryCompiled } from "../../core";
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { Utils } from "../../core/utils";
-import { CommanderBuilder } from "../commander-builder";
+import { ConfigCommander } from "../config-commander";
 
 export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>> {
 
@@ -14,9 +14,10 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
         typeT: new () => T,
         private _toSave: T = void 0,
         mapperTable: MapperTable,
-        alias: string = void 0
+        config: ConfigCommander,
+        alias: string = void 0,
     ) {
-        super(typeT, mapperTable, alias);
+        super(typeT, mapperTable, config, alias);
         if (!Utils.isNull(_toSave)) {
             this.where(where => {
                 where.equal(new ColumnRef(KeyUtils.primaryKeyMapper(mapperTable).column), KeyUtils.getKey(mapperTable, _toSave));
@@ -29,7 +30,7 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
     }
 
     protected buildBase(): QueryCompiled {
-        return CommanderBuilder.delete(this._tablename);
+        return this._commanderBuilder.delete(this._tablename);
     }
 
     public getModel(): T {

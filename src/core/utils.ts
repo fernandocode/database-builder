@@ -78,7 +78,7 @@ export class Utils {
         return typeof value === type;
     }
 
-    public static isArray(value: any): boolean {
+    public static isArray(value: any): value is any[] {
         return Array.isArray(value);
     }
 

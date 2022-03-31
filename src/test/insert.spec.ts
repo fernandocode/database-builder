@@ -19,12 +19,16 @@ import { DatetimeUtils } from "../datetime-utils";
 import { TestClazz } from "./models/test-clazz";
 import { Utils } from "../core/utils";
 import { FieldType } from "../core/enums/field-type";
+import { ConfigCommander } from "../crud/config-commander";
 
 describe("Insert", () => {
     const mapper = getMapper();
+    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
 
     it("Classificacao (insert key Assigned value 0)", () => {
-        const result = new Insert(Classificacao, { toSave: ObjectToTest.classificacao, mapperTable: mapper.get(Classificacao).mapperTable }).compile();
+        const result = new Insert(Classificacao, {
+            toSave: ObjectToTest.classificacao, mapperTable: mapper.get(Classificacao).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.classificacao.codeImport, ObjectToTest.classificacao.descricao
         ].toString());
@@ -32,7 +36,9 @@ describe("Insert", () => {
     });
 
     it("Regiao", () => {
-        const result = new Insert(Regiao, { toSave: ObjectToTest.regiao, mapperTable: mapper.get(Regiao).mapperTable }).compile();
+        const result = new Insert(Regiao, {
+            toSave: ObjectToTest.regiao, mapperTable: mapper.get(Regiao).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.regiao.codeImport, ObjectToTest.regiao.nome
         ].toString());
@@ -44,13 +50,16 @@ describe("Insert", () => {
             toSave: {
                 nome: "Sul"
             } as Regiao,
-            mapperTable: mapper.get(Regiao).mapperTable
+            mapperTable: mapper.get(Regiao).mapperTable,
+            config
         });
         expect(() => sql.compile()).to.throw("Primary key to be informed when generation strategy is 'Assigned'!");
     });
 
     it("SubRegiao", () => {
-        const result = new Insert(SubRegiao, { toSave: ObjectToTest.subRegiao, mapperTable: mapper.get(SubRegiao).mapperTable }).compile();
+        const result = new Insert(SubRegiao, {
+            toSave: ObjectToTest.subRegiao, mapperTable: mapper.get(SubRegiao).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.subRegiao.codeImport, ObjectToTest.subRegiao.nome,
             ObjectToTest.subRegiao.regiao.codeImport
@@ -59,7 +68,9 @@ describe("Insert", () => {
     });
 
     it("Uf", () => {
-        const result = new Insert(Uf, { toSave: ObjectToTest.uf, mapperTable: mapper.get(Uf).mapperTable }).compile();
+        const result = new Insert(Uf, {
+            toSave: ObjectToTest.uf, mapperTable: mapper.get(Uf).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.uf.codeImport, ObjectToTest.uf.nome, ObjectToTest.uf.population
         ].toString());
@@ -67,7 +78,9 @@ describe("Insert", () => {
     });
 
     it("Cidade", () => {
-        const result = new Insert(Cidade, { toSave: ObjectToTest.cidade, mapperTable: mapper.get(Cidade).mapperTable }).compile();
+        const result = new Insert(Cidade, {
+            toSave: ObjectToTest.cidade, mapperTable: mapper.get(Cidade).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.cidade.codeImport,
             ObjectToTest.cidade.nome,
@@ -79,7 +92,9 @@ describe("Insert", () => {
     });
 
     it("Cliente", () => {
-        const result = new Insert(Cliente, { toSave: ObjectToTest.cliente, mapperTable: mapper.get(Cliente).mapperTable }).compile();
+        const result = new Insert(Cliente, {
+            toSave: ObjectToTest.cliente, mapperTable: mapper.get(Cliente).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.cliente.idErp,
             ObjectToTest.cliente.versao,
@@ -95,7 +110,9 @@ describe("Insert", () => {
     });
 
     it("Marca", () => {
-        const result = new Insert(Marca, { toSave: ObjectToTest.marca, mapperTable: mapper.get(Marca).mapperTable }).compile();
+        const result = new Insert(Marca, {
+            toSave: ObjectToTest.marca, mapperTable: mapper.get(Marca).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.marca.codeImport, ObjectToTest.marca.descricao
         ].toString());
@@ -103,7 +120,9 @@ describe("Insert", () => {
     });
 
     it("CondicaoPagamento", () => {
-        const result = new Insert(CondicaoPagamento, { toSave: ObjectToTest.condicaoPagamento, mapperTable: mapper.get(CondicaoPagamento).mapperTable }).compile();
+        const result = new Insert(CondicaoPagamento, {
+            toSave: ObjectToTest.condicaoPagamento, mapperTable: mapper.get(CondicaoPagamento).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.condicaoPagamento.codeImport, ObjectToTest.condicaoPagamento.nome
         ].toString());
@@ -111,7 +130,9 @@ describe("Insert", () => {
     });
 
     it("Pedido", () => {
-        const result = new Insert(Pedido, { toSave: ObjectToTest.pedido, mapperTable: mapper.get(Pedido).mapperTable }).compile();
+        const result = new Insert(Pedido, {
+            toSave: ObjectToTest.pedido, mapperTable: mapper.get(Pedido).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.pedido.codeImport, ObjectToTest.pedido.cliente.id, ObjectToTest.pedido.marca.internalKey,
             ObjectToTest.pedido.condicaoPagamento.codeImport
@@ -121,14 +142,18 @@ describe("Insert", () => {
 
     it("GuidClazz", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
-        const result = new Insert(GuidClazz, { toSave: obj1, mapperTable: mapper.get(GuidClazz).mapperTable }).compile();
+        const result = new Insert(GuidClazz, {
+            toSave: obj1, mapperTable: mapper.get(GuidClazz).mapperTable, config
+        }).compile();
         expect(result[0].params[0]).to.length(36);
         expect(result[0].params[1]).to.equal(obj1.description);
         expect(result[0].query).to.equal("INSERT INTO GuidClazz (guid, description) VALUES (?, ?)");
     });
 
     it("TestClazz", () => {
-        const result = new Insert(TestClazz, { toSave: ObjectToTest.testClazz, mapperTable: mapper.get(TestClazz).mapperTable }).compile();
+        const result = new Insert(TestClazz, {
+            toSave: ObjectToTest.testClazz, mapperTable: mapper.get(TestClazz).mapperTable, config
+        }).compile();
         expect(result[0].params[0]).to.equal(ObjectToTest.testClazz.id);
         expect(result[0].params[1]).to.equal(ObjectToTest.testClazz.description);
         expect(result[0].params[2]).to.equal(Utils.getValueType(ObjectToTest.testClazz.date, FieldType.DATE)?.[0]);
@@ -142,7 +167,9 @@ describe("Insert", () => {
     });
 
     it("TestClazzRefCode", () => {
-        const result = new Insert(TestClazzRefCode, { toSave: ObjectToTest.testClazzRefCode, mapperTable: mapper.get(TestClazzRefCode).mapperTable }).compile();
+        const result = new Insert(TestClazzRefCode, {
+            toSave: ObjectToTest.testClazzRefCode, mapperTable: mapper.get(TestClazzRefCode).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.testClazzRefCode.code, ObjectToTest.testClazzRefCode.description, ObjectToTest.testClazzRefCode.reference.description
         ].toString());
@@ -150,7 +177,9 @@ describe("Insert", () => {
     });
 
     it("TestClazzRefCode", () => {
-        const result = new Insert(TestClazzRefCode, { toSave: ObjectToTest.testClazzRefCode, mapperTable: mapper.get(TestClazzRefCode).mapperTable }).compile();
+        const result = new Insert(TestClazzRefCode, {
+            toSave: ObjectToTest.testClazzRefCode, mapperTable: mapper.get(TestClazzRefCode).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.testClazzRefCode.code, ObjectToTest.testClazzRefCode.description, ObjectToTest.testClazzRefCode.reference.description
         ].toString());
@@ -158,7 +187,9 @@ describe("Insert", () => {
     });
 
     it("ContasAReceber", () => {
-        const result = new Insert(ContasAReceber, { toSave: ObjectToTest.contasReceber, mapperTable: mapper.get(ContasAReceber).mapperTable }).compile();
+        const result = new Insert(ContasAReceber, {
+            toSave: ObjectToTest.contasReceber, mapperTable: mapper.get(ContasAReceber).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             ObjectToTest.contasReceber.versao,
             ObjectToTest.contasReceber.idErp,
@@ -179,7 +210,9 @@ describe("Insert", () => {
             dataRecebimento: void 0,
             dataVencimento: DatetimeUtils.datetimeToDate("2010-01-28T00:00:00-02:00")
         } as ContasAReceber;
-        const result = new Insert(ContasAReceber, { toSave: contasReceber, mapperTable: mapper.get(ContasAReceber).mapperTable }).compile();
+        const result = new Insert(ContasAReceber, {
+            toSave: contasReceber, mapperTable: mapper.get(ContasAReceber).mapperTable, config
+        }).compile();
         expect(result[0].params.toString()).to.equal([
             contasReceber.versao,
             contasReceber.idErp,

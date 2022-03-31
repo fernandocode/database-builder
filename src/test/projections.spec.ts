@@ -8,7 +8,7 @@ import { ReferencesModelTest } from "./models/reference-model-test";
 
 describe("Projections", () => {
 
-    const crud = new Crud({ getMapper: getMapper() });
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, { getMapper: getMapper() });
 
     it("default", () => {
         const query = crud.query(TestClazz);

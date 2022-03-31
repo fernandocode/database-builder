@@ -20,6 +20,7 @@ import { Utils } from "../../core/utils";
 import { FieldType } from "../../core/enums/field-type";
 import { Cliente } from "../models/cliente";
 import { firstValueFrom, lastValueFrom } from "rxjs";
+import { ConfigCommander } from "../../crud/config-commander";
 
 
 describe("SQLite", () => {
@@ -29,8 +30,10 @@ describe("SQLite", () => {
     beforeEach(async () => {
         const mapper = getMapper();
 
+        const config: ConfigCommander = { sqliteLimitVariables: 10000 };
+
         const database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        crud = new Crud(config, { database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
 
         await lastValueFrom(ddl.create(Cliente).execute());
@@ -74,7 +77,6 @@ describe("SQLite", () => {
     };
 
     it("GuidClazz", async () => {
-
         await lastValueFrom(ddl.create(GuidClazz).execute());
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);

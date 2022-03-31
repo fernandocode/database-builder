@@ -3,7 +3,7 @@ import { WhereBuilder } from "../where-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { QueryCompiled } from "../../core";
-import { CommanderBuilder } from "../commander-builder";
+import { ConfigCommander } from "../config-commander";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {
 
@@ -12,8 +12,9 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
         mapperTable: MapperTable,
         alias: string = void 0,
         protected readonly _toSave: T = void 0,
+        config: ConfigCommander
     ) {
-        super(typeT, mapperTable, alias);
+        super(typeT, mapperTable, config, alias);
     }
 
     public columns(
@@ -30,7 +31,7 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
 
     protected buildBase(): QueryCompiled {
         const columnsCompiled = this.getColumnsCompiled();
-        return CommanderBuilder.update(this._tablename, columnsCompiled.columns, columnsCompiled.params[0])
+        return this._commanderBuilder.update(this._tablename, columnsCompiled.columns, columnsCompiled.params[0])
     }
 
     public getModel(): T {

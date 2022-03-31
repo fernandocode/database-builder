@@ -4,6 +4,8 @@ import { ColumnsCompiled } from "../core/columns-compiled";
 import { MapperTable } from "../mapper-table";
 import { SqlBaseBuilder } from "./sql-base-builder";
 import { QueryCompiled } from "../core/query-compiled";
+import { ConfigCommander } from "./config-commander";
+import { CommanderBuilder } from "./commander-builder";
 
 export abstract class CrudBaseBuilder<
     T,
@@ -16,12 +18,16 @@ export abstract class CrudBaseBuilder<
         keyColumns: []
     };
 
+    protected readonly _commanderBuilder: CommanderBuilder;
+
     constructor(
         typeT: new () => T,
         mapperTable: MapperTable,
+        public config: ConfigCommander,
         alias: string = void 0,
     ) {
         super(typeT, typeT, mapperTable, alias);
+        this._commanderBuilder = new CommanderBuilder(config);
     }
 
     public compile(): QueryCompiled {

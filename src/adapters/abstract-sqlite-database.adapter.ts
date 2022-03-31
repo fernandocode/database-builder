@@ -26,11 +26,11 @@ export abstract class DatabaseAbstractSQLiteService extends BaseDatabaseAdapter<
     databaseNative: DatabaseSQLiteObject
   ): (fn: (transaction: WebSqlTransactionInterface) => void) => Promise<any> {
     return (fn: (transaction: DatabaseBaseTransaction) => void): Promise<any> => {
-      return databaseNative.transaction(transiction => {
+      return databaseNative.transaction(transaction => {
         fn({
           executeSql: (sql: string, values: any): Promise<DatabaseResult> => {
             return new Promise<DatabaseResult>((executeSqlResolve, executeSqlReject) => {
-              transiction.executeSql(sql, Array.isArray(values) ? values : [],
+              transaction.executeSql(sql, Array.isArray(values) ? values : [],
                 (_s: any, r: DatabaseResult | PromiseLike<DatabaseResult>) => {
                   executeSqlResolve(r);
                 },
@@ -50,6 +50,15 @@ export abstract class DatabaseAbstractSQLiteService extends BaseDatabaseAdapter<
     return (sqlStatements: Array<(string | string[] | any)>): Promise<DatabaseResult[]> => {
       return databaseNative.sqlBatch(sqlStatements);
     };
+  }
+
+  protected async getSQLiteVersion(databaseNative: DatabaseSQLiteObject): Promise<string> {
+    const result = await databaseNative.executeSql("select sqlite_version()", []);
+    return result.rows.item(0);
+  }
+
+  protected getLimitVariables(_databaseNative: DatabaseSQLiteObject): Promise<number> {
+    return Promise.resolve(10000);
   }
 
   // public create(config: DatabaseConfig): Promise<DatabaseObject> {

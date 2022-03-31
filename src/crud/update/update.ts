@@ -13,6 +13,7 @@ import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { ValueTypeToParse } from "../../core/utils";
 import { ModelUtils } from "../../core/model-utils";
+import { ConfigCommander } from "../config-commander";
 
 export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>> {
 
@@ -23,16 +24,21 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
             mapperTable,
             alias,
             database,
-            enableLog = true
+            enableLog = true,
+            config
         }: {
             toSave?: T,
             mapperTable: MapperTable,
             alias?: string,
             database?: DatabaseBase,
-            enableLog?: boolean
+            enableLog?: boolean,
+            config: ConfigCommander
         }
     ) {
-        super(TypeCrud.UPDATE, { mapperTable, builder: new UpdateBuilder(typeT, mapperTable, alias, toSave), database, enableLog });
+        super(TypeCrud.UPDATE, {
+            mapperTable, builder: new UpdateBuilder(typeT, mapperTable, alias, toSave, config),
+            database, enableLog
+        });
     }
 
     public columns(columnsCallback: (columns: UpdateColumnsBuilder<T>) => void): Update<T> {
@@ -57,7 +63,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
                         reference: KeyUtils.getKey(this.mapperTable, this.model())
                     } as DependencyListSimpleModel;
                 });
-                const builder = new InsertBuilder(void 0, dependency, void 0, dependenciesListSimpleModel);
+                const builder = new InsertBuilder(void 0, dependency, void 0, dependenciesListSimpleModel, this._builder.config);
                 this.checkAndPush(scripts, builder.compile());
             }
         });
@@ -65,7 +71,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
     }
 
     protected resolveDependency(dependency: MapperTable): QueryCompiled {
-        const deleteBuilder = new DeleteBuilder<DependencyListSimpleModel>(void 0, void 0, dependency)
+        const deleteBuilder = new DeleteBuilder<DependencyListSimpleModel>(void 0, void 0, dependency, this._builder.config)
             .where(where => {
                 const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                 where.equal(new ColumnRef(columnReference), KeyUtils.getKey(this.mapperTable, this.model()));

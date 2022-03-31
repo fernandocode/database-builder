@@ -27,7 +27,7 @@ describe("Single Transaction Manager", function () {
         const mapper = getMapper();
 
         database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
