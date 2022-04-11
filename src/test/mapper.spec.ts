@@ -13,12 +13,12 @@ import { MapperTest } from "./mapper-test";
 import { GuidClazz } from "./models/guid-clazz";
 import { Create, Insert } from "..";
 import { MapperTestModel } from "./models/mapper-test-model";
-import { ConfigCommander } from "../crud/config-commander";
+import { ConfigDatabase } from "../crud/config-database";
 
 describe("Mapper", () => {
 
     const mapperBase = new MapperTest();
-    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
+    const config: ConfigDatabase = { sqliteLimitVariables: 10000 };
 
     it("testeContasReceber", () => {
         mapperBase.autoMapperIdImport(Regiao, Number, PrimaryKeyType.Assigned);

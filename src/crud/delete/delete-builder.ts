@@ -6,7 +6,7 @@ import { QueryCompiled } from "../../core";
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { Utils } from "../../core/utils";
-import { ConfigCommander } from "../config-commander";
+import { ConfigDatabase } from "../config-database";
 
 export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>> {
 
@@ -14,7 +14,7 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
         typeT: new () => T,
         private _toSave: T = void 0,
         mapperTable: MapperTable,
-        config: ConfigCommander,
+        config: ConfigDatabase,
         alias: string = void 0,
     ) {
         super(typeT, mapperTable, config, alias);

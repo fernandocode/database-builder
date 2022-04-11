@@ -19,11 +19,11 @@ import { DatetimeUtils } from "../datetime-utils";
 import { TestClazz } from "./models/test-clazz";
 import { Utils } from "../core/utils";
 import { FieldType } from "../core/enums/field-type";
-import { ConfigCommander } from "../crud/config-commander";
+import { ConfigDatabase } from "../crud/config-database";
 
 describe("Insert", () => {
     const mapper = getMapper();
-    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
+    const config: ConfigDatabase = { sqliteLimitVariables: 10000 };
 
     it("Classificacao (insert key Assigned value 0)", () => {
         const result = new Insert(Classificacao, {

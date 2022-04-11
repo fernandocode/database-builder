@@ -10,7 +10,7 @@ import { ReplacementParam } from "../../core/replacement-param";
 import { PrimaryKeyType } from "../../core/enums/primary-key-type";
 import { ModelUtils } from "../../core/model-utils";
 import { Utils, ValueTypeToParse } from "../../core/utils";
-import { ConfigCommander } from "../config-commander";
+import { ConfigDatabase } from "../config-database";
 
 export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilder<T>> {
 
@@ -29,7 +29,7 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
             alias?: string,
             database?: DatabaseBase,
             enableLog?: boolean,
-            config: ConfigCommander
+            config: ConfigDatabase
         }
     ) {
         super(TypeCrud.CREATE, { mapperTable, builder: new InsertBuilder(typeT, mapperTable, alias, toSave, config), database, enableLog });

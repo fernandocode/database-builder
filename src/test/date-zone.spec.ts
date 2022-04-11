@@ -38,8 +38,17 @@ describe("Date", () => {
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
-        const dataResult = await database.crud.query(ContasAReceber).where(w => w.equal(x => x.idErp, dataExample.idErp)).firstOrDefault().toPromise();
+        const dataResult = await database.crud.query(ContasAReceber)
+            .where(w => w.equal(x => x.idErp, dataExample.idErp))
+            .firstOrDefault().toPromise();
         expect(dataResult.dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
+        const dataResult2 = await database.crud.query(ContasAReceber)
+            .where(w => w.equal(x => x.idErp, dataExample.idErp))
+            .mapper<ContasAReceber>(rowResult => {
+                return rowResult.read(ContasAReceber);
+            }).toPromise();
+        console.log(dataResult2);
+        expect(dataResult2[0].dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
     });
 
     it("Datetime insert time zone default", async () => {

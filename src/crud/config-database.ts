@@ -1,3 +1,3 @@
-export interface ConfigCommander {
+export interface ConfigDatabase {
     sqliteLimitVariables: number;
 }

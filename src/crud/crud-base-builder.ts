@@ -4,7 +4,7 @@ import { ColumnsCompiled } from "../core/columns-compiled";
 import { MapperTable } from "../mapper-table";
 import { SqlBaseBuilder } from "./sql-base-builder";
 import { QueryCompiled } from "../core/query-compiled";
-import { ConfigCommander } from "./config-commander";
+import { ConfigDatabase } from "./config-database";
 import { CommanderBuilder } from "./commander-builder";
 
 export abstract class CrudBaseBuilder<
@@ -23,7 +23,7 @@ export abstract class CrudBaseBuilder<
     constructor(
         typeT: new () => T,
         mapperTable: MapperTable,
-        public config: ConfigCommander,
+        public config: ConfigDatabase,
         alias: string = void 0,
     ) {
         super(typeT, typeT, mapperTable, alias);

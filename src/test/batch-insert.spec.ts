@@ -10,11 +10,11 @@ import { TestClazzRef } from "./models/test-clazz-ref";
 import { TestClazzRefCode } from "./models/test-clazz-ref-code";
 import { Utils } from "../core/utils";
 import { FieldType } from "../core/enums/field-type";
-import { ConfigCommander } from "../crud/config-commander";
+import { ConfigDatabase } from "../crud/config-database";
 
 describe("Batch Insert", () => {
     const mapper = getMapper();
-    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
+    const config: ConfigDatabase = { sqliteLimitVariables: 10000 };
     const commanderBuilder = new CommanderBuilder(config);
 
     it("Regiao batch", () => {

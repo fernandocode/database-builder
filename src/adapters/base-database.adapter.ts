@@ -5,7 +5,8 @@ import { DatabaseConfig } from "../definitions/database-config";
 import { WebSqlTransactionInterface } from "../definitions/websql-interface";
 import { SingleTransactionManager } from "../transaction/single-transaction-manager";
 
-export abstract class BaseDatabaseAdapter<DatabaseNativeInterface> implements DatabaseCreatorContract {
+export abstract class BaseDatabaseAdapter<DatabaseNativeInterface>
+    implements DatabaseCreatorContract {
 
     private _singleTransactionManager: SingleTransactionManager;
 

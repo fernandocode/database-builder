@@ -2,11 +2,11 @@ import { DatabaseBuilderError, QueryCompiled } from "../core";
 import { Utils, ValueType } from "../core/utils";
 import { MapperColumn } from "../mapper-column";
 import { MapperTable } from "../mapper-table";
-import { ConfigCommander } from "./config-commander";
+import { ConfigDatabase } from "./config-database";
 
 export class CommanderBuilder {
 
-    constructor(private _config: ConfigCommander) {
+    constructor(private _config: ConfigDatabase) {
     }
 
     public delete(tableName: string)

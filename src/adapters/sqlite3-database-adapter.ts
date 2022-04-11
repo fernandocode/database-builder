@@ -1,5 +1,5 @@
 import { DatabaseConfig } from "../definitions/database-config";
-import { DatabaseBaseTransaction, DatabaseResult, DatabaseObject } from "../definitions/database-definition";
+import { DatabaseBaseTransaction, DatabaseResult } from "../definitions/database-definition";
 import { SQLite3Interface, SQLite3ObjectInterface } from "../definitions/sqlite3-interface";
 import { QueryHelper } from "../core/query-helper";
 import { BaseDatabaseAdapter } from "./base-database.adapter";

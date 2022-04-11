@@ -11,7 +11,7 @@ import { KeyUtils } from "../core/key-utils";
 import { QueryBuilder } from "./query/query-builder";
 import { MetadataTableBase } from "../metadata-table-base";
 import { MapperUtils } from "../mapper/mapper-utils";
-import { ConfigCommander } from "./config-commander";
+import { ConfigDatabase } from "./config-database";
 
 export class Crud {
     public enableLog: boolean;
@@ -19,7 +19,7 @@ export class Crud {
     private _getMapper: GetMapper;
 
     constructor(
-        private _config: ConfigCommander,
+        private _config: ConfigDatabase,
         {
             getMapper,
             database,

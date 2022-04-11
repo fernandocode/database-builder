@@ -3,7 +3,7 @@ import { WhereBuilder } from "../where-builder";
 import { CrudBaseBuilder } from "../crud-base-builder";
 import { MapperTable } from "../../mapper-table";
 import { QueryCompiled } from "../../core";
-import { ConfigCommander } from "../config-commander";
+import { ConfigDatabase } from "../config-database";
 
 export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>> {
 
@@ -12,7 +12,7 @@ export class UpdateBuilder<T> extends CrudBaseBuilder<T, UpdateColumnsBuilder<T>
         mapperTable: MapperTable,
         alias: string = void 0,
         protected readonly _toSave: T = void 0,
-        config: ConfigCommander
+        config: ConfigDatabase
     ) {
         super(typeT, mapperTable, config, alias);
     }

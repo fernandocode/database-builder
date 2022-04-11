@@ -13,7 +13,7 @@ import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { ValueTypeToParse } from "../../core/utils";
 import { ModelUtils } from "../../core/model-utils";
-import { ConfigCommander } from "../config-commander";
+import { ConfigDatabase } from "../config-database";
 
 export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilder<T>> {
 
@@ -32,7 +32,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
             alias?: string,
             database?: DatabaseBase,
             enableLog?: boolean,
-            config: ConfigCommander
+            config: ConfigDatabase
         }
     ) {
         super(TypeCrud.UPDATE, {

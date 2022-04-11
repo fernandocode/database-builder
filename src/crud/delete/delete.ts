@@ -11,7 +11,7 @@ import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { DatabaseBuilderError } from "../../core";
 import { Utils, ValueTypeToParse } from "../../core/utils";
-import { ConfigCommander } from "../config-commander";
+import { ConfigDatabase } from "../config-database";
 
 export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilder<T>> {
 
@@ -28,7 +28,7 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
             mapperTable: MapperTable,
             database?: DatabaseBase,
             enableLog?: boolean,
-            config: ConfigCommander
+            config: ConfigDatabase
         }
     ) {
         super(TypeCrud.DELETE, { mapperTable, builder: new DeleteBuilder(typeT, modelToSave, mapperTable, config), database, enableLog });

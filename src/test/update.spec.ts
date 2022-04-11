@@ -12,11 +12,11 @@ import { expect } from "chai";
 import { Cidade } from "./models/cidade";
 import { getMapper } from "./mappers-table-new";
 import { ObjectToTest } from "./objeto-to-test";
-import { ConfigCommander } from "../crud/config-commander";
+import { ConfigDatabase } from "../crud/config-database";
 
 describe("Update", () => {
     const mapper = getMapper();
-    const config: ConfigCommander = { sqliteLimitVariables: 10000 };
+    const config: ConfigDatabase = { sqliteLimitVariables: 10000 };
 
     it("Classificacao", () => {
         const result = new Update(Classificacao, {
