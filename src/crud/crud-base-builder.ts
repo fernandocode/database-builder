@@ -4,6 +4,8 @@ import { ColumnsCompiled } from "../core/columns-compiled";
 import { MapperTable } from "../mapper-table";
 import { SqlBaseBuilder } from "./sql-base-builder";
 import { QueryCompiled } from "../core/query-compiled";
+import { ConfigDatabase } from "./config-database";
+import { CommanderBuilder } from "./commander-builder";
 
 export abstract class CrudBaseBuilder<
     T,
@@ -16,12 +18,16 @@ export abstract class CrudBaseBuilder<
         keyColumns: []
     };
 
+    protected readonly _commanderBuilder: CommanderBuilder;
+
     constructor(
         typeT: new () => T,
         mapperTable: MapperTable,
+        public config: ConfigDatabase,
         alias: string = void 0,
     ) {
         super(typeT, typeT, mapperTable, alias);
+        this._commanderBuilder = new CommanderBuilder(config);
     }
 
     public compile(): QueryCompiled {
@@ -61,7 +67,7 @@ export abstract class CrudBaseBuilder<
 
     protected abstract setDefaultColumns(): void;
 
-    public abstract getModel(): T;
+    public abstract getModel(): T | Array<T>;
 
     private compileColumns(compiled: ColumnsCompiled) {
         if (compiled.columns.length) {
@@ -69,4 +75,13 @@ export abstract class CrudBaseBuilder<
             this._columnsCompiled.params = this._columnsCompiled.params.concat(compiled.params);
         }
     }
+
+    public get specifiedColumns() { return this.columnsBuilder.columns; }
+
+    private _columnsBuilder: TColumnsBuilder;
+    protected get columnsBuilder() {
+        return this._columnsBuilder ??= this.createColumnsBuilder();
+    }
+
+    protected abstract createColumnsBuilder(): TColumnsBuilder;
 }

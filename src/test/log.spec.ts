@@ -20,7 +20,7 @@ describe("Log", () => {
         const mapper = getMapper();
 
         database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: true });
+        crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: true });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: true });
     });
 
@@ -34,7 +34,7 @@ describe("Log", () => {
         await ddl.create(GuidClazz).execute().toPromise();
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
-        const resultInsert = await crud.insert(GuidClazz, { modelToSave: obj1 }).execute().toPromise();
+        const resultInsert = await crud.insert(GuidClazz, { toSave: obj1 }).execute().toPromise();
 
         const expectedCreate: any = {
             query:

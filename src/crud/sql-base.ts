@@ -2,7 +2,7 @@ import { ExecutableBuilder } from "../core/executable-builder";
 import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
 import { DatabaseBuilderError } from "../core/errors";
 import { MapperTable } from "../mapper-table";
-import { Utils } from "../core/utils";
+import { Utils, ValueTypeToParse } from "../core/utils";
 import { SqlCompilable } from "./sql-compilable";
 import { QueryCompiled } from "../core/query-compiled";
 import { SqlExecutable } from "./sql-executable";
@@ -74,28 +74,36 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         const script: QueryCompiled[] = [];
         const columnDependency = this.mapperTable.columns.find(x => x.tableReference === dependency.tableName);
         const fieldArraySplit = columnDependency.fieldReference.split("[?].");
-        const valuesDependency: any[] = Utils.getValue(this.model(), fieldArraySplit[0]);
-        if (valuesDependency) {
-            valuesDependency.forEach((value, index) => {
-                const valueItem = fieldArraySplit.length > 1 ? ModelUtils.get(value, fieldArraySplit[1]) : value;
-                this.checkAndPush(script, this.resolveDependencyByValue(dependency, valueItem, index));
-            });
-        }
-        return script;
+        const valuesDependencyArray: ValueTypeToParse[][] = Utils.getValue(this.model(), fieldArraySplit[0]);
+        return [...script, ...this.compileValuesDependency(dependency, valuesDependencyArray, fieldArraySplit?.[1])];
     }
 
-    protected dependencies(): MapperTable[] {
-        return this.mapperTable.dependencies;
+    protected compileValuesDependency(dependency: MapperTable, valuesDependencyArray: ValueTypeToParse[][], fieldReferenceSubItem: string): QueryCompiled[] {
+        const scripts: QueryCompiled[] = [];
+        valuesDependencyArray.forEach((valuesDependency) => {
+            if (valuesDependency) {
+                valuesDependency.forEach((value, index) => {
+                    const valueItem = fieldReferenceSubItem ? ModelUtils.get(value, fieldReferenceSubItem) : value;
+                    this.checkAndPush(scripts, this.resolveDependencyByValue(dependency, valueItem, index));
+                });
+            }
+        });
+        return scripts;
     }
 
-    protected abstract model(): T;
+    protected abstract dependencies(): MapperTable[];
+
+    protected abstract model(): T | Array<T>;
 
     protected abstract builderCompiled(): QueryCompiled;
 
-    protected abstract resolveDependencyByValue(dependency: MapperTable, value: any, index: number): QueryCompiled;
     protected abstract resolveDependency(dependency: MapperTable): QueryCompiled;
-
+    
     protected abstract checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]>;
+    
+    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled{
+        return void 0;
+    }
 
     protected getDatabase(database: DatabaseBase): DatabaseBase {
         const result = (database ? database : this.database);

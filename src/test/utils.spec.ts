@@ -100,13 +100,13 @@ describe("Utils", () => {
     });
 
     it("getValueType Datetime", () => {
-        const valueZ = Utils.getValueType("2018-06-08T00:00:00Z", FieldType.DATE);
-        const valueTimeZoneNegative = Utils.getValueType("2018-06-08T00:00:00-03:00", FieldType.DATE);
-        const valueTimeZonePositive = Utils.getValueType("2018-06-08T00:00:00+03:00", FieldType.DATE);
-        const valueWithoutTimeZone = Utils.getValueType("2018-06-08T00:00:00", FieldType.DATE);
-        const valueWithoutTime = Utils.getValueType("2018-06-08", FieldType.DATE);
+        const valueZ = Utils.getValueType("2018-06-08T00:00:00Z", FieldType.DATE)?.[0];
+        const valueTimeZoneNegative = Utils.getValueType("2018-06-08T00:00:00-03:00", FieldType.DATE)?.[0];
+        const valueTimeZonePositive = Utils.getValueType("2018-06-08T00:00:00+03:00", FieldType.DATE)?.[0];
+        const valueWithoutTimeZone = Utils.getValueType("2018-06-08T00:00:00", FieldType.DATE)?.[0];
+        const valueWithoutTime = Utils.getValueType("2018-06-08", FieldType.DATE)?.[0];
         // teste com string numerica
-        const valueStringNumericaString = Utils.getValueType("12345678", FieldType.STRING);
+        const valueStringNumericaString = Utils.getValueType("12345678", FieldType.STRING)?.[0];
         expect(Utils.getValueType.bind(Utils, "12345678", FieldType.DATE)).to.throw("Date format incorrect, value: 12345678");
         expect(valueZ).equal(1528416000);
         expect(valueTimeZoneNegative).equal(1528426800);

@@ -12,7 +12,7 @@ export class DatetimeUtils {
             if (Utils.isDate(date)) {
                 return Math.round(((date as Date).getTime() - ((date as Date).getTimezoneOffset() * 60000)) / 1000);
             }
-            if (Utils.isString(date) && /^(\d{4})-(\d{2})-(\d{2})(T(\d{2})\:(\d{2})\:(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm.test(date as string)) {
+            if (Utils.isString(date) && /^(\d{4})-(\d{2})-(\d{2})(T(\d{2})\:(\d{2})\:(\d{2})(\.\d{1,3})?)?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm.test(date as string)) {
                 return this.datetimeToDatabase(this.createDatetime(date));
             }
             if (!(date as moment.Moment).unix) {

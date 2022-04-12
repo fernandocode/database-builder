@@ -18,7 +18,7 @@ describe("DataSelect", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
 
         await lastValueFrom(ddl.create(Cliente).execute());
@@ -31,7 +31,7 @@ describe("DataSelect", () => {
     it("select toSingle", async () => {
         const cidade = { nome: "Petrolina", codeImport: 123, population: 735646, subRegiao: { codeImport: 234 }, uf: { codeImport: "AC" } } as Cidade;
         const insert = crud.insert(Cidade, {
-            modelToSave: cidade
+            toSave: cidade
         });
         const insertedResult = await lastValueFrom(insert.execute());
         expect(insertedResult[0].rowsAffected).to.equal(1);
@@ -47,7 +47,7 @@ describe("DataSelect", () => {
     it("select mapper single", async () => {
         const cidade = { nome: "Petrolina", codeImport: 123, population: 735646, subRegiao: { codeImport: 234 }, uf: { codeImport: "AC" } } as Cidade;
         const insert = crud.insert(Cidade, {
-            modelToSave: cidade
+            toSave: cidade
         });
         const insertedResult = await lastValueFrom(insert.execute());
         expect(insertedResult[0].rowsAffected).to.equal(1);
@@ -63,7 +63,7 @@ describe("DataSelect", () => {
     it("select toSingleList", async () => {
         const cidade = { nome: "Petrolina", codeImport: 123, population: 735646, subRegiao: { codeImport: 234 }, uf: { codeImport: "AC" } } as Cidade;
         const insert = crud.insert(Cidade, {
-            modelToSave: cidade
+            toSave: cidade
         });
         const insertedResult = await lastValueFrom(insert.execute());
         expect(insertedResult[0].rowsAffected).to.equal(1);

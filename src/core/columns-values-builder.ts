@@ -1,7 +1,7 @@
 import { DatabaseBuilderError } from "./errors";
 import { KeyUtils } from "./key-utils";
 import { PrimaryKeyType } from "./enums/primary-key-type";
-import { ExpressionOrColumn, Utils, ValueTypeToParse } from "./utils";
+import { ExpressionOrColumn, Utils, ValueType, ValueTypeToParse } from "./utils";
 import { ColumnsBaseBuilder } from "./columns-base-builder";
 import { Column } from "./column";
 import { FieldType } from "./enums/field-type";
@@ -13,47 +13,47 @@ export abstract class ColumnsValuesBuilder<
     T, TThis extends ColumnsValuesBuilder<T, TThis>>
     extends ColumnsBaseBuilder<TThis, T, Column> {
 
-    // TODO: fixed list task
     constructor(
-        // metadata: MetadataTable<T>,
         mapperTable: MapperTable,
-        modelToSave: T,
-        // modelToSave: T = metadata.instance,
-        // modelToSave: T = void 0,
+        toSave: T | Array<T>,
     ) {
-        super(mapperTable, modelToSave);
-        // super(metadata, modelToSave);
+        super(mapperTable, toSave);
     }
 
-    public setColumnValue(
+    protected setColumnValue(
         column: string,
-        value: ValueTypeToParse,
+        values: Array<ValueTypeToParse>,
         fieldType: FieldType,
         primaryKeyType?: PrimaryKeyType
     ): TThis {
-        switch (primaryKeyType) {
-            case PrimaryKeyType.Assigned:
-                if (Utils.isNull(value)) {
-                    throw new DatabaseBuilderError("Primary key to be informed when generation strategy is 'Assigned'!");
-                }
-                break;
-            case PrimaryKeyType.Guid:
-                if ((Utils.isNull(value) || (value as string).length === 0) && this.allowGenerateKey()) {
-                    // gerar GUID
-                    value = Utils.GUID();
-                    // set value GUID in model
-                    KeyUtils.setKey(this.mapperTable, this.modelToSave, value);
-                    // KeyUtils.setKey(this.metadata, this.modelToSave, value);
-                }
-                break;
-            case PrimaryKeyType.AutoIncrement:
-            default:
-                break;
-        }
-        this.columns.push({
+        values = values.map((value, index) => {
+            switch (primaryKeyType) {
+                case PrimaryKeyType.Assigned:
+                    if (Utils.isNull(value)) {
+                        throw new DatabaseBuilderError("Primary key to be informed when generation strategy is 'Assigned'!");
+                    }
+                    return value;
+                case PrimaryKeyType.Guid:
+                    if ((Utils.isNull(value) || (value as string).length === 0) && this.allowGenerateKey()) {
+                        // gerar GUID
+                        value = Utils.GUID();
+                        // set value GUID in model
+                        KeyUtils.setKey(this.mapperTable,
+                            Utils.isArray(this.toSave)
+                                ? (this.toSave as Array<T>)[index]
+                                : this.toSave,
+                            value);
+                    }
+                    return value;
+                case PrimaryKeyType.AutoIncrement:
+                default:
+                    return value;
+            }
+        });
+        this._columns.push({
             name: column,
             type: fieldType,
-            value: Utils.getValueType(value, fieldType),
+            value: Utils.getValueType(values, fieldType),
             primaryKeyType
         });
         return this.getInstance();
@@ -61,12 +61,12 @@ export abstract class ColumnsValuesBuilder<
 
     public setValue<TReturn extends ValueTypeToParse>(
         expression: ExpressionOrColumn<TReturn, T>,
-        value: TReturn,
+        value: TReturn | Array<TReturn>,
         primaryKeyType?: PrimaryKeyType
     ): TThis {
         return this.setColumnValue(
             Utils.getColumn(expression),
-            value,
+            Utils.isArray(value) ? value as Array<TReturn> : [value],
             Utils.getType(value),
             primaryKeyType
         );
@@ -89,23 +89,28 @@ export abstract class ColumnsValuesBuilder<
             keyColumns: [],
             params: [],
         };
-        result.keyColumns = this.columns.filter(x => !!x.primaryKeyType).map(x => x.name);
-        this.columns.forEach((column) => {
+        result.keyColumns = this._columns.filter(x => !!x.primaryKeyType).map(x => x.name);
+        this._columns.forEach((column) => {
             if (this.isAddColumn(column)) {
                 const columnName = this.columnFormat(column);
                 if (!Utils.isNull(columnName)) {
                     result.columns.push(columnName);
-                    result.params.push(Utils.isNull(column.value) ? null : column.value);
+                    let values = (Utils.isArray(column.value) ? column.value : [column.value]) as Array<ValueType>;
+                    for (let index = 0; index < values.length; index++) {
+                        const item = values[index];
+                        if (!result.params[index])
+                            result.params[index] = [];
+                        result.params[index].push(this.resolveNullValueType(item));
+                    }
                 }
             }
         });
         return result;
     }
 
-    // Use: Utils.isNull(value)
-    // protected isValueNull(value: any): boolean {
-    //     return value === void 0;
-    // }
+    private resolveNullValueType(value: ValueType): ValueType {
+        return Utils.isNull(value) ? null : value;
+    }
 
     protected allowGenerateKey(): boolean {
         return false;
@@ -124,7 +129,7 @@ export abstract class ColumnsValuesBuilder<
         return column.name;
     }
 
-    private getValueByExpression<TReturn>(expression: ExpressionOrColumn<TReturn, T>): TReturn {
-        return Utils.getValue(this.modelToSave, expression);
+    protected getValueByExpression<TReturn>(expression: ExpressionOrColumn<TReturn, T>): Array<TReturn> {
+        return Utils.getValue(this.toSave, expression);
     }
 }

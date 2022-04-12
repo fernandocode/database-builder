@@ -2,6 +2,7 @@ import { DatabaseBase, DatabaseObject, DatabaseResult } from "../definitions/dat
 import { QueryCompiled } from "./query-compiled";
 import { ReplacementParam } from "./replacement-param";
 import { Observable, Observer } from "rxjs";
+import { KeyUtils } from "./key-utils";
 
 export class ExecutableBuilder {
 
@@ -96,7 +97,9 @@ export class ExecutableBuilder {
     ): Observable<DatabaseResult[]> {
         return Observable.create((observer: Observer<DatabaseResult[]>) => {
             if (compiled && compiled.length > 0) {
-                this.executeSql(database, this.checkParams(compiled[0], dataResultsApplied))
+                this.executeSql(database, this.checkParams(compiled[0],
+                    KeyUtils.transformerDatabaseResultInArray(dataResultsApplied[0]))
+                )
                     .subscribe(result => {
                         // remove o item executado
                         compiled.shift();

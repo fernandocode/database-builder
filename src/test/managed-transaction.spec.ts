@@ -8,6 +8,7 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { DatabaseObject } from "../definitions";
 import { QueryCompiled } from "../core";
 import { TestClazz } from "./models/test-clazz";
+import { firstValueFrom } from "rxjs";
 
 describe("Managed Transaction", () => {
     let crud: Crud;
@@ -18,7 +19,7 @@ describe("Managed Transaction", () => {
         const mapper = getMapper();
 
         database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
@@ -37,7 +38,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
 
         const modelUpdate = {
@@ -46,14 +47,14 @@ describe("Managed Transaction", () => {
         } as GuidClazz;
         transaction.add(
             crud
-                .update(GuidClazz, { modelToSave: modelUpdate })
+                .update(GuidClazz, { toSave: modelUpdate })
                 .where(where => where.equal(x => x.guid, obj1.guid))
         );
 
         const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
         transaction.add(
             crud
-                .update(GuidClazz, { modelToSave: modelUpdateByDescription })
+                .update(GuidClazz, { toSave: modelUpdateByDescription })
                 .where(where => where.equal(x => x.description, modelUpdate.description))
         );
 
@@ -73,7 +74,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
 
         const resultTransaction = await transaction.commit().toPromise();
@@ -98,7 +99,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         const insertResult = await transaction.executeImmediate(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
 
         expect(insertResult).to.have.lengthOf(1);
@@ -133,6 +134,160 @@ describe("Managed Transaction", () => {
         }
     });
 
+    it("Transaction manual Insert Multiple", async () => {
+        const commands: QueryCompiled[] = [
+            {
+                query: "BEGIN TRANSACTION;",
+                params: []
+            },
+            {
+                query: "CREATE TABLE IF NOT EXISTS GuidClazz( guid TEXT NOT NULL PRIMARY KEY, description TEXT );",
+                params: []
+            },
+            {
+                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
+                params: ["1f38715c-9daf-4e88-b402-055b94e7f8f6", "T 1"]
+            },
+            {
+                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?);",
+                params: ["2f38715c-9daf-4e88-b402-055b94e7f8f6", "T 2"]
+            },
+            {
+                query: "INSERT INTO GuidClazz (guid, description) VALUES (?, ?), (?, ?);",
+                params: ["3f38715c-9daf-4e88-b402-055b94e7f8f6", "T 3",
+                    "4f38715c-9daf-4e88-b402-055b94e7f8f6", "T 4"]
+            },
+            {
+                query: "COMMIT TRANSACTION;",
+                params: []
+            }
+        ];
+        for (const command of commands) {
+            await database.executeSql(command.query, command.params);
+        }
+
+        const resultList = await firstValueFrom(crud.query(GuidClazz).toList());
+
+        expect(resultList.length).to.equal(4);
+
+        expect(resultList[0].guid).to.equal(commands[2].params[0]);
+        expect(resultList[0].description).to.equal(commands[2].params[1]);
+
+        expect(resultList[1].guid).to.equal(commands[3].params[0]);
+        expect(resultList[1].description).to.equal(commands[3].params[1]);
+
+        expect(resultList[2].guid).to.equal(commands[4].params[0]);
+        expect(resultList[2].description).to.equal(commands[4].params[1]);
+
+        expect(resultList[3].guid).to.equal(commands[4].params[2]);
+        expect(resultList[3].description).to.equal(commands[4].params[3]);
+    });
+
+    it("Managed Transaction Insert Multiple", async () => {
+        const transaction = database.managedTransaction();
+        transaction.addStatement("CREATE TABLE IF NOT EXISTS GuidClazz( guid TEXT NOT NULL PRIMARY KEY, description TEXT );", []);
+        transaction.addStatement("INSERT INTO GuidClazz (guid, description) VALUES (?, ?), (?, ?), (?, ?), (?, ?);",
+            [
+                "f38715c-9daf-4e88-b402-055b94e7f8f6", "T 1",
+                "2f38715c-9daf-4e88-b402-055b94e7f8f6", "T 2",
+                "3f38715c-9daf-4e88-b402-055b94e7f8f6", "T 3",
+                "4f38715c-9daf-4e88-b402-055b94e7f8f6", "T 4"
+            ]);
+
+        const stack = [... (transaction as any)._stack] as Array<{ statement: string, params: any[] }>;
+
+        const resultTransaction = await firstValueFrom(transaction.commit());
+
+        expect(resultTransaction).to.true;
+
+        const resultList = await firstValueFrom(crud.query(GuidClazz).toList());
+
+        expect(resultList.length).to.equal(4);
+
+        expect(resultList[0].guid).to.equal(stack[1].params[0]);
+        expect(resultList[0].description).to.equal(stack[1].params[1]);
+
+        expect(resultList[1].guid).to.equal(stack[1].params[2]);
+        expect(resultList[1].description).to.equal(stack[1].params[3]);
+
+        expect(resultList[2].guid).to.equal(stack[1].params[4]);
+        expect(resultList[2].description).to.equal(stack[1].params[5]);
+
+        expect(resultList[3].guid).to.equal(stack[1].params[6]);
+        expect(resultList[3].description).to.equal(stack[1].params[7]);
+    });
+
+    const createData = (index: number): any[] => {
+        return [`${index}f38715c-9daf-4e88-b402-055b94e7f8f6`, `Teste testando se funciona ${index}`];
+    };
+
+    const createArrayData = (count: number): any[][] => {
+        return Array.from({ length: count }, (_, i) => createData(i))
+    };
+
+
+    const dados = [
+        ["1f38715c-9daf-4e88-b402-055b94e7f8f6", "T 1"],
+        ["2f38715c-9daf-4e88-b402-055b94e7f8f6", "T 2"],
+        ["3f38715c-9daf-4e88-b402-055b94e7f8f6", "T 3"],
+        ["4f38715c-9daf-4e88-b402-055b94e7f8f6", "T 4"],
+    ];
+
+    it("Managed Transaction Insert Multiple new", async () => {
+
+        // (this as any).timeout(100000);
+
+        const transaction = database.managedTransaction();
+        transaction.addStatement("CREATE TABLE IF NOT EXISTS GuidClazz( guid TEXT NOT NULL PRIMARY KEY, description TEXT );", []);
+
+        const insertMultiple = (baseInsert: string, inserts: any[][]): { statement: string, params: any[] } => {
+            return {
+                statement: `${baseInsert} ${inserts.map(a => `(${a.map(_ => "?").join(",")})`)};`,
+                params: [].concat(...inserts)
+            };
+        }
+        const count = 5000;
+
+        const insert = insertMultiple("INSERT INTO GuidClazz (guid, description) VALUES", createArrayData(count));
+        transaction.addStatement(insert.statement, insert.params);
+
+        const resultTransaction = await firstValueFrom(transaction.commit());
+
+        expect(resultTransaction).to.true;
+
+        const resultList = await firstValueFrom(crud.query(GuidClazz).toList());
+
+        expect(resultList.length).to.equal(count);
+    });
+
+    it("Managed Transaction Insert Multiple old", async () => {
+        const transaction = database.managedTransaction();
+        transaction.addStatement("CREATE TABLE IF NOT EXISTS GuidClazz( guid TEXT NOT NULL PRIMARY KEY, description TEXT );", []);
+
+        const insertSingle = (baseInsert: string, inserts: any[][]): { statement: string, params: any[] }[] => {
+            return inserts.map(insert => {
+                return {
+                    statement: `${baseInsert} (${insert.map(_ => "?").join(",")});`,
+                    params: insert
+                };
+            });
+        }
+        const count = 5000;
+
+        const inserts = insertSingle("INSERT INTO GuidClazz (guid, description) VALUES", createArrayData(count));
+        for (const insert of inserts) {
+            transaction.addStatement(insert.statement, insert.params);
+        }
+
+        const resultTransaction = await firstValueFrom(transaction.commit());
+
+        expect(resultTransaction).to.true;
+
+        const resultList = await firstValueFrom(crud.query(GuidClazz).toList());
+
+        expect(resultList.length).to.equal(count);
+    });
+
     it("Transaction get guid id", async () => {
 
         const transaction = database.managedTransaction();
@@ -142,7 +297,7 @@ describe("Managed Transaction", () => {
         expect(obj1.guid).to.be.undefined;
 
         transaction.add(
-            crud.insert(GuidClazz, { modelToSave: obj1 })
+            crud.insert(GuidClazz, { toSave: obj1 })
         );
 
         expect(obj1.guid).to.have.lengthOf(36);
@@ -163,19 +318,19 @@ describe("Managed Transaction", () => {
 
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
         // script with error, table not exist
         transaction.add(
             crud
-                .insert(TestClazz, { modelToSave: ObjectToTest.testClazz })
+                .insert(TestClazz, { toSave: ObjectToTest.testClazz })
         );
 
         const obj2 = Object.assign({}, ObjectToTest.guidClazz);
 
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj2 })
+                .insert(GuidClazz, { toSave: obj2 })
         );
         try {
             await transaction.commit().toPromise();
@@ -206,14 +361,14 @@ describe("Managed Transaction", () => {
 
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
 
         const obj2 = Object.assign({}, ObjectToTest.guidClazz);
 
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj2 })
+                .insert(GuidClazz, { toSave: obj2 })
         );
         const resultRollback = await transaction.rollback();
         expect(resultRollback).to.equal(true);
@@ -231,7 +386,7 @@ describe("Managed Transaction", () => {
 
         const resultImmediate = await transaction.executeImmediate(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
         expect(resultImmediate.length).to.equal(1);
         expect(resultImmediate[0].rowsAffected).to.equal(1);
@@ -244,7 +399,7 @@ describe("Managed Transaction", () => {
 
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj2 })
+                .insert(GuidClazz, { toSave: obj2 })
         );
         const resultRollback = await transaction.rollback();
         expect(resultRollback).to.equal(true);
@@ -270,7 +425,7 @@ describe("Managed Transaction", () => {
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
         transaction.add(
             crud
-                .insert(GuidClazz, { modelToSave: obj1 })
+                .insert(GuidClazz, { toSave: obj1 })
         );
         transaction.add(
             crud
@@ -283,14 +438,14 @@ describe("Managed Transaction", () => {
         } as GuidClazz;
         transaction.add(
             crud
-                .update(GuidClazz, { modelToSave: modelUpdate })
+                .update(GuidClazz, { toSave: modelUpdate })
                 .where(where => where.equal(x => x.guid, obj1.guid))
         );
 
         const modelUpdateByDescription = new GuidClazz(void 0, "Teste teste test");
         transaction.add(
             crud
-                .update(GuidClazz, { modelToSave: modelUpdateByDescription })
+                .update(GuidClazz, { toSave: modelUpdateByDescription })
                 .where(where => where.equal(x => x.description, modelUpdate.description))
         );
 

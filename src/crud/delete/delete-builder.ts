@@ -6,19 +6,21 @@ import { QueryCompiled } from "../../core";
 import { KeyUtils } from "../../core/key-utils";
 import { ColumnRef } from "../../core/column-ref";
 import { Utils } from "../../core/utils";
+import { ConfigDatabase } from "../config-database";
 
 export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>> {
 
     constructor(
         typeT: new () => T,
-        private _modelToSave: T = void 0,
+        private _toSave: T = void 0,
         mapperTable: MapperTable,
-        alias: string = void 0
+        config: ConfigDatabase,
+        alias: string = void 0,
     ) {
-        super(typeT, mapperTable, alias);
-        if (!Utils.isNull(_modelToSave)) {
+        super(typeT, mapperTable, config, alias);
+        if (!Utils.isNull(_toSave)) {
             this.where(where => {
-                where.equal(new ColumnRef(KeyUtils.primaryKeyMapper(mapperTable).column), KeyUtils.getKey(mapperTable, _modelToSave));
+                where.equal(new ColumnRef(KeyUtils.primaryKeyMapper(mapperTable).column), KeyUtils.getKey(mapperTable, _toSave));
             });
         }
     }
@@ -28,16 +30,17 @@ export class DeleteBuilder<T> extends CrudBaseBuilder<T, DeleteColumnsBuilder<T>
     }
 
     protected buildBase(): QueryCompiled {
-        return {
-            params: [],
-            query: `DELETE FROM ${this._tablename}`,
-        };
+        return this._commanderBuilder.delete(this._tablename);
     }
 
     public getModel(): T {
-        return this._modelToSave;
+        return this._toSave;
     }
 
     protected setDefaultColumns(): void {
+    }
+
+    protected createColumnsBuilder(): DeleteColumnsBuilder<T> {
+        return new DeleteColumnsBuilder<T>(this.mapperTable, this._toSave);
     }
 }

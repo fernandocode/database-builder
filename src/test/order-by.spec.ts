@@ -5,11 +5,10 @@ import { Crud } from "../crud/crud";
 import { getMapper } from "./mappers-table-new";
 import { PlanRef } from "../core/plan-ref";
 import { TestClazzRef } from "./models/test-clazz-ref";
-import { QueryHelper } from "../core/query-helper";
 
 describe("Order By", () => {
 
-    const crud = new Crud({ getMapper: getMapper() });
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, { getMapper: getMapper() });
 
     it("none", () => {
         const query = crud.query(TestClazz);

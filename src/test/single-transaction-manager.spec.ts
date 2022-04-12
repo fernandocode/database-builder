@@ -5,7 +5,7 @@ import { GuidClazz } from "./models/guid-clazz";
 import { SQLiteDatabase } from "./database/sqlite-database";
 import { DatabaseObject } from "../definitions";
 import { SingleTransactionManager } from "../transaction/single-transaction-manager";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { forkJoinSafe } from "../safe-utils";
 import { HeaderSimple } from "./models/header-simple";
 import { Referencia } from "./models/referencia";
@@ -27,7 +27,7 @@ describe("Single Transaction Manager", function () {
         const mapper = getMapper();
 
         database = await new SQLiteDatabase().init();
-        crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
     });
 
@@ -84,7 +84,7 @@ describe("Single Transaction Manager", function () {
             } as GuidClazz;
             transaction.add(
                 crud
-                    .insert(GuidClazz, { modelToSave: obj1 })
+                    .insert(GuidClazz, { toSave: obj1 })
             );
             observers.push(transaction.commit());
         }
@@ -117,12 +117,13 @@ describe("Single Transaction Manager", function () {
             } as HeaderSimple;
             objectsSaved.push(headerSimple2);
             transaction.add(
-                crud.insert(HeaderSimple, { modelToSave: headerSimple2 })
+                crud.insert(HeaderSimple, { toSave: headerSimple2 })
             );
             observers.push(transaction.commit());
         }
 
-        return expect(forkJoinSafe(observers).toPromise()).to.be.rejectedWith(`Insert cascading with autoincrement mapper not supported with transaction. (Found in "INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?)", params: [0,123,[0,insertId]], paramIndex: 2)`);
+        return expect(firstValueFrom(forkJoinSafe(observers))).to.be.rejectedWith(
+            `Insert cascading with autoincrement mapper not supported with transaction. (Found in "INSERT INTO ItemHeaderSimple (indexArray, value, HeaderSimple_id) VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)", params: [0,123,[0,insertId],1,456,[0,insertId],2,789,[0,insertId],3,10a,[0,insertId]], paramIndex: 2)`);
     });
 
     it("cascade mapper transaction guid", async () => {
@@ -141,7 +142,7 @@ describe("Single Transaction Manager", function () {
             } as GuidClazzHasMany;
             objectsSaved.push(guidClass);
             transaction.add(
-                crud.insert(GuidClazzHasMany, { modelToSave: guidClass })
+                crud.insert(GuidClazzHasMany, { toSave: guidClass })
             );
             observers.push(transaction.commit());
         }
@@ -183,7 +184,7 @@ describe("Single Transaction Manager", function () {
             } as Referencia;
             objectsSaved.push(referencia);
             transaction.add(
-                crud.insert(Referencia, { modelToSave: referencia })
+                crud.insert(Referencia, { toSave: referencia })
             );
             observers.push(transaction.commit());
         }

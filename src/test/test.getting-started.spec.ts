@@ -5,8 +5,8 @@ import { Crud } from "../crud/crud";
 import { getMapper } from "./mappers-table-new";
 
 describe("Getting Started", () => {
-
-    const crud = new Crud({getMapper: getMapper()});
+    
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, {getMapper: getMapper()});
 
     it("query", () => {
         const query = crud.query(TestClazz);

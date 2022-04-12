@@ -1,6 +1,6 @@
-import { SQLiteInterface } from "../definitions/sqlite-interface";
+import { SQLiteInterface, SQLiteObjectInterface } from "../definitions/sqlite-interface";
 import { DatabaseConfig } from "../definitions/database-config";
-import { DatabaseAbstractSQLiteService, DatabaseSQLiteObject } from "./abstract-sqlite-database.adapter";
+import { DatabaseAbstractSQLiteService } from "./abstract-sqlite-database.adapter";
 
 /**
  * Adapter for https://ionicframework.com/docs/native/sqlite/
@@ -19,10 +19,9 @@ export class SQLiteDatabaseAdapter extends DatabaseAbstractSQLiteService {
 
     constructor(private _sqlite: SQLiteInterface) {
         super();
-
     }
 
-    protected sqliteCreate(config: DatabaseConfig): Promise<DatabaseSQLiteObject> {
-        return this._sqlite.create(config);
+    protected async sqliteCreate(config: DatabaseConfig): Promise<SQLiteObjectInterface> {
+        return await this._sqlite.create(config);
     }
 }

@@ -14,7 +14,7 @@ import { ParamFilter } from "../core/param-filter";
 describe("Query filter", () => {
 
     const mapperBase = new MapperTest();
-    const crud = new Crud({ getMapper: getMapper() });
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, { getMapper: getMapper() });
 
     const mapperGuidClass = mapperBase.mapper(GuidClazz)
         .key(x => x.guid, PrimaryKeyType.Guid, String)

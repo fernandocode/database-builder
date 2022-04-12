@@ -28,34 +28,21 @@ export class ModelUtils {
     public static mergeValues(oldValue: any, newValue: any) {
         const newIsUndefined = Utils.isNull(newValue);
         const oldIsUndefined = Utils.isNull(oldValue);
-        // const newIsUndefined = lodash.isUndefined(newValue);
-        // const oldIsUndefined = lodash.isUndefined(oldValue);
         const newIsNumber = Utils.isValueNumber(newValue);
         const oldIsNumber = Utils.isValueNumber(oldValue);
         const newIsEmpty = newIsNumber && !newIsUndefined ? false : Utils.isEmpty(newValue);
         const oldIsEmpty = oldIsNumber && !oldIsUndefined ? false : Utils.isEmpty(oldValue);
 
-        // const oldIsGreatZero = oldIsNumber ? oldValue as number > 0 : false;
-        // const newIsGreatZero = Utils.isValueNumber(newValue) ? newValue as number > 0 : false;
         const newIsValueDefault = Utils.isValueDefault(newValue);
         const oldIsValueDefault = Utils.isValueDefault(oldValue);
-        // const oldIsNumberDefaultAndNewIsNumberValid = !oldIsGreatZero && newIsGreatZero;
 
-        // const newValueScoreGood = (newIsUndefined && -1) + (newIsEmpty && -1) + (newIsValueDefault && 1);
-        // const oldValueScoreGood = (oldIsUndefined && -1) + (oldIsEmpty && -1) + (oldIsValueDefault && 1);
         const newValueScoreBad = (newIsUndefined && 3) + (newIsEmpty && 2) + (newIsValueDefault && 1);
         const oldValueScoreBad = (oldIsUndefined && 3) + (oldIsEmpty && 2) + (oldIsValueDefault && 1);
         const newValueIsGood = !newIsUndefined && !newIsEmpty && !newIsValueDefault;
-        // const oldValueIsGood = !oldIsUndefined && !oldIsEmpty && !oldIsValueDefault;
 
-        // const useNewValue: boolean = (oldIsUndefined || oldIsEmpty) || (oldIsValueDefault && (!newIsUndefined || !newIsEmpty));
         const useNewValue: boolean =
-            // (oldIsUndefined || oldIsEmpty) ||
             (oldIsValueDefault && (!newIsUndefined || !newIsEmpty)) ||
-            // (newValueIsGood)
-            (newValueScoreBad <= oldValueScoreBad)
-            ;
-        // const useNewValue: boolean = (oldIsUndefined || oldIsEmpty) || (oldIsNumberDefaultAndNewIsNumberValid);
+            (newValueScoreBad <= oldValueScoreBad);
         const result = useNewValue
             ? newValue
             : oldValue;

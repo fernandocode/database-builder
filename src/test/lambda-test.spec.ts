@@ -7,7 +7,7 @@ import { getMapper } from "./mappers-table-new";
 
 describe("Lambda Expression", () => {
 
-    const crud = new Crud({getMapper: getMapper()});
+    const crud = new Crud({ sqliteLimitVariables: 10000 }, {getMapper: getMapper()});
 
     it("simple lambda", () => {
         const query = crud.query(Cliente)

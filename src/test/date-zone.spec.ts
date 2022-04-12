@@ -18,7 +18,7 @@ describe("Date", () => {
         const mapper = getMapper();
 
         const database = await new SQLiteDatabase().init();
-        const crud = new Crud({ database, getMapper: mapper, enableLog: false });
+        const crud = new Crud({ sqliteLimitVariables: 10000 }, { database, getMapper: mapper, enableLog: false });
         const ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
         return _databaseInstance = { crud, ddl };
     };
@@ -34,12 +34,21 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
-        const dataResult = await database.crud.query(ContasAReceber).where(w => w.equal(x => x.idErp, dataExample.idErp)).firstOrDefault().toPromise();
+        const dataResult = await database.crud.query(ContasAReceber)
+            .where(w => w.equal(x => x.idErp, dataExample.idErp))
+            .firstOrDefault().toPromise();
         expect(dataResult.dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
+        const dataResult2 = await database.crud.query(ContasAReceber)
+            .where(w => w.equal(x => x.idErp, dataExample.idErp))
+            .mapper<ContasAReceber>(rowResult => {
+                return rowResult.read(ContasAReceber);
+            }).toPromise();
+        console.log(dataResult2);
+        expect(dataResult2[0].dataVencimento.unix()).to.equal(dataExample.dataVencimento.unix());
     });
 
     it("Datetime insert time zone default", async () => {
@@ -53,7 +62,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -72,7 +81,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 
@@ -92,7 +101,7 @@ describe("Date", () => {
         } as ContasAReceber;
 
         await database.ddl.create(ContasAReceber).execute().toPromise();
-        const insert = database.crud.insert(ContasAReceber, { modelToSave: dataExample });
+        const insert = database.crud.insert(ContasAReceber, { toSave: dataExample });
         const insertedResult = await insert.execute().toPromise();
         expect(insertedResult[0].rowsAffected).to.equal(1);
 

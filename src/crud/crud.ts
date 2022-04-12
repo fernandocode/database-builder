@@ -11,6 +11,7 @@ import { KeyUtils } from "../core/key-utils";
 import { QueryBuilder } from "./query/query-builder";
 import { MetadataTableBase } from "../metadata-table-base";
 import { MapperUtils } from "../mapper/mapper-utils";
+import { ConfigDatabase } from "./config-database";
 
 export class Crud {
     public enableLog: boolean;
@@ -18,6 +19,7 @@ export class Crud {
     private _getMapper: GetMapper;
 
     constructor(
+        private _config: ConfigDatabase,
         {
             getMapper,
             database,
@@ -45,7 +47,9 @@ export class Crud {
             database?: DatabaseBase
         } = {}
     ): Delete<T> {
-        return new Delete(typeT, { modelToSave, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
+        return new Delete(typeT, {
+            modelToSave, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public deleteByKey<T>(
@@ -61,45 +65,47 @@ export class Crud {
     ): Delete<T> {
         const obj = {} as T;
         KeyUtils.setKey(metadata.mapperTable, obj, key);
-        return new Delete(typeT, { modelToSave: obj, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog });
+        return new Delete(typeT, {
+            modelToSave: obj, mapperTable: metadata.mapperTable, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public update<T>(
         typeT: new () => T,
         {
-            modelToSave,
+            toSave,
             alias,
             metadata = this.getMapper(typeT),
             database = this.getDatabase()
         }: {
-            modelToSave?: T,
+            toSave?: T,
             alias?: string
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
-        // modelToSave: T = void 0,
-        // alias: string = void 0,
-        // metadata: MetadataTable<T> = this.getMapper(typeT),
-        // database: DatabaseBase = this.getDatabase(),
     ): Update<T> {
-        return new Update(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
+        return new Update(typeT, {
+            toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public insert<T>(
         typeT: new () => T,
         {
-            modelToSave,
+            toSave,
             alias,
             metadata = this.getMapper(typeT),
             database = this.getDatabase()
         }: {
-            modelToSave?: T,
+            toSave?: T | Array<T>,
             alias?: string
             metadata?: MetadataTable<T>,
             database?: DatabaseBase
         } = {}
     ): Insert<T> {
-        return new Insert(typeT, { modelToSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog });
+        return new Insert(typeT, {
+            toSave: toSave, mapperTable: metadata.mapperTable, alias, database, enableLog: this.enableLog, config: this._config
+        });
     }
 
     public query<T>(
