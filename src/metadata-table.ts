@@ -11,6 +11,7 @@ import { DEPENDENCY_LIST_SIMPLE_COLUMNS, DependencyListSimpleModel } from "./def
 import { MetadataTableBase } from "./metadata-table-base";
 import { WhereBuilder } from "./crud/where-builder";
 import { MapperUtils } from "./mapper/mapper-utils";
+import { DatabaseTypes } from "./definitions";
 
 export class MetadataTable<T> extends MetadataTableBase<T> {
 
@@ -35,7 +36,7 @@ export class MetadataTable<T> extends MetadataTableBase<T> {
 
     public column<TReturn>(
         expression: ReturnExpression<TReturn, T>,
-        type?: new () => TReturn,
+        type?: (new () => TReturn) | DatabaseTypes,
         primaryKeyType?: PrimaryKeyType
     ): MetadataTable<T> {
         const column = this.columnName(expression);

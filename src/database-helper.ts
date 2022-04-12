@@ -33,7 +33,8 @@ export class DatabaseHelper {
     }
 
     public getFieldType<T>(type: string | (new () => T), constructorName?: string) {
-        const typeCase: string = typeof type === 'string' ? type : MapperUtils.resolveKey(type).toLowerCase();
+        const typeCase = typeof type === 'string' ? type : MapperUtils.resolveKey(type).toLowerCase();
+
         switch (typeCase) {
             case "string":
                 return FieldType.STRING;
@@ -120,10 +121,8 @@ export class DatabaseHelper {
 
     public preFormatValue(value: ValueTypeToParse, type?: FieldType): ValueTypeToParse {
         const regexISODatetime = /^(\d{4})-(\d{2})-(\d{2})(T(\d{2})\:(\d{2})\:(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
-        // const regexISODatetime = /^(\d{4})-?(\d{2})-?(\d{2})(T(\d{2})\:?(\d{2})\:?(\d{2}))?((([+-](\d{2})\:(\d{2}))|Z{1})?)$/gm;
         if (typeof value === "string" && (type === void 0 || type === FieldType.DATE) && regexISODatetime.test(value)) {
             return DatetimeUtils.datetimeToDatabase(value);
-            // return DatetimeUtils.dateToDatabase(value);
         }
         return value;
     }
@@ -145,8 +144,6 @@ export class DatabaseHelper {
             this.isFlag(fieldType, FieldType.BOOLEAN)
         ) {
             return Utils.isValueBoolean(columnValue)
-                // return typeof columnValue === "string"
-                // ? columnValue === "true"
                 ? this.toBoolean(columnValue)
                 : columnValue;
         }
