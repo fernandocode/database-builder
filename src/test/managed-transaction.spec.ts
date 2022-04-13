@@ -1,5 +1,5 @@
 import { Ddl } from "./../ddl/ddl";
-import { expect } from "chai";
+import { expect } from 'chai';
 import { ObjectToTest } from "./objeto-to-test";
 import { getMapper } from "./mappers-table-new";
 import { Crud } from "../crud";
@@ -8,14 +8,20 @@ import { SQLiteDatabase } from "./database/sqlite-database";
 import { DatabaseObject } from "../definitions";
 import { QueryCompiled } from "../core";
 import { TestClazz } from "./models/test-clazz";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, lastValueFrom } from "rxjs";
+import * as sinon from "sinon";
+import { SinonSandbox } from "sinon";
 
 describe("Managed Transaction", () => {
     let crud: Crud;
     let ddl: Ddl;
     let database: DatabaseObject;
 
+    let sandbox: SinonSandbox;
+
     before(async () => {
+        sandbox = sinon.createSandbox();
+
         const mapper = getMapper();
 
         database = await new SQLiteDatabase().init();
@@ -25,6 +31,7 @@ describe("Managed Transaction", () => {
 
     beforeEach(async () => {
         await ddl.create(GuidClazz).execute().toPromise();
+        sandbox.restore();
     });
 
     afterEach(async () => {
@@ -32,7 +39,6 @@ describe("Managed Transaction", () => {
     });
 
     it("Transaction Simple", async () => {
-
         const transaction = database.managedTransaction();
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
@@ -68,7 +74,6 @@ describe("Managed Transaction", () => {
     });
 
     it("Transaction inactive", async () => {
-
         const transaction = database.managedTransaction();
 
         const obj1 = Object.assign({}, ObjectToTest.guidClazz);
@@ -85,11 +90,89 @@ describe("Managed Transaction", () => {
         expect(queryUpdateResult[0].description).to.equal(obj1.description);
         expect(queryUpdateResult[0].guid).to.equal(obj1.guid);
 
-        expect(() => transaction.add(ddl.drop(GuidClazz))).to.throw(`Transaction (id: ${transaction.id}) is no longer active, and can no longer be used`);
+        expect(() => transaction.add(ddl.drop(GuidClazz))).to.throw(`Transaction (id: ${transaction.id}) is no longer active, and can no longer be used. Current status: COMMITTED`);
 
         const deleteResult = await ddl.drop(GuidClazz).execute().toPromise();
         expect(deleteResult.length).to.equal(1);
         expect(deleteResult[0].rowsAffected).to.equal(1);
+    });
+
+    it("Transaction two rollback", async () => {
+        const warn = sandbox.spy(console, "warn");
+
+        const transaction = database.managedTransaction();
+
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        transaction.add(
+            crud
+                .insert(GuidClazz, { toSave: obj1 })
+        );
+
+        // first rollback
+        await transaction.rollback();
+        expect(warn.notCalled).to.true;
+
+        // second rollback
+        await transaction.rollback();
+
+        const expectedWarnTransaction = `Transaction (id: ${transaction.id}) already rollbacked`;
+        sinon.assert.calledWith(warn, expectedWarnTransaction);
+    });
+
+    it("Transaction two commit", async () => {
+        const warn = sandbox.spy(console, "warn");
+
+        const transaction = database.managedTransaction();
+
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        transaction.add(
+            crud
+                .insert(GuidClazz, { toSave: obj1 })
+        );
+
+        // first commit
+        await lastValueFrom(transaction.commit());
+        expect(warn.notCalled).to.true;
+
+        // second commit
+        await lastValueFrom(transaction.commit());
+
+        const expectedWarnTransaction = `Transaction (id: ${transaction.id}) already committed`;
+        sinon.assert.calledWith(warn, expectedWarnTransaction);
+    });
+
+    it("Transaction a commit and a rollback", async () => {
+        const transaction = database.managedTransaction();
+
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        transaction.add(
+            crud
+                .insert(GuidClazz, { toSave: obj1 })
+        );
+
+        // commit
+        await lastValueFrom(transaction.commit());
+
+        // rollback
+        await expect(transaction.rollback())
+            .to.rejectedWith(`Transaction (id: ${transaction.id}) is no longer active, and can no longer be used. Current status: COMMITTED`);
+    });
+
+    it("Transaction a rollback and a commit", async () => {
+        const transaction = database.managedTransaction();
+
+        const obj1 = Object.assign({}, ObjectToTest.guidClazz);
+        transaction.add(
+            crud
+                .insert(GuidClazz, { toSave: obj1 })
+        );
+
+        // rollback
+        await transaction.rollback();
+        
+        // commit
+        await expect(lastValueFrom(transaction.commit()))
+            .to.rejectedWith(`Transaction (id: ${transaction.id}) is no longer active, and can no longer be used. Current status: ROLLBACKED`);
     });
 
     it("Transaction execute immediate", async () => {

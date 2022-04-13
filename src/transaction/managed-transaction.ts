@@ -87,6 +87,10 @@ export class ManagedTransaction {
      * Rollback in current transaction
      */
     public async rollback(): Promise<boolean> {
+        if(this._status === TransactionStatus.ROLLBACKED){
+            console.warn(`Transaction (id: ${this._idTransaction}) already rollbacked`)
+            return true;
+        }
         this.checkTransactionActive();
         this.clearStackTransaction();
         if (this._status === TransactionStatus.STARTED
@@ -124,6 +128,10 @@ export class ManagedTransaction {
      * Commit a transaction
      */
     private async commitExecute(): Promise<boolean> {
+        if(this._status === TransactionStatus.COMMITTED){
+            console.warn(`Transaction (id: ${this._idTransaction}) already committed`)
+            return true;
+        }
         this.checkParametersAllowedInTransaction();
         this.checkTransactionActive();
         if (this._status === TransactionStatus.STARTED
@@ -136,7 +144,7 @@ export class ManagedTransaction {
             this.status = TransactionStatus.STARTED;
             await this.sqlBatch(batch);
         }
-        return this.finishTransaction(TransactionStatus.COMMITED);
+        return this.finishTransaction(TransactionStatus.COMMITTED);
     }
 
     /**
@@ -165,7 +173,7 @@ export class ManagedTransaction {
      */
     private checkTransactionActive(): void {
         if (!this.isTransactionActive()) {
-            throw new DatabaseBuilderError(`Transaction (id: ${this._idTransaction}) is no longer active, and can no longer be used`);
+            throw new DatabaseBuilderError(`Transaction (id: ${this._idTransaction}) is no longer active, and can no longer be used. Current status: ${TransactionStatus[this._status]}`);
         }
     }
 
@@ -182,7 +190,7 @@ export class ManagedTransaction {
      * Finish transaction and set status
      * @param status Status for finished transaction
      */
-    private finishTransaction(status: TransactionStatus.ROLLBACKED | TransactionStatus.COMMITED | TransactionStatus.RELEASED): boolean {
+    private finishTransaction(status: TransactionStatus.ROLLBACKED | TransactionStatus.COMMITTED | TransactionStatus.RELEASED): boolean {
         this.status = status;
         this.clearStackTransaction();
         return true;
