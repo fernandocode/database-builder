@@ -54,7 +54,7 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
     protected compileValuesDependency(dependency: MapperTable, valuesDependencyArray: ValueTypeToParse[][], fieldReferenceSubItem: string): QueryCompiled[] {
         const scripts: QueryCompiled[] = [];
         valuesDependencyArray.forEach((valuesDependency) => {
-            if (valuesDependency) {
+            if (valuesDependency?.length) {
                 const dependenciesListSimpleModel = valuesDependency.map((value, index) => {
                     const valueItem = fieldReferenceSubItem ? ModelUtils.get(value, fieldReferenceSubItem) : value;
                     return {

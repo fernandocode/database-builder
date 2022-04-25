@@ -46,7 +46,7 @@ export class Insert<T> extends CrudBase<T, InsertBuilder<T>, InsertColumnsBuilde
         const scripts: QueryCompiled[] = [];
         let dependenciesToInsert: Array<DependencyListSimpleModel> = [];
         valuesDependencyArray.forEach((valuesDependency, indexHeader) => {
-            if (valuesDependency) {
+            if (valuesDependency?.length) {
                 const dependenciesListSimpleModel = valuesDependency.map((value, indexCascade) => {
                     const valueItem = fieldReferenceSubItem ? ModelUtils.get(value, fieldReferenceSubItem) : value;
                     return this.createDependencyListSimpleModel(dependency, valueItem, indexCascade, indexHeader);
