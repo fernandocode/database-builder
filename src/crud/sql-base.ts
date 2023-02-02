@@ -16,6 +16,10 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
     protected readonly database: DatabaseBase;
     protected readonly enableLog: boolean;
 
+    protected get mainScriptLength() { return this._mainScriptLength; }
+
+    private _mainScriptLength: number;
+
     constructor(
         {
             mapperTable,
@@ -55,7 +59,12 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
 
     public compile(cascade: boolean = true): QueryCompiled[] {
         const compiled = this.builderCompiled();
-        const script = [compiled, ...this.compileDependency(cascade)];
+        const compiledArray = Array.isArray(compiled) ? compiled : [compiled];
+
+        if (compiledArray.length > 1)
+            this._mainScriptLength = compiledArray.length;
+
+        const script = [...compiledArray, ...this.compileDependency(cascade)];
         return script;
     }
 
@@ -95,13 +104,13 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
 
     protected abstract model(): T | Array<T>;
 
-    protected abstract builderCompiled(): QueryCompiled;
+    protected abstract builderCompiled(): QueryCompiled | QueryCompiled[];
 
     protected abstract resolveDependency(dependency: MapperTable): QueryCompiled;
-    
+
     protected abstract checkDatabaseResult(promise: Observable<DatabaseResult[]>): Observable<DatabaseResult[]>;
-    
-    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled{
+
+    protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
         return void 0;
     }
 
@@ -113,9 +122,11 @@ export abstract class SqlBase<T> implements SqlCompilable, SqlExecutable {
         return result;
     }
 
-    protected checkAndPush(scripts: QueryCompiled[], push: QueryCompiled) {
-        if (push) {
+    protected checkAndPush(scripts: QueryCompiled[], push: QueryCompiled | QueryCompiled[]) {
+        if (Array.isArray(push))
+            scripts.push(...push);
+
+        else if (push)
             scripts.push(push);
-        }
     }
 }

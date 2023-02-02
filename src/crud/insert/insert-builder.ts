@@ -20,9 +20,9 @@ export class InsertBuilder<T> extends CrudBaseBuilder<T, InsertColumnsBuilder<T>
         return super.columnsBase(columnsCallback, this.columnsBuilder, this);
     }
 
-    protected buildBase(): QueryCompiled {
+    protected buildBase(): QueryCompiled[] {
         const columnsCompiled = this.getColumnsCompiled();
-        return this._commanderBuilder.batchInsert(this._tablename, columnsCompiled.columns, columnsCompiled.params)?.[0];
+        return this._commanderBuilder.batchInsert(this._tablename, columnsCompiled.columns, columnsCompiled.params);
     }
 
     public getModel(): T | Array<T> {

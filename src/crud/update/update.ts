@@ -76,6 +76,6 @@ export class Update<T> extends CrudBase<T, UpdateBuilder<T>, UpdateColumnsBuilde
                 const columnReference = dependency.getColumnNameByField<DependencyListSimpleModel, any>(x => x.reference);
                 where.equal(new ColumnRef(columnReference), KeyUtils.getKey(this.mapperTable, this.model()));
             });
-        return deleteBuilder.compile();
+        return deleteBuilder.compile() as QueryCompiled;
     }
 }
