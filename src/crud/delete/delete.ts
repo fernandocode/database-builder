@@ -46,7 +46,7 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
 
     protected resolveDependencyByValue(dependency: MapperTable, value: ValueTypeToParse, index: number): QueryCompiled {
         const builder = new DeleteBuilder(void 0, void 0, dependency, this._builder.config);
-        return builder.compile();
+        return builder.compile() as QueryCompiled;
     }
 
     protected resolveDependency(dependency: MapperTable): QueryCompiled {
@@ -58,7 +58,7 @@ export class Delete<T> extends CrudBase<T, DeleteBuilder<T>, DeleteColumnsBuilde
                 }
                 where.equal(new ColumnRef(columnReference), KeyUtils.getKey(this.mapperTable, this.model()));
             });
-        return deleteBuilder.compile();
+        return deleteBuilder.compile() as QueryCompiled;
     }
 
     protected compileDependencyByValue(dependency: MapperTable): QueryCompiled[] {

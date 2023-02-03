@@ -12,7 +12,7 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
     protected whereCompiled: WhereCompiled = { where: "", params: [] };
 
     protected innerUsedAliasTest: Array<{ hasAlias: (alias: string) => boolean }> = [];
-
+    
     private readonly WHERE = " WHERE ";
     private NEXT_VALUE_ALIAS: number = 0;
 
@@ -50,9 +50,9 @@ export abstract class SqlBaseBuilder<T> implements QueryCompilable {
         return !!this.innerUsedAliasTest.find(x => x.hasAlias(alias));
     }
 
-    public abstract compile(): QueryCompiled;
+    public abstract compile(): QueryCompiled | QueryCompiled[];
 
-    protected abstract buildBase(): QueryCompiled;
+    protected abstract buildBase(): QueryCompiled | QueryCompiled[];
 
     protected compileWhere(current: WhereCompiled, compiled: WhereCompiled, addCommand: boolean = true) {
         if (compiled.where.length) {

@@ -10,7 +10,7 @@ import { CommanderBuilder } from "./commander-builder";
 export abstract class CrudBaseBuilder<
     T,
     TColumnsBuilder extends ColumnsValuesBuilder<T, TColumnsBuilder>
-    > extends SqlBaseBuilder<T> {
+> extends SqlBaseBuilder<T> {
 
     private _columnsCompiled: ColumnsCompiled = {
         columns: [],
@@ -30,12 +30,20 @@ export abstract class CrudBaseBuilder<
         this._commanderBuilder = new CommanderBuilder(config);
     }
 
-    public compile(): QueryCompiled {
+    public compile(): QueryCompiled | QueryCompiled[] {
         const compiledBase = this.buildBase();
+
+        if (Array.isArray(compiledBase))
+            return compiledBase.map(c => ({
+                query: `${c.query}${this.whereCompiled.where}`,
+                params: c.params.concat(this.whereCompiled.params)
+            }));
+
         return {
             params: compiledBase.params.concat(this.whereCompiled.params),
             query: `${compiledBase.query}${this.whereCompiled.where}`,
         };
+
     }
 
     protected getColumnsCompiled(): ColumnsCompiled {

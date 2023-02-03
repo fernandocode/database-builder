@@ -58,18 +58,16 @@ export class CommanderBuilder {
     public batchInsert(tableName: string, columnsNames: string[], values: Array<ValueType[]>)
         : QueryCompiled[] {
         if (this.validValues(values)) {
-            return this.splitChunks(values, Math.floor(this._config.sqliteLimitVariables / columnsNames.length)).map(valuesChunk => {
-                return {
-                    params: [].concat(...valuesChunk),
-                    query: Utils.normalizeSqlString(
-                        `INSERT INTO ${tableName}
+            return this.splitChunks(values, Math.floor(this._config.sqliteLimitVariables / columnsNames.length)).map(valuesChunk => ({
+                params: [].concat(...valuesChunk),
+                query: Utils.normalizeSqlString(
+                    `INSERT INTO ${tableName}
                     (${columnsNames.join(", ")})
                     VALUES ${valuesChunk
-                            .map(a => `(${a.map(() => "?").join(", ")})`)
-                            .join(", ")}`
-                    ),
-                };
-            });
+                        .map(a => `(${a.map(() => "?").join(", ")})`)
+                        .join(", ")}`
+                )
+            }));
         }
     }
 

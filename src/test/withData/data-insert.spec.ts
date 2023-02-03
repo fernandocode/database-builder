@@ -181,4 +181,29 @@ describe("Insert with Data", () => {
             expect(queryInsertResult[index].id).to.equal(toInsert[index].id);
         }
     });
+
+    it("Chunked batch insert", async () => {
+        // arrange
+        const mapper = getMapper();
+
+        const database = await new SQLiteDatabase().init();
+
+        // define limite de variáveis como 10
+        const crud = new Crud({ sqliteLimitVariables: 10 }, { database, getMapper: mapper, enableLog: false });
+        const ddl = new Ddl({ database, getMapper: mapper, enableLog: false });
+
+        await firstValueFrom(ddl.create(ReferencesModelTest).execute());
+
+        const toInsert = Array.from({ length: 11 }, (_, i) => ({ name: `item ${i + 1}` })) as ReferencesModelTest[];
+
+        // act
+
+        // internalmente é gerado um chunk de 10, e um segundo com 1 item
+        const insertResult = await firstValueFrom(crud.insert(ReferencesModelTest, { toSave: toInsert }).execute());
+        const queryInsertResult = await firstValueFrom(crud.query(ReferencesModelTest).toList());
+
+        // assert
+        expect(toInsert.length).to.equal(queryInsertResult.length);
+        expect(toInsert.length).to.equal(insertResult[0].rowsAffected);
+    });
 });

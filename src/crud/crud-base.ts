@@ -1,6 +1,6 @@
 import { KeyUtils } from "./../core/key-utils";
 import { TypeCrud } from "./enums/type-crud";
-import { DatabaseBase, DatabaseResult } from "../definitions/database-definition";
+import { DatabaseBase, DatabaseResult, DatabaseRowList } from "../definitions/database-definition";
 import { CrudBaseBuilder } from "./crud-base-builder";
 import { ColumnsValuesBuilder } from "../core/columns-values-builder";
 import { PrimaryKeyType } from "../core/enums/primary-key-type";
@@ -57,7 +57,7 @@ export abstract class CrudBase<
         return this._builder.getModel();
     }
 
-    protected builderCompiled(): QueryCompiled {
+    protected builderCompiled(): QueryCompiled | QueryCompiled[] {
         return this._builder.compile();
     }
 
@@ -67,10 +67,34 @@ export abstract class CrudBase<
                 const models: Array<T> = Utils.isArray(this.model())
                     ? this.model() as Array<T>
                     : [this.model() as T];
+
+                if (this.mainScriptLength) {
+                    const mainScriptResults = results.slice(0, this.mainScriptLength);
+                    const remainingScriptResults = results.slice(this.mainScriptLength);
+
+                    results = [
+                        mainScriptResults
+                            .reduce(
+                                (p, c) => (
+                                    {
+                                        insertId: Math.max(p.insertId, c.insertId),
+                                        rows: arrayToDatabaseRowList(databaseRowListToArray(p.rows).concat(databaseRowListToArray(c.rows))),
+                                        rowsAffected: p.rowsAffected + c.rowsAffected
+                                    }
+                                ),
+                                { insertId: 0, rows: [] as unknown as DatabaseRowList, rowsAffected: 0 } as DatabaseResult
+                            ),
+
+                        ...remainingScriptResults
+                    ];
+                }
+
                 const mainResult = results[0];
+
                 if (models.length > 1 && models.length != mainResult.rowsAffected) {
                     throw new DatabaseBuilderError(`Há ${models.length} models e ${mainResult.rowsAffected} results afetados, isso parece incoerente, e não é possivel trata-lo`);
                 }
+
                 this.setKeyByResult(models, mainResult);
                 // como não sei qual será o retorno do insertMultiple, vou continuar considerando apenas o primeiro para pegar o id inserted do head
 
@@ -121,4 +145,21 @@ export abstract class CrudBase<
         }
         return models;
     }
+}
+
+
+const arrayToDatabaseRowList = (array: Array<any>) => {
+    return {
+        item: i => array[i],
+        length: array.length
+    } as DatabaseRowList;
+}
+
+const databaseRowListToArray = (value: DatabaseRowList) => {
+    const array = [] as any[];
+
+    for (let i = 0; i < value.length; i++)
+        array.push(value.item(i));
+
+    return array;
 }
